@@ -1,7 +1,32 @@
-// This is just an example,
-// so you can safely delete all default props below
-
 export default {
-  failed: 'Action failed',
-  success: 'Action was successful'
+  components: {
+    ThemeButton: {
+      labels: {
+        switchTheme: 'Switch Theme',
+      },
+    },
+  },
+  layouts: {
+    drawers: {
+      LeftMainDrawer: {
+        labels: {
+          home: 'Home',
+        },
+      },
+    },
+    headers: {
+      MainHeader: {
+        labels: {
+          title: 'Le Bot',
+        },
+      },
+    },
+  },
+  pages: {
+    HomePage: {
+      labels: {
+        title: 'Le Bot',
+      },
+    },
+  },
 };
