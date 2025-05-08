@@ -1,0 +1,52 @@
+name: le-bot-frontend CI/CD
+
+on:
+  push:
+    branches: [ ci-*, main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  get-info:
+    runs-on: ubuntu-latest
+    outputs:
+      commit-hash: ${{ steps.git-info.outputs.commit-hash }}
+      base-name: ${{ steps.assemble-base-name.outputs.base-name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get git info
+        id: git-info
+        shell: bash
+        run: |
+          COMMIT_HASH=$(git rev-parse --short ${{ GITHUB.SHA }})
+          echo "commit-hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+      - name: Assemble package base name
+        id: assemble-base-name
+        shell: bash
+        run: |
+          BASE_NAME=LeBotFrontend_${{ steps.git-info.outputs.commit-hash }}_#${{ GITHUB.RUN_NUMBER }}
+          echo "base-name=$BASE_NAME" >> $GITHUB_OUTPUT
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install Dependencies and Build
+        run: |
+          pnpm i
+          DEPLOY_GITHUB_PAGE=true pnpm run build
+      - name: Deploy to GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          build_dir: dist/pwa
+          keep_history: false
+          target_branch: gh-pages
