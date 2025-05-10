@@ -1,5 +1,12 @@
 export default {
   components: {
+    AudioRecorder: {
+      labels: {
+        error: 'Error',
+        hint: 'Hold down to record',
+        recording: 'Recording...',
+      }
+    },
     ThemeButton: {
       labels: {
         switchTheme: 'Switch Theme',
@@ -26,6 +33,10 @@ export default {
     HomePage: {
       labels: {
         title: 'Le Bot',
+        accessToken: 'Coze Access Token',
+        botId: 'Coze Bot ID',
+        connect: 'Connect',
+        disconnect: 'Disconnect',
       },
     },
   },

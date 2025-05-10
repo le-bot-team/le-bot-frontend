@@ -1,63 +1,53 @@
 <script setup lang="ts">
 import type { IMediaRecorder } from 'extendable-media-recorder';
 import { MediaRecorder } from 'extendable-media-recorder';
-import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-interface AudioChunkEvent extends Event {
-  data: Blob;
-}
+import { i18nSubPath } from 'src/utils/common';
 
 const emit = defineEmits<{
-  stop: [blobData: Blob]
-}>()
+  stop: [blobData: Blob];
+}>();
+withDefaults(defineProps<{
+  disable?: boolean;
+}>(), {})
+const { notify } = useQuasar();
 
+const i18n = i18nSubPath('components.AudioRecorder');
+
+const audioChunks = ref<Blob[]>([]);
 const isRecording = ref(false);
-const audioBase64 = ref<string>('');
-const audioUrl = ref<string>('');
-
 const mediaRecorder = ref<IMediaRecorder>();
 const mediaStream = ref<MediaStream>();
-let audioChunks: Blob[] = [];
 
-const startRecording = async (): Promise<void> => {
+const startRecording = () => {
+  if (isRecording.value || !mediaStream.value) {
+    return;
+  }
+
   try {
-    mediaStream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder.value = new MediaRecorder(mediaStream.value, { mimeType: 'audio/wav' });
-
-    mediaRecorder.value.ondataavailable = (event: AudioChunkEvent) => {
-      audioChunks.push(event.data);
+    mediaRecorder.value.ondataavailable = (event) => {
+      audioChunks.value.push(event.data);
     };
-
     mediaRecorder.value.onstop = () => {
       if (!mediaStream.value) {
         return;
       }
+      // mediaStream.value.getTracks().forEach((track) => track.stop());
 
-      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-      emit('stop', audioBlob);
-
-
-      audioChunks = [];
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          audioBase64.value = reader.result;
-          audioUrl.value = URL.createObjectURL(audioBlob);
-        }
-      };
-      reader.readAsDataURL(audioBlob);
-
-      mediaStream.value.getTracks().forEach((track) => track.stop());
-      mediaStream.value = undefined;
-
-      console.log(audioBase64);
+      emit('stop', new Blob(audioChunks.value, { type: 'audio/wav' }));
+      audioChunks.value = [];
     };
-
     mediaRecorder.value.start();
     isRecording.value = true;
   } catch (error) {
-    alert(`麦克风访问失败: ${(error as Error).message}`);
+    notify({
+      type: 'negative',
+      message: i18n('labels.error'),
+      caption: (error as Error).message,
+    });
   }
 };
 
@@ -68,16 +58,38 @@ const stopRecording = (): void => {
   }
 };
 
-const onAudioError = (e: Event) => {
-  console.error('音频播放错误:', e);
-};
+onMounted(async () => {
+  mediaStream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
+});
+
+onBeforeUnmount(() => {
+  if (mediaStream.value) {
+    mediaStream.value.getTracks().forEach((track) => track.stop());
+  }
+});
 </script>
 
 <template>
-  <div>
-    <q-btn v-if="isRecording" color="negative" label="Stop Recording" @click="stopRecording" />
-    <q-btn v-else color="primary" label="Start Recording" @click="startRecording" />
-    <div v-if="audioBase64">Base64长度：{{ audioBase64.length }}</div>
-    <audio v-if="audioUrl" :src="audioUrl" controls @error="onAudioError"></audio>
+  <div class="column items-center q-gutter-y-sm">
+    <div v-if="isRecording" class="row">
+      <q-spinner-bars color="red"/>
+      <div class="text-red">
+        {{ i18n('labels.recording') }}
+      </div>
+    </div>
+    <div v-else class="text-italic">
+      {{ i18n('labels.hint') }}
+    </div>
+    <div>
+      <q-btn
+        color="primary"
+        :icon="isRecording ? 'mic' : 'mic_none'"
+        outline
+        round
+        size="xl"
+        @mousedown="startRecording"
+        @mouseup="stopRecording"
+      />
+    </div>
   </div>
 </template>
