@@ -32,11 +32,13 @@ export default {
   pages: {
     HomePage: {
       labels: {
-        title: 'Le Bot',
         accessToken: 'Coze Access Token',
         botId: 'Coze Bot ID',
+        userId: 'User ID',
         connect: 'Connect',
         disconnect: 'Disconnect',
+        thinking: 'Thinking...',
+        invalidDownstreamMessage: 'Invalid downstream message',
       },
     },
   },

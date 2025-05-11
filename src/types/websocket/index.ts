@@ -1,6 +1,101 @@
 import { Notify } from 'quasar';
 
-import type { WsAction, WsHandler, WsResponse } from 'src/types/websocket/types';
+import type {
+  CozeWsEventType,
+  CozeWsResponse,
+  WsAction,
+  WsHandler,
+  WsResponse,
+} from 'src/types/websocket/types';
+
+export class CozeWsWrapper {
+  readonly url;
+  private _closeHandlers = new Map<string, WsHandler<CloseEvent>>();
+  private _eventHandlers = new Map<CozeWsEventType, WsHandler<never>>();
+  private _openHandlers = new Map<string, WsHandler<never>>();
+  private _ws: WebSocket | undefined;
+
+  constructor(accessToken: string, botId: string) {
+    this.url = `wss://ws.coze.cn/v1/chat?authorization=Bearer ${accessToken}&bot_id=${botId}`;
+    this._connect();
+  }
+
+  destroy() {
+    if (this._ws) {
+      this._ws.onclose = null;
+      this._ws.close();
+      this._ws = undefined;
+    }
+    this._closeHandlers.clear();
+    this._eventHandlers.clear();
+    this._openHandlers.clear();
+  }
+
+  setCloseHandler(id: string, handler: WsHandler<CloseEvent>) {
+    this._closeHandlers.set(id, handler);
+  }
+
+  deleteCloseHandler(id: string) {
+    this._closeHandlers.delete(id);
+  }
+
+  setEventHandler<T extends CozeWsResponse>(eventType: CozeWsEventType, handler: WsHandler<T>) {
+    this._eventHandlers.set(eventType, handler);
+  }
+
+  deleteEventHandler(eventType: CozeWsEventType) {
+    this._eventHandlers.delete(eventType);
+  }
+
+  isOpen() {
+    return this._ws?.readyState === WebSocket.OPEN;
+  }
+
+  sendEvent(id: string, eventType: CozeWsEventType, data: object = {}) {
+    this.sendRaw(JSON.stringify({ ...data, id, event_type: eventType }));
+  }
+
+  sendRaw(message: string | ArrayBufferLike | Blob | ArrayBufferView) {
+    if (this.isOpen()) {
+      this._ws?.send(message);
+    } else {
+      console.log('WebSocket not connected');
+    }
+  }
+
+  private _connect() {
+    this._ws = new WebSocket(this.url);
+    this._ws.onclose = async (event) => {
+      Notify.create({
+        type: 'negative',
+        message: 'WebSocket closed, reconnecting...',
+        icon: 'close',
+      });
+      for (const [, handler] of this._closeHandlers) {
+        await handler(event);
+      }
+      setTimeout(() => {
+        this._connect();
+      }, 3000);
+    };
+    this._ws.onmessage = async (event) => {
+      const message: CozeWsResponse = JSON.parse(event.data);
+      const handler = this._eventHandlers.get(message.event_type);
+      if (handler) {
+        await handler(message as never);
+      } else {
+        Notify.create({
+          type: 'warning',
+          message: `Unknown event_type: ${message.event_type}`,
+          caption: event.data,
+          icon: 'help_outline',
+        });
+        console.log(message);
+      }
+    };
+    this._ws.onopen = () => console.log('WebSocket opened!');
+  }
+}
 
 export class WsWrapper {
   readonly url;
@@ -13,8 +108,7 @@ export class WsWrapper {
         icon: 'check',
       }),
   ];
-  private _actionMessageHandlers: Map<WsAction, WsHandler<never>> = new Map();
-  private _genericMessageHandlers: Map<string, WsHandler<never>> = new Map();
+  private _actionHandlers: Map<WsAction, WsHandler<never>> = new Map();
   private _ws: WebSocket | undefined;
 
   constructor(url: string) {
@@ -28,7 +122,7 @@ export class WsWrapper {
       this._ws.close();
       this._ws = undefined;
     }
-    this._actionMessageHandlers.clear();
+    this._actionHandlers.clear();
   }
 
   addOnOpenHandler(handler: () => void) {
@@ -39,20 +133,12 @@ export class WsWrapper {
     return this._ws?.readyState === WebSocket.OPEN;
   }
 
-  setActionHandler<T extends WsResponse>(action: WsAction, handler: WsHandler<T>) {
-    this._actionMessageHandlers.set(action, handler);
+  setHandler<T extends WsResponse>(action: WsAction, handler: WsHandler<T>) {
+    this._actionHandlers.set(action, handler);
   }
 
-  deleteActionHandler(action: WsAction) {
-    this._actionMessageHandlers.delete(action);
-  }
-
-  setGenericHandler<T extends WsResponse>(id: string, handler: WsHandler<T>) {
-    this._genericMessageHandlers.set(id, handler);
-  }
-
-  deleteGenericHandler(id: string) {
-    this._genericMessageHandlers.delete(id);
+  deleteHandler(action: WsAction) {
+    this._actionHandlers.delete(action);
   }
 
   sendRaw(message: string | ArrayBufferLike | Blob | ArrayBufferView) {
@@ -77,22 +163,16 @@ export class WsWrapper {
     };
     this._ws.onmessage = async (event) => {
       const message = JSON.parse(event.data);
-      if (message.action) {
-        if (this._actionMessageHandlers.has(message.action)) {
-          await this._actionMessageHandlers.get(message.action)?.call(this, message as never);
-        } else {
-          Notify.create({
-            type: 'warning',
-            message: `Unknown action: ${message.action}`,
-            caption: JSON.stringify(message.data),
-            icon: 'help_outline',
-          });
-          console.log(message);
-        }
+      if (this._actionHandlers.has(message.action)) {
+        await this._actionHandlers.get(message.action)?.call(this, message as never);
       } else {
-        this._genericMessageHandlers.forEach((handler) => {
-          handler(message as never).catch((e) => console.warn(e));
+        Notify.create({
+          type: 'warning',
+          message: `Unknown action: ${message.action}`,
+          caption: JSON.stringify(message.data),
+          icon: 'help_outline',
         });
+        console.log(message);
       }
     };
     this._ws.onopen = () => {
