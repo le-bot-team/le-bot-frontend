@@ -10,8 +10,10 @@ const emit = defineEmits<{
   stop: [blobData: Blob];
 }>();
 withDefaults(defineProps<{
-  disable?: boolean;
-}>(), {})
+  disable: boolean;
+}>(), {
+  disable: false
+})
 const { notify } = useQuasar();
 
 const i18n = i18nSubPath('components.AudioRecorder');
@@ -83,6 +85,7 @@ onBeforeUnmount(() => {
     <div>
       <q-btn
         color="primary"
+        :disable="disable"
         :icon="isRecording ? 'mic' : 'mic_none'"
         outline
         round

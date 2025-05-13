@@ -39,8 +39,25 @@ export class CozeWsWrapper {
     this._closeHandlers.delete(id);
   }
 
-  setEventHandler<T extends CozeWsResponse>(eventType: CozeWsEventType, handler: WsHandler<T>) {
-    this._eventHandlers.set(eventType, handler);
+  setEventHandler<T extends CozeWsResponse>(
+    eventType: CozeWsEventType,
+    handler: WsHandler<T>,
+  ): void;
+  setEventHandler<T extends CozeWsResponse>(
+    eventTypeList: CozeWsEventType[],
+    handler: WsHandler<T>,
+  ): void;
+  setEventHandler<T extends CozeWsResponse>(
+    eventTypeOrEventTypeList: CozeWsEventType | CozeWsEventType[],
+    handler: WsHandler<T>,
+  ): void {
+    if (Array.isArray(eventTypeOrEventTypeList)) {
+      eventTypeOrEventTypeList.forEach((eventType) => {
+        this._eventHandlers.set(eventType, handler);
+      });
+    } else {
+      this._eventHandlers.set(eventTypeOrEventTypeList, handler);
+    }
   }
 
   deleteEventHandler(eventType: CozeWsEventType) {
@@ -80,6 +97,7 @@ export class CozeWsWrapper {
     };
     this._ws.onmessage = async (event) => {
       const message: CozeWsResponse = JSON.parse(event.data);
+      console.log(message);
       const handler = this._eventHandlers.get(message.event_type);
       if (handler) {
         await handler(message as never);
@@ -90,7 +108,6 @@ export class CozeWsWrapper {
           caption: event.data,
           icon: 'help_outline',
         });
-        console.log(message);
       }
     };
     this._ws.onopen = () => console.log('WebSocket opened!');

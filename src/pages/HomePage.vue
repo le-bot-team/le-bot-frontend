@@ -3,16 +3,17 @@ import { useQuasar } from 'quasar';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 import AudioRecorder from 'components/AudioRecorder.vue';
-import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
+import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { CozeWsWrapper } from 'src/types/websocket';
 import { constructChatConfig } from 'src/utils/network/coze';
 import type { CozeWsResponse } from 'src/types/websocket/types';
 import { CozeWsEventType } from 'src/types/websocket/types';
+import { pcmToWav } from 'src/utils/audio';
 
 interface AudioMessage {
-  id: string;
+  isFinished: boolean;
   isSent: boolean;
-  audioBlob?: Blob;
+  audioChunks: Blob[];
   audioSrc?: string;
   text?: string;
 }
@@ -67,91 +68,178 @@ const connect = () => {
   });
   ws.value.setEventHandler<
     CozeWsResponse & {
-      data: { id: string };
+      data: { conversation_id: string };
     }
   >(CozeWsEventType.conversationChatCreated, (message) => {
+    console.log(`Received ${message.event_type}: ${message.data.conversation_id}`);
     messageList.value.push({
-      id: message.data.id,
+      isFinished: false,
       isSent: false,
+      audioChunks: [],
     });
   });
   ws.value.setEventHandler<
     CozeWsResponse & {
       data: {
-        id: string;
+        conversation_id: string;
         last_error?: {
           Code: number;
           Msg: string;
         };
       };
     }
-  >(CozeWsEventType.conversationChatInProgress, (message) => {
-    if (message.data.last_error) {
-      notify({
-        type: 'negative',
-        message: message.data.last_error.Msg,
-        caption: message.data.last_error.Code.toString(),
-      });
-      return;
-    }
-    if (!messageList.value.find((item) => item.id === message.data.id)) {
-      notify({
-        type: 'negative',
-        message: i18n('labels.invalidDownstreamMessage'),
-      });
-    }
+  >(CozeWsEventType.conversationChatInProgress, async (message) => {
+    console.log(`Received ${message.event_type}: ${message.data.conversation_id}`);
+    await processLastUnfinishedMessage(
+      false,
+      () => {
+        if (message.data.last_error) {
+          notify({
+            type: 'negative',
+            message: message.data.last_error.Msg,
+            caption: message.data.last_error.Code.toString(),
+          });
+        }
+      },
+      message.event_type,
+    );
   });
   ws.value.setEventHandler<
     CozeWsResponse & {
       data: {
-        id: string;
+        conversation_id: string;
         role: 'assistant' | 'user';
         content: string;
         content_type: 'card' | 'object_string' | 'text';
         type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
       };
     }
-  >(CozeWsEventType.conversationMessageDelta, (message) => {
-    console.log(message);
-  });
+  >(
+    [CozeWsEventType.conversationMessageDelta, CozeWsEventType.conversationMessageCompleted],
+    async (message) =>
+      await processLastUnfinishedMessage(
+        false,
+        (unfinishedMessage) => {
+          if (message.data.type === 'answer') {
+            unfinishedMessage.text = message.data.content;
+          } else {
+            console.log(message);
+          }
+        },
+        message.event_type,
+      ),
+  );
   ws.value.setEventHandler<
     CozeWsResponse & {
       data: {
-        id: string;
+        conversation_id: string;
         role: 'assistant' | 'user';
         content: string;
         type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
       };
     }
-  >(CozeWsEventType.conversationAudioDelta, (message) => {
-    console.log(message);
-  });
+  >(
+    CozeWsEventType.conversationAudioDelta,
+    async (message) =>
+      await processLastUnfinishedMessage(
+        false,
+        (unfinishedMessage) => {
+          if (message.data.type === 'answer') {
+            unfinishedMessage.audioChunks?.push(base64ToBlob(message.data.content));
+          } else {
+            console.log(message);
+          }
+        },
+        message.event_type,
+      ),
+  );
   ws.value.setEventHandler<
     CozeWsResponse & {
       data: {
-        id: string;
+        conversation_id: string;
         role: 'assistant' | 'user';
         content: string;
-        content_type: 'card' | 'object_string' | 'text';
         type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
       };
     }
-  >(CozeWsEventType.conversationMessageCompleted, (message) => {
-    console.log(message);
-  });
+  >(
+    CozeWsEventType.conversationAudioCompleted,
+    async (message) =>
+      await processLastUnfinishedMessage(
+        false,
+        async (unfinishedMessage) => {
+          if (message.data.type === 'answer') {
+            unfinishedMessage.audioSrc = URL.createObjectURL(
+              await pcmToWav(new Blob(unfinishedMessage.audioChunks)),
+            );
+          } else {
+            console.log(message);
+          }
+        },
+        message.event_type,
+      ),
+  );
   ws.value.setEventHandler<
     CozeWsResponse & {
       data: {
-        id: string;
-        role: 'assistant' | 'user';
-        content: string;
-        type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
+        conversation_id: string;
+        last_error?: {
+          Code: number;
+          Msg: string;
+        };
       };
     }
-  >(CozeWsEventType.conversationAudioCompleted, (message) => {
-    console.log(message);
-  });
+  >(
+    CozeWsEventType.conversationChatCompleted,
+    async (message) =>
+      await processLastUnfinishedMessage(
+        false,
+        (unfinishedMessage) => {
+          if (message.data.last_error) {
+            notify({
+              type: 'negative',
+              message: message.data.last_error.Msg,
+              caption: message.data.last_error.Code.toString(),
+            });
+          }
+          unfinishedMessage.isFinished = true;
+          console.log(messageList.value);
+        },
+        message.event_type,
+      ),
+  );
   ws.value.setEventHandler(CozeWsEventType.inputAudioBufferCompleted, () => {});
+  ws.value.setEventHandler<
+    CozeWsResponse & {
+      data: { content: string };
+    }
+  >(
+    CozeWsEventType.conversationAudioTranscriptUpdate,
+    async (message) =>
+      await processLastUnfinishedMessage(
+        true,
+        (unfinishedMessage) => {
+          unfinishedMessage.text = message.data.content;
+        },
+        message.event_type,
+      ),
+  );
+  ws.value.setEventHandler<
+    CozeWsResponse & {
+      data: { content: string };
+    }
+  >(
+    CozeWsEventType.conversationAudioTranscriptCompleted,
+    async (message) =>
+      await processLastUnfinishedMessage(
+        true,
+        (unfinishedMessage) => {
+          unfinishedMessage.text = message.data.content;
+          unfinishedMessage.isFinished = true;
+        },
+        message.event_type,
+      ),
+  );
 };
 
 const disconnect = () => {
@@ -162,13 +250,32 @@ const disconnect = () => {
   isChatReady.value = false;
 };
 
+const processLastUnfinishedMessage = async (
+  isSent: boolean,
+  handler: (message: AudioMessage) => void | Promise<void>,
+  errorCaption: string = '',
+) => {
+  const message = messageList.value.findLast(
+    (message) => !message.isFinished && message.isSent === isSent,
+  );
+  if (!message) {
+    notify({
+      type: 'negative',
+      message: i18n('labels.noUnfinishedMessage'),
+      caption: errorCaption,
+    });
+  } else {
+    await handler(message);
+  }
+};
+
 const processData = async (blobData: Blob) => {
   const dataUrl = await blobToDataUrl(blobData);
 
   messageList.value.push({
-    id: `${userId.value}_${Date.now().toString()}`,
+    isFinished: false,
     isSent: true,
-    audioBlob: blobData,
+    audioChunks: [blobData],
     audioSrc: URL.createObjectURL(blobData),
   });
 
@@ -253,18 +360,36 @@ onBeforeUnmount(() => {
             :key="messageIndex"
             :sent="messageItem.isSent"
           >
-            <audio v-if="messageItem.audioSrc" controls :src="messageItem.audioSrc" />
-            <div v-else class="row q-gutter-x-sm">
-              <q-spinner-rings />
-              <div>
-                {{ i18n('labels.thinking') }}
-              </div>
-            </div>
+            <q-list dense separator>
+              <q-item v-if="!messageItem.isFinished">
+                <q-item-section avatar>
+                  <q-spinner-rings />
+                </q-item-section>
+                <q-item-label>
+                  {{ i18n('labels.processing') }}
+                </q-item-label>
+              </q-item>
+              <q-item v-if="messageItem.audioSrc">
+                <q-item-section>
+                  <audio controls :src="messageItem.audioSrc" />
+                </q-item-section>
+              </q-item>
+              <q-item v-if="messageItem.text">
+                <q-item-label>
+                  {{ messageItem.text }}
+                </q-item-label>
+              </q-item>
+            </q-list>
           </q-chat-message>
         </div>
       </q-card>
       <div class="column">
-        <AudioRecorder :disable="!isChatReady" @stop="processData" />
+        <AudioRecorder
+          :disable="
+            !isChatReady || !!messageList.find((message) => message.isSent && !message.isFinished)
+          "
+          @stop="processData"
+        />
       </div>
     </div>
   </q-page>

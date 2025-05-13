@@ -18,6 +18,16 @@ export const blobToDataUrl = (blob: Blob) => {
   });
 };
 
+export const base64ToBlob = (base64: string, type: string = 'application/octet-stream') => {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type });
+}
+
 export const i18nSubPath =
   (baseName: string) => (relativePath: string, data?: Record<string, unknown>) => {
     if (data) {

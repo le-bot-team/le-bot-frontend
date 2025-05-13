@@ -17,16 +17,8 @@ export const constructChatConfig = (userId: string) => ({
     },
     output_audio: {
       codec: 'pcm',
-      pcm_config: {
-        sample_rate: 24000,
-        frame_size_ms: 50,
-        limit_config: {
-          period: 1,
-          max_frame_num: 22,
-        },
-      },
       speech_rate: 0,
-      voice_id: '7426720361733046281',
+      voice_id: '7426725529589596187',
     },
   },
 });
