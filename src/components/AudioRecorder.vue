@@ -89,10 +89,12 @@ onBeforeUnmount(() => {
       <q-btn
         color="primary"
         :disable="disable"
-        :icon="isRecording ? 'stop' : 'mic'"
+        :icon="isRecording ? 'mic' : 'mic_off'"
         outline
         round
         size="xl"
+        @mousedown="startRecording"
+        @mouseup="stopRecording"
         @touchstart="startRecording"
         @touchend="stopRecording"
         @contextmenu.prevent

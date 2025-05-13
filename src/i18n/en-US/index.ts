@@ -3,8 +3,8 @@ export default {
     AudioRecorder: {
       labels: {
         error: 'Error',
-        hint: 'Tap to record',
-        recording: 'Recording, tab to stop',
+        hint: 'Hold down to record',
+        recording: 'Recording...',
       }
     },
     ThemeButton: {
