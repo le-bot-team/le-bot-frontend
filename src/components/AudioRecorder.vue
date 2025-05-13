@@ -93,7 +93,9 @@ onBeforeUnmount(() => {
         outline
         round
         size="xl"
-        @click="isRecording ? stopRecording : startRecording"
+        @touchstart="startRecording"
+        @touchend="stopRecording"
+        @contextmenu.prevent
       />
     </div>
   </div>
