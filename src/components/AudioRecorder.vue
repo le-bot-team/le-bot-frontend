@@ -9,11 +9,14 @@ import { i18nSubPath } from 'src/utils/common';
 const emit = defineEmits<{
   stop: [blobData: Blob];
 }>();
-withDefaults(defineProps<{
-  disable: boolean;
-}>(), {
-  disable: false
-})
+withDefaults(
+  defineProps<{
+    disable: boolean;
+  }>(),
+  {
+    disable: false,
+  },
+);
 const { notify } = useQuasar();
 
 const i18n = i18nSubPath('components.AudioRecorder');
@@ -74,7 +77,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="column items-center q-gutter-y-sm">
     <div v-if="isRecording" class="row">
-      <q-spinner-bars color="red"/>
+      <q-spinner-bars color="red" />
       <div class="text-red">
         {{ i18n('labels.recording') }}
       </div>
@@ -86,12 +89,11 @@ onBeforeUnmount(() => {
       <q-btn
         color="primary"
         :disable="disable"
-        :icon="isRecording ? 'mic' : 'mic_none'"
+        :icon="isRecording ? 'stop' : 'mic'"
         outline
         round
         size="xl"
-        @mousedown="startRecording"
-        @mouseup="stopRecording"
+        @click="isRecording ? stopRecording : startRecording"
       />
     </div>
   </div>
