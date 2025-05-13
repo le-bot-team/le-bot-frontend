@@ -17,7 +17,7 @@ withDefaults(
     disable: false,
   },
 );
-const { notify } = useQuasar();
+const { notify, platform } = useQuasar();
 
 const i18n = i18nSubPath('components.AudioRecorder');
 
@@ -87,16 +87,27 @@ onBeforeUnmount(() => {
     </div>
     <div>
       <q-btn
+        v-if="platform.is.mobile"
         color="primary"
         :disable="disable"
-        :icon="isRecording ? 'mic' : 'mic_off'"
+        :icon="isRecording ? 'mic_off' : 'mic'"
+        outline
+        round
+        size="xl"
+        @touchstart="startRecording"
+        @touchend="stopRecording"
+        @contextmenu.prevent
+      />
+      <q-btn
+        v-else
+        color="primary"
+        :disable="disable"
+        :icon="isRecording ? 'mic_off' : 'mic'"
         outline
         round
         size="xl"
         @mousedown="startRecording"
         @mouseup="stopRecording"
-        @touchstart="startRecording"
-        @touchend="stopRecording"
         @contextmenu.prevent
       />
     </div>
