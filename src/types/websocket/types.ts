@@ -1,46 +1,195 @@
-export enum WsAction {}
+import { uid } from 'quasar';
 
-export enum CozeWsEventType {
-  // Upstream events
-  chatUpdate = 'chat.update',
-  inputAudioBufferAppend = 'input_audio_buffer.append',
-  inputAudioBufferComplete = 'input_audio_buffer.complete',
-  inputAudioBufferClear = 'input_audio_buffer.clear',
-  conversationMessageCreate = 'conversation.message.create',
-  conversationClear = 'conversation.clear',
-  conversationChatSubmitToolOutputs = 'conversation.chat.submit_tool_outputs',
-  conversationChatCancel = 'conversation.chat.cancel',
-  // Downstream events
-  chatCreated = 'chat.created',
-  chatUpdated = 'chat.updated',
-  conversationChatCreated = 'conversation.chat.created',
-  conversationChatInProgress = 'conversation.chat.in_progress',
-  conversationMessageDelta = 'conversation.message.delta',
-  conversationAudioDelta = 'conversation.audio.delta',
-  conversationMessageCompleted = 'conversation.message.completed',
-  conversationAudioCompleted = 'conversation.audio.completed',
-  conversationChatCompleted = 'conversation.chat.completed',
-  conversationChatFailed = 'conversation.chat.failed',
-  error = 'error',
-  inputAudioBufferCompleted = 'input_audio_buffer.completed',
-  inputAudioBufferCleared = 'input_audio_buffer.cleared',
-  conversationCleared = 'conversation.cleared',
-  conversationChatCanceled = 'conversation.chat.canceled',
-  conversationAudioTranscriptUpdate = 'conversation.audio_transcript.update',
-  conversationAudioTranscriptCompleted = 'conversation.audio_transcript.completed',
-  conversationChatRequiresAction = 'conversation.chat.requires_action',
-  inputAudioBufferSpeechStarted = 'input_audio_buffer.speech_started',
-  inputAudioBufferSpeechStopped = 'input_audio_buffer.speech_stopped',
+export enum WsAction {
+  cancelOutput = 'cancelOutput',
+  chatComplete = 'chatComplete',
+  clearContext = 'clearContext',
+  inputAudioComplete = 'inputAudioComplete',
+  inputAudioStream = 'inputAudioStream',
+  outputAudioComplete = 'outputAudioComplete',
+  outputAudioStream = 'outputAudioStream',
+  outputTextComplete = 'outputTextComplete',
+  outputTextStream = 'outputTextStream',
+  updateConfig = 'updateConfig',
 }
 
-export interface CozeWsResponse {
+interface WsBaseResponseError {
   id: string;
-  event_type: CozeWsEventType;
+  action: WsAction;
+  success: false;
+  message: string;
 }
 
-export interface WsResponse {
+interface WsBaseResponseSuccess {
+  id: string;
   action: WsAction;
-  data: unknown;
+  success: true;
 }
+
+abstract class WsBaseRequest {
+  public readonly id = uid();
+
+  protected constructor(private readonly action: WsAction) {}
+
+  serialize() {
+    return {};
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      action: this.action,
+      ...this.serialize(),
+    };
+  }
+}
+
+export interface WsCancelOutputResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.cancelOutput;
+  data: {
+    cancelType: 'manual' | 'voice';
+  };
+}
+
+export interface WsChatCompleteResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.chatComplete;
+  data: {
+    chatId: string;
+    conversationId: string;
+    createdAt: number;
+    completedAt: number;
+  };
+}
+
+export interface WsChatCompleteResponseError extends WsBaseResponseError {
+  action: WsAction.chatComplete;
+  data: {
+    chatId: string;
+    conversationId: string;
+    createdAt: number;
+    completedAt: number;
+    errors: { code: number; message: string }[];
+  };
+}
+
+export class WsClearContextRequest extends WsBaseRequest {
+  constructor() {
+    super(WsAction.clearContext);
+  }
+}
+
+export interface WsClearContextResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.clearContext;
+}
+
+export class WsInputAudioCompleteRequest extends WsBaseRequest {
+  constructor() {
+    super(WsAction.inputAudioComplete);
+  }
+}
+
+export class WsInputAudioStreamRequest extends WsBaseRequest {
+  constructor(private readonly buffer: string) {
+    super(WsAction.inputAudioStream);
+  }
+
+  override serialize() {
+    return {
+      data: {
+        buffer: this.buffer,
+      },
+    };
+  }
+}
+
+export interface WsInputAudioCompleteResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.inputAudioComplete;
+}
+
+export interface WsOutputAudioCompleteResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.outputAudioComplete;
+  data: {
+    chatId: string;
+    conversationId: string;
+  };
+}
+
+export interface WsOutputAudioStreamResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.outputAudioStream;
+  data: {
+    chatId: string;
+    conversationId: string;
+    buffer: string;
+  };
+}
+
+export interface WsOutputTextCompleteResponseSuccess
+  extends Omit<WsOutputTextStreamResponseSuccess, 'action'> {
+  action: WsAction.outputTextComplete;
+}
+
+export interface WsOutputTextStreamResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.outputTextStream;
+  data: {
+    chatId: string;
+    conversationId: string;
+    role: 'assistant';
+    text: string;
+  };
+}
+
+export class WsUpdateConfigRequest extends WsBaseRequest {
+  constructor(
+    private readonly data: {
+      conversationId?: string;
+      location?: {
+        latitude: number;
+        longitude: number;
+      };
+      outputText?: boolean;
+      sampleRate?: {
+        input?: number;
+        output?: number;
+      };
+      speechRate?: number;
+      voiceId?: string;
+    },
+  ) {
+    super(WsAction.updateConfig);
+  }
+
+  override serialize() {
+    return {
+      data: this.data,
+    };
+  }
+}
+
+export interface WsUpdateConfigResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.updateConfig;
+  data: {
+    conversationId: string;
+  };
+}
+
+export interface WsResponseMapping {
+  [WsAction.cancelOutput]: WsCancelOutputResponseSuccess;
+  [WsAction.chatComplete]: WsChatCompleteResponseSuccess | WsChatCompleteResponseError;
+  [WsAction.clearContext]: WsClearContextResponseSuccess;
+  [WsAction.inputAudioComplete]: WsInputAudioCompleteResponseSuccess;
+  [WsAction.inputAudioStream]: WsInputAudioStreamRequest;
+  [WsAction.outputAudioComplete]: WsOutputAudioCompleteResponseSuccess;
+  [WsAction.outputAudioStream]: WsOutputAudioStreamResponseSuccess;
+  [WsAction.outputTextComplete]: WsOutputTextCompleteResponseSuccess;
+  [WsAction.outputTextStream]: WsOutputTextStreamResponseSuccess;
+  [WsAction.updateConfig]: WsUpdateConfigResponseSuccess;
+}
+
+export type WsRequest =
+  | WsUpdateConfigRequest
+  | WsInputAudioStreamRequest
+  | WsInputAudioCompleteRequest
+  | WsClearContextRequest
+  | WsCancelOutputResponseSuccess;
 
 export type WsHandler<T> = (message: T) => Promise<void> | void;

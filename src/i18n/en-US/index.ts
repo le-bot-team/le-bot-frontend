@@ -32,8 +32,6 @@ export default {
   pages: {
     HomePage: {
       labels: {
-        accessToken: 'Coze Access Token',
-        botId: 'Coze Bot ID',
         userId: 'User ID',
         connect: 'Connect',
         disconnect: 'Disconnect',

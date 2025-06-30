@@ -4,13 +4,17 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 
 import AudioRecorder from 'components/AudioRecorder.vue';
 import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
-import { CozeWsWrapper } from 'src/types/websocket';
-import { constructChatConfig } from 'src/utils/network/coze';
-import type { CozeWsResponse } from 'src/types/websocket/types';
-import { CozeWsEventType } from 'src/types/websocket/types';
+import { WsWrapper } from 'src/types/websocket';
+import {
+  WsAction,
+  WsInputAudioCompleteRequest,
+  WsInputAudioStreamRequest,
+  WsUpdateConfigRequest,
+} from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
 
 interface AudioMessage {
+  chatId?: string;
   isFinished: boolean;
   isSent: boolean;
   audioChunks: Blob[];
@@ -24,222 +28,109 @@ const isMobile = computed(() => screen.lt.md);
 
 const i18n = i18nSubPath('pages.HomePage');
 
-const accessToken = ref<string>('');
-const botId = ref<string>('');
 const conversationId = ref<string>('');
 const isChatReady = ref<boolean>(false);
 const messageList = ref<AudioMessage[]>([]);
 const userId = ref<string>('');
-const ws = ref<CozeWsWrapper>();
+const ws = ref<WsWrapper>();
 
 const connect = () => {
   if (!userId.value) {
     console.warn(`userId is empty`);
     return;
   }
-  const chatConfig = constructChatConfig(userId.value);
 
   if (ws.value) {
     disconnect();
   }
-  ws.value = new CozeWsWrapper(accessToken.value, botId.value);
-  ws.value.setCloseHandler('chat.disable_recording', () => {
-    isChatReady.value = false;
-  });
-  ws.value.setEventHandler(CozeWsEventType.chatCreated, () => {
-    ws.value?.sendEvent(
-      'chat.update_config',
-      CozeWsEventType.chatUpdate,
-      conversationId.value?.length
-        ? {
-            ...chatConfig,
-            conversation_id: conversationId,
-          }
-        : chatConfig,
+  ws.value = new WsWrapper('ws://localhost:3000/api/v1/chat/ws?token=test');
+  // ws.value.setCloseHandler('chat.disable_recording', () => {
+  //   isChatReady.value = false;
+  // });
+  ws.value.addOnOpenHandler(() => {
+    ws.value?.sendAction(
+      new WsUpdateConfigRequest({
+        conversationId: conversationId.value,
+        outputText: true,
+      }),
     );
   });
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: { chat_config: { conversation_id: string } };
-    }
-  >(CozeWsEventType.chatUpdated, (message) => {
+  ws.value.setHandler(WsAction.updateConfig, (message) => {
     isChatReady.value = true;
-    conversationId.value = message.data.chat_config.conversation_id;
+    conversationId.value = message.data.conversationId;
   });
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: { conversation_id: string };
+  ws.value.setHandler(WsAction.outputTextStream, (message) => {
+    conversationId.value = message.data.conversationId;
+    if (messageList.value.at(-1)?.isSent === true) {
+      messageList.value.push({
+        isFinished: false,
+        isSent: false,
+        audioChunks: [],
+      });
     }
-  >(CozeWsEventType.conversationChatCreated, (message) => {
-    console.log(`Received ${message.event_type}: ${message.data.conversation_id}`);
-    messageList.value.push({
-      isFinished: false,
-      isSent: false,
-      audioChunks: [],
-    });
+    const unfinishedMessage = messageList.value.at(-1);
+    if (unfinishedMessage) {
+      unfinishedMessage.chatId = message.data.chatId;
+      unfinishedMessage.text = message.data.text;
+    } else {
+      console.warn('No unfinished message found to update');
+    }
   });
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: {
-        conversation_id: string;
-        last_error?: {
-          Code: number;
-          Msg: string;
-        };
-      };
+  ws.value.setHandler(WsAction.outputTextComplete, (message) => {
+    conversationId.value = message.data.conversationId;
+    const unfinishedMessage = messageList.value.at(-1);
+    if (unfinishedMessage?.isSent === false) {
+      unfinishedMessage.chatId = message.data.chatId;
+      unfinishedMessage.text = message.data.text;
+    } else {
+      console.warn('No unfinished message found to update');
     }
-  >(CozeWsEventType.conversationChatInProgress, async (message) => {
-    console.log(`Received ${message.event_type}: ${message.data.conversation_id}`);
-    await processLastUnfinishedMessage(
-      false,
-      () => {
-        if (message.data.last_error) {
-          notify({
-            type: 'negative',
-            message: message.data.last_error.Msg,
-            caption: message.data.last_error.Code.toString(),
-          });
-        }
-      },
-      message.event_type,
-    );
   });
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: {
-        conversation_id: string;
-        role: 'assistant' | 'user';
-        content: string;
-        content_type: 'card' | 'object_string' | 'text';
-        type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
-      };
+  ws.value.setHandler(WsAction.outputAudioStream, (message) => {
+    conversationId.value = message.data.conversationId;
+    if (messageList.value.at(-1)?.isSent === true) {
+      messageList.value.push({
+        isFinished: false,
+        isSent: true,
+        audioChunks: [],
+      });
     }
-  >(
-    [CozeWsEventType.conversationMessageDelta, CozeWsEventType.conversationMessageCompleted],
-    async (message) =>
-      await processLastUnfinishedMessage(
-        false,
-        (unfinishedMessage) => {
-          if (message.data.type === 'answer') {
-            unfinishedMessage.text = message.data.content;
-          } else {
-            console.log(message);
-          }
-        },
-        message.event_type,
-      ),
-  );
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: {
-        conversation_id: string;
-        role: 'assistant' | 'user';
-        content: string;
-        type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
-      };
+    const unfinishedMessage = messageList.value.at(-1);
+    if (unfinishedMessage) {
+      unfinishedMessage.chatId = message.data.chatId;
+      unfinishedMessage.audioChunks.push(base64ToBlob(message.data.buffer));
+    } else {
+      console.warn('No unfinished message found to update');
     }
-  >(
-    CozeWsEventType.conversationAudioDelta,
-    async (message) =>
-      await processLastUnfinishedMessage(
-        false,
-        (unfinishedMessage) => {
-          if (message.data.type === 'answer') {
-            unfinishedMessage.audioChunks?.push(base64ToBlob(message.data.content));
-          } else {
-            console.log(message);
-          }
-        },
-        message.event_type,
-      ),
-  );
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: {
-        conversation_id: string;
-        role: 'assistant' | 'user';
-        content: string;
-        type: 'answer' | 'function_call' | 'question' | 'tool_output' | 'tool_response' | 'verbose';
-      };
+  });
+  ws.value.setHandler(WsAction.outputAudioComplete, async (message) => {
+    conversationId.value = message.data.conversationId;
+    const unfinishedMessage = messageList.value.at(-1);
+    if (unfinishedMessage?.isSent === false) {
+      unfinishedMessage.chatId = message.data.chatId;
+      unfinishedMessage.audioSrc = URL.createObjectURL(
+        await pcmToWav(new Blob(unfinishedMessage.audioChunks)),
+      );
+    } else {
+      console.warn('No unfinished message found to update');
     }
-  >(
-    CozeWsEventType.conversationAudioCompleted,
-    async (message) =>
-      await processLastUnfinishedMessage(
-        false,
-        async (unfinishedMessage) => {
-          if (message.data.type === 'answer') {
-            unfinishedMessage.audioSrc = URL.createObjectURL(
-              await pcmToWav(new Blob(unfinishedMessage.audioChunks)),
-            );
-          } else {
-            console.log(message);
-          }
-        },
-        message.event_type,
-      ),
-  );
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: {
-        conversation_id: string;
-        last_error?: {
-          Code: number;
-          Msg: string;
-        };
-      };
+  });
+  ws.value.setHandler(WsAction.chatComplete, (message) => {
+    conversationId.value = message.data.conversationId;
+    const unfinishedMessage = messageList.value.at(-1);
+    if (unfinishedMessage?.isSent === false) {
+      unfinishedMessage.isFinished = true;
+      if (!message.success) {
+        notify({
+          type: 'negative',
+          message: message.data.errors.map((error) => error.message).join(', '),
+          caption: message.data.errors.map((error) => error.code).join(', '),
+        });
+      }
+    } else {
+      console.warn('No unfinished message found to update');
     }
-  >(
-    CozeWsEventType.conversationChatCompleted,
-    async (message) =>
-      await processLastUnfinishedMessage(
-        false,
-        (unfinishedMessage) => {
-          if (message.data.last_error) {
-            notify({
-              type: 'negative',
-              message: message.data.last_error.Msg,
-              caption: message.data.last_error.Code.toString(),
-            });
-          }
-          unfinishedMessage.isFinished = true;
-          console.log(messageList.value);
-        },
-        message.event_type,
-      ),
-  );
-  ws.value.setEventHandler(CozeWsEventType.inputAudioBufferCompleted, () => {});
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: { content: string };
-    }
-  >(
-    CozeWsEventType.conversationAudioTranscriptUpdate,
-    async (message) =>
-      await processLastUnfinishedMessage(
-        true,
-        (unfinishedMessage) => {
-          unfinishedMessage.text = message.data.content;
-        },
-        message.event_type,
-      ),
-  );
-  ws.value.setEventHandler<
-    CozeWsResponse & {
-      data: { content: string };
-    }
-  >(
-    CozeWsEventType.conversationAudioTranscriptCompleted,
-    async (message) =>
-      await processLastUnfinishedMessage(
-        true,
-        (unfinishedMessage) => {
-          unfinishedMessage.text = message.data.content;
-          unfinishedMessage.isFinished = true;
-        },
-        message.event_type,
-      ),
-  );
+  });
 };
 
 const disconnect = () => {
@@ -250,41 +141,18 @@ const disconnect = () => {
   isChatReady.value = false;
 };
 
-const processLastUnfinishedMessage = async (
-  isSent: boolean,
-  handler: (message: AudioMessage) => void | Promise<void>,
-  errorCaption: string = '',
-) => {
-  const message = messageList.value.findLast(
-    (message) => !message.isFinished && message.isSent === isSent,
-  );
-  if (!message) {
-    notify({
-      type: 'negative',
-      message: i18n('labels.noUnfinishedMessage'),
-      caption: errorCaption,
-    });
-  } else {
-    await handler(message);
-  }
-};
-
 const processData = async (blobData: Blob) => {
   const dataUrl = await blobToDataUrl(blobData);
 
   messageList.value.push({
-    isFinished: false,
+    isFinished: true,
     isSent: true,
     audioChunks: [blobData],
     audioSrc: URL.createObjectURL(blobData),
   });
 
-  ws.value?.sendEvent('chat.input_audio_append', CozeWsEventType.inputAudioBufferAppend, {
-    data: {
-      delta: dataUrl.substring(dataUrl.indexOf(',') + 1),
-    },
-  });
-  ws.value?.sendEvent('chat.input_audio_complete', CozeWsEventType.inputAudioBufferComplete);
+  ws.value?.sendAction(new WsInputAudioStreamRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)));
+  ws.value?.sendAction(new WsInputAudioCompleteRequest());
 };
 
 onBeforeUnmount(() => {
@@ -313,24 +181,6 @@ onBeforeUnmount(() => {
           :autofocus="true"
           clearable
           :dense="isMobile"
-          :label="i18n('labels.accessToken')"
-          outlined
-          v-model="accessToken"
-        />
-        <q-input
-          :class="{ 'col-grow': !isMobile }"
-          :autofocus="true"
-          clearable
-          :dense="isMobile"
-          :label="i18n('labels.botId')"
-          outlined
-          v-model="botId"
-        />
-        <q-input
-          :class="{ 'col-grow': !isMobile }"
-          :autofocus="true"
-          clearable
-          :dense="isMobile"
           :label="i18n('labels.userId')"
           outlined
           v-model="userId"
@@ -348,7 +198,6 @@ onBeforeUnmount(() => {
         v-else
         color="primary"
         :dense="isMobile"
-        :disable="!accessToken || !botId"
         icon="link"
         :label="i18n('labels.connect')"
         @click="connect"
