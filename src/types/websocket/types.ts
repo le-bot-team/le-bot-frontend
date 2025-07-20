@@ -83,8 +83,16 @@ export interface WsClearContextResponseSuccess extends WsBaseResponseSuccess {
 }
 
 export class WsInputAudioCompleteRequest extends WsBaseRequest {
-  constructor() {
+  constructor(private readonly buffer: string) {
     super(WsAction.inputAudioComplete);
+  }
+
+  override serialize() {
+    return {
+      data: {
+        buffer: this.buffer,
+      },
+    };
   }
 }
 

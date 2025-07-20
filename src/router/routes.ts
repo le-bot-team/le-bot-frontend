@@ -18,6 +18,15 @@ const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/MainHeader.vue'),
         },
       },
+      {
+        name: 'signInAndSignUp',
+        path: 'sign-in-and-sign-up',
+        components: {
+          default: () => import('pages/SignInAndSignUpPage.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          header: () => import('layouts/headers/MainHeader.vue'),
+        },
+      }
     ],
   },
 

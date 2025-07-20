@@ -39,5 +39,21 @@ export default {
         noUnfinishedMessage: 'No unfinished message',
       },
     },
+    SignInAndSignUpPage: {
+      labels: {
+        title: 'Le Bot',
+        description: 'Your intelligent pet and good companion',
+        phoneOrEmail: 'Phone Number / Email',
+        code: 'Verification Code',
+        sendCode: 'Send Code',
+        password: 'Password',
+        signInAndSignUp: 'Sign In / Sign Up',
+        useCode: 'Use Code',
+        usePassword: 'Use Password',
+      },
+      errors: {
+        invalidPhoneOrEmail: 'Invalid phone number or email',
+      }
+    }
   },
 };
