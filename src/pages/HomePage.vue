@@ -9,7 +9,6 @@ import { WsWrapper } from 'src/types/websocket';
 import {
   WsAction,
   WsInputAudioCompleteRequest,
-  WsInputAudioStreamRequest,
   WsUpdateConfigRequest,
 } from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
@@ -155,8 +154,10 @@ const processData = async (blobData: Blob) => {
     audioSrc: URL.createObjectURL(blobData),
   });
 
-  ws.value?.sendAction(new WsInputAudioStreamRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)));
-  ws.value?.sendAction(new WsInputAudioCompleteRequest());
+  // 录音数据作为完成包发送（单次录音，不需要分包）
+  ws.value?.sendAction(
+    new WsInputAudioCompleteRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)),
+  );
 };
 
 const testAudio = async () => {
@@ -185,7 +186,7 @@ const testAudio = async () => {
       },
       onSegmentSent: (segmentIndex, isLast) => {
         console.log(`Segment ${segmentIndex + 1} sent${isLast ? ' (final)' : ''}`);
-      }
+      },
     });
 
     // 添加发送的消息到界面
@@ -207,7 +208,6 @@ const testAudio = async () => {
     }
 
     console.log('Audio file processed and sent successfully');
-
   } catch (error) {
     console.error('Error processing audio file:', error);
 

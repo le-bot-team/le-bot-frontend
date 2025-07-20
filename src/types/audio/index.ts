@@ -103,12 +103,16 @@ export class AudioStreamProcessor {
       // 将音频片段转换为 base64
       const base64Data = uint8ArrayToBase64(segment);
 
-      // 发送音频片段
-      this.ws.sendAction(new WsInputAudioStreamRequest(base64Data));
-
-      console.log(
-        `Sent audio segment ${i + 1}/${totalSegments} (${segment.length} bytes, last: ${isLast})`,
-      );
+      // 关键修复：最后一个音频包通过 WsInputAudioCompleteRequest 发送
+      if (isLast) {
+        this.ws.sendAction(new WsInputAudioCompleteRequest(base64Data));
+        console.log(
+          `Sent final audio segment ${i + 1}/${totalSegments} (${segment.length} bytes) via inputAudioComplete`,
+        );
+      } else {
+        this.ws.sendAction(new WsInputAudioStreamRequest(base64Data));
+        console.log(`Sent audio segment ${i + 1}/${totalSegments} (${segment.length} bytes)`);
+      }
 
       // 调用回调函数
       this.options.onSegmentSent?.(i, isLast);
@@ -123,8 +127,6 @@ export class AudioStreamProcessor {
       }
     }
 
-    // 发送完成信号
-    this.ws.sendAction(new WsInputAudioCompleteRequest());
     console.log('Audio streaming completed');
   }
 
