@@ -1,6 +1,6 @@
 export async function pcmToWav(
   pcmBlob: Blob,
-  sampleRate: 8000 | 16000 | 22050 | 24000 | 32000 | 44100 | 48000 = 24000,
+  sampleRate: 8000 | 16000 | 22050 | 24000 | 32000 | 44100 | 48000 = 16000,
   numChannels = 1,
   bitDepth = 16,
 ): Promise<Blob> {

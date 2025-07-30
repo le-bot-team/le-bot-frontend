@@ -74,7 +74,7 @@ const connect = () => {
     const unfinishedMessage = messageList.value.at(-1);
     if (unfinishedMessage) {
       unfinishedMessage.chatId = message.data.chatId;
-      unfinishedMessage.text = message.data.text;
+      unfinishedMessage.text = (unfinishedMessage.text ?? '') + message.data.text;
     } else {
       console.warn('No unfinished message found to update');
     }
@@ -90,6 +90,7 @@ const connect = () => {
     }
   });
   ws.value.setHandler(WsAction.outputAudioStream, (message) => {
+    console.log(message);
     conversationId.value = message.data.conversationId;
     if (messageList.value.at(-1)?.isSent === true) {
       messageList.value.push({
