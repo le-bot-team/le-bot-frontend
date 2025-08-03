@@ -47,10 +47,7 @@ const connect = () => {
   if (ws.value) {
     disconnect();
   }
-  ws.value = new WsWrapper('ws://localhost:3000/api/v1/chat/ws?token=test');
-  // ws.value.setCloseHandler('chat.disable_recording', () => {
-  //   isChatReady.value = false;
-  // });
+  ws.value = new WsWrapper('ws://stea.studio26f.org:3000/api/v1/chat/ws?token=test');
   ws.value.addOnOpenHandler(() => {
     ws.value?.sendAction(
       new WsUpdateConfigRequest({
