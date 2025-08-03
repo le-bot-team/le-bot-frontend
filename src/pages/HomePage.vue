@@ -21,9 +21,8 @@ interface AudioMessage {
   audioSrc?: string;
   text?: string;
   audioContext?: AudioContext;
-  audioQueue?: AudioBuffer[];
-  isPlaying?: boolean;
   nextStartTime?: number;
+  isPlaying?: boolean;
 }
 
 const { notify, screen } = useQuasar();
@@ -93,21 +92,32 @@ const connect = () => {
   ws.value.setHandler(WsAction.outputAudioStream, async (message) => {
     console.log(message);
     conversationId.value = message.data.conversationId;
-    if (messageList.value.at(-1)?.isSent === true) {
+
+    let unfinishedMessage = messageList.value.at(-1);
+
+    // 如果最后一条消息是发送的，创建新的接收消息
+    if (unfinishedMessage?.isSent === true) {
       messageList.value.push({
         isFinished: false,
         isSent: false,
         audioChunks: [],
       });
+      unfinishedMessage = messageList.value.at(-1);
     }
-    const unfinishedMessage = messageList.value.at(-1);
+
     if (unfinishedMessage) {
       unfinishedMessage.chatId = message.data.chatId;
       const audioBlob = base64ToBlob(message.data.buffer);
       unfinishedMessage.audioChunks.push(audioBlob);
 
-      // 流式播放音频
-      await playAudioBuffer(unfinishedMessage, await pcmToWav(audioBlob));
+      // 初始化音频上下文（仅在第一次）
+      if (!unfinishedMessage.audioContext) {
+        unfinishedMessage.audioContext = new AudioContext();
+        unfinishedMessage.nextStartTime = unfinishedMessage.audioContext.currentTime;
+      }
+
+      // 直接播放每个音频块，使用时间调度避免重叠
+      await playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob));
     } else {
       console.warn('No unfinished message found to update');
     }
@@ -186,55 +196,36 @@ const onStop = () => {
   }
 };
 
-const playAudioBuffer = async (message: AudioMessage, audioData: Blob) => {
+const playAudioChunk = async (message: AudioMessage, audioData: Blob) => {
   if (!message.audioContext) {
-    message.audioContext = new AudioContext();
-    message.audioQueue = [];
-    message.isPlaying = false;
-    message.nextStartTime = message.audioContext.currentTime;
-  }
-
-  try {
-    // Convert PCM blob to AudioBuffer
-    const arrayBuffer = await audioData.arrayBuffer();
-    const audioBuffer = await message.audioContext.decodeAudioData(arrayBuffer);
-
-    message.audioQueue!.push(audioBuffer);
-
-    if (!message.isPlaying) {
-      playNextBuffer(message);
-    }
-  } catch (error) {
-    console.warn('Failed to decode audio data:', error);
-  }
-};
-
-const playNextBuffer = (message: AudioMessage) => {
-  if (!message.audioContext || !message.audioQueue || message.audioQueue.length === 0) {
-    message.isPlaying = false;
+    console.warn('Audio context not initialized');
     return;
   }
 
-  message.isPlaying = true;
-  const audioBuffer = message.audioQueue.shift()!;
-  const source = message.audioContext.createBufferSource();
+  try {
+    // Convert audio blob to AudioBuffer
+    const arrayBuffer = await audioData.arrayBuffer();
+    const audioBuffer = await message.audioContext.decodeAudioData(arrayBuffer);
 
-  source.buffer = audioBuffer;
-  source.connect(message.audioContext.destination);
+    const source = message.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(message.audioContext.destination);
 
-  // Schedule playback
-  const startTime = Math.max(message.audioContext.currentTime, message.nextStartTime || 0);
-  source.start(startTime);
-  message.nextStartTime = startTime + audioBuffer.duration;
+    // Schedule playback
+    const startTime = Math.max(message.audioContext.currentTime, message.nextStartTime || 0);
+    source.start(startTime);
+    message.nextStartTime = startTime + audioBuffer.duration;
 
-  // Schedule next buffer
-  source.onended = () => {
-    if (message.audioQueue && message.audioQueue.length > 0) {
-      playNextBuffer(message);
-    } else {
+    // Update message to indicate playback has started
+    message.isPlaying = true;
+
+    // Set up onended callback
+    source.onended = () => {
       message.isPlaying = false;
-    }
-  };
+    };
+  } catch (error) {
+    console.warn('Failed to decode or play audio data:', error);
+  }
 };
 
 onBeforeUnmount(() => {
