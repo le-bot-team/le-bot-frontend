@@ -23,6 +23,7 @@ interface AudioMessage {
   audioContext?: AudioContext;
   nextStartTime?: number;
   isPlaying?: boolean;
+  hasStreamPlayed?: boolean; // 标记是否已经流式播放过
 }
 
 const { notify, screen } = useQuasar();
@@ -203,6 +204,9 @@ const playAudioChunk = async (message: AudioMessage, audioData: Blob) => {
   }
 
   try {
+    // 标记消息已经开始流式播放
+    message.hasStreamPlayed = true;
+
     // Convert audio blob to AudioBuffer
     const arrayBuffer = await audioData.arrayBuffer();
     const audioBuffer = await message.audioContext.decodeAudioData(arrayBuffer);
@@ -293,7 +297,11 @@ onBeforeUnmount(() => {
               </q-item>
               <q-item v-if="messageItem.audioSrc">
                 <q-item-section>
-                  <audio :autoplay="!messageItem.isSent" controls :src="messageItem.audioSrc" />
+                  <audio
+                    :autoplay="!messageItem.isSent && !messageItem.hasStreamPlayed"
+                    controls
+                    :src="messageItem.audioSrc"
+                  />
                 </q-item-section>
               </q-item>
               <q-item v-if="messageItem.text">
