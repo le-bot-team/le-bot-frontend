@@ -4,11 +4,11 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 
 import AudioRecorder from 'components/AudioRecorder.vue';
 import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
-import { AudioStreamProcessor } from 'src/types/audio';
 import { WsWrapper } from 'src/types/websocket';
 import {
   WsAction,
   WsInputAudioCompleteRequest,
+  WsInputAudioStreamRequest,
   WsUpdateConfigRequest,
 } from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
@@ -28,11 +28,8 @@ const isMobile = computed(() => screen.lt.md);
 
 const i18n = i18nSubPath('pages.HomePage');
 
-const audioFile = ref<File>();
-const audioProcessor = ref<AudioStreamProcessor>();
 const conversationId = ref<string>('');
 const isChatReady = ref<boolean>(false);
-const isProcessingAudio = ref<boolean>(false);
 const messageList = ref<AudioMessage[]>([]);
 const userId = ref<string>('');
 const ws = ref<WsWrapper>();
@@ -145,88 +142,39 @@ const disconnect = () => {
   isChatReady.value = false;
 };
 
-const processData = async (blobData: Blob) => {
-  const dataUrl = await blobToDataUrl(blobData);
-
-  messageList.value.push({
-    isFinished: true,
-    isSent: true,
-    audioChunks: [blobData],
-    audioSrc: URL.createObjectURL(blobData),
-  });
-
-  // 录音数据作为完成包发送（单次录音，不需要分包）
-  ws.value?.sendAction(
-    new WsInputAudioCompleteRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)),
-  );
-};
-
-const testAudio = async () => {
-  if (!audioFile.value) {
-    return;
-  }
-
+const onData = async (blobData: Blob) => {
   if (!ws.value) {
     console.warn('WebSocket connection not available');
     return;
   }
 
-  if (isProcessingAudio.value) {
-    console.warn('Audio processing already in progress');
+  const dataUrl = await blobToDataUrl(blobData);
+  ws.value?.sendAction(new WsInputAudioStreamRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)));
+
+  const sentMessage = messageList.value.at(-1);
+  if (sentMessage?.isSent === true && !sentMessage.isFinished) {
+    sentMessage.audioChunks.push(blobData);
+  } else {
+    messageList.value.push({
+      isFinished: false,
+      isSent: true,
+      audioChunks: [blobData],
+    });
+  }
+};
+
+const onStop = () => {
+  if (!ws.value) {
+    console.warn('WebSocket connection not available');
     return;
   }
 
-  try {
-    isProcessingAudio.value = true;
+  ws.value?.sendAction(new WsInputAudioCompleteRequest(''));
 
-    // 创建音频流处理器
-    audioProcessor.value = new AudioStreamProcessor(ws.value, {
-      segmentDurationMs: 200, // 每个音频片段200ms，参考Python脚本
-      onProgress: (progress, segmentIndex, totalSegments) => {
-        console.log(`Progress: ${(progress * 100).toFixed(1)}% (${segmentIndex}/${totalSegments})`);
-      },
-      onSegmentSent: (segmentIndex, isLast) => {
-        console.log(`Segment ${segmentIndex + 1} sent${isLast ? ' (final)' : ''}`);
-      },
-    });
-
-    // 添加发送的消息到界面
-    const audioUrl = URL.createObjectURL(audioFile.value);
-    messageList.value.push({
-      isFinished: false, // 设为false，等待处理完成
-      isSent: true,
-      audioChunks: [audioFile.value],
-      audioSrc: audioUrl,
-    });
-
-    // 处理音频文件并流式发送
-    await audioProcessor.value.processAudioFile(audioFile.value);
-
-    // 处理完成，更新消息状态
-    const sentMessage = messageList.value.at(-1);
-    if (sentMessage?.isSent === true) {
-      sentMessage.isFinished = true;
-    }
-
-    console.log('Audio file processed and sent successfully');
-  } catch (error) {
-    console.error('Error processing audio file:', error);
-
-    // 显示错误通知
-    notify({
-      type: 'negative',
-      message: 'Failed to process audio file',
-      caption: error instanceof Error ? error.message : 'Unknown error',
-    });
-
-    // 如果有未完成的消息，标记为完成（带错误状态）
-    const sentMessage = messageList.value.at(-1);
-    if (sentMessage?.isSent === true && !sentMessage.isFinished) {
-      sentMessage.isFinished = true;
-    }
-  } finally {
-    isProcessingAudio.value = false;
-    audioProcessor.value = undefined;
+  const sentMessage = messageList.value.at(-1);
+  if (sentMessage?.isSent === true && !sentMessage.isFinished) {
+    sentMessage.isFinished = true;
+    sentMessage.audioSrc = URL.createObjectURL(new Blob(sentMessage.audioChunks));
   }
 };
 
@@ -277,19 +225,6 @@ onBeforeUnmount(() => {
         :label="i18n('labels.connect')"
         @click="connect"
       />
-      <q-file class="full-width" label="Choose Audio File" outlined v-model="audioFile">
-        <template v-slot:append>
-          <q-btn
-            :color="isChatReady ? 'primary' : 'grey'"
-            dense
-            :disable="!isChatReady"
-            flat
-            :icon="isChatReady ? 'send' : 'cancel_schedule_send'"
-            round
-            @click="testAudio"
-          />
-        </template>
-      </q-file>
       <q-card class="col-grow full-width" bordered flat>
         <div class="column full-width">
           <q-chat-message
@@ -325,7 +260,8 @@ onBeforeUnmount(() => {
           :disable="
             !isChatReady || !!messageList.find((message) => message.isSent && !message.isFinished)
           "
-          @stop="processData"
+          @data="onData"
+          @stop="onStop"
         />
       </div>
     </div>

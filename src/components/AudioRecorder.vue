@@ -7,7 +7,8 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { i18nSubPath } from 'src/utils/common';
 
 const emit = defineEmits<{
-  stop: [blobData: Blob];
+  data: [blobData: Blob];
+  stop: [];
 }>();
 withDefaults(
   defineProps<{
@@ -21,7 +22,6 @@ const { notify, platform } = useQuasar();
 
 const i18n = i18nSubPath('components.AudioRecorder');
 
-const audioChunks = ref<Blob[]>([]);
 const isRecording = ref(false);
 const mediaRecorder = ref<IMediaRecorder>();
 const mediaStream = ref<MediaStream>();
@@ -34,7 +34,7 @@ const startRecording = () => {
   try {
     mediaRecorder.value = new MediaRecorder(mediaStream.value, { mimeType: 'audio/wav' });
     mediaRecorder.value.ondataavailable = (event) => {
-      audioChunks.value.push(event.data);
+      emit('data', event.data);
     };
     mediaRecorder.value.onstop = () => {
       if (!mediaStream.value) {
@@ -42,10 +42,9 @@ const startRecording = () => {
       }
       // mediaStream.value.getTracks().forEach((track) => track.stop());
 
-      emit('stop', new Blob(audioChunks.value, { type: 'audio/wav' }));
-      audioChunks.value = [];
+      emit('stop');
     };
-    mediaRecorder.value.start();
+    mediaRecorder.value.start(200); // 200ms per chunk
     isRecording.value = true;
   } catch (error) {
     notify({
@@ -64,7 +63,16 @@ const stopRecording = (): void => {
 };
 
 onMounted(async () => {
-  mediaStream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaStream.value = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      sampleRate: 16000,
+      sampleSize: 16,
+      channelCount: 1,
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    }
+  });
 });
 
 onBeforeUnmount(() => {
