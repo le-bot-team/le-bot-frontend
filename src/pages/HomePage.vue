@@ -20,6 +20,10 @@ interface AudioMessage {
   audioChunks: Blob[];
   audioSrc?: string;
   text?: string;
+  audioContext?: AudioContext;
+  audioQueue?: AudioBuffer[];
+  isPlaying?: boolean;
+  nextStartTime?: number;
 }
 
 const { notify, screen } = useQuasar();
@@ -86,20 +90,24 @@ const connect = () => {
       console.warn('No unfinished message found to update');
     }
   });
-  ws.value.setHandler(WsAction.outputAudioStream, (message) => {
+  ws.value.setHandler(WsAction.outputAudioStream, async (message) => {
     console.log(message);
     conversationId.value = message.data.conversationId;
     if (messageList.value.at(-1)?.isSent === true) {
       messageList.value.push({
         isFinished: false,
-        isSent: true,
+        isSent: false,
         audioChunks: [],
       });
     }
     const unfinishedMessage = messageList.value.at(-1);
     if (unfinishedMessage) {
       unfinishedMessage.chatId = message.data.chatId;
-      unfinishedMessage.audioChunks.push(base64ToBlob(message.data.buffer));
+      const audioBlob = base64ToBlob(message.data.buffer);
+      unfinishedMessage.audioChunks.push(audioBlob);
+
+      // 流式播放音频
+      await playAudioBuffer(unfinishedMessage, await pcmToWav(audioBlob));
     } else {
       console.warn('No unfinished message found to update');
     }
@@ -178,6 +186,57 @@ const onStop = () => {
   }
 };
 
+const playAudioBuffer = async (message: AudioMessage, audioData: Blob) => {
+  if (!message.audioContext) {
+    message.audioContext = new AudioContext();
+    message.audioQueue = [];
+    message.isPlaying = false;
+    message.nextStartTime = message.audioContext.currentTime;
+  }
+
+  try {
+    // Convert PCM blob to AudioBuffer
+    const arrayBuffer = await audioData.arrayBuffer();
+    const audioBuffer = await message.audioContext.decodeAudioData(arrayBuffer);
+
+    message.audioQueue!.push(audioBuffer);
+
+    if (!message.isPlaying) {
+      playNextBuffer(message);
+    }
+  } catch (error) {
+    console.warn('Failed to decode audio data:', error);
+  }
+};
+
+const playNextBuffer = (message: AudioMessage) => {
+  if (!message.audioContext || !message.audioQueue || message.audioQueue.length === 0) {
+    message.isPlaying = false;
+    return;
+  }
+
+  message.isPlaying = true;
+  const audioBuffer = message.audioQueue.shift()!;
+  const source = message.audioContext.createBufferSource();
+
+  source.buffer = audioBuffer;
+  source.connect(message.audioContext.destination);
+
+  // Schedule playback
+  const startTime = Math.max(message.audioContext.currentTime, message.nextStartTime || 0);
+  source.start(startTime);
+  message.nextStartTime = startTime + audioBuffer.duration;
+
+  // Schedule next buffer
+  source.onended = () => {
+    if (message.audioQueue && message.audioQueue.length > 0) {
+      playNextBuffer(message);
+    } else {
+      message.isPlaying = false;
+    }
+  };
+};
+
 onBeforeUnmount(() => {
   disconnect();
   messageList.value.forEach((message) => {
@@ -243,7 +302,7 @@ onBeforeUnmount(() => {
               </q-item>
               <q-item v-if="messageItem.audioSrc">
                 <q-item-section>
-                  <audio controls :src="messageItem.audioSrc" />
+                  <audio :autoplay="!messageItem.isSent" controls :src="messageItem.audioSrc" />
                 </q-item-section>
               </q-item>
               <q-item v-if="messageItem.text">
