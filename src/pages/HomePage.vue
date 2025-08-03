@@ -256,13 +256,7 @@ onBeforeUnmount(() => {
         </div>
       </q-card>
       <div class="row">
-        <AudioRecorder
-          :disable="
-            !isChatReady || !!messageList.find((message) => message.isSent && !message.isFinished)
-          "
-          @data="onData"
-          @stop="onStop"
-        />
+        <AudioRecorder :disable="!isChatReady" @data="onData" @stop="onStop" />
       </div>
     </div>
   </q-page>

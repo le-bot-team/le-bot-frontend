@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import type { IMediaRecorder } from 'extendable-media-recorder';
 import { MediaRecorder } from 'extendable-media-recorder';
-import { useQuasar } from 'quasar';
+import { uid, useQuasar } from 'quasar';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 
 const emit = defineEmits<{
   data: [blobData: Blob];
+  start: [recordId: string];
   stop: [];
 }>();
+
 withDefaults(
   defineProps<{
     disable: boolean;
@@ -22,16 +24,17 @@ const { notify, platform } = useQuasar();
 
 const i18n = i18nSubPath('components.AudioRecorder');
 
-const isRecording = ref(false);
 const mediaRecorder = ref<IMediaRecorder>();
 const mediaStream = ref<MediaStream>();
+const recordId = ref<string>();
 
 const startRecording = () => {
-  if (isRecording.value || !mediaStream.value) {
+  if (recordId.value?.length || !mediaStream.value) {
     return;
   }
 
   try {
+    recordId.value = uid();
     mediaRecorder.value = new MediaRecorder(mediaStream.value, { mimeType: 'audio/wav' });
     mediaRecorder.value.ondataavailable = (event) => {
       emit('data', event.data);
@@ -45,21 +48,21 @@ const startRecording = () => {
       emit('stop');
     };
     mediaRecorder.value.start(200); // 200ms per chunk
-    isRecording.value = true;
   } catch (error) {
     notify({
       type: 'negative',
       message: i18n('labels.error'),
       caption: (error as Error).message,
     });
+    recordId.value = '';
   }
 };
 
 const stopRecording = (): void => {
   if (mediaRecorder.value?.state === 'recording') {
     mediaRecorder.value.stop();
-    isRecording.value = false;
   }
+  recordId.value = '';
 };
 
 onMounted(async () => {
@@ -70,8 +73,8 @@ onMounted(async () => {
       channelCount: 1,
       echoCancellation: true,
       noiseSuppression: true,
-      autoGainControl: true
-    }
+      autoGainControl: true,
+    },
   });
 });
 
@@ -84,7 +87,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="column items-center q-gutter-y-sm">
-    <div v-if="isRecording" class="row">
+    <div v-if="recordId?.length" class="row">
       <q-spinner-bars color="red" />
       <div class="text-red">
         {{ i18n('labels.recording') }}
@@ -98,7 +101,7 @@ onBeforeUnmount(() => {
         v-if="platform.is.mobile"
         color="primary"
         :disable="disable"
-        :icon="isRecording ? 'mic_off' : 'mic'"
+        :icon="recordId?.length ? 'mic_off' : 'mic'"
         outline
         round
         size="xl"
@@ -110,7 +113,7 @@ onBeforeUnmount(() => {
         v-else
         color="primary"
         :disable="disable"
-        :icon="isRecording ? 'mic_off' : 'mic'"
+        :icon="recordId?.length ? 'mic_off' : 'mic'"
         outline
         round
         size="xl"
