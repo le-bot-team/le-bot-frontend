@@ -48,9 +48,13 @@ const connect = () => {
     disconnect();
   }
   ws.value = new WsWrapper(
-    process.env.DEPLOY_GITHUB_PAGE || process.env.DEPLOY_ELYSIA
-      ? 'wss://cafuuchino.studio26f.org:10580/api/v1/chat/ws?token=test'
-      : 'ws://stea.studio26f.org:3000/api/v1/chat/ws?token=test',
+    `${
+      process.env.DEPLOY_GITHUB_PAGE
+        ? 'wss://cafuuchino.studio26f.org:10580'
+        : process.env.DEPLOY_ELYSIA
+          ? ''
+          : 'ws://localhost:3000'
+    }/api/v1/chat/ws?token=test`,
   );
   ws.value.addOnOpenHandler(() => {
     ws.value?.sendAction(
