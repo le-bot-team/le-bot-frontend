@@ -47,7 +47,11 @@ const connect = () => {
   if (ws.value) {
     disconnect();
   }
-  ws.value = new WsWrapper('ws://stea.studio26f.org:3000/api/v1/chat/ws?token=test');
+  ws.value = new WsWrapper(
+    process.env.DEPLOY_GITHUB_PAGE || process.env.DEPLOY_ELYSIA
+      ? 'wss://cafuuchino.studio26f.org:10580/api/v1/chat/ws?token=test'
+      : 'ws://stea.studio26f.org:3000/api/v1/chat/ws?token=test',
+  );
   ws.value.addOnOpenHandler(() => {
     ws.value?.sendAction(
       new WsUpdateConfigRequest({
