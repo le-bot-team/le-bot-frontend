@@ -264,9 +264,9 @@ onBeforeUnmount(() => {
           clearable
           :dense="isMobile"
           :label="i18n('labels.userId')"
+          name="user-id-input"
           outlined
-          v-model="userId"
-        />
+          v-model="userId"/>
       </div>
       <q-btn
         v-if="ws"
