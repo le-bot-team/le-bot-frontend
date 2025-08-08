@@ -47,15 +47,7 @@ const connect = () => {
   if (ws.value) {
     disconnect();
   }
-  ws.value = new WsWrapper(
-    `${
-      process.env.DEPLOY_GITHUB_PAGE
-        ? 'wss://cafuuchino.studio26f.org:10580'
-        : process.env.DEPLOY_ELYSIA
-          ? ''
-          : 'ws://localhost:3000'
-    }/api/v1/chat/ws?token=test`,
-  );
+  ws.value = new WsWrapper(`${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=test`);
   ws.value.addOnOpenHandler(() => {
     ws.value?.sendAction(
       new WsUpdateConfigRequest({
@@ -266,7 +258,8 @@ onBeforeUnmount(() => {
           :label="i18n('labels.userId')"
           name="user-id-input"
           outlined
-          v-model="userId"/>
+          v-model="userId"
+        />
       </div>
       <q-btn
         v-if="ws"
