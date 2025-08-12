@@ -277,9 +277,10 @@ onBeforeUnmount(() => {
         :label="i18n('labels.connect')"
         @click="connect"
       />
-      <q-card class="col-grow full-width" bordered flat>
-        <div class="column full-width">
+      <q-card class="col-grow full-width column" bordered flat>
+        <q-scroll-area class="col-grow full-width">
           <q-chat-message
+            class="q-mx-md"
             v-for="(messageItem, messageIndex) in messageList"
             :key="messageIndex"
             :sent="messageItem.isSent"
@@ -309,7 +310,7 @@ onBeforeUnmount(() => {
               </q-item>
             </q-list>
           </q-chat-message>
-        </div>
+        </q-scroll-area>
       </q-card>
       <div class="row">
         <AudioRecorder :disable="!isChatReady" @data="onData" @stop="onStop" />
