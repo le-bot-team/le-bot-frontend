@@ -43,8 +43,6 @@ const startRecording = () => {
       if (!mediaStream.value) {
         return;
       }
-      // mediaStream.value.getTracks().forEach((track) => track.stop());
-
       emit('stop');
     };
     mediaRecorder.value.start(200); // 200ms per chunk

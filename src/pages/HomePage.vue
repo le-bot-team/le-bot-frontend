@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
@@ -12,6 +13,7 @@ import {
   WsUpdateConfigRequest,
 } from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
+import { useChatStore } from 'stores/chat';
 
 interface AudioMessage {
   chatId?: string;
@@ -26,13 +28,13 @@ interface AudioMessage {
   hasStreamPlayed?: boolean; // 标记是否已经流式播放过
 }
 
+const { conversationId } = storeToRefs(useChatStore());
 const { notify, screen } = useQuasar();
 
 const isMobile = computed(() => screen.lt.md);
 
 const i18n = i18nSubPath('pages.HomePage');
 
-const conversationId = ref<string>('');
 const isChatReady = ref<boolean>(false);
 const messageList = ref<AudioMessage[]>([]);
 const userId = ref<string>('');
@@ -62,51 +64,95 @@ const connect = () => {
   });
   ws.value.setHandler(WsAction.outputTextStream, (message) => {
     conversationId.value = message.data.conversationId;
-    if (messageList.value.at(-1)?.isSent === true) {
-      messageList.value.push({
-        isFinished: false,
-        isSent: false,
-        audioChunks: [],
-      });
-    }
-    const unfinishedMessage = messageList.value.at(-1);
-    if (unfinishedMessage) {
-      unfinishedMessage.chatId = message.data.chatId;
-      unfinishedMessage.text = (unfinishedMessage.text ?? '') + message.data.text;
-    } else {
-      console.warn('No unfinished message found to update');
+    switch (message.data.role) {
+      case 'assistant': {
+        let unfinishedMessage = messageList.value.findLast(
+          (message) => !message.isFinished && !message.isSent,
+        );
+        if (!unfinishedMessage) {
+          unfinishedMessage = {
+            isFinished: false,
+            isSent: false,
+            audioChunks: [],
+            chatId: message.data.chatId,
+            text: message.data.text,
+          };
+          messageList.value.push(unfinishedMessage);
+        } else {
+          unfinishedMessage.text = message.data.text;
+        }
+        break;
+      }
+      case 'user': {
+        let unfinishedMessage = messageList.value.findLast(
+          (message) => !message.isFinished && message.isSent,
+        );
+        if (!unfinishedMessage) {
+          unfinishedMessage = {
+            isFinished: false,
+            isSent: true,
+            audioChunks: [],
+            chatId: message.data.chatId,
+            text: message.data.text,
+          };
+          messageList.value.push(unfinishedMessage);
+        } else {
+          unfinishedMessage.text = message.data.text;
+        }
+        break;
+      }
     }
   });
   ws.value.setHandler(WsAction.outputTextComplete, (message) => {
     conversationId.value = message.data.conversationId;
-    const unfinishedMessage = messageList.value.at(-1);
-    if (unfinishedMessage?.isSent === false) {
-      unfinishedMessage.chatId = message.data.chatId;
-      unfinishedMessage.text = message.data.text;
-    } else {
-      console.warn('No unfinished message found to update');
+    switch (message.data.role) {
+      case 'assistant': {
+        let unfinishedMessage = messageList.value.findLast(
+          (message) => !message.isFinished && !message.isSent,
+        );
+        if (!unfinishedMessage) {
+          unfinishedMessage = {
+            isFinished: false,
+            isSent: false,
+            audioChunks: [],
+            chatId: message.data.chatId,
+            text: message.data.text,
+          };
+          messageList.value.push(unfinishedMessage);
+        }
+        unfinishedMessage.text = message.data.text;
+        break;
+      }
+      case 'user': {
+        let unfinishedMessage = messageList.value.findLast(
+          (message) => !message.isFinished && message.isSent,
+        );
+        if (!unfinishedMessage) {
+          unfinishedMessage = {
+            isFinished: false,
+            isSent: true,
+            audioChunks: [],
+            chatId: message.data.chatId,
+            text: message.data.text,
+          };
+          messageList.value.push(unfinishedMessage);
+        }
+        unfinishedMessage.text = message.data.text;
+        unfinishedMessage.isFinished = true;
+        break;
+      }
     }
   });
   ws.value.setHandler(WsAction.outputAudioStream, async (message) => {
-    console.log(message);
     conversationId.value = message.data.conversationId;
+    const audioBlob = base64ToBlob(message.data.buffer);
 
-    let unfinishedMessage = messageList.value.at(-1);
-
-    // 如果最后一条消息是发送的，创建新的接收消息
-    if (unfinishedMessage?.isSent === true) {
-      messageList.value.push({
-        isFinished: false,
-        isSent: false,
-        audioChunks: [],
-      });
-      unfinishedMessage = messageList.value.at(-1);
-    }
-
+    let unfinishedMessage = messageList.value.findLast(
+      (message) => !message.isFinished && !message.isSent,
+    );
     if (unfinishedMessage) {
-      unfinishedMessage.chatId = message.data.chatId;
-      const audioBlob = base64ToBlob(message.data.buffer);
       unfinishedMessage.audioChunks.push(audioBlob);
+      unfinishedMessage.chatId = message.data.chatId;
 
       // 初始化音频上下文（仅在第一次）
       if (!unfinishedMessage.audioContext) {
@@ -114,16 +160,26 @@ const connect = () => {
         unfinishedMessage.nextStartTime = unfinishedMessage.audioContext.currentTime;
       }
 
-      // 直接播放每个音频块，使用时间调度避免重叠
       await playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob));
     } else {
-      console.warn('No unfinished message found to update');
+      unfinishedMessage = {
+        isFinished: false,
+        isSent: false,
+        audioChunks: [audioBlob],
+        audioContext: new AudioContext(),
+        nextStartTime: 0,
+        chatId: message.data.chatId,
+      };
+      await playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob));
+      messageList.value.push(unfinishedMessage);
     }
   });
   ws.value.setHandler(WsAction.outputAudioComplete, async (message) => {
     conversationId.value = message.data.conversationId;
-    const unfinishedMessage = messageList.value.at(-1);
-    if (unfinishedMessage?.isSent === false) {
+    const unfinishedMessage = messageList.value.findLast(
+      (message) => !message.isFinished && !message.isSent,
+    );
+    if (unfinishedMessage) {
       unfinishedMessage.chatId = message.data.chatId;
       unfinishedMessage.audioSrc = URL.createObjectURL(
         await pcmToWav(new Blob(unfinishedMessage.audioChunks)),
@@ -134,8 +190,10 @@ const connect = () => {
   });
   ws.value.setHandler(WsAction.chatComplete, (message) => {
     conversationId.value = message.data.conversationId;
-    const unfinishedMessage = messageList.value.at(-1);
-    if (unfinishedMessage?.isSent === false) {
+    const unfinishedMessage = messageList.value.findLast(
+      (message) => !message.isFinished && !message.isSent,
+    );
+    if (unfinishedMessage) {
       unfinishedMessage.isFinished = true;
       if (!message.success) {
         notify({
@@ -167,15 +225,18 @@ const onData = async (blobData: Blob) => {
   const dataUrl = await blobToDataUrl(blobData);
   ws.value?.sendAction(new WsInputAudioStreamRequest(dataUrl.substring(dataUrl.indexOf(',') + 1)));
 
-  const sentMessage = messageList.value.at(-1);
-  if (sentMessage?.isSent === true && !sentMessage.isFinished) {
-    sentMessage.audioChunks.push(blobData);
-  } else {
-    messageList.value.push({
+  let unfinishedMessage = messageList.value.findLast(
+    (message) => !message.isFinished && message.isSent,
+  );
+  if (!unfinishedMessage) {
+    unfinishedMessage = {
       isFinished: false,
       isSent: true,
       audioChunks: [blobData],
-    });
+    };
+    messageList.value.push(unfinishedMessage);
+  } else {
+    unfinishedMessage.audioChunks.push(blobData);
   }
 };
 
@@ -187,10 +248,13 @@ const onStop = () => {
 
   ws.value?.sendAction(new WsInputAudioCompleteRequest(''));
 
-  const sentMessage = messageList.value.at(-1);
-  if (sentMessage?.isSent === true && !sentMessage.isFinished) {
-    sentMessage.isFinished = true;
-    sentMessage.audioSrc = URL.createObjectURL(new Blob(sentMessage.audioChunks));
+  const unfinishedMessage = messageList.value.findLast(
+    (message) => !message.isFinished && message.isSent,
+  );
+  if (unfinishedMessage) {
+    unfinishedMessage.audioSrc = URL.createObjectURL(new Blob(unfinishedMessage.audioChunks));
+  } else {
+    console.warn('No unfinished message found to finalize');
   }
 };
 
@@ -243,24 +307,17 @@ onBeforeUnmount(() => {
   <q-page class="row justify-center q-pa-md-xl q-pa-md">
     <div class="col-grow column items-center justify-center q-gutter-y-md">
       <div class="text-h4 text-weight-regular">Voice Chat Test</div>
-      <div
+      <div>Conversation ID: {{ conversationId.length ? conversationId : 'Not available' }}</div>
+      <q-input
         class="full-width"
-        :class="{
-          'column q-gutter-y-sm': isMobile,
-          'row q-gutter-x-sm': !isMobile,
-        }"
-      >
-        <q-input
-          :class="{ 'col-grow': !isMobile }"
-          :autofocus="true"
-          clearable
-          :dense="isMobile"
-          :label="i18n('labels.userId')"
-          name="user-id-input"
-          outlined
-          v-model="userId"
-        />
-      </div>
+        :autofocus="true"
+        clearable
+        :dense="isMobile"
+        :label="i18n('labels.userId')"
+        name="user-id-input"
+        outlined
+        v-model="userId"
+      />
       <q-btn
         v-if="ws"
         color="negative"

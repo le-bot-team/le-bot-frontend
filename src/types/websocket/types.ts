@@ -141,7 +141,7 @@ export interface WsOutputTextStreamResponseSuccess extends WsBaseResponseSuccess
   data: {
     chatId: string;
     conversationId: string;
-    role: 'assistant';
+    role: 'assistant' | 'user';
     text: string;
   };
 }
