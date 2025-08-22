@@ -55,6 +55,7 @@ const verifyPhoneOrEmail = () => {
           class="full-width"
           clearable
           :label="i18n('labels.phoneOrEmail')"
+          name="emailOrPhoneInput"
           outlined
           :rules="[
             (value) =>
@@ -62,14 +63,14 @@ const verifyPhoneOrEmail = () => {
               i18n('errors.invalidPhoneOrEmail'),
           ]"
           @update:model-value="isSignedUp = false"
-          v-model="emailOrPhone"
-        />
+          v-model="emailOrPhone"/>
         <q-slide-transition>
           <div v-if="isSignedUp" class="full-width row">
             <q-input
               class="col-grow q-mr-md"
               clearable
               :label="i18n(`labels.${signInMethod}`)"
+              name="passwordInput"
               type="password"
               outlined
               v-model="codeOrPassword"
