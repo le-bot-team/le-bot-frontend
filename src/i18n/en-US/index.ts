@@ -5,7 +5,7 @@ export default {
         error: 'Error',
         hint: 'Hold down to record',
         recording: 'Recording...',
-      }
+      },
     },
     ThemeButton: {
       labels: {
@@ -39,7 +39,7 @@ export default {
         noUnfinishedMessage: 'No unfinished message',
       },
     },
-    SignInAndSignUpPage: {
+    SignInOrSignUpPage: {
       labels: {
         title: 'Le Bot',
         description: 'Your intelligent pet and good companion',
@@ -47,13 +47,14 @@ export default {
         code: 'Verification Code',
         sendCode: 'Send Code',
         password: 'Password',
-        signInAndSignUp: 'Sign In / Sign Up',
+        signIn: 'Sign In',
+        signInOrSignUp: 'Sign In / Sign Up',
         useCode: 'Use Code',
         usePassword: 'Use Password',
       },
       errors: {
         invalidPhoneOrEmail: 'Invalid phone number or email',
-      }
-    }
+      },
+    },
   },
 };

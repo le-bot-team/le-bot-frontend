@@ -3,28 +3,28 @@ import { ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 
-const i18n = i18nSubPath('pages.SignInAndSignUpPage');
+const i18n = i18nSubPath('pages.SignInOrSignUpPage');
 
 const emailPhoneRegexList = [/^\+?[1-9]\d{1,14}$/, /^[^\s@]+@[^\s@]+\.[^\s@]+$/];
 
 const avatar = ref<string>();
 const codeOrPassword = ref<string>();
 const emailOrPhone = ref<string>();
-const isSignedUp = ref(false);
-const signInMethod = ref<'code' | 'password'>('password');
+// const isSignedUp = ref(false);
+const signInMethod = ref<'code' | 'password'>('code');
 
 const verifyPhoneOrEmail = () => {
   if (!emailPhoneRegexList.some((regex) => regex.test(emailOrPhone.value ?? ''))) {
     return false;
   }
   // Pseudo verification logic
-  if (emailOrPhone.value === '12312341234' || emailOrPhone.value === 'foo@bar.com') {
-    isSignedUp.value = true;
-    return true;
-  } else {
-    isSignedUp.value = false;
-    return false;
-  }
+  // if (emailOrPhone.value === '12312341234' || emailOrPhone.value === 'foo@bar.com') {
+  //   isSignedUp.value = true;
+  //   return true;
+  // } else {
+  //   isSignedUp.value = false;
+  //   return false;
+  // }
 };
 </script>
 
@@ -62,12 +62,12 @@ const verifyPhoneOrEmail = () => {
               emailPhoneRegexList.some((regex) => regex.test(value ?? '')) ||
               i18n('errors.invalidPhoneOrEmail'),
           ]"
-          @update:model-value="isSignedUp = false"
-          v-model="emailOrPhone"/>
+          v-model="emailOrPhone"
+        />
         <q-slide-transition>
-          <div v-if="isSignedUp" class="full-width row">
+          <div class="full-width row">
             <q-input
-              class="col-grow q-mr-md"
+              class="col-grow"
               clearable
               :label="i18n(`labels.${signInMethod}`)"
               name="passwordInput"
@@ -75,22 +75,31 @@ const verifyPhoneOrEmail = () => {
               outlined
               v-model="codeOrPassword"
             />
-            <q-btn :label="i18n('labels.sendCode')" no-caps />
+            <q-btn
+              v-if="signInMethod === 'code'"
+              class="q-ml-md"
+              color="primary"
+              icon-right="send"
+              :label="i18n('labels.sendCode')"
+              no-caps
+            />
           </div>
         </q-slide-transition>
         <q-btn
           class="q-mt-lg full-width"
           color="primary"
-          :label="i18n('labels.signInAndSignUp')"
+          :label="i18n(`labels.${signInMethod === 'code' ? 'signInOrSignUp' : 'signIn'}`)"
           no-caps
+          size="lg"
           @click="verifyPhoneOrEmail"
         />
         <q-slide-transition>
           <q-btn
-            v-if="isSignedUp"
             class="q-mt-sm full-width"
+            flat
             :label="i18n(`labels.${signInMethod === 'code' ? 'usePassword' : 'useCode'}`)"
             no-caps
+            size="lg"
             @click="signInMethod = signInMethod === 'code' ? 'password' : 'code'"
           />
         </q-slide-transition>
