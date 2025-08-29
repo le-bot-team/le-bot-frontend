@@ -46,6 +46,8 @@ export default {
         phoneOrEmail: 'Phone Number / Email',
         code: 'Verification Code',
         sendCode: 'Send Code',
+        resendCode: 'Resend Code',
+        resendCodeCoolDown: 'Resend Code ({seconds}s)',
         password: 'Password',
         signIn: 'Sign In',
         signInOrSignUp: 'Sign In / Sign Up',
@@ -53,8 +55,13 @@ export default {
         usePassword: 'Use Password',
       },
       errors: {
+        invalidCode: 'Invalid verification code',
         invalidPhoneOrEmail: 'Invalid phone number or email',
       },
+      notifications: {
+        codeSent: 'Verification code sent',
+        unknownError: 'Unknown error',
+      }
     },
   },
 };

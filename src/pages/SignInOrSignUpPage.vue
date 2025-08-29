@@ -1,30 +1,110 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
+import { computed, ref } from 'vue';
 
+import {
+  emailChallenge,
+  emailCode,
+  emailPassword,
+  phoneChallenge,
+  phoneCode,
+  phonePassword,
+} from 'src/utils/api/auth';
 import { i18nSubPath } from 'src/utils/common';
+import { useAuthStore } from 'stores/auth';
 
 const i18n = i18nSubPath('pages.SignInOrSignUpPage');
+const { isNeverSendCode, remainedSendCodeCooldownSeconds } = storeToRefs(useAuthStore());
+const { notify } = useQuasar();
 
-const emailPhoneRegexList = [/^\+?[1-9]\d{1,14}$/, /^[^\s@]+@[^\s@]+\.[^\s@]+$/];
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+const processFunctionsMatrix = {
+  code: {
+    email: emailCode,
+    phone: phoneCode,
+  },
+  password: {
+    email: emailPassword,
+    phone: phonePassword,
+  },
+};
+const sendCodeFunctionsMatrix = {
+  email: emailChallenge,
+  phone: phoneChallenge,
+};
 
 const avatar = ref<string>();
 const codeOrPassword = ref<string>();
 const emailOrPhone = ref<string>();
-// const isSignedUp = ref(false);
-const signInMethod = ref<'code' | 'password'>('code');
+const processMethod = ref<'code' | 'password'>('code');
 
-const verifyPhoneOrEmail = () => {
-  if (!emailPhoneRegexList.some((regex) => regex.test(emailOrPhone.value ?? ''))) {
+const codeError = computed(
+  () => processMethod.value === 'code' && codeOrPassword.value?.length !== 6,
+);
+const processType = computed(() => {
+  if (emailRegex.test(emailOrPhone.value ?? '')) {
+    return 'email';
+  } else if (phoneRegex.test(emailOrPhone.value ?? '')) {
+    return 'phone';
+  }
+  return null;
+});
+
+const processSignInOrSignUp = async () => {
+  if (!emailOrPhone.value?.length || !codeOrPassword.value?.length || !processType.value?.length) {
+    return;
+  }
+
+  const processFunction = processFunctionsMatrix[processMethod.value][processType.value];
+  if (!processFunction) {
+    return;
+  }
+
+  try {
+    const result = await processFunction(emailOrPhone.value, codeOrPassword.value);
+    if (!result.data.success) {
+      notify({
+        type: 'negative',
+        message: result.data.message ?? i18n('notifications.unknownError'),
+      });
+      return false;
+    }
+  } catch (error) {
+    notify({
+      type: 'negative',
+      message: (error as Error).message ?? i18n('notifications.unknownError'),
+    });
     return false;
   }
-  // Pseudo verification logic
-  // if (emailOrPhone.value === '12312341234' || emailOrPhone.value === 'foo@bar.com') {
-  //   isSignedUp.value = true;
-  //   return true;
-  // } else {
-  //   isSignedUp.value = false;
-  //   return false;
-  // }
+  return false;
+};
+
+const sendCode = async () => {
+  if (!processType.value || !emailOrPhone.value?.length) {
+    return;
+  }
+
+  try {
+    const result = await sendCodeFunctionsMatrix[processType.value](emailOrPhone.value);
+    if (!result.data.success) {
+      notify({
+        type: 'negative',
+        message: result.data.message ?? i18n('notifications.unknownError'),
+      });
+      return;
+    }
+    notify({
+      type: 'positive',
+      message: i18n('notifications.codeSent'),
+    });
+  } catch (error) {
+    notify({
+      type: 'negative',
+      message: (error as Error).message ?? i18n('notifications.unknownError'),
+    });
+  }
 };
 </script>
 
@@ -55,12 +135,11 @@ const verifyPhoneOrEmail = () => {
           class="full-width"
           clearable
           :label="i18n('labels.phoneOrEmail')"
+          lazy-rules
           name="emailOrPhoneInput"
           outlined
           :rules="[
-            (value) =>
-              emailPhoneRegexList.some((regex) => regex.test(value ?? '')) ||
-              i18n('errors.invalidPhoneOrEmail'),
+            () => !emailOrPhone?.length || !!processType || i18n('errors.invalidPhoneOrEmail'),
           ]"
           v-model="emailOrPhone"
         />
@@ -69,38 +148,60 @@ const verifyPhoneOrEmail = () => {
             <q-input
               class="col-grow"
               clearable
-              :label="i18n(`labels.${signInMethod}`)"
-              name="passwordInput"
-              type="password"
+              counter
+              :label="i18n(`labels.${processMethod}`)"
+              lazy-rules
+              :maxlength="processMethod === 'code' ? 6 : undefined"
+              :name="processMethod"
+              :type="processMethod === 'password' ? 'password' : undefined"
               outlined
+              :rules="[
+                () =>
+                  !codeOrPassword?.length ||
+                  !codeError ||
+                  i18n('errors.invalidCode'),
+              ]"
               v-model="codeOrPassword"
-            />
-            <q-btn
-              v-if="signInMethod === 'code'"
-              class="q-ml-md"
-              color="primary"
-              icon-right="send"
-              :label="i18n('labels.sendCode')"
-              no-caps
-            />
+            >
+              <template v-slot:append>
+                <q-btn
+                  v-if="processMethod === 'code'"
+                  dense
+                  :disable="!processType"
+                  flat
+                  :label="
+                    isNeverSendCode
+                      ? i18n('labels.sendCode')
+                      : remainedSendCodeCooldownSeconds
+                        ? i18n('labels.resendCodeCooldown', {
+                            seconds: remainedSendCodeCooldownSeconds,
+                          })
+                        : i18n('labels.resendCode')
+                  "
+                  no-caps
+                  @click="sendCode"
+                />
+              </template>
+            </q-input>
           </div>
         </q-slide-transition>
         <q-btn
           class="q-mt-lg full-width"
           color="primary"
-          :label="i18n(`labels.${signInMethod === 'code' ? 'signInOrSignUp' : 'signIn'}`)"
+          :disable="!processType || !codeOrPassword?.length || codeError"
+          :label="i18n(`labels.${processMethod === 'code' ? 'signInOrSignUp' : 'signIn'}`)"
           no-caps
           size="lg"
-          @click="verifyPhoneOrEmail"
+          @click="processSignInOrSignUp"
         />
         <q-slide-transition>
           <q-btn
             class="q-mt-sm full-width"
             flat
-            :label="i18n(`labels.${signInMethod === 'code' ? 'usePassword' : 'useCode'}`)"
+            :label="i18n(`labels.${processMethod === 'code' ? 'usePassword' : 'useCode'}`)"
             no-caps
             size="lg"
-            @click="signInMethod = signInMethod === 'code' ? 'password' : 'code'"
+            @click="processMethod = processMethod === 'code' ? 'password' : 'code'"
           />
         </q-slide-transition>
       </div>
