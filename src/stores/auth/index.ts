@@ -6,6 +6,7 @@ const SEND_CODE_COOLDOWN_INTERVAL = 60000;
 export const useAuthStore = defineStore(
   'auth',
   () => {
+    const accessToken = ref<string>();
     const sendCodeTime = ref<number>(0);
 
     const isNeverSendCode = computed(() => sendCodeTime.value === 0);
@@ -21,6 +22,7 @@ export const useAuthStore = defineStore(
     };
 
     return {
+      accessToken,
       isNeverSendCode,
       remainedSendCodeCooldownSeconds,
       tryResetSendCodeCooldown,

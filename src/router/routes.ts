@@ -19,10 +19,10 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'signInOrSignUp',
-        path: 'sign-in-or-sign-up',
+        name: 'auth',
+        path: 'auth',
         components: {
-          default: () => import('pages/SignInOrSignUpPage.vue'),
+          default: () => import('pages/AuthPage.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           header: () => import('layouts/headers/MainHeader.vue'),
         },

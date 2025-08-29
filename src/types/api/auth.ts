@@ -5,7 +5,7 @@ export type ChallengeResponse = {
   success: true;
 }
 
-export type CodeResponse = {
+export type AuthResponse = {
   success: false;
   message: string;
 } | {
@@ -14,15 +14,5 @@ export type CodeResponse = {
     accessToken: string;
     isNew: boolean;
     noPassword: boolean;
-  };
-}
-
-export type PasswordResponse = {
-  success: false;
-  message: string;
-} | {
-  success: true;
-  data: {
-    accessToken: string;
   };
 }

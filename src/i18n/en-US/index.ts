@@ -1,5 +1,45 @@
 export default {
   components: {
+    auth: {
+      NewPasswordPanel: {
+        labels: {
+          welcome:
+            'Welcome, {username}!\n' +
+            'We notice that you currently have no password.\n' +
+            'Please set a password for better experience.',
+          newPassword: 'New Password',
+          confirmNewPassword: 'Confirm New Password',
+        },
+        notifications: {
+          invalidCode: 'Invalid verification code',
+          invalidEmailOrPhone: 'Invalid email or phone number',
+          invalidType: 'Invalid type',
+          unknownError: 'Unknown error',
+        },
+      },
+      SignInOrSignUpPanel: {
+        labels: {
+          phoneOrEmail: 'Phone Number / Email',
+          code: 'Verification Code',
+          password: 'Password',
+          sendCode: 'Send Code',
+          resendCode: 'Resend Code',
+          resendCodeCoolDown: 'Resend Code ({seconds}s)',
+          signInOrSignUp: 'Sign In / Sign Up',
+          signIn: 'Sign In',
+          usePassword: 'Use Password',
+          useCode: 'Use Code',
+        },
+        errors: {
+          invalidCode: 'Invalid verification code',
+          invalidPhoneOrEmail: 'Invalid phone number or email',
+        },
+        notifications: {
+          codeSent: 'Verification code sent',
+          unknownError: 'Unknown error',
+        },
+      },
+    },
     AudioRecorder: {
       labels: {
         error: 'Error',
@@ -39,29 +79,11 @@ export default {
         noUnfinishedMessage: 'No unfinished message',
       },
     },
-    SignInOrSignUpPage: {
+    AuthPage: {
       labels: {
         title: 'Le Bot',
         description: 'Your intelligent pet and good companion',
-        phoneOrEmail: 'Phone Number / Email',
-        code: 'Verification Code',
-        sendCode: 'Send Code',
-        resendCode: 'Resend Code',
-        resendCodeCoolDown: 'Resend Code ({seconds}s)',
-        password: 'Password',
-        signIn: 'Sign In',
-        signInOrSignUp: 'Sign In / Sign Up',
-        useCode: 'Use Code',
-        usePassword: 'Use Password',
       },
-      errors: {
-        invalidCode: 'Invalid verification code',
-        invalidPhoneOrEmail: 'Invalid phone number or email',
-      },
-      notifications: {
-        codeSent: 'Verification code sent',
-        unknownError: 'Unknown error',
-      }
     },
   },
 };
