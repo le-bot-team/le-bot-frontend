@@ -14,6 +14,10 @@ export const emailPassword = async (email: string, password: string) => {
   return await api.post<AuthResponse>('/auth/email/password', { email, password });
 };
 
+export const emailReset = async (email: string, code: string, newPassword: string) => {
+  return await api.post<ChallengeResponse>('/auth/email/reset', { email, code, newPassword });
+};
+
 export const phoneChallenge = async (phone: string) => {
   return await api.post<ChallengeResponse>('/auth/phone/challenge', { phone });
 };
@@ -24,4 +28,8 @@ export const phoneCode = async (phone: string, code: string) => {
 
 export const phonePassword = async (phone: string, password: string) => {
   return await api.post<AuthResponse>('/auth/phone/password', { phone, password });
+};
+
+export const phoneReset = async (phone: string, code: string, newPassword: string) => {
+  return await api.post<ChallengeResponse>('/auth/phone/reset', { phone, code, newPassword });
 };

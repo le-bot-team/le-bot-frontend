@@ -3,6 +3,7 @@ import { useQuasar } from 'quasar';
 import { onMounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
+import { emailPassword, emailReset, phonePassword, phoneReset } from 'src/utils/api/auth';
 
 const props = defineProps<{
   code: string;
@@ -17,20 +18,69 @@ const emit = defineEmits<{
   previous: [];
 }>();
 
+const functionsMatrix = {
+  email: {
+    reset: emailReset,
+    login: emailPassword,
+  },
+  phone: {
+    reset: phoneReset,
+    login: phonePassword,
+  },
+};
+
 const i18n = i18nSubPath('components.auth.NewPasswordPanel');
 const { notify } = useQuasar();
 
 const newPassword = ref<string>();
 
-const confirmNewPassword = () => {
-  if ((newPassword.value?.length ?? 0) < 8) {
+const confirmNewPassword = async () => {
+  if (!props.type) {
+    return;
+  }
+
+  if (newPassword.value === undefined || newPassword.value.length < 8) {
     notify({
       type: 'negative',
       message: i18n('notifications.passwordTooShort'),
     });
     return;
   }
-  emit('finish');
+  {
+    const { data } = await functionsMatrix[props.type].reset(
+      props.emailOrPhone,
+      props.code,
+      newPassword.value,
+    );
+    if (!data.success) {
+      notify({
+        type: 'negative',
+        message: data.message || i18n('notifications.unknownError'),
+      });
+      return;
+    }
+    notify({
+      type: 'positive',
+      message: i18n('notifications.passwordResetSuccess'),
+    });
+  }
+  const { data } = await emailPassword(props.emailOrPhone, newPassword.value);
+  if (!data.success) {
+    notify({
+      type: 'negative',
+      message: data.message || i18n('notifications.unknownError'),
+    });
+    return;
+  }
+  notify({
+    type: 'positive',
+    message: i18n('notifications.loginSuccess'),
+  });
+  if (props.isNew) {
+    emit('next');
+  } else {
+    emit('finish');
+  }
 };
 
 onMounted(() => {
@@ -65,7 +115,7 @@ onMounted(() => {
 <template>
   <q-tab-panel class="q-gutter-y-md" :name="name">
     <div class="text-h6 text-center" style="white-space: pre-line">
-      {{ i18n('labels.welcome', { username: 'guest' }) }}
+      {{ i18n(`labels.${isNew ? 'welcomeNew' : 'welcome'}`, { username: 'guest' }) }}
     </div>
     <q-input
       class="fullwidth"

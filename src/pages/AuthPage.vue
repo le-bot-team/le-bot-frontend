@@ -12,7 +12,7 @@ const avatar = ref<string>('');
 const code = ref<string>('');
 const emailOrPhone = ref<string>('');
 const isNew = ref<boolean>(false);
-const panelIndex = ref<number>(1);
+const panelIndex = ref<number>(0);
 const processType = ref<'email' | 'phone'>();
 </script>
 
@@ -59,6 +59,7 @@ const processType = ref<'email' | 'phone'>();
             :is-new="isNew"
             :name="1"
             :type="processType"
+            @finish="panelIndex = -1"
           />
         </q-tab-panels>
       </div>

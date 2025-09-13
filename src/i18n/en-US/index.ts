@@ -4,9 +4,10 @@ export default {
       NewPasswordPanel: {
         labels: {
           welcome:
-            'Welcome, {username}!\n' +
+            'Welcome back, {username}!\n' +
             'We notice that you currently have no password.\n' +
             'Please set a password for better experience.',
+          welcomeNew: 'Welcome, {username}!\n' + 'Please set your password to continue.',
           newPassword: 'New Password',
           confirmNewPassword: 'Confirm New Password',
         },
@@ -14,6 +15,9 @@ export default {
           invalidCode: 'Invalid verification code',
           invalidEmailOrPhone: 'Invalid email or phone number',
           invalidType: 'Invalid type',
+          passwordTooShort: 'Password too short',
+          passwordResetSuccess: 'Password reset successfully',
+          loginSuccess: 'Login successfully',
           unknownError: 'Unknown error',
         },
       },
