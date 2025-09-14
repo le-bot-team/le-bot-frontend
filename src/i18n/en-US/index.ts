@@ -28,7 +28,7 @@ export default {
             'Please set up your profile to continue.\n' +
             'Or you can skip this step and change it in settings later.',
           avatar: 'Avatar',
-          upload: 'Upload',
+          uploadAvatar: 'Upload\nAvatar',
           nickname: 'Nickname',
           bio: 'Bio',
           confirm: 'Confirm',
@@ -66,6 +66,18 @@ export default {
         hint: 'Hold down to record',
         recording: 'Recording...',
       },
+    },
+    CropperDialog: {
+      labels: {
+        title: 'Crop Image',
+        chooseImage: 'Choose Image',
+        noImage: 'Choose an image to start cropping',
+        cancel: 'Cancel',
+        confirm: 'Confirm',
+      },
+      notifications: {
+        invalidFile: 'Invalid file',
+      }
     },
     ThemeButton: {
       labels: {

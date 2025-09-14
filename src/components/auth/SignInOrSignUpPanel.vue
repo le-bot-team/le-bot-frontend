@@ -46,6 +46,7 @@ const sendCodeFunctionsMatrix = {
 
 const codeOrPassword = ref<string>();
 const emailOrPhone = ref<string>();
+const isSendingCode = ref(false);
 const processMethod = ref<'code' | 'password'>('code');
 
 const codeError = computed(
@@ -102,6 +103,7 @@ const sendCode = async () => {
     return;
   }
 
+  isSendingCode.value = true;
   try {
     const result = await sendCodeFunctionsMatrix[processType.value](emailOrPhone.value);
     if (!result.data.success) {
@@ -109,6 +111,7 @@ const sendCode = async () => {
         type: 'negative',
         message: result.data.message ?? i18n('notifications.unknownError'),
       });
+      isSendingCode.value = false;
       return;
     }
     notify({
@@ -121,6 +124,7 @@ const sendCode = async () => {
       message: (error as Error).message ?? i18n('notifications.unknownError'),
     });
   }
+  isSendingCode.value = false;
 };
 </script>
 
@@ -164,6 +168,7 @@ const sendCode = async () => {
                   })
                 : i18n('labels.resendCode')
           "
+          :loading="isSendingCode"
           no-caps
           @click="sendCode"
         />

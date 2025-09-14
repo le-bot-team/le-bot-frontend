@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 
+import CropperDialog from 'components/CropperDialog.vue';
 import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
-import { useQuasar } from 'quasar';
 
 defineProps<{
   name: string | number;
@@ -18,7 +19,7 @@ const emit = defineEmits<{
 
 const i18n = i18nSubPath('components.auth.SetupProfilePanel');
 
-const { notify } = useQuasar();
+const { dark, dialog, notify } = useQuasar();
 const { accessToken } = storeToRefs(useAuthStore());
 const { updateProfile } = useProfileStore();
 
@@ -29,7 +30,15 @@ const region = ref<string>();
 
 const editAvatar = () => {
   console.log('edit avatar');
-  emit('finish');
+  dialog({
+    component: CropperDialog,
+    componentProps: {
+      src: avatar.value || '',
+    },
+    persistent: true,
+  }).onOk((data) => {
+    avatar.value = data;
+  });
 };
 const confirm = async () => {
   if (!accessToken.value) {
@@ -72,13 +81,17 @@ const confirm = async () => {
       <q-avatar
         class="cursor-pointer"
         size="6.75rem"
-        style="border-radius: 25%; border: 1px solid #c2c2c2"
-        text-color="white"
+        style="border-radius: 10%; border: 1px solid #c2c2c2"
+        :text-color="dark.isActive ? 'grey-5' : 'grey-8'"
         @click="editAvatar"
       >
         <q-img v-if="avatar" :src="avatar" />
-        <div v-else class="text-color-grey text-font-inter" style="font-size: 1rem">
-          {{ i18n('labels.upload') }}
+        <div
+          v-else
+          class="text-color-grey text-font-inter"
+          style="font-size: 1rem; white-space: pre-line"
+        >
+          {{ i18n('labels.uploadAvatar') }}
         </div>
       </q-avatar>
     </div>
@@ -104,7 +117,7 @@ const confirm = async () => {
     <q-btn
       class="q-mt-lg full-width"
       color="primary"
-      :label="i18n('labels.confirmNewPassword')"
+      :label="i18n('labels.confirm')"
       no-caps
       size="lg"
       @click="confirm"

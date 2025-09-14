@@ -13,7 +13,7 @@ const avatar = ref<string>('');
 const code = ref<string>('');
 const emailOrPhone = ref<string>('');
 const isNew = ref<boolean>(false);
-const panelIndex = ref<number>(0);
+const panelIndex = ref<number>(2);
 const processType = ref<'email' | 'phone'>();
 </script>
 
@@ -61,6 +61,7 @@ const processType = ref<'email' | 'phone'>();
             :name="1"
             :type="processType"
             @finish="panelIndex = -1"
+            @next="panelIndex = 2"
           />
           <setup-profile-panel :name = "2" @finish="panelIndex = -1" />
         </q-tab-panels>
