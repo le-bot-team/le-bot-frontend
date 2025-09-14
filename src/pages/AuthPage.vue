@@ -5,6 +5,7 @@ import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
 
 import { i18nSubPath } from 'src/utils/common';
 import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
+import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 
 const i18n = i18nSubPath('pages.AuthPage');
 
@@ -61,6 +62,7 @@ const processType = ref<'email' | 'phone'>();
             :type="processType"
             @finish="panelIndex = -1"
           />
+          <setup-profile-panel :name = "2" @finish="panelIndex = -1" />
         </q-tab-panels>
       </div>
     </div>

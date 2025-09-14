@@ -21,6 +21,22 @@ export default {
           unknownError: 'Unknown error',
         },
       },
+      SetupProfilePanel: {
+        labels: {
+          welcome:
+            'Welcome, {username}!\n' +
+            'Please set up your profile to continue.\n' +
+            'Or you can skip this step and change it in settings later.',
+          avatar: 'Avatar',
+          upload: 'Upload',
+          nickname: 'Nickname',
+          bio: 'Bio',
+          confirm: 'Confirm',
+        },
+        notifications: {
+          unknownError: 'Unknown error',
+        },
+      },
       SignInOrSignUpPanel: {
         labels: {
           phoneOrEmail: 'Phone Number / Email',

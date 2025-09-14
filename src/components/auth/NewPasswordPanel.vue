@@ -4,6 +4,8 @@ import { onMounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 import { emailPassword, emailReset, phonePassword, phoneReset } from 'src/utils/api/auth';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from 'stores/auth';
 
 const props = defineProps<{
   code: string;
@@ -30,6 +32,8 @@ const functionsMatrix = {
 };
 
 const i18n = i18nSubPath('components.auth.NewPasswordPanel');
+
+const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
 
 const newPassword = ref<string>();
@@ -72,6 +76,7 @@ const confirmNewPassword = async () => {
     });
     return;
   }
+  accessToken.value = data.data.accessToken;
   notify({
     type: 'positive',
     message: i18n('notifications.loginSuccess'),
