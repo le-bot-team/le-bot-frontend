@@ -59,6 +59,20 @@ export default {
           unknownError: 'Unknown error',
         },
       },
+      FinishPanel: {
+        labels: {
+          welcome: 'Welcome back, {username}!\n' + 'You have successfully signed in.',
+          welcomeNew: 'Welcome, {username}!\n' + 'Your account has been created successfully.',
+          redirect: 'Taking you back to the previous page...',
+        },
+      },
+    },
+    me: {
+      ProfileCard: {
+        labels: {
+          signInOrSignUp: 'Sign In / Sign Up',
+        }
+      }
     },
     AudioRecorder: {
       labels: {
@@ -77,7 +91,8 @@ export default {
       },
       notifications: {
         invalidFile: 'Invalid file',
-      }
+        noImageToProcess: 'No image to process',
+      },
     },
     ThemeButton: {
       labels: {
@@ -117,5 +132,18 @@ export default {
         description: 'Your intelligent pet and good companion',
       },
     },
+    MePage: {
+      labels: {
+        memberCenter: 'Member Center',
+        memberCenterDescription: 'Points Redemption',
+        serviceCenter: 'Service Center',
+        serviceCenterDescription: 'Devices and Support',
+        myOrders: 'My Orders',
+        sharedDevices: 'Shared Devices',
+        helpAndFeedback: 'Help & Feedback',
+        aboutUs: 'About Us',
+        settings: 'Settings',
+      }
+    }
   },
 };

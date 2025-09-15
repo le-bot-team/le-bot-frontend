@@ -3,21 +3,34 @@ import { useDialogPluginComponent, useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { Cropper, RectangleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
+
 import { i18nSubPath } from 'src/utils/common';
 
 const props = defineProps<{
-  src: string;
+  src?: string | undefined;
 }>();
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const i18n = i18nSubPath('components.CropperDialog');
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } = useDialogPluginComponent();
-
 const { notify } = useQuasar();
 
 const image = ref(props.src);
 const imageFiles = ref<File>();
 const cropper = ref<typeof Cropper>();
 
-const i18n = i18nSubPath('components.CropperDialog');
+const onConfirm = () => {
+  const croppedImage = cropper.value?.getResult()?.canvas.toDataURL();
+  if (croppedImage) {
+    onDialogOK(croppedImage);
+  } else {
+    notify({
+      type: 'negative',
+      message: i18n('notifications.noImageToProcess'),
+    });
+  }
+};
 
 const onFileChange = (file: File) => {
   const reader = new FileReader();
@@ -36,16 +49,6 @@ const onRejected = () => {
     type: 'negative',
     message: i18n('notifications.invalidFile'),
   });
-};
-
-const flip = (x: boolean, y: boolean) => {
-  cropper.value?.flip(x, y);
-};
-const rotate = (angle: number) => {
-  cropper.value?.rotate(angle);
-};
-const zoom = (ratio: number) => {
-  cropper.value?.zoom(ratio);
 };
 </script>
 
@@ -91,42 +94,42 @@ const zoom = (ratio: number) => {
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="flip(true, false)"
+            @click="cropper?.flip(true, false)"
           />
           <q-btn
             icon="mdi-flip-vertical"
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="flip(false, true)"
+            @click="cropper?.flip(false, true)"
           />
           <q-btn
             icon="mdi-rotate-left"
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="rotate(-90)"
+            @click="cropper?.rotate(-90)"
           />
           <q-btn
             icon="mdi-rotate-right"
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="rotate(90)"
+            @click="cropper?.rotate(90)"
           />
           <q-btn
             icon="mdi-magnify-minus-outline"
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="zoom(0.5)"
+            @click="cropper?.zoom(0.5)"
           />
           <q-btn
             icon="mdi-magnify-plus-outline"
             padding="0.5rem"
             size="0.75rem"
             outline
-            @click="zoom(2)"
+            @click="cropper?.zoom(2)"
           />
         </div>
       </q-card-section>
@@ -139,7 +142,7 @@ const zoom = (ratio: number) => {
             :label="i18n('labels.confirm')"
             no-caps
             unelevated
-            @click="onDialogOK(cropper?.getResult().canvas.toDataURL())"
+            @click="onConfirm"
           />
         </div>
       </q-card-section>

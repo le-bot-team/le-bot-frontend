@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
+import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
 
 import { i18nSubPath } from 'src/utils/common';
-import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
-import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
+import FinishPanel from 'components/auth/FinishPanel.vue';
 
 const i18n = i18nSubPath('pages.AuthPage');
 
@@ -43,7 +44,7 @@ const processType = ref<'email' | 'phone'>();
         <q-tab-panels class="full-width col-grow bg-transparent" v-model="panelIndex">
           <sign-in-or-sign-up-panel
             :name="0"
-            @finish="panelIndex = -1"
+            @finish="panelIndex = 3"
             @next="
               (_isNew, _type, _emailOrPhone, _code) => {
                 isNew = _isNew;
@@ -60,10 +61,11 @@ const processType = ref<'email' | 'phone'>();
             :is-new="isNew"
             :name="1"
             :type="processType"
-            @finish="panelIndex = -1"
+            @finish="panelIndex = 3"
             @next="panelIndex = 2"
           />
-          <setup-profile-panel :name = "2" @finish="panelIndex = -1" />
+          <setup-profile-panel :name="2" @finish="panelIndex = 3" />
+          <finish-panel :is-new="isNew" :name="3" :nickname="emailOrPhone" />
         </q-tab-panels>
       </div>
     </div>

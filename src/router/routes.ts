@@ -1,4 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { useQuasar } from 'quasar';
+
+const { platform } = useQuasar();
 
 const routes: RouteRecordRaw[] = [
   {
@@ -15,7 +18,7 @@ const routes: RouteRecordRaw[] = [
         components: {
           default: () => import('pages/HomePage.vue'),
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
-          header: () => import('layouts/headers/MainHeader.vue'),
+          header: platform.is.mobile ? undefined : () => import('layouts/headers/MainHeader.vue'),
         },
       },
       {
@@ -26,7 +29,16 @@ const routes: RouteRecordRaw[] = [
           leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
           header: () => import('layouts/headers/MainHeader.vue'),
         },
-      }
+      },
+      {
+        name: 'me',
+        path: 'me',
+        components: {
+          default: () => import('pages/MePage.vue'),
+          leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+          header: () => import('layouts/headers/MainHeader.vue'),
+        },
+      },
     ],
   },
 

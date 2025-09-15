@@ -33,12 +33,16 @@ const editAvatar = () => {
   dialog({
     component: CropperDialog,
     componentProps: {
-      src: avatar.value || '',
+      src: avatar.value,
     },
     persistent: true,
   }).onOk((data) => {
     avatar.value = data;
-  });
+  }).onCancel(() => {
+    console.log('Cancel')
+  }).onDismiss(() => {
+    console.log('Called on OK or Cancel')
+  })
 };
 const confirm = async () => {
   if (!accessToken.value) {
@@ -102,7 +106,7 @@ const confirm = async () => {
       :label="i18n('labels.nickname')"
       name="nickname"
       outlined
-      :model-value="nickname"
+      v-model="nickname"
     />
     <q-input
       class="fullwidth"
@@ -112,7 +116,7 @@ const confirm = async () => {
       name="bio"
       outlined
       type="textarea"
-      :model-value="bio"
+      v-model="bio"
     />
     <q-btn
       class="q-mt-lg full-width"
