@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useQuasar } from 'quasar';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { copyToClipboard, useQuasar } from 'quasar';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import AudioRecorder from 'components/AudioRecorder.vue';
 import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
@@ -13,6 +14,7 @@ import {
   WsUpdateConfigRequest,
 } from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
+import { useAuthStore } from 'stores/auth';
 import { useChatStore } from 'stores/chat';
 
 interface AudioMessage {
@@ -28,35 +30,35 @@ interface AudioMessage {
   hasStreamPlayed?: boolean; // 标记是否已经流式播放过
 }
 
+const i18n = i18nSubPath('pages.HomePage');
+
+const { accessToken } = storeToRefs(useAuthStore());
 const { conversationId } = storeToRefs(useChatStore());
 const { notify, screen } = useQuasar();
-
-const isMobile = computed(() => screen.lt.md);
-
-const i18n = i18nSubPath('pages.HomePage');
+const router = useRouter();
 
 const isChatReady = ref<boolean>(false);
 const messageList = ref<AudioMessage[]>([]);
-const userId = ref<string>('');
 const ws = ref<WsWrapper>();
 
-const connect = () => {
-  if (!userId.value) {
-    console.warn(`userId is empty`);
-    return;
-  }
+const isMobile = computed(() => screen.lt.md);
 
+const connect = () => {
   if (ws.value) {
     disconnect();
   }
-  ws.value = new WsWrapper(`${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=test`);
+  ws.value = new WsWrapper(
+    `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${accessToken.value}`,
+  );
   ws.value.addOnOpenHandler(() => {
-    ws.value?.sendAction(
-      new WsUpdateConfigRequest({
-        conversationId: conversationId.value,
-        outputText: true,
-      }),
-    );
+    setTimeout(() => {
+      ws.value?.sendAction(
+        new WsUpdateConfigRequest({
+          conversationId: conversationId.value,
+          outputText: true,
+        }),
+      );
+    }, 1000);
   });
   ws.value.setHandler(WsAction.updateConfig, (message) => {
     isChatReady.value = true;
@@ -208,6 +210,25 @@ const connect = () => {
   });
 };
 
+const copyAccessToken = () => {
+  if (accessToken.value) {
+    copyToClipboard(accessToken.value)
+      .then(() => {
+        notify({
+          type: 'positive',
+          message: i18n('notifications.copiedAccessToken'),
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to copy access token:', err);
+        notify({
+          type: 'negative',
+          message: i18n('notifications.copyAccessTokenFailed'),
+        });
+      });
+  }
+};
+
 const disconnect = () => {
   if (ws.value) {
     ws.value.destroy();
@@ -293,6 +314,17 @@ const playAudioChunk = async (message: AudioMessage, audioData: Blob) => {
   }
 };
 
+onMounted(() => {
+  console.log(accessToken.value);
+  if (!accessToken.value?.length) {
+    notify({
+      type: 'warning',
+      message: i18n('notifications.notLoggedIn'),
+    });
+    router.push('/auth').catch((err) => console.error(err));
+  }
+});
+
 onBeforeUnmount(() => {
   disconnect();
   messageList.value.forEach((message) => {
@@ -307,17 +339,38 @@ onBeforeUnmount(() => {
   <q-page class="row justify-center q-pa-md-xl q-pa-md">
     <div class="col-grow column items-center justify-center q-gutter-y-md">
       <div class="text-h4 text-weight-regular">Voice Chat Test</div>
-      <div>Conversation ID: {{ conversationId.length ? conversationId : 'Not available' }}</div>
-      <q-input
-        class="full-width"
-        :autofocus="true"
-        clearable
-        :dense="isMobile"
-        :label="i18n('labels.userId')"
-        name="user-id-input"
-        outlined
-        v-model="userId"
-      />
+      <q-card bordered flat>
+        <q-list>
+          <q-item clickable @click="copyAccessToken">
+            <q-item-section>
+              <q-item-label> Access Token </q-item-label>
+              <q-item-label caption>
+                {{ accessToken?.length ? accessToken : 'Not available' }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="content_copy"/>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-item-label> Conversation ID </q-item-label>
+              <q-item-label caption>
+                {{ conversationId.length ? conversationId : 'Not available' }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn
+                color="negative"
+                dense
+                icon="delete_sweep"
+                round
+                @click="conversationId = ''"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
       <q-btn
         v-if="ws"
         color="negative"

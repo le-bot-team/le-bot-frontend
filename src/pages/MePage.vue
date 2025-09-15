@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { i18nSubPath } from 'src/utils/common';
 import ProfileCard from 'components/me/ProfileCard.vue';
+import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.MePage');
 

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import FinishPanel from 'components/auth/FinishPanel.vue';
 import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
 import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
-
 import { i18nSubPath } from 'src/utils/common';
-import FinishPanel from 'components/auth/FinishPanel.vue';
 
 const i18n = i18nSubPath('pages.AuthPage');
 
@@ -14,7 +13,7 @@ const avatar = ref<string>('');
 const code = ref<string>('');
 const emailOrPhone = ref<string>('');
 const isNew = ref<boolean>(false);
-const panelIndex = ref<number>(2);
+const panelIndex = ref<number>(0);
 const processType = ref<'email' | 'phone'>();
 </script>
 

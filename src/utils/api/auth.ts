@@ -33,3 +33,11 @@ export const phonePassword = async (phone: string, password: string) => {
 export const phoneReset = async (phone: string, code: string, newPassword: string) => {
   return await api.post<ChallengeResponse>('/auth/phone/reset', { phone, code, newPassword });
 };
+
+export const validateAccessToken = async (accessToken: string) => {
+  return await api.get<{ success: boolean; message?: string }>('/auth/validate', {
+    headers: {
+      'x-access-token': accessToken,
+    },
+  });
+}

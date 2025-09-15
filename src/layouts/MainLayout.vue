@@ -5,20 +5,32 @@ import { ref } from 'vue';
 import { bus } from 'boot/bus';
 
 const { screen } = useQuasar();
+const leftDrawerMini = ref(false);
 const leftDrawerOpen = ref(false);
+const rightDrawerMini = ref(false);
 const rightDrawerOpen = ref(false);
 
 bus.on('drawer', (action, position) => {
-  const targetDrawer = position === 'left' ? leftDrawerOpen : rightDrawerOpen;
+  const targetDrawerMini = position === 'left' ? leftDrawerMini : rightDrawerMini;
+  const targetDrawerOpen = position === 'left' ? leftDrawerOpen : rightDrawerOpen;
   switch (action) {
     case 'open':
-      targetDrawer.value = true;
+      targetDrawerOpen.value = true;
       break;
     case 'close':
-      targetDrawer.value = false;
+      targetDrawerOpen.value = false;
       break;
     case 'toggle':
-      targetDrawer.value = !targetDrawer.value;
+      targetDrawerOpen.value = !targetDrawerOpen.value;
+      break;
+    case 'maximize':
+      targetDrawerMini.value = false;
+      break;
+    case 'minimize':
+      targetDrawerMini.value = true;
+      break;
+    case 'switch':
+      targetDrawerMini.value = !targetDrawerMini.value;
       break;
   }
 });
@@ -27,11 +39,11 @@ bus.on('drawer', (action, position) => {
 <template>
   <q-layout view="hHh LpR lFf">
     <router-view :mobile="screen.lt.md" name="header" />
-    <router-view :mobile="screen.lt.md" :model-value="leftDrawerOpen" name="leftDrawer" />
+    <router-view :mobile="screen.lt.md" :model-value="leftDrawerOpen" :mini="leftDrawerMini" name="leftDrawer" />
     <q-page-container style="height: 100vh">
       <router-view />
     </q-page-container>
-    <router-view :mobile="screen.lt.md" :model-value="rightDrawerOpen" name="rightDrawer" />
+    <router-view :mobile="screen.lt.md" :model-value="rightDrawerOpen" :mini="rightDrawerMini" name="rightDrawer" />
     <router-view :mobile="screen.lt.md" name="footer" />
   </q-layout>
 </template>

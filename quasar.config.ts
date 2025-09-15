@@ -57,18 +57,16 @@ export default defineConfig((ctx) => {
       },
 
       env: {
-        LE_BOT_BACKEND_HTTP_BASE_URL:
-          process.env.DEPLOY_GITHUB_PAGE
-            ? 'https://cafuuchino.studio26f.org:10580'
-            : process.env.DEPLOY_ELYSIA
-              ? ''
-              : 'http://localhost:3000',
-        LE_BOT_BACKEND_WS_BASE_URL:
-          process.env.DEPLOY_GITHUB_PAGE
-            ? 'wss://cafuuchino.studio26f.org:10580'
-            : process.env.DEPLOY_ELYSIA
-              ? ''
-              : 'ws://localhost:3000'
+        LE_BOT_BACKEND_HTTP_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
+          ? 'https://cafuuchino.studio26f.org:10580'
+          : process.env.DEPLOY_ELYSIA
+            ? ''
+            : 'http://localhost:3000',
+        LE_BOT_BACKEND_WS_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
+          ? 'wss://cafuuchino.studio26f.org:10580'
+          : process.env.DEPLOY_ELYSIA
+            ? ''
+            : 'ws://localhost:3000',
       },
 
       target: {
@@ -147,7 +145,7 @@ export default defineConfig((ctx) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: { dark: 'auto' },
+      config: { dark: 'auto', notify: { position: 'top' } },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack

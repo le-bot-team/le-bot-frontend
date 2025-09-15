@@ -9,7 +9,7 @@ const i18n = i18nSubPath('layouts.headers.MainHeader');
 <template>
   <q-header bordered class="bg-primary text-white">
     <q-toolbar>
-      <q-btn dense flat icon="menu" round @click="bus.emit('drawer', 'toggle', 'left')" />
+      <q-btn dense flat icon="menu" round @click="bus.emit('drawer', 'switch', 'left')" />
       <q-toolbar-title>
         <q-avatar>
           <q-img src="favicon.ico" />
@@ -18,7 +18,7 @@ const i18n = i18nSubPath('layouts.headers.MainHeader');
         {{ i18n('labels.title') }}
       </q-toolbar-title>
       <theme-button />
-      <q-btn dense flat icon="menu" round @click="bus.emit('drawer', 'toggle', 'right')" />
+      <q-btn dense flat icon="menu" round @click="bus.emit('drawer', 'switch', 'right')" />
     </q-toolbar>
   </q-header>
 </template>

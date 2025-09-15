@@ -1,29 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
 import { bus } from 'boot/bus';
-
-interface Navigation {
-  label: string;
-  icon: string;
-  available: boolean;
-  route: string;
-}
-
-const { t } = useI18n();
-
-const i18n = (relativePath: string) => {
-  return t('layouts.drawers.LeftMainDrawer.' + relativePath);
-};
-
-const navigations: Navigation[] = [
-  {
-    label: 'home',
-    icon: 'home',
-    available: true,
-    route: 'home',
-  },
-];
+import { NAVIGATIONS } from 'components/navigations';
 </script>
 
 <template>
@@ -33,19 +10,20 @@ const navigations: Navigation[] = [
     no-swipe-backdrop
     no-swipe-close
     no-swipe-open
-    overlay
     side="left"
+    show-if-above
+    @mini-state="bus.emit('drawer', $event ? 'minimize' : 'maximize', 'left')"
     @show="bus.emit('drawer', 'open', 'left')"
     @hide="bus.emit('drawer', 'close', 'left')"
   >
     <q-list separator>
-      <template v-for="navigation in navigations" :key="navigation">
+      <template v-for="navigation in NAVIGATIONS" :key="navigation">
         <q-item :disable="!navigation.available" exact :to="navigation.route">
           <q-item-section avatar>
-            <q-icon :name="navigation.icon" :color="navigation.available ? 'primary' : 'grey'" />
+            <q-icon :name="navigation.icon" :color="navigation.available ? '' : 'grey'" />
           </q-item-section>
           <q-item-section :class="navigation.available ? '' : 'text-grey'">
-            {{ i18n('labels.' + navigation.label) }}
+            {{ navigation.label }}
           </q-item-section>
         </q-item>
       </template>

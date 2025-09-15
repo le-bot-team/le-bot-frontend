@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useQuasar } from 'quasar';
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -13,15 +12,9 @@ defineProps<{
 
 const i18n = i18nSubPath('components.auth.FinishPanel');
 
-const { notify } = useQuasar();
 const route = useRoute();
 
 onMounted(() => {
-  notify({
-    type: 'positive',
-    message: i18n('messages.success'),
-    timeout: 2000,
-  });
   setInterval(() => {
     if (route.query.from) {
       window.location.href = route.query.from.toString();
@@ -39,6 +32,9 @@ onMounted(() => {
     </div>
     <div class="text-body1 text-center text-grey" style="white-space: pre-line">
       {{ i18n('labels.redirect') }}
+    </div>
+    <div class="row justify-center">
+      <q-spinner size="xl"/>
     </div>
   </q-tab-panel>
 </template>

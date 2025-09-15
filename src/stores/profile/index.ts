@@ -8,7 +8,7 @@ export const useProfileStore = defineStore(
   () => {
     const profile = ref<UserProfile>();
 
-    const updateProfile = (newProfile: UserProfile) => {
+    const updateProfile = (newProfile?: UserProfile) => {
       profile.value = newProfile;
     };
 

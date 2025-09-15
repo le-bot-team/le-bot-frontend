@@ -1,6 +1,13 @@
 export default {
   components: {
     auth: {
+      FinishPanel: {
+        labels: {
+          welcome: 'Welcome back, {username}!\n' + 'You have successfully signed in.',
+          welcomeNew: 'Welcome, {username}!\n' + 'Your account has been created successfully.',
+          redirect: 'Taking you back to the previous page...',
+        },
+      },
       NewPasswordPanel: {
         labels: {
           welcome:
@@ -59,20 +66,21 @@ export default {
           unknownError: 'Unknown error',
         },
       },
-      FinishPanel: {
-        labels: {
-          welcome: 'Welcome back, {username}!\n' + 'You have successfully signed in.',
-          welcomeNew: 'Welcome, {username}!\n' + 'Your account has been created successfully.',
-          redirect: 'Taking you back to the previous page...',
-        },
-      },
     },
     me: {
       ProfileCard: {
         labels: {
           signInOrSignUp: 'Sign In / Sign Up',
-        }
-      }
+        },
+      },
+    },
+    navigations: {
+      labels: {
+        home: 'Home',
+        growth: 'Growth',
+        mall: 'Mall',
+        me: 'Me',
+      },
     },
     AudioRecorder: {
       labels: {
@@ -103,9 +111,7 @@ export default {
   layouts: {
     drawers: {
       LeftMainDrawer: {
-        labels: {
-          home: 'Home',
-        },
+        labels: {},
       },
     },
     headers: {
@@ -119,11 +125,15 @@ export default {
   pages: {
     HomePage: {
       labels: {
-        userId: 'User ID',
         connect: 'Connect',
         disconnect: 'Disconnect',
         processing: 'Processing...',
         noUnfinishedMessage: 'No unfinished message',
+      },
+      notifications: {
+        copiedAccessToken: 'Access token copied to clipboard',
+        copyAccessTokenFailed: 'Failed to copy access token',
+        notLoggedIn: 'You are not logged in, please sign in first',
       },
     },
     AuthPage: {
@@ -143,7 +153,7 @@ export default {
         helpAndFeedback: 'Help & Feedback',
         aboutUs: 'About Us',
         settings: 'Settings',
-      }
-    }
+      },
+    },
   },
 };
