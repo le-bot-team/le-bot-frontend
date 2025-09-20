@@ -1,0 +1,1 @@
+import{i as a}from"./common-9KULR6fY.js";const l=a("components.navigations"),o=[{label:l("labels.home"),icon:"home",available:!0,route:"home"},{label:l("labels.growth"),icon:"mdi-sprout",available:!1,route:"growth"},{label:l("labels.mall"),icon:"mdi-shopping",available:!1,route:"mall"},{label:l("labels.me"),icon:"person",available:!0,route:"me"}];export{o as N};
