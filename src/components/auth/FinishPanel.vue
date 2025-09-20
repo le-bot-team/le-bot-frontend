@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useTimeout } from 'quasar';
 import { onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { i18nSubPath } from 'src/utils/common';
 
@@ -13,14 +14,14 @@ defineProps<{
 const i18n = i18nSubPath('components.auth.FinishPanel');
 
 const route = useRoute();
+const router = useRouter();
+const { registerTimeout } = useTimeout();
 
 onMounted(() => {
-  setInterval(() => {
-    if (route.query.from) {
-      window.location.href = route.query.from.toString();
-    } else {
-      window.location.href = '/';
-    }
+  registerTimeout(() => {
+    router
+      .replace(typeof route.query.from === 'string' ? route.query.from : '/')
+      .catch((error) => console.warn(error));
   }, 3000);
 });
 </script>
@@ -34,7 +35,7 @@ onMounted(() => {
       {{ i18n('labels.redirect') }}
     </div>
     <div class="row justify-center">
-      <q-spinner size="xl"/>
+      <q-spinner size="xl" />
     </div>
   </q-tab-panel>
 </template>
