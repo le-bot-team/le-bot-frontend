@@ -58,12 +58,12 @@ export default defineConfig((ctx) => {
 
       env: {
         LE_BOT_BACKEND_HTTP_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
-          ? 'https://cafuuchino.studio26f.org:10580'
+          ? 'https://cafuuchino.studio26f.org:10543'
           : process.env.DEPLOY_ELYSIA
             ? ''
             : 'http://localhost:3000',
         LE_BOT_BACKEND_WS_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
-          ? 'wss://cafuuchino.studio26f.org:10580'
+          ? 'wss://cafuuchino.studio26f.org:10543'
           : process.env.DEPLOY_ELYSIA
             ? ''
             : 'ws://localhost:3000',
