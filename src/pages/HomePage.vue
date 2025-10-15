@@ -80,6 +80,7 @@ const connect = () => {
             text: message.data.text,
           };
           messageList.value.push(unfinishedMessage);
+          console.log('Created new unfinished message for ongoing assistant text');
         } else {
           unfinishedMessage.text = message.data.text;
         }
@@ -98,6 +99,7 @@ const connect = () => {
             text: message.data.text,
           };
           messageList.value.push(unfinishedMessage);
+          console.log('Created new unfinished message for ongoing user text');
         } else {
           unfinishedMessage.text = message.data.text;
         }
@@ -121,26 +123,31 @@ const connect = () => {
             text: message.data.text,
           };
           messageList.value.push(unfinishedMessage);
+          console.log('Created new unfinished message for completed assistant text');
         }
         unfinishedMessage.text = message.data.text;
         break;
       }
       case 'user': {
-        let unfinishedMessage = messageList.value.findLast(
+        const unfinishedMessage = messageList.value.findLast(
           (message) => !message.isFinished && message.isSent,
         );
-        if (!unfinishedMessage) {
-          unfinishedMessage = {
-            isFinished: false,
-            isSent: true,
-            audioChunks: [],
-            chatId: message.data.chatId,
-            text: message.data.text,
-          };
-          messageList.value.push(unfinishedMessage);
+        if (unfinishedMessage) {
+          if (message.data.text.length >= 2) {
+            messageList.value.push({
+              isFinished: false,
+              isSent: false,
+              audioChunks: [],
+              chatId: message.data.chatId,
+            });
+          }
+          unfinishedMessage.audioSrc = URL.createObjectURL(new Blob(unfinishedMessage.audioChunks));
+          unfinishedMessage.text = message.data.text;
+          unfinishedMessage.isFinished = true;
+          console.log('Marked message as finished for completed user text');
+        } else {
+          console.warn('No unfinished message found to update');
         }
-        unfinishedMessage.text = message.data.text;
-        unfinishedMessage.isFinished = true;
         break;
       }
     }
@@ -162,7 +169,7 @@ const connect = () => {
         unfinishedMessage.nextStartTime = unfinishedMessage.audioContext.currentTime;
       }
 
-      await playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob));
+      playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob)).catch(console.error);
     } else {
       unfinishedMessage = {
         isFinished: false,
@@ -172,8 +179,9 @@ const connect = () => {
         nextStartTime: 0,
         chatId: message.data.chatId,
       };
-      await playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob));
+      playAudioChunk(unfinishedMessage, await pcmToWav(audioBlob)).catch(console.error);
       messageList.value.push(unfinishedMessage);
+      console.log('Created new unfinished message for ongoing assistant audio');
     }
   });
   ws.value.setHandler(WsAction.outputAudioComplete, async (message) => {
@@ -197,6 +205,7 @@ const connect = () => {
     );
     if (unfinishedMessage) {
       unfinishedMessage.isFinished = true;
+      console.log('Marked message as finished for completed chat');
       if (!message.success) {
         notify({
           type: 'negative',
@@ -237,7 +246,7 @@ const disconnect = () => {
   isChatReady.value = false;
 };
 
-const onData = async (blobData: Blob) => {
+const onAudioRecordData = async (blobData: Blob) => {
   if (!ws.value) {
     console.warn('WebSocket connection not available');
     return;
@@ -256,12 +265,13 @@ const onData = async (blobData: Blob) => {
       audioChunks: [blobData],
     };
     messageList.value.push(unfinishedMessage);
+    console.log('Created new unfinished message for user audio');
   } else {
     unfinishedMessage.audioChunks.push(blobData);
   }
 };
 
-const onStop = () => {
+const onAudioRecordStop = () => {
   if (!ws.value) {
     console.warn('WebSocket connection not available');
     return;
@@ -349,7 +359,7 @@ onBeforeUnmount(() => {
               </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-icon name="content_copy"/>
+              <q-icon name="content_copy" />
             </q-item-section>
           </q-item>
           <q-item>
@@ -423,7 +433,11 @@ onBeforeUnmount(() => {
         </q-scroll-area>
       </q-card>
       <div class="row">
-        <AudioRecorder :disable="!isChatReady" @data="onData" @stop="onStop" />
+        <AudioRecorder
+          :disable="!isChatReady"
+          @data="onAudioRecordData"
+          @stop="onAudioRecordStop"
+        />
       </div>
     </div>
   </q-page>

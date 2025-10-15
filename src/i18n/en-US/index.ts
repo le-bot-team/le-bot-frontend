@@ -85,7 +85,7 @@ export default {
     AudioRecorder: {
       labels: {
         error: 'Error',
-        hint: 'Hold down to record',
+        hint: 'Click to start recording',
         recording: 'Recording...',
       },
     },
