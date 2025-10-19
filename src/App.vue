@@ -3,15 +3,24 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
 import { validateAccessToken } from 'src/utils/api/auth';
-import { retrieveProfileInfo } from 'src/utils/api/profile';
+import { retrieveProfileAvatar, retrieveProfileInfo } from 'src/utils/api/profile';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
 import { useSettingsStore } from 'stores/settings';
 
 const { accessToken } = storeToRefs(useAuthStore());
 const { tryResetSendCodeCooldown } = useAuthStore();
+const { profile } = storeToRefs(useProfileStore());
 const { updateProfile } = useProfileStore();
 const { applyTheme } = useSettingsStore();
+
+const clearLoginState = (reload = true) => {
+  accessToken.value = '';
+  updateProfile();
+  if (reload) {
+    location.reload();
+  }
+};
 
 onMounted(async () => {
   tryResetSendCodeCooldown();
@@ -21,22 +30,29 @@ onMounted(async () => {
       if ((await validateAccessToken(accessToken.value)).data.success) {
         const { data } = await retrieveProfileInfo(accessToken.value);
         if (data?.success) {
+          if (
+            profile.value?.avatarHash != data.data.avatarHash ||
+            !profile.value?.avatar?.length
+          ) {
+            const { data: avatarData } = await retrieveProfileAvatar(accessToken.value);
+            if (avatarData?.success) {
+              data.data.avatar = avatarData.data.avatar;
+            }
+          }
           updateProfile(data.data);
         } else {
           console.error(data.message);
           updateProfile();
         }
       } else {
-        accessToken.value = '';
-        updateProfile();
+        clearLoginState();
       }
     } catch (error) {
       console.error('Failed to validate access token', error);
-      accessToken.value = '';
-      updateProfile();
+      clearLoginState();
     }
   } else {
-    updateProfile();
+    clearLoginState(false);
   }
 });
 </script>

@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { bus } from 'boot/bus';
 
 const { screen } = useQuasar();
+
 const leftDrawerMini = ref(false);
 const leftDrawerOpen = ref(false);
 const rightDrawerMini = ref(false);

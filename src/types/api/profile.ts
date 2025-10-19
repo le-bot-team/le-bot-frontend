@@ -1,5 +1,19 @@
 import type { UserProfile } from 'stores/profile/types';
 
+export type RetrieveProfileAvatarResponse =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+      data: {
+        id: number;
+        avatar: string;
+        avatarHash: string;
+      };
+    };
+
 export type RetrieveProfileInfoResponse =
   | {
       success: false;

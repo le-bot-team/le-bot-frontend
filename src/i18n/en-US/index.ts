@@ -120,40 +120,92 @@ export default {
           title: 'Le Bot',
         },
       },
+      StackHeader: {
+        navigations: {
+          about: 'About Us',
+          auth: 'Authentication',
+          profile: 'Profile',
+          settings: 'Settings',
+        }
+      }
     },
   },
   pages: {
-    HomePage: {
-      labels: {
-        connect: 'Connect',
-        disconnect: 'Disconnect',
-        processing: 'Processing...',
-        noUnfinishedMessage: 'No unfinished message',
+    main: {
+      AuthPage: {
+        labels: {
+          title: 'Le Bot',
+          description: 'Your intelligent pet and good companion',
+        },
       },
-      notifications: {
-        copiedAccessToken: 'Access token copied to clipboard',
-        copyAccessTokenFailed: 'Failed to copy access token',
-        notLoggedIn: 'You are not logged in, please sign in first',
+      HomePage: {
+        labels: {
+          connect: 'Connect',
+          disconnect: 'Disconnect',
+          processing: 'Processing...',
+          noUnfinishedMessage: 'No unfinished message',
+        },
+        notifications: {
+          copiedAccessToken: 'Access token copied to clipboard',
+          copyAccessTokenFailed: 'Failed to copy access token',
+          notLoggedIn: 'You are not logged in, please sign in first',
+        },
+      },
+      MePage: {
+        labels: {
+          memberCenter: 'Member Center',
+          memberCenterDescription: 'Points Redemption',
+          serviceCenter: 'Service Center',
+          serviceCenterDescription: 'Devices and Support',
+          myOrders: 'My Orders',
+          sharedDevices: 'Shared Devices',
+          helpAndFeedback: 'Help & Feedback',
+          aboutUs: 'About Us',
+          settings: 'Settings',
+        },
       },
     },
-    AuthPage: {
-      labels: {
-        title: 'Le Bot',
-        description: 'Your intelligent pet and good companion',
+    stack: {
+      AboutPage:{
+        labels: {
+          title: 'About Us',
+          companyDescriptionTitle: 'Company Description',
+          companyDescription: 'Le Bot is a cutting-edge technology company dedicated to creating intelligent and interactive robotic companions.\n' +
+            'Our mission is to enhance the quality of life through innovative AI-driven solutions that bring joy, convenience, and companionship to users worldwide.',
+        }
       },
-    },
-    MePage: {
-      labels: {
-        memberCenter: 'Member Center',
-        memberCenterDescription: 'Points Redemption',
-        serviceCenter: 'Service Center',
-        serviceCenterDescription: 'Devices and Support',
-        myOrders: 'My Orders',
-        sharedDevices: 'Shared Devices',
-        helpAndFeedback: 'Help & Feedback',
-        aboutUs: 'About Us',
-        settings: 'Settings',
+      ProfilePage: {
+        labels: {
+          nickname: 'Nickname',
+          bio: 'Bio',
+          region: 'Region',
+          notSet: 'Not Set',
+          changePassword: 'Change Password',
+          bindEmail: 'Bind Email',
+          bindPhone: 'Bind Phone Number',
+          removeAccount: 'Remove Account',
+        }
       },
-    },
+      SettingsPage: {
+        labels: {
+          profileSettings: 'Profile Settings',
+          signInOrSignUp: 'Sign In / Sign Up',
+          deliveryAddresses: 'Delivery Addresses',
+          languageSettings: 'Language Settings',
+          messageSettings: 'Message Settings',
+          generalSettings: 'General Settings',
+          privacySettings: 'Privacy Settings',
+          permissionManagement: 'Permission Management',
+          clearCache: 'Clear Cache',
+          networkDiagnostics: 'Network Diagnostics',
+          storageSpace: 'Storage Space',
+          appVersion: 'App Version',
+          privacyPolicy: 'Privacy Policy',
+          termsOfService: 'Terms of Service',
+          internetICPCode: 'Internet ICP Code: {code}',
+          logout: 'Log Out',
+        }
+      }
+    }
   },
 };

@@ -12,7 +12,7 @@ const { dark } = useQuasar();
 
 <template>
   <q-card flat>
-    <q-item class="q-py-md" clickable :to="profile ? '/profile' : '/auth'">
+    <q-item class="q-py-md" clickable :to="profile ? '/stack/profile' : '/stack/auth'">
       <q-item-section avatar>
         <q-avatar
           class="cursor-pointer"

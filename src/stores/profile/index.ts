@@ -9,6 +9,9 @@ export const useProfileStore = defineStore(
     const profile = ref<UserProfile>();
 
     const updateProfile = (newProfile?: UserProfile) => {
+      if (newProfile && !newProfile.avatar) {
+        newProfile.avatar = profile.value?.avatar
+      }
       profile.value = newProfile;
     };
 

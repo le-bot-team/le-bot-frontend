@@ -30,7 +30,7 @@ interface AudioMessage {
   hasStreamPlayed?: boolean; // 标记是否已经流式播放过
 }
 
-const i18n = i18nSubPath('pages.HomePage');
+const i18n = i18nSubPath('pages.main.HomePage');
 
 const { accessToken } = storeToRefs(useAuthStore());
 const { conversationId } = storeToRefs(useChatStore());
@@ -331,7 +331,7 @@ onMounted(() => {
       type: 'warning',
       message: i18n('notifications.notLoggedIn'),
     });
-    router.push('/auth').catch((err) => console.error(err));
+    router.push('/stack/auth').catch((err) => console.error(err));
   }
 });
 

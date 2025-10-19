@@ -1,5 +1,17 @@
 import { api } from 'boot/axios';
-import type { RetrieveProfileInfoResponse, UpdateProfileInfoRequest } from 'src/types/api/profile';
+import type {
+  RetrieveProfileAvatarResponse,
+  RetrieveProfileInfoResponse,
+  UpdateProfileInfoRequest,
+} from 'src/types/api/profile';
+
+export const retrieveProfileAvatar = async (accessToken: string) => {
+  return await api.get<RetrieveProfileAvatarResponse>('/profile/avatar', {
+    headers: {
+      'x-access-token': accessToken,
+    },
+  });
+}
 
 export const retrieveProfileInfo = async (accessToken: string) => {
   return await api.get<RetrieveProfileInfoResponse>('/profile/info', {

@@ -22,6 +22,7 @@ onMounted(() => {
     router
       .replace(typeof route.query.from === 'string' ? route.query.from : '/')
       .catch((error) => console.warn(error));
+    location.reload();
   }, 3000);
 });
 </script>

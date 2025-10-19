@@ -4,9 +4,15 @@ export interface UserProfile {
   updated_at: Date;
   nickname?: string;
   bio?: string;
-  avatar?: string;
+  avatar?: string | undefined;
   avatarHash?: string;
   region?: string;
   last_active: Date;
   last_login: Date;
+}
+
+export interface UserProfileAvatar {
+  id: bigint;
+  avatar?: string;
+  avatarHash?: string;
 }

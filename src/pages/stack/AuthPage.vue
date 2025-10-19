@@ -7,7 +7,7 @@ import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
 import { i18nSubPath } from 'src/utils/common';
 
-const i18n = i18nSubPath('pages.AuthPage');
+const i18n = i18nSubPath('pages.main.AuthPage');
 
 const avatar = ref<string>('');
 const code = ref<string>('');
