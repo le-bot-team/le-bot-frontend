@@ -18,9 +18,10 @@ const router = useRouter();
 const { registerTimeout } = useTimeout();
 
 onMounted(() => {
+  console.log('route.query.from:', typeof route.query.from === 'string' ? route.query.from : '/');
   registerTimeout(() => {
     router
-      .replace(typeof route.query.from === 'string' ? route.query.from : '/')
+      .push(typeof route.query.from === 'string' ? route.query.from : '/')
       .catch((error) => console.warn(error));
     location.reload();
   }, 3000);

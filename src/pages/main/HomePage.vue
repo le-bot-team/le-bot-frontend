@@ -51,14 +51,12 @@ const connect = () => {
     `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${accessToken.value}`,
   );
   ws.value.addOnOpenHandler(() => {
-    setTimeout(() => {
-      ws.value?.sendAction(
-        new WsUpdateConfigRequest({
-          conversationId: conversationId.value,
-          outputText: true,
-        }),
-      );
-    }, 1000);
+    ws.value?.sendAction(
+      new WsUpdateConfigRequest({
+        conversationId: conversationId.value,
+        outputText: true,
+      }),
+    );
   });
   ws.value.setHandler(WsAction.updateConfig, (message) => {
     isChatReady.value = true;
@@ -239,6 +237,7 @@ const copyAccessToken = () => {
 };
 
 const disconnect = () => {
+  console.log('Disconnecting...');
   if (ws.value) {
     ws.value.destroy();
     ws.value = undefined;
@@ -331,7 +330,7 @@ onMounted(() => {
       type: 'warning',
       message: i18n('notifications.notLoggedIn'),
     });
-    router.push('/stack/auth').catch((err) => console.error(err));
+    router.push('/stack/auth?from=/main/home').catch((err) => console.error(err));
   }
 });
 

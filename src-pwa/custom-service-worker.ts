@@ -19,16 +19,36 @@ self.skipWaiting().catch((e) => console.warn(e));
 clientsClaim();
 
 // Use with precache injection
-precacheAndRoute(self.__WB_MANIFEST);
+const manifest = self.__WB_MANIFEST;
+precacheAndRoute(manifest);
 
 cleanupOutdatedCaches();
 
 // Non-SSR fallbacks to index.html
 // Production SSR fallbacks to offline.html (except for dev)
 if (process.env.MODE !== 'ssr' || process.env.PROD) {
-  registerRoute(
-    new NavigationRoute(createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML), {
-      denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/],
-    }),
+  const fallbackUrl = process.env.PWA_FALLBACK_HTML || 'index.html';
+
+  // Check if the fallback URL is in the precache
+  const precacheUrls = manifest.map((entry) =>
+    typeof entry === 'string' ? entry : entry.url,
   );
+
+  // Try to find the URL in various formats
+  const urlVariants = [fallbackUrl, '/' + fallbackUrl, './' + fallbackUrl];
+
+  const matchedUrl = urlVariants.find((variant) => precacheUrls.includes(variant));
+
+  if (matchedUrl) {
+    registerRoute(
+      new NavigationRoute(createHandlerBoundToURL(matchedUrl), {
+        denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/],
+      }),
+    );
+  } else {
+    console.warn(
+      `PWA: Fallback URL "${fallbackUrl}" not found in precache manifest. Available URLs:`,
+      precacheUrls,
+    );
+  }
 }

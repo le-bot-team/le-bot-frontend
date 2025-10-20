@@ -27,24 +27,23 @@ onMounted(async () => {
   applyTheme();
   if (accessToken.value) {
     try {
-      if ((await validateAccessToken(accessToken.value)).data.success) {
-        const { data } = await retrieveProfileInfo(accessToken.value);
-        if (data?.success) {
-          if (
-            profile.value?.avatarHash != data.data.avatarHash ||
-            !profile.value?.avatar?.length
-          ) {
+      const { data: validateResult } = await validateAccessToken(accessToken.value);
+      if (validateResult.success) {
+        const { data: retrieveResult } = await retrieveProfileInfo(accessToken.value);
+        if (retrieveResult?.success) {
+          if (profile.value?.avatarHash != retrieveResult.data.avatarHash || !profile.value?.avatar?.length) {
             const { data: avatarData } = await retrieveProfileAvatar(accessToken.value);
             if (avatarData?.success) {
-              data.data.avatar = avatarData.data.avatar;
+              retrieveResult.data.avatar = avatarData.data.avatar;
             }
           }
-          updateProfile(data.data);
+          updateProfile(retrieveResult.data);
         } else {
-          console.error(data.message);
+          console.error(retrieveResult.message);
           updateProfile();
         }
       } else {
+        console.error(validateResult.message);
         clearLoginState();
       }
     } catch (error) {
