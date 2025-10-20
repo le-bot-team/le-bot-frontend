@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { bus } from 'boot/bus';
-import { NAVIGATIONS } from 'components/navigations';
+import { MAIN_NAVIGATIONS } from 'components/navigations';
 </script>
 
 <template>
@@ -17,7 +17,7 @@ import { NAVIGATIONS } from 'components/navigations';
     @hide="bus.emit('drawer', 'close', 'left')"
   >
     <q-list separator>
-      <template v-for="navigation in NAVIGATIONS" :key="navigation">
+      <template v-for="navigation in MAIN_NAVIGATIONS" :key="navigation">
         <q-item :disable="!navigation.available" exact :to="navigation.route">
           <q-item-section avatar>
             <q-icon :name="navigation.icon" :color="navigation.available ? '' : 'grey'" />

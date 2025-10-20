@@ -67,6 +67,20 @@ export default {
         },
       },
     },
+    home: {
+      DeviceCard: {
+        labels: {
+          noDevice: 'No Device',
+          addNewDevice: 'Add New Device',
+        }
+      },
+      TopicCard: {
+        labels: {
+          title: 'Hot Topics',
+          chatHistory: 'Chat History',
+        }
+      }
+    },
     me: {
       ProfileCard: {
         labels: {
@@ -75,12 +89,18 @@ export default {
       },
     },
     navigations: {
-      labels: {
+      main: {
         home: 'Home',
         growth: 'Growth',
         mall: 'Mall',
         me: 'Me',
       },
+      stack: {
+        about: 'About Us',
+        auth: 'Authentication',
+        profile: 'Profile',
+        settings: 'Settings',
+      }
     },
     AudioRecorder: {
       labels: {
@@ -121,12 +141,7 @@ export default {
         },
       },
       StackHeader: {
-        navigations: {
-          about: 'About Us',
-          auth: 'Authentication',
-          profile: 'Profile',
-          settings: 'Settings',
-        }
+        labels:{}
       }
     },
   },
@@ -140,15 +155,10 @@ export default {
       },
       HomePage: {
         labels: {
-          connect: 'Connect',
-          disconnect: 'Disconnect',
-          processing: 'Processing...',
-          noUnfinishedMessage: 'No unfinished message',
+          myDevices: 'My Devices',
+          tryChatting: 'Try Chatting',
         },
         notifications: {
-          copiedAccessToken: 'Access token copied to clipboard',
-          copyAccessTokenFailed: 'Failed to copy access token',
-          notLoggedIn: 'You are not logged in, please sign in first',
         },
       },
       MePage: {
@@ -173,6 +183,19 @@ export default {
           companyDescription: 'Le Bot is a cutting-edge technology company dedicated to creating intelligent and interactive robotic companions.\n' +
             'Our mission is to enhance the quality of life through innovative AI-driven solutions that bring joy, convenience, and companionship to users worldwide.',
         }
+      },
+      ChatPage: {
+        labels: {
+          connect: 'Connect',
+          disconnect: 'Disconnect',
+          processing: 'Processing...',
+          noUnfinishedMessage: 'No unfinished message',
+        },
+        notifications: {
+          copiedAccessToken: 'Access token copied to clipboard',
+          copyAccessTokenFailed: 'Failed to copy access token',
+          notLoggedIn: 'You are not logged in, please sign in first',
+        },
       },
       ProfilePage: {
         labels: {

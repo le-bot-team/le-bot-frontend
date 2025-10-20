@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { NAVIGATIONS } from 'components/navigations';
+import { useQuasar } from 'quasar';
+
+import { MAIN_NAVIGATIONS } from 'components/navigations';
+
+const { dark } = useQuasar();
 </script>
 
 <template>
-  <q-footer>
-    <q-toolbar>
-      <q-tabs class="full-width" no-caps>
+  <q-footer class="bg-transparent">
+    <q-toolbar :class="{ 'text-dark': !dark.isActive}">
+      <q-tabs class="full-width" active-color="primary" dense indicator-color="transparent" no-caps>
         <q-route-tab
-          v-for="(navigation, index) in NAVIGATIONS"
+          v-for="(navigation, index) in MAIN_NAVIGATIONS"
           :key="index"
           :disable="!navigation.available"
           exact

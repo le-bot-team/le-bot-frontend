@@ -59,6 +59,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'chat',
+        path: 'chat',
+        components: {
+          default: () => import('pages/stack/ChatPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'profile',
         path: 'profile',
         components: {

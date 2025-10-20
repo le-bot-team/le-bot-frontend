@@ -4,6 +4,7 @@ export enum WsAction {
   cancelOutput = 'cancelOutput',
   chatComplete = 'chatComplete',
   clearContext = 'clearContext',
+  establishConnection = 'establishConnection',
   inputAudioComplete = 'inputAudioComplete',
   inputAudioStream = 'inputAudioStream',
   outputAudioComplete = 'outputAudioComplete',
@@ -80,6 +81,10 @@ export class WsClearContextRequest extends WsBaseRequest {
 
 export interface WsClearContextResponseSuccess extends WsBaseResponseSuccess {
   action: WsAction.clearContext;
+}
+
+export interface WsEstablishConnectionResponseSuccess extends WsBaseResponseError {
+  action: WsAction.establishConnection;
 }
 
 export class WsInputAudioCompleteRequest extends WsBaseRequest {
@@ -184,6 +189,7 @@ export interface WsResponseMapping {
   [WsAction.cancelOutput]: WsCancelOutputResponseSuccess;
   [WsAction.chatComplete]: WsChatCompleteResponseSuccess | WsChatCompleteResponseError;
   [WsAction.clearContext]: WsClearContextResponseSuccess;
+  [WsAction.establishConnection]: WsEstablishConnectionResponseSuccess;
   [WsAction.inputAudioComplete]: WsInputAudioCompleteResponseSuccess;
   [WsAction.inputAudioStream]: WsInputAudioStreamRequest;
   [WsAction.outputAudioComplete]: WsOutputAudioCompleteResponseSuccess;
