@@ -36,6 +36,7 @@ abstract class WsBaseRequest {
     return {};
   }
 
+  // noinspection JSUnusedGlobalSymbols
   toJSON() {
     return {
       id: this.id,
@@ -165,6 +166,7 @@ export class WsUpdateConfigRequest extends WsBaseRequest {
         output?: number;
       };
       speechRate?: number;
+      timezone?: string
       voiceId?: string;
     },
   ) {

@@ -55,6 +55,7 @@ const connect = () => {
       new WsUpdateConfigRequest({
         conversationId: conversationId.value,
         outputText: true,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
     );
   });
