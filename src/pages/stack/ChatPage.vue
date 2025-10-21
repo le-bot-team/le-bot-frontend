@@ -28,6 +28,7 @@ interface AudioMessage {
   nextStartTime?: number;
   isPlaying?: boolean;
   hasStreamPlayed?: boolean; // 标记是否已经流式播放过
+  activeSources?: AudioBufferSourceNode[]; // 跟踪所有已调度的音频源
 }
 
 const i18n = i18nSubPath('pages.stack.ChatPage');
@@ -139,6 +140,11 @@ const connect = () => {
               audioChunks: [],
               chatId: message.data.chatId,
             });
+            // 如果正在播放音频或有已调度的音频，停止播放并清空缓冲区
+            if (unfinishedMessage.isPlaying || (unfinishedMessage.activeSources && unfinishedMessage.activeSources.length > 0)) {
+              console.log('Stopping audio playback due to outputTextComplete');
+              stopAudioPlayback(unfinishedMessage);
+            }
           }
           unfinishedMessage.audioSrc = URL.createObjectURL(new Blob(unfinishedMessage.audioChunks));
           unfinishedMessage.text = message.data.text;
@@ -246,6 +252,33 @@ const disconnect = () => {
   isChatReady.value = false;
 };
 
+const stopAudioPlayback = (message: AudioMessage) => {
+  // 停止所有已调度的音频源
+  if (message.activeSources && message.activeSources.length > 0) {
+    message.activeSources.forEach((source) => {
+      try {
+        source.stop();
+        source.disconnect();
+      } catch (error) {
+        // 忽略已经停止的源
+        console.debug('Source already stopped:', error);
+      }
+    });
+    message.activeSources = [];
+    console.log('Stopped all scheduled audio sources');
+  }
+
+  // 重置音频上下文和播放状态
+  if (message.audioContext) {
+    message.nextStartTime = message.audioContext.currentTime;
+  }
+  message.isPlaying = false;
+
+  // 清空音频缓冲区
+  message.audioChunks = [];
+  console.log('Cleared audio buffer and reset playback state');
+};
+
 const onAudioRecordData = async (blobData: Blob) => {
   if (!ws.value) {
     console.warn('WebSocket connection not available');
@@ -306,6 +339,13 @@ const playAudioChunk = async (message: AudioMessage, audioData: Blob) => {
     source.buffer = audioBuffer;
     source.connect(message.audioContext.destination);
 
+    // 初始化 activeSources 数组
+    if (!message.activeSources) {
+      message.activeSources = [];
+    }
+    // 将源添加到活跃源列表中
+    message.activeSources.push(source);
+
     // Schedule playback
     const startTime = Math.max(message.audioContext.currentTime, message.nextStartTime || 0);
     source.start(startTime);
@@ -316,7 +356,17 @@ const playAudioChunk = async (message: AudioMessage, audioData: Blob) => {
 
     // Set up onended callback
     source.onended = () => {
-      message.isPlaying = false;
+      // 从活跃源列表中移除已完成的源
+      if (message.activeSources) {
+        const index = message.activeSources.indexOf(source);
+        if (index > -1) {
+          message.activeSources.splice(index, 1);
+        }
+      }
+      // 如果没有活跃源了，标记为不再播放
+      if (!message.activeSources || message.activeSources.length === 0) {
+        message.isPlaying = false;
+      }
     };
   } catch (error) {
     console.warn('Failed to decode or play audio data:', error);
