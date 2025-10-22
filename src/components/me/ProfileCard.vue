@@ -3,11 +3,14 @@ import { useQuasar } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
 import { useProfileStore } from 'stores/profile';
+import { storeToRefs } from 'pinia';
 
 const i18n = i18nSubPath('components.me.ProfileCard');
 
-const { profile } = useProfileStore();
+const { profile } = storeToRefs(useProfileStore());
 const { dark } = useQuasar();
+
+console.log(profile.value);
 </script>
 
 <template>

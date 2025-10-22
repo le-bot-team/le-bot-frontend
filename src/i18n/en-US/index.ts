@@ -5,7 +5,10 @@ export default {
         labels: {
           welcome: 'Welcome back, {username}!\n' + 'You have successfully signed in.',
           welcomeNew: 'Welcome, {username}!\n' + 'Your account has been created successfully.',
+          setupFailed: 'Something went wrong.\n' + 'Please try sign in / sign up again.',
+          settingUp: 'Setting things up for you...',
           redirect: 'Taking you back to the previous page...',
+          startOver: 'Start Over',
         },
       },
       NewPasswordPanel: {
