@@ -103,6 +103,16 @@ const connect = () => {
         } else {
           unfinishedMessage.text = message.data.text;
         }
+        if (message.data.text.length >= 2) {
+          // 如果正在播放音频或有已调度的音频，停止播放并清空缓冲区
+          if (
+            unfinishedMessage.isPlaying ||
+            (unfinishedMessage.activeSources && unfinishedMessage.activeSources.length > 0)
+          ) {
+            console.log('Stopping audio playback due to outputTextComplete');
+            stopAudioPlayback(unfinishedMessage);
+          }
+        }
         break;
       }
     }
@@ -140,11 +150,6 @@ const connect = () => {
               audioChunks: [],
               chatId: message.data.chatId,
             });
-            // 如果正在播放音频或有已调度的音频，停止播放并清空缓冲区
-            if (unfinishedMessage.isPlaying || (unfinishedMessage.activeSources && unfinishedMessage.activeSources.length > 0)) {
-              console.log('Stopping audio playback due to outputTextComplete');
-              stopAudioPlayback(unfinishedMessage);
-            }
           }
           unfinishedMessage.audioSrc = URL.createObjectURL(new Blob(unfinishedMessage.audioChunks));
           unfinishedMessage.text = message.data.text;
