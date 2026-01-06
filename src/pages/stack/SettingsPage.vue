@@ -14,73 +14,79 @@ const menuGroups = reactive<{ disabled?: boolean; icon: string; label: string; t
     {
       icon: profile ? 'mdi-account-circle-outline' : 'mdi-login',
       label: profile ? i18n('labels.profileSettings') : i18n('labels.signInOrSignUp'),
-      to: profile ? '/stack/profile?edit=true' : '/stack/auth',
+      to: profile ? '/stack/profile?edit=true' : '/stack/auth?from=/stack/settings',
+    },
+    {
+      disabled: !profile,
+      icon: 'mdi-account-voice',
+      label: i18n('labels.voiceprintSettings'),
+      to: '/stack/settings/voiceprint',
     },
     {
       icon: 'mdi-map-marker-outline',
       label: i18n('labels.deliveryAddresses'),
-      to: '/stack/deliveryAddresses',
+      to: '/stack/settings/address',
     },
     {
       icon: 'mdi-web',
       label: i18n('labels.languageSettings'),
-      to: '/stack/languageSettings',
+      to: '/stack/settings/language',
     },
   ],
   [
     {
       icon: 'mdi-bell-cog-outline',
       label: i18n('labels.messageSettings'),
-      to: '/stack/messageSettings',
+      to: '/stack/settings/message',
     },
     {
       icon: 'mdi-cog-outline',
       label: i18n('labels.generalSettings'),
-      to: '/stack/generalSettings',
+      to: '/stack/settings/general',
     },
     {
       icon: 'mdi-drama-masks',
       label: i18n('labels.privacySettings'),
-      to: '/stack/privacySettings',
+      to: '/stack/settings/privacy',
     },
     {
       icon: 'mdi-security',
       label: i18n('labels.permissionManagement'),
-      to: '/stack/permissionManagement',
+      to: '/stack/settings/permission',
     },
   ],
   [
     {
       icon: 'mdi-broom',
       label: i18n('labels.clearCache'),
-      to: '/stack/clearCache',
+      to: '/stack/settings/clear-cache',
     },
     {
       icon: 'mdi-wifi-check',
       label: i18n('labels.networkDiagnostics'),
-      to: '/stack/networkDiagnostics',
+      to: '/stack/settings/network',
     },
     {
       icon: 'mdi-database',
       label: i18n('labels.storageSpace'),
-      to: '/stack/storageSpace',
+      to: '/stack/settings/storage',
     },
   ],
   [
     {
       icon: 'mdi-information-outline',
       label: i18n('labels.appVersion'),
-      to: '/stack/appVersion',
+      to: '/stack/settings/version',
     },
     {
       icon: 'mdi-file-document-multiple-outline',
       label: i18n('labels.privacyPolicy'),
-      to: '/stack/privacyPolicy',
+      to: '/stack/settings/policy',
     },
     {
       icon: 'mdi-file-sign',
       label: i18n('labels.termsOfService'),
-      to: '/stack/termsOfService',
+      to: '/stack/settings/tos',
     },
   ],
 ]);

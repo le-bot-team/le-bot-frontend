@@ -23,6 +23,7 @@ const emit = defineEmits<{
 }>();
 
 const i18n = i18nSubPath('components.auth.SignInOrSignUpPanel');
+
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
   storeToRefs(useAuthStore());
 const { notify } = useQuasar();
@@ -156,6 +157,7 @@ const sendCode = async () => {
       <template v-slot:append>
         <q-btn
           v-if="processMethod === 'code'"
+          color="primary"
           dense
           :disable="!processType"
           flat

@@ -2,10 +2,10 @@
 import { storeToRefs } from 'pinia';
 import { copyToClipboard, useQuasar } from 'quasar';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import AudioRecorder from 'components/AudioRecorder.vue';
-import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
+
+import { router } from 'src/router';
 import { WsWrapper } from 'src/types/websocket';
 import {
   WsAction,
@@ -14,6 +14,7 @@ import {
   WsUpdateConfigRequest,
 } from 'src/types/websocket/types';
 import { pcmToWav } from 'src/utils/audio';
+import { base64ToBlob, blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 import { useChatStore } from 'stores/chat';
 
@@ -36,7 +37,6 @@ const i18n = i18nSubPath('pages.stack.ChatPage');
 const { accessToken } = storeToRefs(useAuthStore());
 const { conversationId } = storeToRefs(useChatStore());
 const { notify, screen } = useQuasar();
-const router = useRouter();
 
 const isChatReady = ref<boolean>(false);
 const messageList = ref<AudioMessage[]>([]);

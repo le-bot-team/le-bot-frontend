@@ -1,0 +1,1 @@
+export const SEND_CODE_COOLDOWN_INTERVAL = 60000;

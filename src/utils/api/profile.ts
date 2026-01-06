@@ -5,26 +5,23 @@ import type {
   UpdateProfileInfoRequest,
 } from 'src/types/api/profile';
 
-export const retrieveProfileAvatar = async (accessToken: string) => {
-  return await api.get<RetrieveProfileAvatarResponse>('/profile/avatar', {
+export const retrieveProfileAvatar = async (accessToken: string) =>
+  await api.get<RetrieveProfileAvatarResponse>('/profile/avatar', {
     headers: {
       'x-access-token': accessToken,
     },
   });
-}
 
-export const retrieveProfileInfo = async (accessToken: string) => {
-  return await api.get<RetrieveProfileInfoResponse>('/profile/info', {
+export const retrieveProfileInfo = async (accessToken: string) =>
+  await api.get<RetrieveProfileInfoResponse>('/profile/info', {
     headers: {
       'x-access-token': accessToken,
     },
   });
-};
 
-export const updateProfileInfo = async (accessToken: string, data: UpdateProfileInfoRequest) => {
-  return await api.put<{ success: boolean; message?: string }>('/profile/info', data, {
+export const updateProfileInfo = async (accessToken: string, data: UpdateProfileInfoRequest) =>
+  await api.put<{ success: boolean; message?: string }>('/profile/info', data, {
     headers: {
       'x-access-token': accessToken,
     },
   });
-};

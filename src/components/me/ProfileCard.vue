@@ -9,8 +9,6 @@ const i18n = i18nSubPath('components.me.ProfileCard');
 
 const { profile } = storeToRefs(useProfileStore());
 const { dark } = useQuasar();
-
-console.log(profile.value);
 </script>
 
 <template>

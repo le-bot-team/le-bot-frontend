@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-const SEND_CODE_COOLDOWN_INTERVAL = 60000;
+import { SEND_CODE_COOLDOWN_INTERVAL } from 'stores/auth/constants';
 
 export const useAuthStore = defineStore(
   'auth',

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
 
 import { STACK_NAVIGATIONS } from 'components/navigations';
-import { computed } from 'vue';
+
+import { router } from 'src/router';
 
 const { dark } = useQuasar();
 const route = useRoute();
-const router = useRouter();
 
 const title = computed(
   () => STACK_NAVIGATIONS.find((navigation) => navigation.route === route.name?.toString())?.label,

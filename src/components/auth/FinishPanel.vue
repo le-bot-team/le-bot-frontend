@@ -2,12 +2,15 @@
 import { storeToRefs } from 'pinia';
 import { useTimeout } from 'quasar';
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
+import { router } from 'src/router';
 import { retrieveProfile } from 'src/utils/account';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
+import { useDeviceStore } from 'stores/device';
 import { useProfileStore } from 'stores/profile';
+import { retrieveDevices } from 'src/utils/device';
 
 defineProps<{
   isNew: boolean;
@@ -21,9 +24,9 @@ const emit = defineEmits<{
 const i18n = i18nSubPath('components.auth.FinishPanel');
 
 const { accessToken } = storeToRefs(useAuthStore());
+const { updateDevices } = useDeviceStore();
 const { updateProfile } = useProfileStore();
 const route = useRoute();
-const router = useRouter();
 const { registerTimeout } = useTimeout();
 
 const isFailed = ref(false);
@@ -35,6 +38,7 @@ const startOver = () => {
 
 onMounted(async () => {
   try {
+    updateDevices(await retrieveDevices());
     updateProfile(await retrieveProfile());
     isReady.value = true;
     registerTimeout(() => {

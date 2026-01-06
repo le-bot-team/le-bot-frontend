@@ -67,6 +67,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'growth-data',
+        path: 'growth-data',
+        components: {
+          default: () => import('pages/stack/GrowthDataPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'profile',
         path: 'profile',
         components: {
@@ -75,12 +83,51 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'settings',
+        path: 'device-config',
+        children: [
+          {
+            name: 'device-config',
+            path: '',
+            components: {
+              default: () => import('pages/stack/DeviceConfigPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
+      },
+      {
         path: 'settings',
-        components: {
-          default: () => import('pages/stack/SettingsPage.vue'),
-          header: () => import('layouts/headers/StackHeader.vue'),
-        },
+        children: [
+          {
+            name: 'settings',
+            path: '',
+            components: {
+              default: () => import('pages/stack/SettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            path: 'voiceprint',
+            children: [
+              {
+                name: 'settings-voiceprint',
+                path: '',
+                components: {
+                  default: () => import('pages/stack/settings/VoiceprintPage.vue'),
+                  header: () => import('layouts/headers/StackHeader.vue'),
+                },
+              },
+              {
+                name: 'settings-voiceprint-new',
+                path: 'new',
+                components: {
+                  default: () => import('pages/stack/settings/voiceprint/NewPage.vue'),
+                  header: () => import('layouts/headers/StackHeader.vue'),
+                },
+              }
+            ],
+          },
+        ],
       },
     ],
   },

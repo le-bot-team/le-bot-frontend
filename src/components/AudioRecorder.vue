@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 withDefaults(
   defineProps<{
-    disable: boolean;
+    disable?: boolean;
   }>(),
   {
     disable: false,
@@ -39,6 +39,9 @@ const startRecording = () => {
     mediaRecorder.value.ondataavailable = (event) => {
       emit('data', event.data);
     };
+    mediaRecorder.value.onstart = () => {
+      emit('start', recordId.value!);
+    }
     mediaRecorder.value.onstop = () => {
       if (!mediaStream.value) {
         return;

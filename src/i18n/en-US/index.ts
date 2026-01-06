@@ -70,19 +70,35 @@ export default {
         },
       },
     },
+    growthData: {
+      OverviewCard: {
+        labels: {
+          accompanyTime: 'Accompanied for {hours} hours',
+          guest: 'Guest',
+          male: 'Boy',
+          female: 'Girl',
+          age: '{age} y/o',
+          unknown: 'Unknown',
+          weeklyInteract: 'Weekly Interact',
+          bestCapability: 'Best Capability',
+          hotTopic: 'Hot Topic',
+          hours: '{hours} Hours',
+        },
+      },
+    },
     home: {
       DeviceCard: {
         labels: {
           noDevice: 'No Device',
           addNewDevice: 'Add New Device',
-        }
+        },
       },
       TopicCard: {
         labels: {
           title: 'Hot Topics',
           chatHistory: 'Chat History',
-        }
-      }
+        },
+      },
     },
     me: {
       ProfileCard: {
@@ -101,9 +117,54 @@ export default {
       stack: {
         about: 'About Us',
         auth: 'Authentication',
+        deviceConfig: 'Device Config',
         profile: 'Profile',
         settings: 'Settings',
-      }
+        settingsVoiceprint: 'Voiceprint Settings',
+        settingsVoiceprintNew: 'Add Voiceprint',
+      },
+    },
+    settings: {
+      voiceprint: {
+        ConfirmPanel: {
+          labels: {
+            hint: 'Please ensure that your recording is clear and distinguishable. If you are not satisfied, you can go back and re-record.',
+            whoseVoice: 'Whose voice is this?',
+            whoseVoiceHint: 'Please enter the name of the voice owner',
+            relationship: 'Relationship with you',
+            relationshipHint: 'Select the relationship with the voice owner',
+            self: 'Self',
+            family: 'Family',
+            friend: 'Friend',
+            colleague: 'Colleague',
+            other: 'Other',
+            confirm: 'Confirm and Submit',
+            previous: 'Go back',
+          },
+          notifications: {
+            registrationSuccess: 'Voiceprint registered successfully',
+            registrationFailed: 'Voiceprint registration failed: {message}',
+            registrationError: 'Voiceprint registration error',
+          },
+        },
+        RecordPanel: {
+          labels: {
+            preparation: 'Recording Preparation',
+            quietEnvironment: 'Quiet Environment',
+            quietEnvironmentDescription:
+              'Conducted in a noise-free, echo-free indoor environment to ensure clear recordings.',
+            naturalVoice: 'Natural Voice',
+            naturalVoiceDescription:
+              'Speak in a normal tone and pace, avoiding exaggerated emotions or tones.',
+            moderateDistance: 'Moderate Distance',
+            moderateDistanceDescription:
+              'Maintain a distance of about 10-15 cm from the microphone to ensure sound quality.',
+            readAloudPhrases: 'Read Aloud Phrases',
+            readAloudPhrasesDescription: 'Lovable Lebot is my good friend.',
+            finish: 'Finish Recording',
+          },
+        },
+      },
     },
     AudioRecorder: {
       labels: {
@@ -144,8 +205,8 @@ export default {
         },
       },
       StackHeader: {
-        labels:{}
-      }
+        labels: {},
+      },
     },
   },
   pages: {
@@ -161,8 +222,7 @@ export default {
           myDevices: 'My Devices',
           tryChatting: 'Try Chatting',
         },
-        notifications: {
-        },
+        notifications: {},
       },
       MePage: {
         labels: {
@@ -179,13 +239,14 @@ export default {
       },
     },
     stack: {
-      AboutPage:{
+      AboutPage: {
         labels: {
           title: 'About Us',
           companyDescriptionTitle: 'Company Description',
-          companyDescription: 'Le Bot is a cutting-edge technology company dedicated to creating intelligent and interactive robotic companions.\n' +
+          companyDescription:
+            'Le Bot is a cutting-edge technology company dedicated to creating intelligent and interactive robotic companions.\n' +
             'Our mission is to enhance the quality of life through innovative AI-driven solutions that bring joy, convenience, and companionship to users worldwide.',
-        }
+        },
       },
       ChatPage: {
         labels: {
@@ -200,6 +261,18 @@ export default {
           notLoggedIn: 'You are not logged in, please sign in first',
         },
       },
+      DeviceConfigPage: {
+        labels: {
+          voiceStyle: 'Voice Style',
+          defaultStyle: 'Default Style',
+          language: 'Language',
+          personalityAdjustment: 'AI Personality Adjustment',
+          wifiManagement: 'Wi-Fi Management',
+          firmwareUpdate: 'Firmware Update',
+          aboutThisDevice: 'About This Device',
+          unbindDevice: 'Unbind Device',
+        },
+      },
       ProfilePage: {
         labels: {
           nickname: 'Nickname',
@@ -210,12 +283,13 @@ export default {
           bindEmail: 'Bind Email',
           bindPhone: 'Bind Phone Number',
           removeAccount: 'Remove Account',
-        }
+        },
       },
       SettingsPage: {
         labels: {
           profileSettings: 'Profile Settings',
           signInOrSignUp: 'Sign In / Sign Up',
+          voiceprintSettings: 'Voiceprint Settings',
           deliveryAddresses: 'Delivery Addresses',
           languageSettings: 'Language Settings',
           messageSettings: 'Message Settings',
@@ -230,8 +304,15 @@ export default {
           termsOfService: 'Terms of Service',
           internetICPCode: 'Internet ICP Code: {code}',
           logout: 'Log Out',
-        }
-      }
-    }
+        },
+      },
+      settings: {
+        VoiceprintPage: {
+          labels: {
+            addNewVoiceprint: 'Add New Voiceprint',
+          },
+        },
+      },
+    },
   },
 };

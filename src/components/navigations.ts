@@ -56,9 +56,27 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'profile',
   },
   {
+    label: i18n('stack.deviceConfig'),
+    icon: 'cog',
+    available: true,
+    route: 'device-config',
+  },
+  {
     label: i18n('stack.settings'),
     icon: 'cog',
     available: true,
     route: 'settings',
   },
-]
+  {
+    label: i18n('stack.settingsVoiceprint'),
+    icon: 'mdi-account-voice',
+    available: true,
+    route: 'settings-voiceprint',
+  },
+  {
+    label: i18n('stack.settingsVoiceprintNew'),
+    icon: 'mdi-microphone-plus',
+    available: true,
+    route: 'settings-voiceprint-new',
+  },
+];
