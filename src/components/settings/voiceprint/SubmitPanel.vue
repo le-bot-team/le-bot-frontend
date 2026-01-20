@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import type { VprRelationship } from 'src/types/api/voiceprint';
-import { registerVoiceprint } from 'src/utils/api/voiceprint';
+import { register } from 'src/utils/api/voiceprint';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 
@@ -20,7 +20,7 @@ const emit = defineEmits<{
 const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
 
-const i18n = i18nSubPath('components.settings.voiceprint.ConfirmPanel');
+const i18n = i18nSubPath('components.settings.voiceprint.SubmitPanel');
 
 const relationshipOptions: { label: string; value: VprRelationship }[] = [
   {
@@ -71,7 +71,7 @@ const confirm = async (): Promise<void> => {
 
   try {
     const dataUrl = await blobToDataUrl(props.data);
-    const { data: result } = await registerVoiceprint(
+    const { data: result } = await register(
       accessToken.value,
       dataUrl.substring(dataUrl.indexOf(',') + 1),
       personName.value,

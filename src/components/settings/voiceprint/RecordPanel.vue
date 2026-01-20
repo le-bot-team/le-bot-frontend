@@ -34,7 +34,6 @@ const audioData = ref<Blob>();
 const audioSrc = ref<string>();
 
 const onAudioRecordData = (blobData: Blob): void => {
-  // concat blob data
   if (!audioData.value) {
     audioData.value = blobData;
   } else {

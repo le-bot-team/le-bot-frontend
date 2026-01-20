@@ -126,7 +126,24 @@ export default {
     },
     settings: {
       voiceprint: {
-        ConfirmPanel: {
+        RecordPanel: {
+          labels: {
+            preparation: 'Recording Preparation',
+            quietEnvironment: 'Quiet Environment',
+            quietEnvironmentDescription:
+              'Conducted in a noise-free, echo-free indoor environment to ensure clear recordings.',
+            naturalVoice: 'Natural Voice',
+            naturalVoiceDescription:
+              'Speak in a normal tone and pace, avoiding exaggerated emotions or tones.',
+            moderateDistance: 'Moderate Distance',
+            moderateDistanceDescription:
+              'Maintain a distance of about 10-15 cm from the microphone to ensure sound quality.',
+            readAloudPhrases: 'Read Aloud Phrases',
+            readAloudPhrasesDescription: 'Lovable Lebot is my good friend.',
+            finish: 'Finish Recording',
+          },
+        },
+        SubmitPanel: {
           labels: {
             hint: 'Please ensure that your recording is clear and distinguishable. If you are not satisfied, you can go back and re-record.',
             whoseVoice: 'Whose voice is this?',
@@ -145,23 +162,6 @@ export default {
             registrationSuccess: 'Voiceprint registered successfully',
             registrationFailed: 'Voiceprint registration failed: {message}',
             registrationError: 'Voiceprint registration error',
-          },
-        },
-        RecordPanel: {
-          labels: {
-            preparation: 'Recording Preparation',
-            quietEnvironment: 'Quiet Environment',
-            quietEnvironmentDescription:
-              'Conducted in a noise-free, echo-free indoor environment to ensure clear recordings.',
-            naturalVoice: 'Natural Voice',
-            naturalVoiceDescription:
-              'Speak in a normal tone and pace, avoiding exaggerated emotions or tones.',
-            moderateDistance: 'Moderate Distance',
-            moderateDistanceDescription:
-              'Maintain a distance of about 10-15 cm from the microphone to ensure sound quality.',
-            readAloudPhrases: 'Read Aloud Phrases',
-            readAloudPhrasesDescription: 'Lovable Lebot is my good friend.',
-            finish: 'Finish Recording',
           },
         },
       },
@@ -307,9 +307,23 @@ export default {
         },
       },
       settings: {
+        voiceprint: {
+          TestPage: {
+            labels: {
+              hint: 'Please ensure that your recording is clear and distinguishable.',
+              finish: 'Finish Testing',
+            },
+            notifications: {
+              recognitionSuccess: 'Voice recognized: {personName} (Confidence: {confidence}%)',
+              recognitionFailed: 'Voice recognition failed: {message}',
+              recognitionError: 'Voice recognition error',
+            },
+          },
+        },
         VoiceprintPage: {
           labels: {
             addNewVoiceprint: 'Add New Voiceprint',
+            testVoiceprint: 'Test Voiceprint',
           },
         },
       },

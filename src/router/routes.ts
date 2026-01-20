@@ -124,7 +124,15 @@ const routes: RouteRecordRaw[] = [
                   default: () => import('pages/stack/settings/voiceprint/NewPage.vue'),
                   header: () => import('layouts/headers/StackHeader.vue'),
                 },
-              }
+              },
+              {
+                name: 'settings-voiceprint-test',
+                path: 'test',
+                components: {
+                  default: () => import('pages/stack/settings/voiceprint/TestPage.vue'),
+                  header: () => import('layouts/headers/StackHeader.vue'),
+                },
+              },
             ],
           },
         ],

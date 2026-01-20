@@ -3,10 +3,10 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import RecordPanel from 'components/settings/voiceprint/RecordPanel.vue';
+import SubmitPanel from 'components/settings/voiceprint/SubmitPanel.vue';
 
 import { router } from 'src/router';
 import { useAuthStore } from 'stores/auth';
-import ConfirmPanel from 'components/settings/voiceprint/ConfirmPanel.vue';
 
 const { accessToken } = storeToRefs(useAuthStore());
 
@@ -33,7 +33,7 @@ onBeforeMount(async () => {
           }
         "
       />
-      <confirm-panel :name="1" :data="data" @finish="router.go(-1)" @previous="panelIndex = 0" />
+      <submit-panel :name="1" :data="data" @finish="router.go(-1)" @previous="panelIndex = 0" />
     </q-tab-panels>
   </q-page>
 </template>

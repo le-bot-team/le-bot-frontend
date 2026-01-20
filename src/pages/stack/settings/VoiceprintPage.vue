@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 
 import { router } from 'src/router';
-import type { PersonInfo } from 'src/types/api/voiceprint';
-import { retrievePersonsInfo } from 'src/utils/api/voiceprint';
+import type { Person } from 'src/types/api/voiceprint';
+import { getPersons } from 'src/utils/api/voiceprint';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 
@@ -12,7 +12,7 @@ const i18n = i18nSubPath('pages.stack.settings.VoiceprintPage');
 
 const { accessToken } = storeToRefs(useAuthStore());
 
-const persons = ref<PersonInfo[]>([]);
+const persons = ref<Person[]>([]);
 
 onMounted(async () => {
   if (!accessToken.value) {
@@ -20,10 +20,10 @@ onMounted(async () => {
     return;
   }
   try {
-    const { data: response } = await retrievePersonsInfo(accessToken.value);
+    const { data: response } = await getPersons(accessToken.value);
     if (response.success) {
       console.log(response);
-      persons.value = response.data.persons;
+      persons.value = response.data;
     } else {
       console.error('Failed to fetch persons:', response.message);
     }
@@ -53,6 +53,13 @@ onMounted(async () => {
       :label="i18n('labels.addNewVoiceprint')"
       no-caps
       to="/stack/settings/voiceprint/new"
+    />
+    <q-btn
+      color="secondary"
+      flat
+      :label="i18n('labels.testVoiceprint')"
+      no-caps
+      to="/stack/settings/voiceprint/test"
     />
   </q-page>
 </template>
