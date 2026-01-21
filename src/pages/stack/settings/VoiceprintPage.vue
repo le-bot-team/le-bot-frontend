@@ -35,7 +35,7 @@ onMounted(async () => {
 
 <template>
   <q-page class="column q-gutter-y-lg q-pa-md">
-    <q-card>
+    <q-card bordered flat>
       <q-list>
         <q-item v-for="(person, index) in persons" :key="index">
           <q-item-section>
@@ -43,7 +43,12 @@ onMounted(async () => {
             <q-item-label caption>{{ person.person_id }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-btn dense flat icon="mdi-chevron-right" />
+            <q-btn
+              dense
+              flat
+              icon="mdi-chevron-right"
+              :to="`/stack/settings/voiceprint/detail/${person.person_id}`"
+            />
           </q-item-section>
         </q-item>
       </q-list>
@@ -56,7 +61,6 @@ onMounted(async () => {
     />
     <q-btn
       color="secondary"
-      flat
       :label="i18n('labels.testVoiceprint')"
       no-caps
       to="/stack/settings/voiceprint/test"

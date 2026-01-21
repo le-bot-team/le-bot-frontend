@@ -1,3 +1,5 @@
+import type { VprRelationship } from 'components/vpr-relationships';
+
 interface VprErrorResponse {
   success: false;
   message: string;
@@ -9,15 +11,21 @@ export type EmptyResponse =
       success: true;
     };
 
-export type VprRelationship = 'self' | 'family' | 'friend' | 'colleague' | 'other';
-
 export interface Person {
   person_id: string;
   person_name?: string;
-  relationship: string;
+  relationship: VprRelationship;
   voice_count: number;
   is_temporal: boolean;
   expire_date?: string;
+}
+
+export interface PersonDetail extends Person {
+  voices: {
+    voice_id: string;
+    feature_vector: number[];
+    created_at: string;
+  }[];
 }
 
 export interface RecognitionData {
@@ -62,13 +70,7 @@ export type GetPersonResponse =
   | VprErrorResponse
   | {
       success: true;
-      data: Person & {
-        voices: {
-          voice_id: string;
-          feature_vector: number[];
-          created_at: string;
-        }[];
-      };
+      data: PersonDetail;
     };
 
 export interface UpdatePersonRequest {

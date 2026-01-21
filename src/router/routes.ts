@@ -118,6 +118,14 @@ const routes: RouteRecordRaw[] = [
                 },
               },
               {
+                name: 'settings-voiceprint-detail',
+                path: 'detail/:personId',
+                components: {
+                  default: () => import('pages/stack/settings/voiceprint/DetailPage.vue'),
+                  header: () => import('layouts/headers/StackHeader.vue'),
+                },
+              },
+              {
                 name: 'settings-voiceprint-new',
                 path: 'new',
                 components: {

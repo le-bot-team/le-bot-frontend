@@ -3,7 +3,8 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-import type { VprRelationship } from 'src/types/api/voiceprint';
+import { RELATIONSHIP_OPTIONS } from 'components/vpr-relationships';
+
 import { register } from 'src/utils/api/voiceprint';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
@@ -22,33 +23,10 @@ const { notify } = useQuasar();
 
 const i18n = i18nSubPath('components.settings.voiceprint.SubmitPanel');
 
-const relationshipOptions: { label: string; value: VprRelationship }[] = [
-  {
-    label: i18n('labels.self'),
-    value: 'self',
-  },
-  {
-    label: i18n('labels.family'),
-    value: 'family',
-  },
-  {
-    label: i18n('labels.friend'),
-    value: 'friend',
-  },
-  {
-    label: i18n('labels.colleague'),
-    value: 'colleague',
-  },
-  {
-    label: i18n('labels.other'),
-    value: 'other',
-  },
-];
-
 const audioSrc = ref<string>();
 const isLoading = ref<boolean>(false);
 const personName = ref<string>();
-const relationship = ref(relationshipOptions[0]);
+const relationship = ref(RELATIONSHIP_OPTIONS[0]);
 
 const confirm = async (): Promise<void> => {
   if (!accessToken.value) {
@@ -137,7 +115,7 @@ onBeforeUnmount(() => {
       </div>
       <q-select
         :label="i18n('labels.relationshipHint')"
-        :options="relationshipOptions"
+        :options="RELATIONSHIP_OPTIONS"
         outlined
         v-model="relationship"
       />

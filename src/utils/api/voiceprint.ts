@@ -1,5 +1,7 @@
 import { api } from 'boot/axios';
 
+import type { VprRelationship } from 'components/vpr-relationships';
+
 import type {
   EmptyResponse,
   GetPersonResponse,
@@ -7,7 +9,6 @@ import type {
   RecognizeResponse,
   RegisterResponse,
   UpdatePersonRequest,
-  VprRelationship,
 } from 'src/types/api/voiceprint';
 
 export const recognize = async (accessToken: string, audioBase64: string) =>

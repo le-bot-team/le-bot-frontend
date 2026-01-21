@@ -150,11 +150,6 @@ export default {
             whoseVoiceHint: 'Please enter the name of the voice owner',
             relationship: 'Relationship with you',
             relationshipHint: 'Select the relationship with the voice owner',
-            self: 'Self',
-            family: 'Family',
-            friend: 'Friend',
-            colleague: 'Colleague',
-            other: 'Other',
             confirm: 'Confirm and Submit',
             previous: 'Go back',
           },
@@ -165,6 +160,13 @@ export default {
           },
         },
       },
+    },
+    vprRelationships: {
+      self: 'Self',
+      family: 'Family',
+      friend: 'Friend',
+      colleague: 'Colleague',
+      other: 'Other',
     },
     AudioRecorder: {
       labels: {
@@ -308,6 +310,31 @@ export default {
       },
       settings: {
         voiceprint: {
+          DetailPage: {
+            labels: {
+              name: 'Name: {name}',
+              id: 'ID: {id}',
+              temporary: 'Temporary',
+              voiceprints: 'Voiceprints',
+              vectorLength: 'Vector Length: {length}',
+              noVoiceprints: 'No voiceprints registered yet.',
+              addVoiceprint: 'Add Voiceprint',
+              deletePerson: 'Delete Person',
+              deletePersonPrompt:
+                'Are you sure you want to delete "{name}" and all associated voiceprints?',
+              deletePersonWarning:
+                'This action cannot be undone. The person will need to re-register if you want to add them again.',
+              cancel: 'Cancel',
+              confirm: 'Confirm',
+            },
+            notifications: {
+              deletePersonSuccess: 'Person deleted successfully',
+              deletePersonFailed: 'Failed to delete person',
+              deletePersonError: 'Error deleting person',
+              fetchPersonDetailFailed: 'Failed to fetch person details',
+              fetchPersonDetailError: 'Error fetching person details',
+            },
+          },
           TestPage: {
             labels: {
               hint: 'Please ensure that your recording is clear and distinguishable.',
