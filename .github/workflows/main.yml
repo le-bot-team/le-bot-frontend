@@ -36,17 +36,12 @@ jobs:
       RELEASE_FOLDER: ./release
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install Dependencies and Build
         run: |
-          pnpm i
-          DEPLOY_GITHUB_PAGE=true pnpm run build
+          bun install
+          DEPLOY_GITHUB_PAGE=true bun run build
       - name: Deploy to GitHub Pages
         uses: crazy-max/ghaction-github-pages@v4
         env:
@@ -64,17 +59,12 @@ jobs:
       RELEASE_FOLDER: ./release
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
       - name: Install Dependencies and Build
         run: |
-          pnpm i
-          DEPLOY_ELYSIA=true pnpm run build
+          bun install
+          DEPLOY_ELYSIA=true bun run build
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
