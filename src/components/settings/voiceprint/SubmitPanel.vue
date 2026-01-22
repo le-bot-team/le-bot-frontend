@@ -5,13 +5,15 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { RELATIONSHIP_OPTIONS } from 'components/vpr-relationships';
 
-import { register } from 'src/utils/api/voiceprint';
+import { addVoice, register } from 'src/utils/api/voiceprint';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
+import type { EmptyResponse } from 'src/types/api/voiceprint';
 
 const props = defineProps<{
   name: string | number;
   data?: Blob | undefined;
+  personId?: string | undefined;
 }>();
 const emit = defineEmits<{
   finish: [];
@@ -37,24 +39,37 @@ const confirm = async (): Promise<void> => {
     console.error('No audio data provided for voiceprint registration.');
     return;
   }
-  if (!personName.value || !personName.value.length) {
-    console.error('Person name is required for voiceprint registration.');
-    return;
-  }
-  if (!relationship.value) {
-    console.error('Relationship is required for voiceprint registration.');
-    return;
-  }
   isLoading.value = true;
 
   try {
     const dataUrl = await blobToDataUrl(props.data);
-    const { data: result } = await register(
-      accessToken.value,
-      dataUrl.substring(dataUrl.indexOf(',') + 1),
-      personName.value,
-      relationship.value.value,
-    );
+    let result: EmptyResponse;
+    if (props.personId?.length) {
+      result = (
+        await addVoice(
+          accessToken.value,
+          props.personId,
+          dataUrl.substring(dataUrl.indexOf(',') + 1),
+        )
+      ).data;
+    } else {
+      if (!personName.value || !personName.value.length) {
+        console.error('Person name is required for voiceprint registration.');
+        return;
+      }
+      if (!relationship.value) {
+        console.error('Relationship is required for voiceprint registration.');
+        return;
+      }
+      result = (
+        await register(
+          accessToken.value,
+          dataUrl.substring(dataUrl.indexOf(',') + 1),
+          personName.value,
+          relationship.value.value,
+        )
+      ).data;
+    }
     if (!result.success) {
       notify({
         type: 'negative',
@@ -103,13 +118,13 @@ onBeforeUnmount(() => {
         <audio class="full-width" controls :src="audioSrc" />
       </q-card-section>
     </q-card>
-    <div class="column q-gutter-y-sm">
+    <div v-if="!personId?.length" class="column q-gutter-y-sm">
       <div class="text-body1 text-bold">
         {{ i18n('labels.whoseVoice') }}
       </div>
       <q-input clearable :label="i18n('labels.whoseVoiceHint')" outlined v-model="personName" />
     </div>
-    <div class="column q-gutter-y-sm">
+    <div v-if="!personId?.length" class="column q-gutter-y-sm">
       <div class="text-body1 text-bold">
         {{ i18n('labels.relationship') }}
       </div>
@@ -122,7 +137,7 @@ onBeforeUnmount(() => {
     </div>
     <q-btn
       color="primary"
-      :disable="!data || !personName?.length"
+      :disable="!data || (!personId?.length && !personName?.length)"
       :label="i18n('labels.confirm')"
       no-caps
       @click="confirm"

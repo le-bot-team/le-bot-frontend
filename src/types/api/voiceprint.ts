@@ -79,6 +79,13 @@ export interface UpdatePersonRequest {
   isTemporal?: boolean;
 }
 
-export interface UpdateVoiceRequest {
-  audio: string;
-}
+export type AddVoiceResponse =
+  | VprErrorResponse
+  | {
+      success: true;
+      data: {
+        person_id: string;
+        voice_id: string;
+        voice_count: number;
+      };
+    };

@@ -121,11 +121,43 @@ export default {
         profile: 'Profile',
         settings: 'Settings',
         settingsVoiceprint: 'Voiceprint Settings',
+        settingsVoiceprintDetail: 'Voiceprint Details',
         settingsVoiceprintNew: 'Add Voiceprint',
       },
     },
     settings: {
       voiceprint: {
+        DeletePersonDialog: {
+          labels: {
+            title: 'Delete Person',
+            deletePrompt:
+              'Are you sure you want to delete "{personName}" and all associated voiceprints?',
+            deleteWarning:
+              'This action cannot be undone. The person will need to re-register if you want to add them again.',
+            cancel: 'Cancel',
+            confirm: 'Confirm',
+          },
+          notifications: {
+            deleteSuccess: 'Person deleted successfully',
+            deleteFailed: 'Failed to delete person',
+            deleteError: 'Error deleting person',
+          },
+        },
+        DeleteVoiceDialog: {
+          labels: {
+            title: 'Delete Voiceprint',
+            deletePrompt: 'Are you sure you want to delete this voiceprint for "{personName}"?',
+            deleteWarning:
+              'This action cannot be undone. You will lose this voiceprint permanently.',
+            cancel: 'Cancel',
+            confirm: 'Confirm',
+          },
+          notifications: {
+            deleteSuccess: 'Voiceprint deleted successfully',
+            deleteFailed: 'Failed to delete voiceprint',
+            deleteError: 'Error deleting voiceprint',
+          },
+        },
         RecordPanel: {
           labels: {
             preparation: 'Recording Preparation',
@@ -320,17 +352,8 @@ export default {
               noVoiceprints: 'No voiceprints registered yet.',
               addVoiceprint: 'Add Voiceprint',
               deletePerson: 'Delete Person',
-              deletePersonPrompt:
-                'Are you sure you want to delete "{name}" and all associated voiceprints?',
-              deletePersonWarning:
-                'This action cannot be undone. The person will need to re-register if you want to add them again.',
-              cancel: 'Cancel',
-              confirm: 'Confirm',
             },
             notifications: {
-              deletePersonSuccess: 'Person deleted successfully',
-              deletePersonFailed: 'Failed to delete person',
-              deletePersonError: 'Error deleting person',
               fetchPersonDetailFailed: 'Failed to fetch person details',
               fetchPersonDetailError: 'Error fetching person details',
             },
@@ -349,8 +372,8 @@ export default {
         },
         VoiceprintPage: {
           labels: {
-            addNewVoiceprint: 'Add New Voiceprint',
-            testVoiceprint: 'Test Voiceprint',
+            addNewPerson: 'Add New Person',
+            testVoice: 'Test Voice',
           },
         },
       },

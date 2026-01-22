@@ -55,13 +55,13 @@ onMounted(async () => {
     </q-card>
     <q-btn
       color="primary"
-      :label="i18n('labels.addNewVoiceprint')"
+      :label="i18n('labels.addNewPerson')"
       no-caps
       to="/stack/settings/voiceprint/new"
     />
     <q-btn
       color="secondary"
-      :label="i18n('labels.testVoiceprint')"
+      :label="i18n('labels.testVoice')"
       no-caps
       to="/stack/settings/voiceprint/test"
     />

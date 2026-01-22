@@ -74,6 +74,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'settings-voiceprint',
   },
   {
+    label: i18n('stack.settingsVoiceprintDetail'),
+    icon: 'mdi-account-voice',
+    available: true,
+    route: 'settings-voiceprint-detail',
+  },
+  {
     label: i18n('stack.settingsVoiceprintNew'),
     icon: 'mdi-microphone-plus',
     available: true,

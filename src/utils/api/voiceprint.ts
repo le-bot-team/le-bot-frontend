@@ -3,6 +3,7 @@ import { api } from 'boot/axios';
 import type { VprRelationship } from 'components/vpr-relationships';
 
 import type {
+  AddVoiceResponse,
   EmptyResponse,
   GetPersonResponse,
   GetPersonsResponse,
@@ -77,6 +78,19 @@ export const updatePerson = async (
     },
   });
 
+export const addVoice = async (accessToken: string, personId: string, audioBase64: string) =>
+  await api.post<EmptyResponse>(
+    `/voiceprint/persons/${personId}/voices/add`,
+    {
+      audio: audioBase64,
+    },
+    {
+      headers: {
+        'x-access-token': accessToken,
+      },
+    },
+  );
+
 export const deleteVoice = async (accessToken: string, personId: string, voiceId: string) =>
   await api.delete<EmptyResponse>(`/voiceprint/persons/${personId}/voices/${voiceId}`, {
     headers: {
@@ -90,7 +104,7 @@ export const updateVoice = async (
   voiceId: string,
   audioBase64: string,
 ) =>
-  await api.put<EmptyResponse>(
+  await api.put<AddVoiceResponse>(
     `/voiceprint/persons/${personId}/voices/${voiceId}`,
     {
       audio: audioBase64,
