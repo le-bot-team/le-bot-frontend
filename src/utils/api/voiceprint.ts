@@ -29,6 +29,8 @@ export const register = async (
   accessToken: string,
   audioBase64: string,
   name: string,
+  age: number,
+  address: string,
   relationship: VprRelationship,
 ) =>
   await api.post<RegisterResponse>(

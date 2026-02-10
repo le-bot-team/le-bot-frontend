@@ -30,13 +30,16 @@ export interface PersonDetail extends Person {
 
 export interface RecognitionData {
   person_id: string;
-  person_name: string;
   voice_id: string;
-  relationship: VprRelationship;
   confidence: number;
   similarity: number;
   processing_time_ms: number;
   details: Record<string, unknown>[];
+  name?: string;
+  age?: number;
+  address?: string;
+  relationship: VprRelationship;
+  metadata?: Record<string, unknown>;
 }
 
 export type RecognizeResponse =
