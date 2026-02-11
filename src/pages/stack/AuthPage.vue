@@ -10,11 +10,9 @@ import { i18nSubPath } from 'src/utils/common';
 const i18n = i18nSubPath('pages.main.AuthPage');
 
 const avatar = ref<string>('');
-const code = ref<string>('');
-const emailOrPhone = ref<string>('');
+const email = ref<string>('');
 const isNew = ref<boolean>(false);
 const panelIndex = ref<number>(0);
-const processType = ref<'email' | 'phone'>();
 </script>
 
 <template>
@@ -45,26 +43,22 @@ const processType = ref<'email' | 'phone'>();
             :name="0"
             @finish="panelIndex = 3"
             @next="
-              (_isNew, _type, _emailOrPhone, _code) => {
+              (_isNew, _email, _code) => {
                 isNew = _isNew;
-                processType = _type;
-                emailOrPhone = _emailOrPhone;
-                code = _code;
+                email = _email;
                 panelIndex = 1;
               }
             "
           />
           <new-password-panel
-            :code="code"
-            :email-or-phone="emailOrPhone"
+            :email="email"
             :is-new="isNew"
             :name="1"
-            :type="processType"
             @finish="panelIndex = 3"
             @next="panelIndex = 2"
           />
           <setup-profile-panel :name="2" @finish="panelIndex = 3" />
-          <finish-panel :is-new="isNew" :name="3" :nickname="emailOrPhone" />
+          <finish-panel :is-new="isNew" :name="3" :nickname="email" />
         </q-tab-panels>
       </div>
     </div>

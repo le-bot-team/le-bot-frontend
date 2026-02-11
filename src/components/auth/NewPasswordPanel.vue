@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
-import { emailPassword, emailReset, phonePassword, phoneReset } from 'src/utils/api/auth';
+import { emailPassword, emailReset } from 'src/utils/api/auth';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from 'stores/auth';
+import VerificationCodeInput from 'components/auth/VerificationCodeInput.vue';
 
 const props = defineProps<{
-  code: string;
-  emailOrPhone: string;
+  email: string;
   isNew: boolean;
   name: string | number;
-  type: 'email' | 'phone' | undefined;
 }>();
 const emit = defineEmits<{
   finish: [];
@@ -20,42 +19,25 @@ const emit = defineEmits<{
   previous: [];
 }>();
 
-const functionsMatrix = {
-  email: {
-    reset: emailReset,
-    login: emailPassword,
-  },
-  phone: {
-    reset: phoneReset,
-    login: phonePassword,
-  },
-};
-
 const i18n = i18nSubPath('components.auth.NewPasswordPanel');
 
 const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
 
+const code = ref<string>();
 const newPassword = ref<string>();
 
-const confirmNewPassword = async () => {
-  if (!props.type) {
-    return;
-  }
+const codeError = computed(() => code.value?.length !== 6);
+const passwordError = computed(
+  () => newPassword.value === undefined || newPassword.value.length < 8,
+);
 
-  if (newPassword.value === undefined || newPassword.value.length < 8) {
-    notify({
-      type: 'negative',
-      message: i18n('notifications.passwordTooShort'),
-    });
+const confirmNewPassword = async () => {
+  if (!newPassword.value?.length || !code.value?.length) {
     return;
   }
   {
-    const { data } = await functionsMatrix[props.type].reset(
-      props.emailOrPhone,
-      props.code,
-      newPassword.value,
-    );
+    const { data } = await emailReset(props.email, code.value, newPassword.value);
     if (!data.success) {
       notify({
         type: 'negative',
@@ -68,7 +50,7 @@ const confirmNewPassword = async () => {
       message: i18n('notifications.passwordResetSuccess'),
     });
   }
-  const { data } = await emailPassword(props.emailOrPhone, newPassword.value);
+  const { data } = await emailPassword(props.email, newPassword.value);
   if (!data.success) {
     notify({
       type: 'negative',
@@ -89,26 +71,10 @@ const confirmNewPassword = async () => {
 };
 
 onMounted(() => {
-  if (props.code?.length !== 6) {
+  if (!props.email?.length) {
     notify({
       type: 'negative',
-      message: i18n('notifications.invalidCode'),
-    });
-    setTimeout(() => {
-      emit('previous');
-    }, 3000);
-  } else if (!props.emailOrPhone?.length) {
-    notify({
-      type: 'negative',
-      message: i18n('notifications.invalidEmailOrPhone'),
-    });
-    setTimeout(() => {
-      emit('previous');
-    }, 3000);
-  } else if (!props.type) {
-    notify({
-      type: 'negative',
-      message: i18n('notifications.invalidType'),
+      message: i18n('notifications.invalidEmail'),
     });
     setTimeout(() => {
       emit('previous');
@@ -122,6 +88,7 @@ onMounted(() => {
     <div class="text-h6 text-center" style="white-space: pre-line">
       {{ i18n(`labels.${isNew ? 'welcomeNew' : 'welcome'}`, { username: 'guest' }) }}
     </div>
+    <verification-code-input :email="email" v-model="code" />
     <q-input
       class="fullwidth"
       clearable
@@ -130,17 +97,21 @@ onMounted(() => {
       name="newPassword"
       type="password"
       outlined
+      :rules="[
+        () => !newPassword?.length || newPassword.length >= 8 || i18n('errors.passwordTooShort'),
+      ]"
       v-model="newPassword"
     />
     <q-btn
       class="q-mt-lg full-width"
       color="primary"
-      :disable="!newPassword?.length"
+      :disable="codeError || passwordError"
       :label="i18n('labels.confirmNewPassword')"
       no-caps
       size="lg"
       @click="confirmNewPassword"
     />
+    <q-btn class="q-mt-lg full-width" color="primary" />
   </q-tab-panel>
 </template>
 

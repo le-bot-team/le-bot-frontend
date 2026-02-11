@@ -31,7 +31,7 @@ const promptDeletePerson = () => {
     component: DeletePersonDialog,
     componentProps: {
       personId: personId.value,
-      personName: personDetail.value?.person_name,
+      personName: personDetail.value?.name,
     },
   }).onOk(() => setTimeout(() => router.go(-1), 2000));
 };
@@ -44,7 +44,7 @@ const promptDeleteVoice = (voiceId: string, createdAt: string) => {
     component: DeleteVoiceDialog,
     componentProps: {
       personId: personId.value,
-      personName: personDetail.value?.person_name,
+      personName: personDetail.value?.name,
       voiceId,
       createdAt,
     },
@@ -106,7 +106,7 @@ onMounted(async () => {
         <div class="row justify-between items-center">
           <div class="column q-gutter-y-md">
             <div v-if="personDetail" class="text-body1">
-              {{ i18n('labels.name', { name: personDetail.person_name }) }}
+              {{ i18n('labels.name', { name: personDetail.name }) }}
             </div>
             <q-skeleton v-else type="text" />
             <div v-if="personDetail" class="text-caption text-grey">

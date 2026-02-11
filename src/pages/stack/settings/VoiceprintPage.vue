@@ -39,7 +39,7 @@ onMounted(async () => {
       <q-list>
         <q-item v-for="(person, index) in persons" :key="index">
           <q-item-section>
-            <q-item-label>{{ person.person_name }}</q-item-label>
+            <q-item-label>{{ person.name }}</q-item-label>
             <q-item-label caption>{{ person.person_id }}</q-item-label>
           </q-item-section>
           <q-item-section side>

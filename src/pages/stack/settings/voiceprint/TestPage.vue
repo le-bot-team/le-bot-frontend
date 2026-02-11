@@ -62,7 +62,7 @@ const onAudioRecordStop = async () => {
       notify({
         type: 'positive',
         message: i18n('notifications.recognitionSuccess', {
-          personName: result.data.person_name,
+          personName: result.data.name,
           confidence: result.data.confidence.toFixed(2),
         }),
       });

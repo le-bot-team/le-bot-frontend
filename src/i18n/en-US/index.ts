@@ -12,6 +12,9 @@ export default {
         },
       },
       NewPasswordPanel: {
+        errors: {
+          passwordTooShort: 'Password must be at least 8 characters',
+        },
         labels: {
           welcome:
             'Welcome back, {username}!\n' +
@@ -22,13 +25,18 @@ export default {
           confirmNewPassword: 'Confirm New Password',
         },
         notifications: {
-          invalidCode: 'Invalid verification code',
-          invalidEmailOrPhone: 'Invalid email or phone number',
-          invalidType: 'Invalid type',
-          passwordTooShort: 'Password too short',
+          invalidEmail: 'Invalid email address',
           passwordResetSuccess: 'Password reset successfully',
           loginSuccess: 'Login successfully',
           unknownError: 'Unknown error',
+        },
+      },
+      PasswordInput: {
+        errors: {
+          invalidCode: 'Invalid password',
+        },
+        labels: {
+          title: 'Password',
         },
       },
       SetupProfilePanel: {
@@ -49,24 +57,35 @@ export default {
       },
       SignInOrSignUpPanel: {
         labels: {
-          phoneOrEmail: 'Phone Number / Email',
-          code: 'Verification Code',
+          email: 'Email',
           password: 'Password',
-          sendCode: 'Send Code',
-          resendCode: 'Resend Code',
-          resendCodeCoolDown: 'Resend Code ({seconds}s)',
           signInOrSignUp: 'Sign In / Sign Up',
           signIn: 'Sign In',
           usePassword: 'Use Password',
           useCode: 'Use Code',
         },
         errors: {
-          invalidCode: 'Invalid verification code',
-          invalidPhoneOrEmail: 'Invalid phone number or email',
+          invalidEmail: 'Invalid email address',
         },
         notifications: {
           codeSent: 'Verification code sent',
           unknownError: 'Unknown error',
+        },
+      },
+      VerificationCodeInput: {
+        errors: {
+          invalidCode: 'Invalid verification code',
+        },
+        labels: {
+          title: 'Verification Code',
+          sendCode: 'Send Code',
+          resendCode: 'Resend Code',
+          resendCodeCooldown: 'Resend Code ({seconds}s)',
+        },
+        notifications: {
+          sendCodeError: 'Error sending verification code',
+          sendCodeFailed: 'Failed to send verification code',
+          sendCodeSuccess: 'Verification code sent successfully',
         },
       },
     },

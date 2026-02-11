@@ -3,77 +3,52 @@ import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 
-import {
-  emailChallenge,
-  emailCode,
-  emailPassword,
-  phoneChallenge,
-  phoneCode,
-  phonePassword,
-} from 'src/utils/api/auth';
+import { emailCode, emailPassword } from 'src/utils/api/auth';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
+import VerificationCodeInput from 'components/auth/VerificationCodeInput.vue';
+import PasswordInput from 'components/auth/PasswordInput.vue';
 
 defineProps<{
   name: string | number;
 }>();
 const emit = defineEmits<{
   finish: [];
-  next: [isNew: boolean, type: 'email' | 'phone', emailOrPhone: string, code: string];
+  next: [isNew: boolean, email: string, code: string];
 }>();
 
 const i18n = i18nSubPath('components.auth.SignInOrSignUpPanel');
 
-const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
-  storeToRefs(useAuthStore());
+const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 const processFunctionsMatrix = {
-  code: {
-    email: emailCode,
-    phone: phoneCode,
-  },
-  password: {
-    email: emailPassword,
-    phone: phonePassword,
-  },
-};
-const sendCodeFunctionsMatrix = {
-  email: emailChallenge,
-  phone: phoneChallenge,
+  code: emailCode,
+  password: emailPassword,
 };
 
 const codeOrPassword = ref<string>();
-const emailOrPhone = ref<string>();
-const isSendingCode = ref(false);
+const email = ref<string>();
 const processMethod = ref<'code' | 'password'>('code');
 
 const codeError = computed(
   () => processMethod.value === 'code' && codeOrPassword.value?.length !== 6,
 );
-const processType = computed(() => {
-  if (emailRegex.test(emailOrPhone.value ?? '')) {
-    return 'email';
-  } else if (phoneRegex.test(emailOrPhone.value ?? '')) {
-    return 'phone';
-  }
-  return null;
-});
+const isValidEmail = computed(() => emailRegex.test(email.value ?? ''));
 
 const processSignInOrSignUp = async () => {
-  if (!emailOrPhone.value?.length || !codeOrPassword.value?.length || !processType.value?.length) {
+  if (!email.value?.length || !codeOrPassword.value?.length || !isValidEmail.value) {
     return;
   }
 
-  const processFunction = processFunctionsMatrix[processMethod.value][processType.value];
+  const processFunction = processFunctionsMatrix[processMethod.value];
   if (!processFunction) {
     return;
   }
 
   try {
-    const { data } = await processFunction(emailOrPhone.value, codeOrPassword.value);
+    const { data } = await processFunction(email.value, codeOrPassword.value);
     if (!data.success) {
       notify({
         type: 'negative',
@@ -85,9 +60,9 @@ const processSignInOrSignUp = async () => {
     accessToken.value = data.data.accessToken;
 
     if (data.data.isNew) {
-      emit('next', true, processType.value, emailOrPhone.value, codeOrPassword.value);
+      emit('next', true, email.value, codeOrPassword.value);
     } else if (data.data.noPassword) {
-      emit('next', false, processType.value, emailOrPhone.value, codeOrPassword.value);
+      emit('next', false, email.value, codeOrPassword.value);
     } else {
       emit('finish');
     }
@@ -98,35 +73,6 @@ const processSignInOrSignUp = async () => {
     });
   }
 };
-
-const sendCode = async () => {
-  if (!processType.value || !emailOrPhone.value?.length) {
-    return;
-  }
-
-  isSendingCode.value = true;
-  try {
-    const result = await sendCodeFunctionsMatrix[processType.value](emailOrPhone.value);
-    if (!result.data.success) {
-      notify({
-        type: 'negative',
-        message: result.data.message ?? i18n('notifications.unknownError'),
-      });
-      isSendingCode.value = false;
-      return;
-    }
-    notify({
-      type: 'positive',
-      message: i18n('notifications.codeSent'),
-    });
-  } catch (error) {
-    notify({
-      type: 'negative',
-      message: (error as Error).message ?? i18n('notifications.unknownError'),
-    });
-  }
-  isSendingCode.value = false;
-};
 </script>
 
 <template>
@@ -134,52 +80,23 @@ const sendCode = async () => {
     <q-input
       class="full-width"
       clearable
-      :label="i18n('labels.phoneOrEmail')"
+      :label="i18n('labels.email')"
       lazy-rules
-      name="emailOrPhoneInput"
+      name="emailInput"
       outlined
-      :rules="[() => !emailOrPhone?.length || !!processType || i18n('errors.invalidPhoneOrEmail')]"
-      v-model="emailOrPhone"
+      :rules="[() => !email?.length || isValidEmail || i18n('errors.invalidEmail')]"
+      v-model="email"
     />
-    <q-input
-      class="full-width"
-      clearable
-      counter
-      :label="i18n(`labels.${processMethod}`)"
-      lazy-rules
-      :maxlength="processMethod === 'code' ? 6 : undefined"
-      :name="processMethod"
-      :type="processMethod === 'password' ? 'password' : undefined"
-      outlined
-      :rules="[() => !codeOrPassword?.length || !codeError || i18n('errors.invalidCode')]"
+    <verification-code-input
+      v-if="processMethod === 'code'"
+      :email="email"
       v-model="codeOrPassword"
-    >
-      <template v-slot:append>
-        <q-btn
-          v-if="processMethod === 'code'"
-          color="primary"
-          dense
-          :disable="!processType"
-          flat
-          :label="
-            isNeverSendCode
-              ? i18n('labels.sendCode')
-              : remainedSendCodeCooldownSeconds
-                ? i18n('labels.resendCodeCooldown', {
-                    seconds: remainedSendCodeCooldownSeconds,
-                  })
-                : i18n('labels.resendCode')
-          "
-          :loading="isSendingCode"
-          no-caps
-          @click="sendCode"
-        />
-      </template>
-    </q-input>
+    />
+    <password-input v-else v-model="codeOrPassword" />
     <q-btn
       class="q-mt-lg full-width"
       color="primary"
-      :disable="!processType || !codeOrPassword?.length || codeError"
+      :disable="!isValidEmail || !codeOrPassword?.length || codeError"
       :label="i18n(`labels.${processMethod === 'code' ? 'signInOrSignUp' : 'signIn'}`)"
       no-caps
       size="lg"

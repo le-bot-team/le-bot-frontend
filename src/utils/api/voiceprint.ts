@@ -30,16 +30,19 @@ export const register = async (
   audioBase64: string,
   name: string,
   age: number,
-  address: string,
   relationship: VprRelationship,
+  address?: string,
+  isTemporal?: boolean,
 ) =>
   await api.post<RegisterResponse>(
     '/voiceprint/register',
     {
       audio: audioBase64,
       name,
+      age,
+      address,
       relationship,
-      is_temporal: false,
+      isTemporal: isTemporal ?? false,
     },
     {
       headers: {

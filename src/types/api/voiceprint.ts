@@ -13,11 +13,14 @@ export type EmptyResponse =
 
 export interface Person {
   person_id: string;
-  person_name?: string;
-  relationship: VprRelationship;
   voice_count: number;
   is_temporal: boolean;
   expire_date?: string;
+  name?: string;
+  age?: number;
+  address?: string;
+  relationship: VprRelationship;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PersonDetail extends Person {

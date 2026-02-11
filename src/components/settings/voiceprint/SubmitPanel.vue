@@ -27,6 +27,7 @@ const i18n = i18nSubPath('components.settings.voiceprint.SubmitPanel');
 
 const audioSrc = ref<string>();
 const isLoading = ref<boolean>(false);
+const personAge = ref<number>(30);
 const personName = ref<string>();
 const relationship = ref(RELATIONSHIP_OPTIONS[0]);
 
@@ -66,6 +67,7 @@ const confirm = async (): Promise<void> => {
           accessToken.value,
           dataUrl.substring(dataUrl.indexOf(',') + 1),
           personName.value,
+          personAge.value,
           relationship.value.value,
         )
       ).data;
