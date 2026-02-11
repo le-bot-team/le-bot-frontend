@@ -1,0 +1,1 @@
+import{f as a,h as r,W as s,C as l}from"./index-BMfL_U64.js";const p=a({name:"QToolbar",props:{inset:Boolean},setup(o,{slots:e}){const t=l(()=>"q-toolbar row no-wrap items-center"+(o.inset===!0?" q-toolbar--inset":""));return()=>r("div",{class:t.value,role:"toolbar"},s(e.default))}});export{p as Q};
