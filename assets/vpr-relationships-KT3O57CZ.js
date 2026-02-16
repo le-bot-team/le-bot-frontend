@@ -1,0 +1,1 @@
+import{i as l}from"./common-K7rkEdDd.js";const e=l("components.vprRelationships"),s={self:e("self"),family:e("family"),friend:e("friend"),colleague:e("colleague"),other:e("other")},i=Object.entries(s).map(([a,o])=>({label:o,value:a}));export{s as R,i as a};
