@@ -33,7 +33,7 @@ export default {
       },
       PasswordInput: {
         errors: {
-          invalidCode: 'Invalid password',
+          invalidPassword: 'Invalid password',
         },
         labels: {
           title: 'Password',

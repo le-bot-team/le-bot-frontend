@@ -15,7 +15,7 @@ const i18n = i18nSubPath('components.auth.PasswordInput');
     lazy-rules
     type="password"
     outlined
-    :rules="[() => !modelValue?.length || i18n('errors.invalidPassword')]"
+    :rules="[() => !!modelValue?.length || i18n('errors.invalidPassword')]"
     v-model="modelValue"
   />
 </template>
