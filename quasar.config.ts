@@ -49,11 +49,21 @@ export default defineConfig((ctx) => {
           writeFileSync(resolve(distDir, 'index.html'), indexHtml);
 
           readdirSync(resolve(distDir, 'assets')).forEach((filename) => {
-            if (extname(filename) === '.js') {
-              const filepath = resolve(distDir, 'assets', filename);
+            const filepath = resolve(distDir, 'assets', filename);
+            const ext = extname(filename);
+            if (ext === '.js') {
               const content = readFileSync(filepath).toString();
               if (content.includes('/sw.js')) {
                 const newContent = content.replace('/sw.js', 'sw.js');
+                writeFileSync(filepath, newContent);
+              }
+            } else if (ext === '.css') {
+              // Fix absolute asset URLs to relative paths so Bun's CSS
+              // resolver doesn't try to resolve them as filesystem imports.
+              // CSS and fonts are co-located in the same assets/ directory.
+              const content = readFileSync(filepath).toString();
+              const newContent = content.replaceAll(`url(${base}assets/`, 'url(');
+              if (newContent !== content) {
                 writeFileSync(filepath, newContent);
               }
             }
