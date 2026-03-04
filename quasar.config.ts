@@ -39,9 +39,14 @@ export default defineConfig((ctx) => {
       afterBuild(params) {
         const distDir = params.quasarConf.build?.distDir;
         if (distDir && (process.env.DEPLOY_GITHUB_PAGE || process.env.DEPLOY_ELYSIA)) {
-          const indexHtml = readFileSync(resolve(distDir, 'index.html')).toString();
-          const newHtml = indexHtml.replace('href="/manifest.json"', 'href="manifest.json"');
-          writeFileSync(resolve(distDir, 'index.html'), newHtml);
+          const base = process.env.DEPLOY_GITHUB_PAGE ? '/le-bot-frontend/' : '/public/';
+
+          let indexHtml = readFileSync(resolve(distDir, 'index.html')).toString();
+          // Fix manifest.json path to relative
+          indexHtml = indexHtml.replace('href="/manifest.json"', 'href="manifest.json"');
+          // Fix PWA meta tag icon paths (injected by Quasar without base prefix)
+          indexHtml = indexHtml.replaceAll('"/icons/', `"${base}icons/`);
+          writeFileSync(resolve(distDir, 'index.html'), indexHtml);
 
           readdirSync(resolve(distDir, 'assets')).forEach((filename) => {
             if (extname(filename) === '.js') {
@@ -141,7 +146,7 @@ export default defineConfig((ctx) => {
     devServer: {
       // https: true,
       open: false, // opens a browser window automatically
-      port: 3001,
+      port: 3000,
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
