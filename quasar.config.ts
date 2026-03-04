@@ -3,8 +3,8 @@
 
 import { defineConfig } from '#q-app/wrappers';
 import { fileURLToPath } from 'node:url';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { extname, resolve } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // noinspection JSUnusedGlobalSymbols
 export default defineConfig((ctx) => {
@@ -36,52 +36,37 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
+      // Fix Quasar PWA meta tag paths for GitHub Pages deployment.
+      // Quasar's PWA plugin injects meta/link tags (apple-touch-icon, ms-icon,
+      // safari-pinned-tab, manifest.json) with root-relative paths (/icons/...)
+      // that ignore Vite's base setting. This hook patches them to include the
+      // GitHub Pages base path prefix.
       afterBuild(params) {
+        if (!process.env.DEPLOY_GITHUB_PAGE) return;
         const distDir = params.quasarConf.build?.distDir;
-        if (distDir && (process.env.DEPLOY_GITHUB_PAGE || process.env.DEPLOY_ELYSIA)) {
-          const base = process.env.DEPLOY_GITHUB_PAGE ? '/le-bot-frontend/' : '/public/';
+        if (!distDir) return;
 
-          let indexHtml = readFileSync(resolve(distDir, 'index.html')).toString();
-          // Fix manifest.json path to relative
-          indexHtml = indexHtml.replace('href="/manifest.json"', 'href="manifest.json"');
-          // Fix PWA meta tag icon paths (injected by Quasar without base prefix)
-          indexHtml = indexHtml.replaceAll('"/icons/', `"${base}icons/`);
-          writeFileSync(resolve(distDir, 'index.html'), indexHtml);
-
-          readdirSync(resolve(distDir, 'assets')).forEach((filename) => {
-            const filepath = resolve(distDir, 'assets', filename);
-            const ext = extname(filename);
-            if (ext === '.js') {
-              const content = readFileSync(filepath).toString();
-              if (content.includes('/sw.js')) {
-                const newContent = content.replace('/sw.js', 'sw.js');
-                writeFileSync(filepath, newContent);
-              }
-            } else if (ext === '.css') {
-              // Fix absolute asset URLs to relative paths so Bun's CSS
-              // resolver doesn't try to resolve them as filesystem imports.
-              // CSS and fonts are co-located in the same assets/ directory.
-              const content = readFileSync(filepath).toString();
-              const newContent = content.replaceAll(`url(${base}assets/`, 'url(');
-              if (newContent !== content) {
-                writeFileSync(filepath, newContent);
-              }
-            }
-          });
-        }
+        const base = '/le-bot-frontend/';
+        const indexPath = resolve(distDir, 'index.html');
+        let html = readFileSync(indexPath, 'utf-8');
+        // Fix PWA icon paths: "/icons/..." -> "/le-bot-frontend/icons/..."
+        html = html.replaceAll('"/icons/', `"${base}icons/`);
+        // Fix manifest.json path: "/manifest.json" -> "/le-bot-frontend/manifest.json"
+        html = html.replace('href="/manifest.json"', `href="${base}manifest.json"`);
+        writeFileSync(indexPath, html);
       },
 
       env: {
         LE_BOT_BACKEND_HTTP_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
           ? 'https://cafuuchino.studio26f.org:10543'
-          : process.env.DEPLOY_ELYSIA
-            ? ''
-            : 'http://localhost:3000',
+          : ctx.dev
+            ? 'http://localhost:3000'
+            : '',
         LE_BOT_BACKEND_WS_BASE_URL: process.env.DEPLOY_GITHUB_PAGE
           ? 'wss://cafuuchino.studio26f.org:10543'
-          : process.env.DEPLOY_ELYSIA
-            ? ''
-            : 'ws://localhost:3000',
+          : ctx.dev
+            ? 'ws://localhost:3000'
+            : '',
       },
 
       target: {
@@ -112,11 +97,9 @@ export default defineConfig((ctx) => {
       // distDir
 
       extendViteConf(viteConf) {
-        viteConf.base = process.env.DEPLOY_GITHUB_PAGE
-          ? '/le-bot-frontend/'
-          : process.env.DEPLOY_ELYSIA
-            ? '/public/'
-            : '/';
+        if (process.env.DEPLOY_GITHUB_PAGE) {
+          viteConf.base = '/le-bot-frontend/';
+        }
       },
       // viteVuePluginOptions: {},
 

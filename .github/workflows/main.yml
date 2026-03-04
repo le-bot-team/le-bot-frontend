@@ -2,10 +2,10 @@ name: le-bot-frontend CI/CD
 
 on:
   push:
-    branches: [ ci-*, main ]
-    tags: [ pre*, v* ]
+    branches: [ci-*, main]
+    tags: [pre*, v*]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   get-info:
@@ -64,7 +64,7 @@ jobs:
       - name: Install Dependencies and Build
         run: |
           bun install
-          DEPLOY_ELYSIA=true bun run build
+          bun run build
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
