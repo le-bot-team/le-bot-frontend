@@ -36,22 +36,21 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
-      // Fix Quasar PWA meta tag paths for GitHub Pages deployment.
+      // Fix Quasar PWA meta tag paths for deployment.
       // Quasar's PWA plugin injects meta/link tags (apple-touch-icon, ms-icon,
       // safari-pinned-tab, manifest.json) with root-relative paths (/icons/...)
       // that ignore Vite's base setting. This hook patches them to include the
-      // GitHub Pages base path prefix.
+      // correct base path prefix for the deployment target.
       afterBuild(params) {
-        if (!process.env.DEPLOY_GITHUB_PAGE) return;
         const distDir = params.quasarConf.build?.distDir;
         if (!distDir) return;
 
-        const base = '/le-bot-frontend/';
+        const base = process.env.DEPLOY_GITHUB_PAGE ? '/le-bot-frontend/' : '/public/';
         const indexPath = resolve(distDir, 'index.html');
         let html = readFileSync(indexPath, 'utf-8');
-        // Fix PWA icon paths: "/icons/..." -> "/le-bot-frontend/icons/..."
+        // Fix PWA icon paths: "/icons/..." -> "<base>icons/..."
         html = html.replaceAll('"/icons/', `"${base}icons/`);
-        // Fix manifest.json path: "/manifest.json" -> "/le-bot-frontend/manifest.json"
+        // Fix manifest.json path: "/manifest.json" -> "<base>manifest.json"
         html = html.replace('href="/manifest.json"', `href="${base}manifest.json"`);
         writeFileSync(indexPath, html);
       },
@@ -99,6 +98,8 @@ export default defineConfig((ctx) => {
       extendViteConf(viteConf) {
         if (process.env.DEPLOY_GITHUB_PAGE) {
           viteConf.base = '/le-bot-frontend/';
+        } else if (!ctx.dev) {
+          viteConf.base = '/public/';
         }
       },
       // viteVuePluginOptions: {},
