@@ -1,0 +1,1 @@
+import{bx as t}from"./index-DUi4FMJn.js";const i=n=>new Promise((o,e)=>{const r=new FileReader;r.onloadend=()=>{if(r.error){e(r.error);return}typeof r.result=="string"?o(r.result):e(new Error("FileReader result is not a string"))},r.readAsDataURL(n)}),l=n=>(o,e)=>e?t.t(`${n}.${o}`,e):t.t(`${n}.${o}`);export{i as b,l as i};
