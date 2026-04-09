@@ -74,6 +74,20 @@ export interface WsChatCompleteResponseError extends WsBaseResponseError {
   };
 }
 
+export class WsCancelOutputRequest extends WsBaseRequest {
+  constructor(private readonly cancelType: 'manual' | 'voice' = 'manual') {
+    super(WsAction.cancelOutput);
+  }
+
+  override serialize() {
+    return {
+      data: {
+        cancelType: this.cancelType,
+      },
+    };
+  }
+}
+
 export class WsClearContextRequest extends WsBaseRequest {
   constructor() {
     super(WsAction.clearContext);
@@ -206,6 +220,6 @@ export type WsRequest =
   | WsInputAudioStreamRequest
   | WsInputAudioCompleteRequest
   | WsClearContextRequest
-  | WsCancelOutputResponseSuccess;
+  | WsCancelOutputRequest;
 
 export type WsHandler<T> = (message: T) => Promise<void> | void;

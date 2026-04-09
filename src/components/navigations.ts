@@ -50,6 +50,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'auth',
   },
   {
+    label: i18n('stack.chat'),
+    icon: 'chat',
+    available: true,
+    route: 'chat',
+  },
+  {
     label: i18n('stack.profile'),
     icon: 'account-circle',
     available: true,
