@@ -59,21 +59,83 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-tab-panel class="q-gutter-y-md" :name="name">
-    <div class="text-h6 text-center" style="white-space: pre-line">
+  <q-tab-panel class="finish-panel" :name="name">
+    <div class="finish-title">
       {{ i18n(`labels.${isNew ? 'welcomeNew' : 'welcome'}`, { username: nickname ?? 'guest' }) }}
     </div>
-    <div v-if="isFailed" class="text-body1 text-center text-negative" style="white-space: pre-line">
+    <div v-if="isFailed" class="finish-msg error">
       {{ i18n('labels.setupFailed') }}
     </div>
-    <div v-else class="text-body1 text-center text-grey" style="white-space: pre-line">
+    <div v-else class="finish-msg">
       {{ isReady ? i18n('labels.redirect') : i18n('labels.settingUp') }}
     </div>
-    <div class="row justify-center">
-      <q-btn v-if="isFailed" :label="i18n('labels.startOver')" @click="startOver" />
-      <q-spinner v-else size="xl" />
+    <div class="finish-action">
+      <button v-if="isFailed" class="btn-max" @click="startOver">
+        {{ i18n('labels.startOver') }}
+      </button>
+      <q-spinner v-else size="lg" class="finish-spinner" />
     </div>
   </q-tab-panel>
 </template>
 
-<style scoped></style>
+<style scoped>
+.finish-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px;
+}
+
+.finish-title {
+  font-family: var(--font-family);
+  font-size: var(--font-size-slogan-entry);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+  color: var(--clr-slogan-entry);
+  text-align: center;
+  white-space: pre-line;
+}
+
+.finish-msg {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--clr-weak);
+  text-align: center;
+  white-space: pre-line;
+}
+
+.finish-msg.error {
+  color: var(--clr-error);
+  font-weight: 500;
+}
+
+.finish-action {
+  margin-top: 8px;
+}
+
+.btn-max {
+  width: 311px;
+  height: 56px;
+  border: none;
+  border-radius: 28px;
+  background: rgba(18, 14, 44, 1);
+  color: var(--clr-white, rgba(255, 255, 255, 1));
+  font-family: var(--font-family, 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-max:hover {
+  opacity: 0.9;
+}
+
+.finish-spinner {
+  color: var(--clr-link) !important;
+}
+</style>

@@ -1,15 +1,45 @@
 <script setup lang="ts">
+import { Notify } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, reactive } from 'vue';
+import { onBeforeMount, reactive, computed } from 'vue';
 
 import { router } from 'src/router';
 import { logoutAccount } from 'src/utils/account';
 import { i18nSubPath } from 'src/utils/common';
+import { unbindAndRemoveDevice } from 'src/utils/device';
 import { useDeviceStore } from 'stores/device';
 
 const i18n = i18nSubPath('pages.stack.DeviceConfigPage');
 
-const { currentDevice } = storeToRefs(useDeviceStore());
+const deviceStore = useDeviceStore();
+const { currentDevice } = storeToRefs(deviceStore);
+
+const isVirtual = computed(() => currentDevice.value?.type === 'virtual');
+
+async function handleUnbind() {
+  if (!currentDevice.value) return;
+
+  if (isVirtual.value) {
+    try {
+      await unbindAndRemoveDevice(currentDevice.value.id);
+      Notify.create({
+        type: 'positive',
+        message: i18n('notifications.unbindSuccess'),
+        icon: 'check',
+      });
+      router.replace('/stack/devices').catch(console.error);
+    } catch (err) {
+      console.error('Failed to unbind device:', err);
+      Notify.create({
+        type: 'negative',
+        message: i18n('notifications.unbindFailed'),
+        icon: 'error',
+      });
+    }
+  } else {
+    logoutAccount();
+  }
+}
 
 const menuGroups = reactive<
   { disabled?: boolean; label: string; sideLabel?: string; to?: string }[][]
@@ -76,7 +106,7 @@ onBeforeMount(() => {
         </q-item>
       </q-list>
     </q-card>
-    <q-btn color="red" :label="i18n('labels.unbindDevice')" @click="logoutAccount" />
+    <q-btn color="red" :label="i18n('labels.unbindDevice')" @click="handleUnbind" />
   </q-page>
 </template>
 

@@ -11,3 +11,24 @@ export type RetrieveMineResponse =
         devices: DeviceInfo[];
       };
     };
+
+export type ActivateVirtualDeviceResponse =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+      data: {
+        device: DeviceInfo;
+      };
+    };
+
+export type UnbindDeviceResponse =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+    };

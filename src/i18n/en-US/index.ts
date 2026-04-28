@@ -79,6 +79,7 @@ export default {
         labels: {
           title: 'Verification Code',
           sendCode: 'Send Code',
+          sending: 'Sending...',
           resendCode: 'Resend Code',
           resendCodeCooldown: 'Resend Code ({seconds}s)',
         },
@@ -138,6 +139,7 @@ export default {
         auth: 'Authentication',
         chat: 'Voice Chat',
         deviceConfig: 'Device Config',
+        devices: 'My Devices',
         profile: 'Profile',
         settings: 'Settings',
         settingsVoiceprint: 'Voiceprint Settings',
@@ -335,6 +337,29 @@ export default {
           firmwareUpdate: 'Firmware Update',
           aboutThisDevice: 'About This Device',
           unbindDevice: 'Unbind Device',
+        },
+        notifications: {
+          unbindSuccess: 'Device unbound successfully',
+          unbindFailed: 'Failed to unbind device',
+        },
+      },
+      DevicesPage: {
+        labels: {
+          title: 'My Devices',
+          addVirtualDevice: 'Add Virtual LeBot',
+          virtualDevice: 'Virtual LeBot',
+          serialNumber: 'SN: {sn}',
+          unbind: 'Unbind',
+          cancel: 'Cancel',
+          unbindConfirm: 'Are you sure you want to unbind this device?',
+          noVirtualDevices: 'No virtual devices yet. Add one to start chatting!',
+          maxDevicesReached: 'You can add up to 5 virtual devices',
+        },
+        notifications: {
+          activateSuccess: 'Virtual LeBot activated successfully',
+          activateFailed: 'Failed to activate virtual device',
+          unbindSuccess: 'Device unbound successfully',
+          unbindFailed: 'Failed to unbind device',
         },
       },
       ProfilePage: {

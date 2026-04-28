@@ -71,7 +71,7 @@ export class WsWrapper {
       }, 3000);
     };
     this._ws.onmessage = async (event) => {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data as string);
       if (this._actionHandlers.has(message.action)) {
         await this._actionHandlers.get(message.action)?.call(this, message as never);
       } else {

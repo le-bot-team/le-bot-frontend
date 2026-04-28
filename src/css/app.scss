@@ -1,1 +1,170 @@
 // app global css in SCSS form
+
+// ===== Design Token CSS Custom Properties =====
+// These tokens are inherited by all components.
+// Reference: Blue Lake design specs for 登录认证模块
+
+:root {
+  // Colors
+  --clr-text: rgba(21, 23, 23, 1);
+  --clr-placeholder: rgba(147, 152, 169, 1);
+  --clr-link: rgba(32, 204, 249, 1);
+  --clr-error: rgba(255, 93, 93, 1);
+  --clr-weak: rgba(99, 104, 104, 1);
+  --clr-white: rgba(255, 255, 255, 1);
+  --clr-slogan-entry: rgba(18, 14, 44, 1);
+
+  // Typography
+  --font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-size-body: 15px;
+  --font-size-btn: 17px;
+  --font-size-slogan: 15px;
+  --font-size-slogan-entry: 20px;
+  --font-size-terms: 12px;
+  --line-height-body: 22px;
+  --line-height-btn: 24px;
+
+  // Sizing
+  --input-width: 311px;
+  --input-height: 48px;
+  --input-radius: 8px;
+  --btn-width: 311px;
+  --btn-height: 56px;
+  --btn-radius: 28px;
+  --logo-size: 120px;
+  --avatar-size: 87px;
+
+  // Button colors
+  --clr-btn-primary-bg: rgba(18, 14, 44, 1);
+  --clr-btn-weak-border: rgba(33, 186, 69, 1);
+  --clr-btn-weak-text: rgba(99, 104, 104, 1);
+
+  // Input field colors (from raw JSON: fills=white, radius=8px)
+  --clr-input-bg: rgba(255, 255, 255, 1);
+  --clr-input-border: rgba(147, 152, 169, 0.2);
+
+  // Action link (inline button within input, e.g. "发送验证码")
+  --clr-action-link: rgba(32, 204, 249, 1);
+  --font-size-action-link: 15px;
+  --font-weight-action-link: 400;
+  --line-height-action-link: 22px;
+  --clr-action-link-disabled: rgba(147, 152, 169, 1);
+
+  // Page background gradient (design spec: vertical, light-blue → white)
+  --gradient-page-bg: linear-gradient(
+    180deg,
+    rgba(216, 244, 255, 1) 0%,
+    rgba(225, 255, 242, 1) 20.7%,
+    rgba(253, 255, 224, 1) 54.6%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+// ===== AlibabaPuHuiTi Font Face =====
+// Fall back to system fonts if not installed
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src: local('AlibabaPuHuiTi'), local('Alibaba PuHuiTi'), local('AlibabaPuHuiTi-Regular');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src:
+    local('AlibabaPuHuiTi Medium'), local('Alibaba PuHuiTi Medium'), local('AlibabaPuHuiTi-Medium');
+  font-weight: 500;
+  font-style: normal;
+}
+
+// ===== Global resets =====
+body {
+  font-family: var(--font-family);
+}
+
+// ===== Shared auth input/button patterns =====
+// These can be referenced by any auth component
+
+.input-row {
+  display: flex;
+  gap: 12px;
+  width: 311px;
+}
+
+.input-group {
+  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
+}
+
+.auth-input-base {
+  width: var(--input-width);
+  height: var(--input-height);
+  border: 1px solid var(--clr-input-border);
+  border-radius: var(--input-radius);
+  outline: none;
+  background: var(--clr-input-bg);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+  color: var(--clr-text);
+  padding: 13px 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+
+  &::placeholder {
+    font-weight: 400;
+    color: var(--clr-placeholder);
+  }
+
+  &:focus {
+    border-color: var(--clr-link);
+  }
+}
+
+.auth-btn-primary {
+  width: var(--btn-width);
+  height: var(--btn-height);
+  border: none;
+  border-radius: var(--btn-radius);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 500;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.auth-btn-weak {
+  width: var(--btn-width);
+  height: var(--btn-height);
+  border: 1px solid var(--clr-btn-weak-border);
+  border-radius: var(--btn-radius);
+  background: transparent;
+  color: var(--clr-btn-weak-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 400;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+}
+
+.auth-error-msg {
+  width: var(--input-width);
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+  color: var(--clr-error);
+  margin-top: 8px;
+  text-align: left;
+}

@@ -1,4 +1,7 @@
-export type DeviceType = 'robot';
+export type DeviceType = 'robot' | 'virtual';
+
+/** Maximum number of virtual devices a user can create */
+export const MAX_VIRTUAL_DEVICES = 5;
 
 export interface DeviceInfo {
   id: string;
@@ -13,4 +16,6 @@ export interface DeviceInfo {
   config: {
     voiceStyle: string;
   } | null;
+  /** Reserved for future physical device binding — null for standalone virtual devices */
+  boundPhysicalDeviceId?: string | null;
 }
