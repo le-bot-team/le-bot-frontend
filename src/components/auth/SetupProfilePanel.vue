@@ -1,9 +1,11 @@
 <script setup lang="ts">
+// SetupProfilePanel — lanhu designs ed71eb82 (完善个人信息) / fb8d01d5 (选择关系弹窗)
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 
 import CropperDialog from 'components/CropperDialog.vue';
+import BirthdayPicker from 'components/BirthdayPicker.vue';
 import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
@@ -22,17 +24,16 @@ const { updateProfile } = useProfileStore();
 
 const avatar = ref<string>();
 const nickname = ref<string>();
-const birthday = ref<string>();
+const birthday = ref<string>('');
 const relationship = ref<string>();
 
 const isSending = ref(false);
 
-// Relationship options: order matches design grid (3-col layout, L-to-R, top-to-bottom)
+// Relationship options: order matches design fb8d01d5 grid (3-col, L-to-R, top-to-bottom).
+// Raw JSON text frames at y=621/681/741: 妈妈/爸爸/奶奶 | 爷爷/外婆/外公 | 朋友/其他亲属 (8 items).
 const relationOptions = ['妈妈', '爸爸', '奶奶', '爷爷', '外婆', '外公', '朋友', '其他亲属'];
 
 const showRelationSheet = ref(false);
-const showBirthdayPicker = ref(false);
-const birthdayInput = ref<HTMLInputElement>();
 
 const editAvatar = () => {
   dialog({
@@ -44,20 +45,6 @@ const editAvatar = () => {
   }).onOk((data) => {
     avatar.value = data;
   });
-};
-
-const openBirthdayPicker = () => {
-  showBirthdayPicker.value = !showBirthdayPicker.value;
-  if (showBirthdayPicker.value) {
-    // Focus hidden date input after render
-    setTimeout(() => birthdayInput.value?.showPicker?.(), 100);
-  }
-};
-
-const onBirthdayChange = (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  birthday.value = target.value;
-  showBirthdayPicker.value = false;
 };
 
 const selectRelationship = (val: string) => {
@@ -103,20 +90,15 @@ const confirm = async () => {
   }
   isSending.value = false;
 };
-
-const skip = () => {
-  // Skip profile setup, go directly to finish
-  emit('finish');
-};
 </script>
 
 <template>
-  <q-tab-panel :name="name" class="auth-panel">
+  <q-tab-panel :name="name" class="auth-panel q-pa-none">
     <!-- Avatar: 87x87px circular, fill rgba(229,229,239,1), 3px white border -->
-    <div class="avatar-shell" @click="editAvatar">
-      <div class="avatar-circle">
-        <img v-if="avatar" :src="avatar" class="avatar-img" alt="头像" />
-        <div v-else class="avatar-placeholder">
+    <div class="setup-profile-avatar-shell" @click="editAvatar">
+      <div class="setup-profile-avatar-circle">
+        <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" alt="头像" />
+        <div v-else class="setup-profile-avatar-placeholder">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <circle cx="16" cy="10" r="6" stroke="#9398A9" stroke-width="1.5" />
             <path
@@ -131,50 +113,30 @@ const skip = () => {
     </div>
 
     <!-- Nickname -->
-    <div class="field-row">
-      <label class="field-label">昵称</label>
-      <div class="input-group">
-        <input class="design-input" v-model="nickname" placeholder="请输入昵称" maxlength="20" />
+    <div class="setup-profile-field-row">
+      <label class="setup-profile-field-label">昵称</label>
+      <div class="auth-input-group">
+        <input class="auth-input" v-model="nickname" placeholder="请输入昵称" maxlength="20" />
       </div>
     </div>
 
     <!-- Birthday -->
-    <div class="field-row">
-      <label class="field-label">生日</label>
-      <div class="input-group input-group--clickable" @click="openBirthdayPicker">
-        <span class="field-value" :class="{ 'field-value--placeholder': !birthday }">
-          {{ birthday || '请选择生日' }}
-        </span>
-        <span class="field-action-arrow">
-          <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
-            <path
-              d="M1 1L6 6L1 11"
-              stroke="#9398A9"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </span>
-      </div>
-      <!-- Hidden date input -->
-      <input
-        ref="birthdayInput"
-        type="date"
-        class="date-hidden"
-        @change="onBirthdayChange"
-        :max="new Date().toISOString().split('T')[0]"
-      />
+    <div class="setup-profile-field-row">
+      <label class="setup-profile-field-label">生日</label>
+      <BirthdayPicker v-model="birthday" />
     </div>
 
     <!-- Relationship -->
-    <div class="field-row">
-      <label class="field-label">您与孩子的关系</label>
-      <div class="input-group input-group--clickable" @click="showRelationSheet = true">
-        <span class="field-value" :class="{ 'field-value--placeholder': !relationship }">
+    <div class="setup-profile-field-row">
+      <label class="setup-profile-field-label">您与孩子的关系</label>
+      <div class="auth-input-group auth-input-group--clickable" @click="showRelationSheet = true">
+        <span
+          class="setup-profile-field-value"
+          :class="{ 'setup-profile-field-value--placeholder': !relationship }"
+        >
           {{ relationship || '请选择' }}
         </span>
-        <span class="field-action-arrow">
+        <span class="setup-profile-field-arrow">
           <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
             <path
               d="M1 1L6 6L1 11"
@@ -189,28 +151,32 @@ const skip = () => {
     </div>
 
     <!-- Primary button -->
-    <button class="btn-max" :disabled="isSending" @click="confirm">完成</button>
+    <button
+      class="auth-btn-primary setup-profile-btn-primary"
+      :disabled="isSending"
+      @click="confirm"
+    >
+      完成
+    </button>
+  </q-tab-panel>
 
-    <!-- Weak skip button -->
-    <button class="btn-weak" @click="skip">跳过</button>
-
-    <!-- Relationship bottom sheet (grid layout per design) -->
+    <!-- Relationship bottom sheet (grid layout per design fb8d01d5) -->
     <transition name="sheet">
       <div
         v-if="showRelationSheet"
-        class="relation-overlay"
+        class="setup-profile-relation-overlay"
         @click.self="showRelationSheet = false"
       >
-        <div class="relation-sheet">
-          <div class="sheet-head">
-            <span class="sheet-title">选择关系</span>
+        <div class="setup-profile-relation-sheet">
+          <div class="setup-profile-relation-head">
+            <span class="setup-profile-relation-title">选择关系</span>
           </div>
-          <div class="sheet-body">
+          <div class="setup-profile-relation-body">
             <button
               v-for="opt in relationOptions"
               :key="opt"
-              class="relation-chip"
-              :class="{ 'relation-chip--active': relationship === opt }"
+              class="setup-profile-relation-chip"
+              :class="{ 'setup-profile-relation-chip--active': relationship === opt }"
               @click="selectRelationship(opt)"
             >
               {{ opt }}
@@ -219,290 +185,13 @@ const skip = () => {
         </div>
       </div>
     </transition>
-  </q-tab-panel>
 </template>
 
 <style scoped>
-/* ===== Design tokens ===== */
-.auth-panel {
-  --clr-text: rgba(21, 23, 23, 1);
-  --clr-placeholder: rgba(147, 152, 169, 1);
-  --clr-link: rgba(32, 204, 249, 1);
-  --clr-error: rgba(255, 93, 93, 1);
-  --clr-weak: rgba(99, 104, 104, 1);
-  --clr-white: rgba(255, 255, 255, 1);
-  --font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-
-  font-family: var(--font-family);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 0 32px;
-}
-
-/* ===== Avatar ===== */
-.avatar-shell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 32px;
-  cursor: pointer;
-}
-
-.avatar-circle {
-  width: 87px;
-  height: 87px;
-  border-radius: 50%;
-  background: rgba(229, 229, 239, 1);
-  border: 3px solid rgba(255, 255, 255, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.5;
-}
-
-/* ===== Field row ===== */
-.field-row {
-  width: 311px;
-  margin-bottom: 12px;
-}
-
-.field-label {
-  display: block;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-placeholder);
-  margin-bottom: 8px;
-}
-
-/* ===== Input group ===== */
-.input-group {
-  width: 311px;
-  height: 48px;
-  position: relative;
-  border: none;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 0 16px;
-  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
-}
-
-.input-group:focus-within {
-  outline: none;
-}
-
-.input-group--clickable {
-  cursor: pointer;
-  user-select: none;
-}
-
-/* ===== Design input (inside input-group with padding) ===== */
-.design-input {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: var(--font-family);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-text);
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.design-input::placeholder {
-  font-weight: 400;
-  color: var(--clr-placeholder);
-}
-
-/* ===== Field value (for clickable rows) ===== */
-.field-value {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-text);
-}
-
-.field-value--placeholder {
-  font-weight: 400;
-  color: var(--clr-placeholder);
-}
-
-.field-action-arrow {
-  flex-shrink: 0;
-  width: 7px;
-  height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-}
-
-/* Hidden date input */
-.date-hidden {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ===== Max button ===== */
-.btn-max {
-  width: 311px;
-  height: 56px;
-  border: none;
-  border-radius: 28px;
-  background: rgba(18, 14, 44, 1);
-  color: var(--clr-white);
-  font-family: var(--font-family);
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 24px;
-  cursor: pointer;
-  margin-top: 48px;
-  transition: opacity 0.2s;
-}
-
-.btn-max:hover {
-  opacity: 0.9;
-}
-
-.btn-max:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-max:active {
-  transform: none;
-}
-
-/* ===== Weak button ===== */
-.btn-weak {
-  width: 311px;
-  height: 56px;
-  border: 1.5px solid rgba(212, 246, 170, 1);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 1);
-  color: var(--clr-weak);
-  font-family: var(--font-family);
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 24px;
-  cursor: pointer;
-  margin-top: 8px;
-}
-
-.btn-weak:active {
-  transform: none;
-}
-
-/* ===== Relation bottom sheet ===== */
-.relation-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.relation-sheet {
-  width: 375px;
-  max-height: 60vh;
-  background: #fff;
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  flex-direction: column;
-  animation: slideUp 0.25s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.sheet-head {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(147, 152, 169, 0.15);
-  position: relative;
-}
-
-.sheet-title {
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 24px;
-  color: var(--clr-text);
-}
-
-.sheet-body {
-  padding: 16px 0 28px;
-  display: grid;
-  grid-template-columns: repeat(3, 100px);
-  gap: 12px;
-  justify-content: center;
-  overflow-y: auto;
-}
-
-/* ===== Relation chip (grid layout per design) ===== */
-.relation-chip {
-  width: 100px;
-  height: 40px;
-  border-radius: 20px;
-  border: 1px solid rgba(147, 152, 169, 0.2);
-  background: rgba(255, 255, 255, 1);
-  font-family: var(--font-family);
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: rgba(21, 23, 23, 1);
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.relation-chip:hover {
-  background: rgba(32, 204, 249, 0.04);
-}
-
-.relation-chip--active {
-  background: rgba(18, 14, 44, 1);
-  border-color: rgba(18, 14, 44, 1);
-  color: rgba(255, 255, 255, 1);
-}
-
-/* ===== Sheet transition ===== */
+/* All structural styles live in src/css/app.scss under
+   "===== SetupProfilePanel patterns, designs ed71eb82 / fb8d01d5 =====".
+   Only the Vue <transition name="sheet"> hooks remain scoped, since those
+   class names are generated and only apply within this component. */
 .sheet-enter-active,
 .sheet-leave-active {
   transition: opacity 0.25s ease;

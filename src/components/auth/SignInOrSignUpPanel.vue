@@ -1,7 +1,10 @@
 <script setup lang="ts">
+// SignInOrSignUpPanel — designs 72b3b33f (检测手机号), 4a4704cc (验证码登录),
+// 883b0908 (密码登录). Entry panel of the auth flow.
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { emailChallenge, emailCode, emailPassword } from 'src/utils/api/auth';
 import { useAuthStore } from 'stores/auth';
@@ -10,10 +13,10 @@ defineProps<{
   name: string | number;
 }>();
 const emit = defineEmits<{
-  finish: [];
-  next: [isNew: boolean, email: string, code: string];
+  next: [isNew: boolean, email: string, code: string, needsPassword: boolean];
 }>();
 
+const router = useRouter();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
   storeToRefs(useAuthStore());
 const { notify } = useQuasar();
@@ -48,6 +51,11 @@ const sendCodeLabel = computed(() => {
     return `重新发送(${remainedSendCodeCooldownSeconds.value}s)`;
   return '重新发送';
 });
+
+// Navigation to legal pages
+const goToTermsOfService = () => router.push('/stack/settings/terms-of-service');
+const goToUserAgreement = () => router.push('/stack/settings/user-agreement');
+const goToPrivacyPolicy = () => router.push('/stack/settings/privacy-policy');
 
 // Clear error when user types
 watch([email, codeOrPassword], () => {
@@ -91,11 +99,14 @@ const processSignInOrSignUp = async () => {
     accessToken.value = data.data.accessToken;
 
     if (data.data.isNew) {
-      emit('next', true, e, p);
+      // New user: go to password setup first
+      emit('next', true, e, p, true);
     } else if (data.data.noPassword) {
-      emit('next', false, e, p);
+      // Existing user without password: set password first, then profile
+      emit('next', false, e, p, true);
     } else {
-      emit('finish');
+      // Existing user with password: go directly to profile setup
+      emit('next', false, e, p, false);
     }
   } catch (err) {
     errorMsg.value = (err as Error).message ?? '未知错误';
@@ -106,9 +117,9 @@ const processSignInOrSignUp = async () => {
 <template>
   <q-tab-panel :name="name" class="auth-panel">
     <!-- Email input -->
-    <div class="input-group" :class="{ 'input-group--error': email && !isValidEmail }">
+    <div class="auth-input-group" :class="{ 'auth-input-group--error': email && !isValidEmail }">
       <input
-        class="design-input"
+        class="auth-input"
         type="email"
         v-model="email"
         placeholder="请输入邮箱"
@@ -117,21 +128,21 @@ const processSignInOrSignUp = async () => {
     </div>
 
     <!-- Verification code input -->
-    <div v-if="processMethod === 'code'" class="input-row">
-      <div class="input-group input-group--code">
+    <div v-if="processMethod === 'code'" class="auth-input-row">
+      <div class="auth-input-group auth-input-group--code">
         <input
-          class="design-input"
+          class="auth-input"
           v-model="codeOrPassword"
           placeholder="请输入验证码"
           maxlength="6"
           autocomplete="one-time-code"
         />
       </div>
-      <div class="input-group input-group--action">
+      <div class="auth-input-group auth-input-group--action">
         <span
-          class="action-link"
+          class="auth-action-link"
           :class="{
-            'action-link--disabled':
+            'auth-action-link--disabled':
               !isValidEmail || (!isNeverSendCode && remainedSendCodeCooldownSeconds),
           }"
           @click="sendCode"
@@ -142,10 +153,10 @@ const processSignInOrSignUp = async () => {
     </div>
 
     <!-- Password input -->
-    <div v-else class="input-group">
-      <div class="input-with-action">
+    <div v-else class="auth-input-group">
+      <div class="auth-input-with-action">
         <input
-          class="design-input design-input--flex"
+          class="auth-input auth-input--flex"
           :type="showPassword ? 'text' : 'password'"
           v-model="codeOrPassword"
           placeholder="请输入密码"
@@ -155,7 +166,7 @@ const processSignInOrSignUp = async () => {
         />
         <span
           v-if="isPasswordFocused || codeOrPassword?.length"
-          class="action-icon"
+          class="auth-action-icon"
           @click="showPassword = !showPassword"
         >
           <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -179,12 +190,12 @@ const processSignInOrSignUp = async () => {
     </div>
 
     <!-- Error message -->
-    <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+    <div v-if="errorMsg" class="auth-error-msg">{{ errorMsg }}</div>
 
     <!-- Primary button -->
     <button
-      class="btn-max"
-      :class="{ 'btn-max--disabled': !canSubmit }"
+      class="auth-btn-primary auth-btn-primary--mt"
+      :class="{ 'auth-btn-primary--disabled': !canSubmit }"
       :disabled="!canSubmit"
       @click="processSignInOrSignUp"
     >
@@ -193,15 +204,15 @@ const processSignInOrSignUp = async () => {
 
     <!-- Weak button - mode toggle -->
     <button
-      class="btn-weak"
+      class="auth-btn-weak"
       @click="processMethod = processMethod === 'code' ? 'password' : 'code'"
     >
       {{ processMethod === 'code' ? '密码登录' : '验证码登录' }}
     </button>
 
     <!-- Terms agreement checkbox -->
-    <div class="terms-row" @click="agreeTerms = !agreeTerms">
-      <div class="checkbox" :class="{ 'checkbox--checked': agreeTerms }">
+    <div class="auth-terms-row" @click="agreeTerms = !agreeTerms">
+      <div class="auth-checkbox">
         <svg v-if="agreeTerms" width="14" height="14" viewBox="0 0 14 14" fill="none">
           <rect width="14" height="14" rx="4" fill="#20CCF9" />
           <path
@@ -216,211 +227,23 @@ const processSignInOrSignUp = async () => {
           <rect width="14" height="14" rx="4" stroke="#9398A9" stroke-width="1" fill="none" />
         </svg>
       </div>
-      <span class="terms-text">
-        我已阅读并同意<span class="link">《服务条款》</span>、<span class="link">《用户协议》</span
-        >和<span class="link">《隐私政策》</span>
+      <span class="auth-terms-text">
+        我已阅读并同意<span class="link" @click.stop="goToTermsOfService">《服务条款》</span>、<span
+          class="link"
+          @click.stop="goToUserAgreement"
+          >《用户协议》</span
+        >和<span class="link" @click.stop="goToPrivacyPolicy">《隐私政策》</span>
       </span>
     </div>
   </q-tab-panel>
 </template>
 
-<style scoped>
-/* ===== Design token colors ===== */
-.auth-panel {
-  --clr-text: rgba(21, 23, 23, 1);
-  --clr-placeholder: rgba(147, 152, 169, 1);
-  --clr-link: rgba(32, 204, 249, 1);
-  --clr-error: rgba(255, 93, 93, 1);
-  --clr-weak: rgba(99, 104, 104, 1);
-  --clr-white: rgba(255, 255, 255, 1);
-  --font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+<style scoped lang="scss">
+// SignInOrSignUpPanel — designs 72b3b33f / 4a4704cc / 883b0908
+// All shared input/button/error/terms styles come from app.scss globals.
+// Only component-specific spacing overrides remain here.
 
-  font-family: var(--font-family);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 0 32px;
-}
-
-/* ===== Input row (verification code: two independent boxes) ===== */
-.input-row {
-  display: flex;
-  gap: 12px;
-  width: 311px;
-  margin-top: 12px;
-}
-
-/* ===== Input group ===== */
-.input-group {
-  width: 311px;
-  height: 48px;
-  position: relative;
-  border: 1px solid var(--clr-input-border, rgba(147, 152, 169, 0.2));
-  border-radius: 8px;
-  transition: border-color 0.2s;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.input-group:focus-within {
-  border-color: var(--clr-link);
-}
-.input-group--error {
-  border-color: var(--clr-error);
-}
-.input-group--code {
-  width: 172px;
-}
-.input-group--action {
-  width: 127px;
-  justify-content: center;
-}
-
-/* Spacing between stacked inputs (design: ~12px gap) */
-/* Only apply to top-level input-groups, not siblings inside .input-row */
-.input-group + .input-group:not(.input-group--action) {
-  margin-top: 12px;
-}
-
-.design-input {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
-  font-family: var(--font-family);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-text);
-  padding: 13px 16px;
-  box-sizing: border-box;
-}
-.design-input::placeholder {
-  font-weight: 400;
-  color: var(--clr-placeholder);
-}
-/* Hide browser-native password reveal/clear buttons */
-.design-input::-ms-reveal,
-.design-input::-ms-clear,
-.design-input::-webkit-password-toggle {
-  display: none;
-}
-.design-input--flex {
-  width: calc(100% - 40px);
-}
-
-/* ===== Input with right action (password mode: eye icon) ===== */
-.input-with-action {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* ===== Action link (inside independent action box) ===== */
-.action-link {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: var(--clr-link);
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  text-align: center;
-}
-.action-link--disabled {
-  color: var(--clr-placeholder);
-  cursor: not-allowed;
-}
-
-.action-icon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-}
-
-/* ===== Error message ===== */
-.error-msg {
-  width: 311px;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-error);
-  margin-top: 8px;
-  text-align: left;
-}
-
-/* ===== Max button ===== */
-.btn-max {
-  width: 311px;
-  height: 56px;
-  border: none;
-  border-radius: 28px;
-  background: rgba(18, 14, 44, 1);
-  color: var(--clr-white);
-  font-family: var(--font-family);
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 24px;
-  cursor: pointer;
+.auth-btn-primary--mt {
   margin-top: 24px;
-  transition: opacity 0.2s;
-}
-.btn-max:hover {
-  opacity: 0.9;
-}
-.btn-max--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ===== Weak button ===== */
-.btn-weak {
-  width: 311px;
-  height: 56px;
-  border: 1px solid rgba(33, 186, 69, 1);
-  border-radius: 28px;
-  background: transparent;
-  color: var(--clr-weak);
-  font-family: var(--font-family);
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 24px;
-  cursor: pointer;
-  margin-top: 8px;
-}
-
-/* ===== Terms row ===== */
-.terms-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  width: 311px;
-  margin-top: 16px;
-  cursor: pointer;
-  user-select: none;
-}
-.checkbox {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  margin-top: 1px;
-}
-.terms-text {
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
-  color: var(--clr-placeholder);
-}
-.terms-text .link {
-  color: var(--clr-link);
 }
 </style>

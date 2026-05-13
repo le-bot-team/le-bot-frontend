@@ -18,6 +18,7 @@ export const MOCK_PROFILE: UserProfile = {
   avatar: MOCK_AVATAR_BASE64,
   avatarHash: 'mock-avatar-hash-00000000',
   region: '中国',
+  phone: '18758326895',
   last_active: new Date('2024-12-15T12:00:00.000Z'),
   last_login: new Date('2024-12-15T08:00:00.000Z'),
 };

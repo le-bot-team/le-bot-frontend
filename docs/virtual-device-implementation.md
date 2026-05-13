@@ -544,22 +544,104 @@ stack: {
 
 > **重要提示**: 以下接口需要后端团队配合实现。接口遵循项目现有的 `{ success, message?, data? }` 响应格式和 `x-access-token` 鉴权方式。
 
+### 2.0 通用约定
+
+#### 2.0.1 认证方式
+
+所有设备模块接口均需在 HTTP Header 中携带 `x-access-token`，后端需校验 token 有效性并提取 `userId`（即 `ownerId`）用于权限校验。
+
+```
+x-access-token: <accessToken>
+```
+
+#### 2.0.2 通用响应格式
+
+**成功响应 (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+**失败响应 (HTTP 200，业务错误):**
+
+```json
+{
+  "success": false,
+  "message": "错误描述信息"
+}
+```
+
+> 注意：本项目约定业务错误也返回 HTTP 200，通过 `success: false` 区分。仅在网络异常或服务端内部错误时返回 HTTP 4xx/5xx。
+
+#### 2.0.3 错误码规范
+
+后端返回的 `message` 字段应使用以下标准错误描述，前端根据 `message` 内容展示对应的 i18n 文案：
+
+| 错误场景         | message 值                                        | 前端处理     |
+| ---------------- | ------------------------------------------------- | ------------ |
+| Token 无效或过期 | `"Invalid or expired access token"`               | 跳转登录页   |
+| 设备数量超限     | `"Cannot create more than 5 virtual devices"`     | 展示错误通知 |
+| 设备不存在       | `"Device not found"`                              | 展示错误通知 |
+| 无权限操作       | `"Access denied: device does not belong to user"` | 展示错误通知 |
+| 设备 ID 格式无效 | `"Invalid deviceId format"`                       | 展示错误通知 |
+| 服务端内部错误   | `"Internal server error"`                         | 展示错误通知 |
+| 虚拟设备激活失败 | `"Failed to activate virtual device"`             | 展示错误通知 |
+
+#### 2.0.4 数据库表结构参考
+
+后端实现时建议使用如下表结构（以关系型数据库为例）：
+
+```sql
+CREATE TABLE devices (
+  id            VARCHAR(36)  PRIMARY KEY,              -- UUID v4，由后端生成
+  identifier    VARCHAR(32)  NOT NULL UNIQUE,         -- SN 序列号，如 LEBOT-V-A1B2C3D4
+  owner_id      INTEGER      NOT NULL,                -- 所属用户 ID（关联 users 表）
+  type          VARCHAR(16)  NOT NULL DEFAULT 'robot', -- 'robot' | 'virtual'
+  model         VARCHAR(64)  NOT NULL,                -- 设备型号，虚拟设备固定 'virtual-lebot-v1'
+  name          VARCHAR(128),                         -- 用户自定义设备名称，可为 NULL
+  status        JSON,                                  -- 设备状态（预留），可为 NULL
+  config        JSON,                                  -- 设备配置 JSON，如 {"voiceStyle":"default"}
+  bound_physical_device_id VARCHAR(36),               -- 绑定的物理设备 ID（预留），可为 NULL
+  created_at    TIMESTAMP     NOT NULL DEFAULT NOW(),
+  updated_at    TIMESTAMP,
+
+  INDEX idx_devices_owner_id (owner_id),
+  INDEX idx_devices_type (type),
+  INDEX idx_devices_identifier (identifier),
+  CONSTRAINT chk_device_type CHECK (type IN ('robot', 'virtual'))
+);
+```
+
+**关键字段说明**：
+
+| 字段                       | 说明                                                           |
+| -------------------------- | -------------------------------------------------------------- |
+| `id`                       | UUID v4，全局唯一，作为 API 路径参数和 WebSocket 的 `deviceId` |
+| `identifier`               | SN 序列号，展示给用户的可读标识符，全局唯一                    |
+| `config`                   | JSON 字段，存储 `voiceStyle`、`aiPersonality` 等设备配置       |
+| `bound_physical_device_id` | 预留字段，当前始终为 NULL，未来用于虚拟设备绑定物理设备        |
+
+---
+
 ### 2.1 激活虚拟设备
 
-创建新的虚拟设备，后端负责生成唯一 SN (序列号/identifier) 并将其加入设备维护列表。
+创建新的虚拟设备，后端负责生成唯一 SN（序列号/identifier）并将其加入设备维护列表。
 
 ```
 POST /api/v1/devices/virtual/activate
 ```
 
-**请求头**:
+**请求头**：
 
 | Header           | Value                 |
 | ---------------- | --------------------- |
 | `Content-Type`   | `application/json`    |
 | `x-access-token` | `<用户 access token>` |
 
-**请求体**:
+**请求体**：
 
 ```json
 {}
@@ -567,7 +649,7 @@ POST /api/v1/devices/virtual/activate
 
 > 当前请求体为空，因为所有必要信息（用户身份、设备类型=virtual）均可从 token 和路由推导。后续如需传入设备名称等参数可扩展。
 
-**成功响应** (200):
+**成功响应** (HTTP 200)：
 
 ```json
 {
@@ -575,6 +657,8 @@ POST /api/v1/devices/virtual/activate
   "data": {
     "device": {
       "id": "550e8400-e29b-41d4-a716-446655440000",
+      "createdAt": "2026-04-25T10:30:00.000Z",
+      "updatedAt": null,
       "identifier": "LEBOT-V-A1B2C3D4",
       "ownerId": 123,
       "type": "virtual",
@@ -582,17 +666,39 @@ POST /api/v1/devices/virtual/activate
       "name": null,
       "status": "active",
       "config": {
-        "voiceStyle": "default"
+        "voiceStyle": "default",
+        "aiPersonality": {
+          "enabled": false
+        }
       },
-      "createdAt": "2026-04-25T10:30:00.000Z",
-      "updatedAt": null,
       "boundPhysicalDeviceId": null
     }
   }
 }
 ```
 
-**失败响应** (200):
+**响应字段详细说明**：
+
+| 字段                                  | 类型                        | 必填 | 说明                                       |
+| ------------------------------------- | --------------------------- | ---- | ------------------------------------------ |
+| `device.id`                           | `string` (UUID)             | 是   | 设备唯一标识，UUID v4 格式                 |
+| `device.createdAt`                    | `string \| null` (ISO 8601) | 是   | 设备创建时间，新建设备应设为服务器当前时间 |
+| `device.updatedAt`                    | `string \| null` (ISO 8601) | 是   | 设备更新时间，新建设备为 `null`            |
+| `device.identifier`                   | `string`                    | 是   | SN 序列号，格式见下方规则                  |
+| `device.ownerId`                      | `number`                    | 是   | 所属用户 ID，从 access token 提取          |
+| `device.type`                         | `"virtual"`                 | 是   | 固定为 `"virtual"`                         |
+| `device.model`                        | `string`                    | 是   | 设备型号，固定为 `"virtual-lebot-v1"`      |
+| `device.name`                         | `string \| null`            | 是   | 用户自定义名称，新建设备为 `null`          |
+| `device.status`                       | `unknown`                   | 是   | 设备状态，新建设备建议为 `"active"`        |
+| `device.config`                       | `object \| null`            | 是   | 设备配置，见下方初始化规则                 |
+| `device.config.voiceStyle`            | `string`                    | 是   | 语音风格，默认 `"default"`                 |
+| `device.config.aiPersonality`         | `object`                    | 否   | AI 人格配置，见下方说明                    |
+| `device.config.aiPersonality.enabled` | `boolean`                   | 是   | 是否启用 AI 人格，默认 `false`             |
+| `device.config.aiPersonality.traits`  | `string`                    | 否   | AI 人格特质描述                            |
+| `device.config.aiPersonality.goals`   | `string`                    | 否   | AI 人格目标描述                            |
+| `device.boundPhysicalDeviceId`        | `string \| null`            | 否   | 绑定的物理设备 ID（预留），当前为 `null`   |
+
+**失败响应** (HTTP 200)：
 
 ```json
 {
@@ -601,15 +707,43 @@ POST /api/v1/devices/virtual/activate
 }
 ```
 
-**后端实现要求**:
+**后端实现要求**：
 
-| 要求        | 说明                                                     |
-| ----------- | -------------------------------------------------------- |
-| SN 生成规则 | 建议格式 `LEBOT-V-XXXXXXXX` (8位大写字母+数字)，全局唯一 |
-| 数量限制    | 每个用户最多 5 个 `type === 'virtual'` 的设备            |
-| 状态设置    | 新建设备 `status` 应为 `"active"`                        |
-| 配置初始化  | `config.voiceStyle` 默认值 `"default"`                   |
-| 时间戳      | `createdAt` 设置为服务器当前时间                         |
+| 要求           | 说明                                                                                                                       |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| SN 生成规则    | 格式 `LEBOT-V-XXXXXXXX`，其中 `XXXXXXXX` 为 8 位大写字母+数字组合。建议使用随机生成 + 数据库唯一约束重试机制，确保全局唯一 |
+| SN 生成算法    | 推荐：取 4 字节随机数 → Base32 编码（去掉填充符）→ 取前 8 位 → 添加前缀 `LEBOT-V-`。也可使用 NanoID 等短 ID 生成库         |
+| 数量限制       | 每个 `ownerId` 最多 5 个 `type === 'virtual'` 的设备，超出时返回 `success: false`                                          |
+| 数量校验原子性 | 数量校验 + 插入操作应在同一数据库事务中完成，防止并发创建导致超限                                                          |
+| 状态设置       | 新建设备 `status` 应为 `"active"`                                                                                          |
+| 配置初始化     | `config` 应初始化为 `{ "voiceStyle": "default", "aiPersonality": { "enabled": false } }`                                   |
+| 时间戳         | `createdAt` 设置为服务器当前时间（ISO 8601 格式），`updatedAt` 为 `null`                                                   |
+| model 字段     | 固定为 `"virtual-lebot-v1"`，便于未来区分不同版本的虚拟设备                                                                |
+| 权限验证       | 从 `x-access-token` 中提取 `userId`，作为 `ownerId` 写入设备记录                                                           |
+| Token 校验     | Token 无效或过期时返回 `success: false, message: "Invalid or expired access token"`                                        |
+| 幂等性建议     | 同一用户短时间内重复调用应各自创建独立设备（非幂等），前端通过 `isActivating` 锁防止并发                                   |
+
+**后端处理流程伪代码**：
+
+```
+function activateVirtualDevice(accessToken):
+  1. 校验 accessToken → 提取 userId
+     - 失败 → return { success: false, message: "Invalid or expired access token" }
+
+  2. 查询该 userId 下 type='virtual' 的设备数量
+     - count >= 5 → return { success: false, message: "Cannot create more than 5 virtual devices" }
+
+  3. [事务开始]
+     a. 生成 SN (identifier): "LEBOT-V-" + randomBase32(8)
+        - 若 identifier 冲突则重试（最多 3 次）
+     b. 生成 UUID v4 作为 id
+     c. INSERT INTO devices (id, identifier, owner_id, type, model, name, status, config, created_at)
+        VALUES (id, identifier, userId, 'virtual', 'virtual-lebot-v1', NULL, 'active', defaultConfig, NOW())
+     d. [事务提交]
+
+  4. 返回完整的 DeviceInfo 对象
+     return { success: true, data: { device: newDevice } }
+```
 
 ---
 
@@ -621,19 +755,19 @@ POST /api/v1/devices/virtual/activate
 DELETE /api/v1/devices/{deviceId}
 ```
 
-**请求头**:
+**请求头**：
 
 | Header           | Value                 |
 | ---------------- | --------------------- |
 | `x-access-token` | `<用户 access token>` |
 
-**路径参数**:
+**路径参数**：
 
 | 参数       | 类型            | 说明            |
 | ---------- | --------------- | --------------- |
 | `deviceId` | `string` (UUID) | 要删除的设备 ID |
 
-**成功响应** (200):
+**成功响应** (HTTP 200)：
 
 ```json
 {
@@ -641,22 +775,76 @@ DELETE /api/v1/devices/{deviceId}
 }
 ```
 
-**失败响应** (200):
+**失败响应** (HTTP 200)：
 
 ```json
 {
   "success": false,
-  "message": "Device not found or access denied"
+  "message": "Device not found"
 }
 ```
 
-**后端实现要求**:
+**所有可能的失败场景**：
 
-| 要求     | 说明                                                     |
-| -------- | -------------------------------------------------------- |
-| 权限校验 | 仅允许设备所有者 (`ownerId`) 删除                        |
-| 级联处理 | 删除设备时应清理相关的会话记录、WebSocket 连接等关联数据 |
-| 幂等性   | 重复删除已不存在的设备应返回 `success: false`            |
+| 场景              | message                                           | 说明                     |
+| ----------------- | ------------------------------------------------- | ------------------------ |
+| Token 无效        | `"Invalid or expired access token"`               | 鉴权失败                 |
+| deviceId 格式无效 | `"Invalid deviceId format"`                       | 非 UUID v4 格式          |
+| 设备不存在        | `"Device not found"`                              | 数据库中无此 id 的记录   |
+| 无权限操作        | `"Access denied: device does not belong to user"` | 设备存在但不属于当前用户 |
+| 服务端错误        | `"Internal server error"`                         | 数据库操作异常等         |
+
+**后端实现要求**：
+
+| 要求           | 说明                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| 权限校验       | 仅允许设备所有者 (`ownerId === userId`) 删除，非所有者返回 `"Access denied"`                        |
+| 权限校验优先级 | 先校验 Token → 再校验 deviceId 格式 → 再查询设备 → 再校验所有权，按顺序返回首个错误                 |
+| 级联删除       | 删除设备时应清理相关的关联数据，详见下方级联删除清单                                                |
+| 幂等性         | 删除已不存在的设备应返回 `success: false, message: "Device not found"`（非幂等）                    |
+| 并发安全       | 如果该设备有活跃的 WebSocket 连接，删除时应主动断开该连接                                           |
+| 物理设备处理   | `type === 'robot'` 的物理设备同样使用此接口解绑，但后端可能需要额外的清理逻辑（如通知物理设备断开） |
+
+**级联删除数据清单**：
+
+删除设备时，后端应依次清理以下关联数据：
+
+| 序号 | 关联数据       | 清理方式                                                   | 说明                       |
+| ---- | -------------- | ---------------------------------------------------------- | -------------------------- |
+| 1    | WebSocket 连接 | 主动断开以该 `deviceId` 建立的 WebSocket 连接              | 防止已删除设备继续收发消息 |
+| 2    | 对话记录       | 删除该设备关联的所有 `conversation` 和 `chat_message` 记录 | 释放存储空间，保障隐私     |
+| 3    | 会话上下文     | 清除该设备在 Redis/内存中的对话上下文缓存                  | 防止残留上下文被复用       |
+| 4    | 声纹绑定       | 如果设备绑定了特定声纹配置，清理关联关系                   | 释放声纹资源引用           |
+| 5    | 设备配置缓存   | 清除该设备配置在 Redis/内存中的缓存                        | 防止缓存不一致             |
+
+> 注意：`boundPhysicalDeviceId` 关联的物理设备记录本身不应被级联删除，仅清理虚拟设备侧的引用。
+
+**后端处理流程伪代码**：
+
+```
+function unbindDevice(accessToken, deviceId):
+  1. 校验 accessToken → 提取 userId
+     - 失败 → return { success: false, message: "Invalid or expired access token" }
+
+  2. 校验 deviceId 格式 (UUID v4)
+     - 无效 → return { success: false, message: "Invalid deviceId format" }
+
+  3. 查询设备记录
+     - 不存在 → return { success: false, message: "Device not found" }
+
+  4. 校验设备所有权 (device.ownerId === userId)
+     - 不匹配 → return { success: false, message: "Access denied: device does not belong to user" }
+
+  5. [事务开始]
+     a. 断开该设备的活跃 WebSocket 连接
+     b. 删除关联的对话记录 (conversations, chat_messages)
+     c. 清除 Redis 中的对话上下文和设备配置缓存
+     d. 清理声纹绑定关系
+     e. DELETE FROM devices WHERE id = deviceId
+     f. [事务提交]
+
+  6. return { success: true }
+```
 
 ---
 
@@ -668,13 +856,13 @@ DELETE /api/v1/devices/{deviceId}
 GET /api/v1/devices/mine
 ```
 
-**请求头**:
+**请求头**：
 
 | Header           | Value                 |
 | ---------------- | --------------------- |
 | `x-access-token` | `<用户 access token>` |
 
-**成功响应** (200):
+**成功响应** (HTTP 200)：
 
 ```json
 {
@@ -682,18 +870,37 @@ GET /api/v1/devices/mine
   "data": {
     "devices": [
       {
-        "id": "...",
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z",
         "identifier": "PHYSICAL-ROBOT-01",
+        "ownerId": 1,
         "type": "robot",
         "model": "lebot-v1",
-        "...": "..."
+        "name": "我的乐宝",
+        "status": {},
+        "config": {
+          "voiceStyle": "xiaole"
+        },
+        "boundPhysicalDeviceId": null
       },
       {
-        "id": "550e8400-...",
+        "id": "660e8400-e29b-41d4-a716-446655440001",
+        "createdAt": "2026-04-25T10:30:00.000Z",
+        "updatedAt": null,
         "identifier": "LEBOT-V-A1B2C3D4",
+        "ownerId": 1,
         "type": "virtual",
         "model": "virtual-lebot-v1",
-        "...": "..."
+        "name": null,
+        "status": "active",
+        "config": {
+          "voiceStyle": "default",
+          "aiPersonality": {
+            "enabled": false
+          }
+        },
+        "boundPhysicalDeviceId": null
       }
     ]
   }
@@ -702,38 +909,95 @@ GET /api/v1/devices/mine
 
 **变更要求**: 返回的 `devices[]` 中应**同时包含** `type: "robot"` 和 `type: "virtual"` 的设备，前端 Store 的 `updateDevices()` 会统一存储。
 
+**DeviceInfo 完整字段说明**：
+
+| 字段                           | 类型                        | 必填     | 说明                                                                 |
+| ------------------------------ | --------------------------- | -------- | -------------------------------------------------------------------- |
+| `id`                           | `string` (UUID)             | 是       | 设备唯一标识                                                         |
+| `createdAt`                    | `string \| null` (ISO 8601) | 是       | 创建时间                                                             |
+| `updatedAt`                    | `string \| null` (ISO 8601) | 是       | 更新时间，未更新过则为 `null`                                        |
+| `identifier`                   | `string`                    | 是       | 设备 SN 序列号，物理设备和虚拟设备格式不同                           |
+| `ownerId`                      | `number`                    | 是       | 所属用户 ID                                                          |
+| `type`                         | `"robot" \| "virtual"`      | 是       | 设备类型                                                             |
+| `model`                        | `string`                    | 是       | 设备型号：物理设备如 `"lebot-v1"`，虚拟设备固定 `"virtual-lebot-v1"` |
+| `name`                         | `string \| null`            | 是       | 用户自定义设备名称，未设置则为 `null`                                |
+| `status`                       | `unknown`                   | 是       | 设备状态（预留字段，类型未固定）                                     |
+| `config`                       | `object \| null`            | 是       | 设备配置 JSON                                                        |
+| `config.voiceStyle`            | `string`                    | 是       | 语音风格标识                                                         |
+| `config.aiPersonality`         | `object`                    | 否       | AI 人格配置（仅虚拟设备可能有）                                      |
+| `config.aiPersonality.enabled` | `boolean`                   | 条件必填 | 是否启用 AI 人格                                                     |
+| `config.aiPersonality.traits`  | `string`                    | 否       | AI 人格特质                                                          |
+| `config.aiPersonality.goals`   | `string`                    | 否       | AI 人格目标                                                          |
+| `boundPhysicalDeviceId`        | `string \| null`            | 否       | 绑定的物理设备 ID（预留），当前为 `null`                             |
+
 ---
 
-### 2.4 WebSocket 握手协议扩展
+### 2.4 WebSocket 连接协议扩展
 
 WebSocket 连接 URL 增加可选的 `deviceId` 查询参数。
 
-**连接 URL 格式**:
+**连接 URL 格式**：
 
 ```
 wss://<host>/api/v1/chat/ws?token=<accessToken>&deviceId=<deviceId>
 ```
 
-| 参数       | 必填 | 说明                                       |
-| ---------- | ---- | ------------------------------------------ |
-| `token`    | 是   | 用户 access token                          |
-| `deviceId` | 否   | 虚拟设备 ID (UUID)，不传则表示物理设备模式 |
+**参数说明**：
 
-**后端处理逻辑**:
+| 参数       | 类型            | 必填 | 说明                                |
+| ---------- | --------------- | ---- | ----------------------------------- |
+| `token`    | `string`        | 是   | 用户 access token，用于鉴权         |
+| `deviceId` | `string` (UUID) | 否   | 虚拟设备 ID，不传则表示物理设备模式 |
 
-1. 收到连接请求后，根据 `deviceId` 查询对应设备信息
-2. 如果 `deviceId` 存在，加载该虚拟设备的配置 (`voiceStyle`, `voiceId` 等)
-3. 如果 `deviceId` 不存在或为空，保持原有物理设备逻辑
-4. 后续所有 WebSocket 消息（`inputAudioStream`, `outputAudioStream` 等）应关联到该设备
+**后端处理逻辑**：
 
-**与现有 `WsUpdateConfigRequest` 的关系**:
+1. 收到连接请求后，首先校验 `token` 有效性
+2. 若 `deviceId` 参数存在且非空：
+   - 校验 `deviceId` 格式（应为 UUID v4）
+   - 查询数据库确认该设备存在且 `ownerId === userId`
+   - 加载该虚拟设备的配置（`voiceStyle`、`aiPersonality` 等）
+   - 将该 WebSocket 连接与 `deviceId` 关联
+3. 若 `deviceId` 不存在或为空：
+   - 保持原有物理设备逻辑
+   - 查询该用户关联的物理设备
+4. 后续所有 WebSocket 消息（`inputAudioStream`、`outputAudioStream` 等）应关联到该设备
 
-当前前端在 `establishConnection` 后立即发送 `WsUpdateConfigRequest` 携带 `voiceId` 等配置。增加 `deviceId` 参数后，后端可以：
+**deviceId 参数校验失败的处理**：
 
-- 在握手阶段就确定设备身份
-- 预加载设备配置，减少后续 `updateConfig` 消息的延迟
+| 场景                          | 处理方式                                      |
+| ----------------------------- | --------------------------------------------- |
+| `deviceId` 格式不是有效 UUID  | 拒绝 WebSocket 握手（HTTP 400），返回错误信息 |
+| `deviceId` 对应设备不存在     | 拒绝 WebSocket 握手（HTTP 404），返回错误信息 |
+| `deviceId` 设备不属于当前用户 | 拒绝 WebSocket 握手（HTTP 403），返回错误信息 |
+| `deviceId` 设备已被删除       | 拒绝 WebSocket 握手（HTTP 404），返回错误信息 |
 
-`WsUpdateConfigRequest` 现有字段（保持不变）:
+**设备配置预加载机制**：
+
+当连接携带 `deviceId` 时，后端应在 WebSocket 握手成功后、发送 `establishConnection` 之前，预加载以下设备配置并应用于当前会话：
+
+| 配置项      | 来源字段                              | 默认值      | 说明                            |
+| ----------- | ------------------------------------- | ----------- | ------------------------------- |
+| 语音风格    | `device.config.voiceStyle`            | `"default"` | 用于 TTS 语音合成               |
+| AI 人格开关 | `device.config.aiPersonality.enabled` | `false`     | 控制 AI 是否使用人格化回复      |
+| AI 人格特质 | `device.config.aiPersonality.traits`  | `null`      | AI 人格特质描述文本             |
+| AI 人格目标 | `device.config.aiPersonality.goals`   | `null`      | AI 人格目标描述文本             |
+| 设备 ID     | `device.id`                           | -           | 关联到所有后续消息的 `deviceId` |
+
+**与现有 `WsUpdateConfigRequest` 的关系**：
+
+当前前端在 `establishConnection` 后立即发送 `WsUpdateConfigRequest` 携带 `voiceId` 等配置。增加 `deviceId` 参数后，后端应：
+
+1. **在握手阶段**根据 `deviceId` 预加载设备配置作为会话默认配置
+2. **在收到 `updateConfig` 消息后**，用消息中的配置**覆盖**预加载的默认配置
+3. `updateConfig` 消息中的 `voiceId` 字段优先级**高于**设备配置中的 `voiceStyle`
+
+这种分层覆盖的设计确保了：
+
+- 即使前端未发送 `updateConfig`，设备配置也能生效
+- 前端仍可通过 `updateConfig` 动态调整会话参数
+- 向后兼容：不传 `deviceId` 时行为完全不变
+
+`WsUpdateConfigRequest` 现有字段（保持不变）：
 
 ```typescript
 {
@@ -746,6 +1010,86 @@ wss://<host>/api/v1/chat/ws?token=<accessToken>&deviceId=<deviceId>
   voiceId?: string;
 }
 ```
+
+**连接生命周期中的设备关联**：
+
+```
+WebSocket 连接建立
+  │
+  ├─ 校验 token + 校验 deviceId（如有）
+  │
+  ├─ [成功] 预加载设备配置 → 发送 establishConnection
+  │     │
+  │     ├─ 会话期间，所有消息关联到该 deviceId
+  │     │     ├─ inputAudioStream  → 标记 deviceId
+  │     │     ├─ outputAudioStream → 使用该设备 voiceStyle
+  │     │     ├─ outputTextStream  → 使用该设备 aiPersonality
+  │     │     └─ chatComplete      → 记录到该设备的对话历史
+  │     │
+  │     └─ 收到 updateConfig → 覆盖预加载的配置
+  │
+  └─ [失败] 拒绝握手 (HTTP 400/403/404)
+```
+
+**多设备并发连接**：
+
+- 同一用户可同时建立多个 WebSocket 连接，每个连接关联不同的 `deviceId`
+- 后端需维护 `connectionId → deviceId` 的映射关系
+- 同一设备可被多个连接关联（如用户在多个标签页打开同一设备的聊天页面）
+- 设备被删除时，应断开所有关联的 WebSocket 连接
+
+---
+
+### 2.5 错误处理与异常场景汇总
+
+本节汇总所有设备模块相关的异常场景及后端预期行为，便于后端开发人员统一处理。
+
+#### 2.5.1 激活虚拟设备异常场景
+
+| 场景                | 触发条件                                             | HTTP 状态码 | 响应                                                                                                                            |
+| ------------------- | ---------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Token 无效/过期     | `x-access-token` 解析失败                            | 200         | `{ success: false, message: "Invalid or expired access token" }`                                                                |
+| 虚拟设备数量超限    | 该用户已有 5 个 `type='virtual'` 设备                | 200         | `{ success: false, message: "Cannot create more than 5 virtual devices" }`                                                      |
+| SN 生成冲突重试耗尽 | 随机生成的 identifier 连续 3 次冲突                  | 200         | `{ success: false, message: "Failed to activate virtual device" }`                                                              |
+| 数据库写入失败      | 事务执行异常                                         | 200         | `{ success: false, message: "Internal server error" }`                                                                          |
+| 并发创建超限        | 多个请求同时到达，事务内数量校验通过但插入后超出限制 | 200         | 应通过数据库唯一约束和事务隔离级别防止，若发生则返回 `{ success: false, message: "Cannot create more than 5 virtual devices" }` |
+
+#### 2.5.2 解绑设备异常场景
+
+| 场景               | 触发条件                        | HTTP 状态码 | 响应                                                                           |
+| ------------------ | ------------------------------- | ----------- | ------------------------------------------------------------------------------ |
+| Token 无效/过期    | `x-access-token` 解析失败       | 200         | `{ success: false, message: "Invalid or expired access token" }`               |
+| deviceId 格式无效  | 非 UUID v4 格式                 | 200         | `{ success: false, message: "Invalid deviceId format" }`                       |
+| 设备不存在         | 数据库中无此 id 的记录          | 200         | `{ success: false, message: "Device not found" }`                              |
+| 无权限操作         | 设备 `ownerId` 与当前用户不匹配 | 200         | `{ success: false, message: "Access denied: device does not belong to user" }` |
+| 级联删除部分失败   | 关联数据删除异常                | 200         | 建议事务回滚，返回 `{ success: false, message: "Internal server error" }`      |
+| 设备有活跃 WS 连接 | 正在聊天的设备被删除            | 200         | 删除成功后主动断开 WS 连接，返回 `{ success: true }`                           |
+
+#### 2.5.3 获取设备列表异常场景
+
+| 场景            | 触发条件                  | HTTP 状态码 | 响应                                                             |
+| --------------- | ------------------------- | ----------- | ---------------------------------------------------------------- |
+| Token 无效/过期 | `x-access-token` 解析失败 | 200         | `{ success: false, message: "Invalid or expired access token" }` |
+| 用户无设备      | 该用户无任何设备记录      | 200         | `{ success: true, data: { devices: [] } }`                       |
+
+#### 2.5.4 WebSocket 连接异常场景
+
+| 场景                        | 触发条件                             | 处理方式                                                     |
+| --------------------------- | ------------------------------------ | ------------------------------------------------------------ |
+| token 参数缺失或无效        | URL 中无 token 或 token 解析失败     | 拒绝握手，HTTP 401                                           |
+| deviceId 格式无效           | `deviceId` 非 UUID v4                | 拒绝握手，HTTP 400                                           |
+| deviceId 设备不存在         | 数据库中无此设备                     | 拒绝握手，HTTP 404                                           |
+| deviceId 设备不属于当前用户 | `ownerId !== userId`                 | 拒绝握手，HTTP 403                                           |
+| 设备在连接期间被删除        | 另一端点删除了该设备                 | 主动断开 WebSocket 连接，发送 `chatComplete` 带错误信息      |
+| 设备配置更新                | 用户在设备配置页修改了 voiceStyle 等 | 下次建立新连接时生效；当前连接需通过 `updateConfig` 消息更新 |
+
+#### 2.5.5 通用异常处理原则
+
+1. **HTTP 状态码**：本项目约定业务错误统一返回 HTTP 200，通过 `success: false` 区分；仅网络层/服务端异常返回 4xx/5xx
+2. **message 字段**：应使用英文标准错误描述（见 2.0.3 节错误码表），前端根据 message 匹配 i18n 文案
+3. **事务安全**：所有写操作应在数据库事务中执行，失败时完整回滚
+4. **日志记录**：所有错误场景应记录详细日志（包括 userId、deviceId、错误原因），便于排查
+5. **敏感信息**：错误响应不应暴露数据库结构、内部实现细节等敏感信息
 
 ---
 

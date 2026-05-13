@@ -1,187 +1,86 @@
 ---
 name: lanhu-ui-sync
-description: Sync frontend UI code with Blue Lake (lanhu) design specs by fetching design tokens via lanhu-mcp tools, comparing against current implementation, and applying fixes using the gradient overlay method (global CSS → page → component layers). Use when aligning any frontend module with 蓝湖 designs, replacing UI styles, or when the user mentions 设计稿, design replacement, lanhu, or UI比对.
+description: Sync frontend UI code with Blue Lake (lanhu / 蓝湖) design specs by fetching design tokens via lanhu-mcp tools, comparing against current implementation, and applying fixes in a layered cascade (global CSS → page → component). Use when aligning any frontend module with 蓝湖 designs, replacing UI styles, or when the user mentions 设计稿, design replacement, lanhu, 蓝湖, or UI 比对.
+metadata:
+  version: '2.0.0'
+  domain: frontend
+  triggers: 蓝湖, lanhu, 设计稿, design sync, UI 比对, design token, 切图, image_id, lanhu-mcp
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-expert
 ---
 
 # Blue Lake Design UI Sync
 
 ## Overview
 
-This skill syncs frontend code with Blue Lake (蓝湖) design specifications. The workflow follows a 9-step process: identify designs, fetch data, extract style tokens, compare with current code, apply fixes in a layered cascade, and verify.
+Aligns frontend Vue/Quasar code with Blue Lake (蓝湖) design specs through a deterministic 9-step workflow. Treats design tokens (colors, gradients, radii, spacings, typography) as the single source of truth and applies fixes in a strict cascade: global CSS variables → page-scoped styles → component-local overrides.
 
 ## Prerequisites
 
-- lanhu-mcp package installed (`node_modules/@star_work/lanhu-mcp/dist/index.js` exists)
-- Blue Lake login cookie valid (`~/.lanhu-mcp/cookie.json`)
-- On Windows: use `node node_modules/@star_work/lanhu-mcp/dist/index.js` directly (NOT `npx`)
+- `lanhu-mcp` installed at `node_modules/@star_work/lanhu-mcp/dist/index.js`
+- Blue Lake login cookie valid at `~/.lanhu-mcp/cookie.json` (re-run login if expired)
+- Windows: invoke via `node node_modules/@star_work/lanhu-mcp/dist/index.js` directly (NOT `npx`)
 
 **Project constants**:
 
-- `tid`: `043c655d-def8-4d64-8b42-11143b799069`
-- `pid`: `aba59ed3-cb41-4ddb-9e79-ccb13b416f04`
-- Design data dir: `page/lanhu-mcp-assets/`
+| Key               | Value                                  |
+| ----------------- | -------------------------------------- |
+| `tid`             | `043c655d-def8-4d64-8b42-11143b799069` |
+| `pid`             | `aba59ed3-cb41-4ddb-9e79-ccb13b416f04` |
+| Design assets dir | `page/lanhu-mcp-assets/`               |
+| Tokens reference  | [`tokens.md`](./tokens.md)             |
 
----
+## Core Workflow
 
-## Workflow
+Use this checklist for every sync task. Details in [`references/workflow.md`](./references/workflow.md).
 
-```
-Task Progress for [module-name]:
-- [ ] Step 1: Identify target design image_ids
-- [ ] Step 2: Fetch parsed JSON via lanhu_get_design
-- [ ] Step 3: Extract fills/gradients from raw JSON (MUST search ALL shape types)
-- [ ] Step 4: Download screenshots for visual reference
-- [ ] Step 5: Download slices (icons/images) if needed
-- [ ] Step 6: Generate diff report (8 dimensions)
-- [ ] Step 7: Apply fixes using gradient overlay method
-- [ ] Step 8: Build verification
-- [ ] Step 9: Visual confirmation
-```
+1. **Identify target** — resolve `image_id` via `lanhu_resolve_link` or `all-designs.json`
+2. **Fetch data** — call `lanhu_get_design` + `lanhu_get_screenshot` for visual & structural reference
+3. **Get raw JSON** — run `fetch-raw.mjs <image_id>` to obtain gradient / shape / color precise values
+4. **Download slices** — call `lanhu_download_slices` for icons/backgrounds that cannot be reproduced in CSS
+5. **Extract tokens** — consolidate colors, gradients, radii, spacings, typography into a token list; record in [`tokens.md`](./tokens.md)
+6. **Diff current code** — read existing Vue/SCSS; list mismatches against tokens
+7. **Apply fixes (cascaded)** — global CSS variables first → page-scoped styles → component-local only if truly unique
+8. **Verify** — re-read changed files; visually diff against screenshot; confirm dark-mode parity
+9. **Record** — append new/changed tokens to `tokens.md`; note pitfalls encountered
 
-### Phase 1: Identify & Fetch
+## Reference Guide
 
-**Step 1** — Search `page/lanhu-mcp-assets/all-designs.json` for designs matching the target module by name keyword. Extract `id` (used as `image_id`) and `name`.
+Load detailed guidance based on the current sub-task:
 
-**Step 2** — Call `lanhu_get_design` for each image_id. Output is saved to `page/lanhu-mcp-assets/designs/{image_id}.json`. Contains node types (shape/text/container/icon), UnoCSS classes, and text styles.
+| Topic                                       | Reference                                                          | Load When                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Full workflow expansion (4 phases, 9 steps) | [`references/workflow.md`](./references/workflow.md)               | Starting a new sync task, need phase-by-phase detail                          |
+| Raw JSON extraction & gradient decoding     | [`references/raw-json.md`](./references/raw-json.md)               | Screenshot shows gradients, alpha fills, arc shapes, or complex backgrounds   |
+| 10 core principles                          | [`references/principles.md`](./references/principles.md)           | Deciding layer of fix, naming tokens, handling ambiguity                      |
+| Common pitfalls table                       | [`references/pitfalls.md`](./references/pitfalls.md)               | Fix does not render as expected; before writing CSS                           |
+| Slice identification (SHA-256 mapping)      | [`references/slice-mapping.md`](./references/slice-mapping.md)     | Need to map a design layer to an already-downloaded slice file                |
+| Escalation protocol (Principle 10)          | [`references/escalation.md`](./references/escalation.md)           | Design clearly conflicts with current code; unable to reconcile automatically |
+| Design token data overview                  | [`references/tokens-overview.md`](./references/tokens-overview.md) | Want a map of what already exists in `tokens.md`                              |
+| **Design token data repository**            | [`tokens.md`](./tokens.md)                                         | Looking up concrete hex/rgba/radius values by module                          |
 
-**Step 3** — **CRITICAL**: Parsed JSON shape nodes do NOT contain fill/gradient colors. These MUST be extracted from raw JSON:
+## Constraints
 
-- Check if `{image_id}_raw.json` exists
-- If not, search for the same component name in other `_raw.json` files — same-named components share styles across designs
-- Extract `fills[]`, `borders[]`, `shadows[]`, `radius`/`paths[].radius` from raw JSON
+### MUST DO
 
-### Phase 2: Diff Analysis
+- Fetch **raw JSON** (not only cleaned design JSON) whenever the screenshot contains gradients, radial fills, or shapes — cleaned JSON loses precision
+- Apply fixes in the **global → page → component** cascade; promote repeated values to CSS variables before duplicating
+- Cross-check every token against [`tokens.md`](./tokens.md); reuse existing names instead of inventing synonyms
+- Verify both **light and dark** modes after every change
+- For every downloaded slice, record its **SHA-256** and source `image_id` in the module's section of `tokens.md`
+- Escalate (abort and report) when a design conflicts with documented code behaviour — follow [`references/escalation.md`](./references/escalation.md)
 
-**Step 6** — Compare 8 dimensions:
+### MUST NOT DO
 
-| Dimension               | Design Source                                      | Code Source                                 |
-| ----------------------- | -------------------------------------------------- | ------------------------------------------- |
-| Page background         | raw JSON `fills[0].gradient.stops`                 | Page component CSS                          |
-| Button color            | raw JSON `fills[0].color.value`                    | Button CSS `background`                     |
-| Button border           | raw JSON `borders[]`                               | Button CSS `border`                         |
-| Input field styling     | raw JSON `fills[]`, `paths[].radius`, `borders[]`  | `.input-group` / `.design-input` CSS        |
-| Dimensions              | parsed JSON `class: w-Xpx h-Ypx`                   | CSS `width`/`height`                        |
-| Text styles             | parsed JSON `text.style.font/color`                | CSS font properties                         |
-| Text content            | parsed JSON `text.style.content`                   | Vue template text/placeholder               |
-| Inline action buttons   | parsed JSON text node inside shape                 | HTML element + class                        |
-| **Component structure** | parsed JSON shape hierarchy (sibling shapes)       | DOM element tree                            |
-| **Element visual role** | parsed JSON shape dimensions matching input fields | HTML class usage (`.input-group` vs custom) |
-| **Vertical spacing**    | Y-coordinate deltas between consecutive shapes     | CSS margin-top / gap between siblings       |
+- Invent gradient stops or colors from the screenshot; always derive from raw JSON or token file
+- Copy full design JSON into code comments or commits
+- Duplicate a color/radius/spacing value that already exists as a CSS variable
+- Hardcode slice paths before confirming the slice SHA matches the design layer
+- Modify `tokens.md` formatting or rename existing tokens without running through the diff step
+- Use short i18n key paths like `t('LanguagePage.xxx')`; always use project's `i18nSubPath('pages.stack.LanguagePage')` convention (see pitfalls)
 
-### Phase 3: Apply Fixes
+## Knowledge Reference
 
-**Step 7** — Apply in cascade order (gradient overlay method):
-
-1. **Global CSS variables** (`src/css/app.scss` `:root`) — add/modify CSS custom properties
-2. **Page-level styles** (e.g., AuthPage.vue) — page background gradient
-3. **Component-level styles** — scoped CSS for buttons, inputs, text
-
-### Phase 4: Verify
-
-**Step 8** — Run `vue-tsc --noEmit` + PWA build; both must pass with zero errors.
-
-**Step 9** — Visual confirmation: compare design screenshot against implemented styles for background, button, input, and text accuracy.
-
----
-
-## Core Principles
-
-### 1. Trust raw JSON, not screenshots — and never trust memory
-
-Screenshots can be misleading (e.g., rounded corners create visual gradient illusion). Always extract exact RGBA values from raw JSON `fills[].color.value`. If `fills[].type` is `"color"`, it's solid; if `"gradient"`, use the gradient stops.
-
-**CRITICAL**: Never assume that two shapes with the same visual appearance share the same dimensions, border, or radius. Always measure each shape individually from the design data. Never rely on "this looks like the same style" or "we used 12px elsewhere" — extract every value from the raw JSON every time. Hardcoding styles is the root cause of design drift.
-
-### 2. Input fields are the #1 most commonly missed dimension
-
-Parsed JSON represents input shapes as bare nodes with ONLY dimensions — no fills, borders, or radius. These MUST be extracted from raw JSON. For every input shape:
-
-- Search `fills[0].color` → set `background` (typical: `rgba(255,255,255,1)`)
-- Check `paths[0].radius` → set `border-radius` (typical: `8px`)
-- Check `borders[]` → if empty, add subtle border for visibility on gradient backgrounds
-- **Both the container (`.input-group`) and inner input (`.design-input`) must have the correct background**
-- **Measure the actual Y-coordinate deltas between consecutive shapes to derive spacing, never assume a fixed gap**
-
-### 3. Distinguish design placeholders from production content
-
-Design files contain mock data that must NOT leak into production:
-
-- `按钮文案` → generic container name; real text is the child text node's `content`
-- `15858077935` → demo phone number, not production data
-- Error state text → show conditionally, not hardcoded
-
-### 4. Avoid Quasar components for design-critical elements
-
-Quasar `q-input`/`q-btn` inject their own border, radius, background, font, and padding styles that override design tokens. For elements that must match exact design specs, use plain HTML (`<input class="design-input">`, `<span class="action-link">`) with custom CSS classes referencing design token variables.
-
-### 5. Always include fallback values in CSS var() calls
-
-Use `var(--clr-input-bg, rgba(255, 255, 255, 1))` pattern so components degrade gracefully even if global variables are missing.
-
-### 6. Verify DOM structure matches design shape hierarchy
-
-When design specs show multiple sibling shapes (e.g., two separate rectangles side by side), each shape must correspond to an independent HTML element with its own border, radius, and background. Merging sibling shapes into a single container causes missing visual separation. Check that the number of top-level visual elements in the DOM matches the number of sibling shapes in the design.
-
-### 7. Visual semantics over functional semantics — design appearance is the only truth
-
-When a design shape (e.g., `矩形 1992`, 311×48px) visually looks like an input field (same border, radius, background, height), the HTML element MUST use the same visual class (e.g., `.input-group`) — even if the element is functionally read-only text, a label, or a display-only value. Never use a plain `<div>` or `<span>` with ad-hoc styles when the design shows the same visual container as other input fields. This prevents style drift and position misalignment.
-
-**Rule**: The design shape determines the HTML class, not the functional role. If a design rectangle has the same dimensions/style as input fields, wrap its content in `.input-group` (with a modifier like `--readonly`) instead of creating a separate class. Do NOT invent new CSS classes for elements that design shows as identical containers.
-
-### 8. Use robust CSS spacing selectors for stacked form elements — measure from design
-
-Design specs define vertical gaps between stacked form elements. These gaps MUST be derived from the actual Y-coordinate measurements in the parsed JSON (`shape.text.frame.top` deltas), not from memory or preset values. CSS adjacent sibling selectors like `.input-group + .input-group` are fragile — they break when wrapper elements (`.input-row`, error messages, etc.) are inserted between `.input-group` siblings.
-
-**Rule**: First measure the gap from design data. Then define spacing rules for ALL possible sibling combinations in the form layout:
-
-```css
-/* Cover all adjacent combinations */
-.input-group + .input-group {
-  margin-top: 12px; /* value from actual design measurement */
-}
-.input-row + .input-group {
-  margin-top: 12px; /* value from actual design measurement */
-}
-.input-group + .input-row {
-  margin-top: 12px; /* value from actual design measurement */
-}
-```
-
-Alternatively, use `.auth-panel > * + *` or flex `gap` on the parent for uniform spacing that's DOM-structure-agnostic — but the gap value must still come from design measurement.
-
----
-
-## Common Pitfalls
-
-| Problem                                                     | Root Cause                                                                                                     | Solution                                                                                                                                                                                                                                   |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Input rendered transparent with only bottom border          | Input shapes skipped during raw JSON fill extraction                                                           | Always search raw JSON for ALL `矩形` shapes, extract fills + radius + borders                                                                                                                                                             |
-| Design placeholder text in production                       | Text content not compared in Step 6                                                                            | Extract real text from child text nodes inside containers                                                                                                                                                                                  |
-| Screenshot API returns Parse Error                          | Internal HTTP parsing issue                                                                                    | Use cached PNGs in `screenshots/` directory                                                                                                                                                                                                |
-| npx lanhu-mcp fails on Windows                              | PowerShell spawn limitation                                                                                    | Use `node node_modules/@star_work/lanhu-mcp/dist/index.js` directly                                                                                                                                                                        |
-| Input background not white despite correct variable         | Container `.input-group` missing `background` property; page gradient bleeds through                           | Add `background` to both container and inner input                                                                                                                                                                                         |
-| Sibling shapes merged into one container                    | Design shows independent boxes (e.g., code input + send button) but code uses single container with inner divs | Split into independent HTML elements matching each design shape, each with own border/radius/background. Check ALL pages with the same pattern (SignInOrSignUpPanel, NewPasswordPanel, etc.) — the merge issue tends to recur across pages |
-| Read-only field styled as plain text instead of input-group | Email/phone display uses `<div class="email-display">` with ad-hoc styles instead of `.input-group` container  | If the design shape has the same dimensions (311×48px), border, radius as input fields, use `.input-group.input-group--readonly` wrapper. Visual appearance drives class choice, not functional role                                       |
-| Spacing breaks between non-adjacent .input-group elements   | CSS `.input-group + .input-group` fails when `.input-row` or other wrappers sit between them                   | Add combinators for ALL sibling pairs: `.input-row + .input-group`, `.input-group + .input-row`. Or use parent-level flex `gap` / `> * + *` selector for structure-agnostic spacing                                                        |
-| Quasar components override design tokens                    | `q-input`/`q-btn` add conflicting styles                                                                       | Replace with plain HTML + custom CSS classes                                                                                                                                                                                               |
-| Cookie expired                                              | Session timeout                                                                                                | Re-run `lanhu_login`                                                                                                                                                                                                                       |
-| tokens.md out of sync with design data                      | tokens.md not updated alongside SKILL.md changes                                                               | Always update tokens.md when design token values change                                                                                                                                                                                    |
-
----
-
-## Design Token Quick Reference
-
-For the full verified token table, see [tokens.md](tokens.md).
-
-Key values extracted from the login/auth module (applicable across modules):
-
-- Primary button: `311×56px`, radius `28px`, `rgba(18,14,44,1)` solid
-- Weak button: `311×56px`, `1px solid rgba(33,186,69,1)` border, text `rgba(99,104,104,1)`
-- Input field: `311×48px`, `background: rgba(255,255,255,1)`, radius `8px`, border `1px solid rgba(147,152,169,0.2)`
-- Verification code row: code input `172×48px` + send button `127×48px`, gap `12px` (two independent input-groups in `.input-row`)
-- Stacked input vertical gap: `12px` between ALL adjacent form elements (input-group, input-row, etc.)
-- Read-only display fields (email/phone): same `311×48px` input-group container, `--readonly` modifier
-- Placeholder: `15px Regular`, `rgba(147,152,169,1)`
-- Error text: `15px Medium`, `rgba(255,93,93,1)`
-- Link text: `15px Regular`, `rgba(32,204,249,1)`
-- Font: `AlibabaPuHuiTi` (Medium=500, Regular=400)
+Blue Lake (蓝湖) MCP API, design token extraction, CSS custom properties cascade, Quasar theming, Vue 3 `<style scoped>`, gradient decoding (linear / radial / conic), SHA-256 asset fingerprinting, raw design JSON schema (`_raw.json`), `fetch-raw.mjs` / `slice-mapping.mjs` helper scripts.

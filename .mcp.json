@@ -1,8 +1,3 @@
 {
-  "mcpServers": {
-    "lanhu": {
-      "command": "npx",
-      "args": ["@star_work/lanhu-mcp"]
-    }
-  }
+  "mcpServers": {}
 }

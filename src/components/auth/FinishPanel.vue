@@ -78,13 +78,13 @@ onMounted(async () => {
   </q-tab-panel>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .finish-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 0 32px;
+  gap: var(--spacing-md, 16px);
+  padding: 0 var(--spacing-lg, 32px);
 }
 
 .finish-title {
@@ -99,9 +99,9 @@ onMounted(async () => {
 
 .finish-msg {
   font-family: var(--font-family);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body, 15px);
   font-weight: 400;
-  line-height: var(--line-height-body);
+  line-height: var(--line-height-body, 21px);
   color: var(--clr-weak);
   text-align: center;
   white-space: pre-line;
@@ -113,20 +113,21 @@ onMounted(async () => {
 }
 
 .finish-action {
-  margin-top: 8px;
+  margin-top: var(--spacing-sm, 8px);
 }
 
 .btn-max {
-  width: 311px;
-  height: 56px;
+  width: 100%;
+  max-width: 311px;
+  height: var(--btn-height, 56px);
   border: none;
-  border-radius: 28px;
-  background: rgba(18, 14, 44, 1);
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-primary, rgba(18, 14, 44, 1));
   color: var(--clr-white, rgba(255, 255, 255, 1));
-  font-family: var(--font-family, 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif);
-  font-size: 17px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-subtitle, 17px);
   font-weight: 500;
-  line-height: 24px;
+  line-height: var(--line-height-subtitle, 24px);
   cursor: pointer;
   transition: opacity 0.2s;
 }

@@ -24,6 +24,29 @@ export type ActivateVirtualDeviceResponse =
       };
     };
 
+export interface BindDeviceRequest {
+  macAddress: string;
+  board?: string;
+  appVersion?: string;
+  name?: string;
+}
+
+export type BindDeviceResponse =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+      data: {
+        device: DeviceInfo;
+      };
+    };
+
+export interface UnbindDeviceRequest {
+  deviceId: string;
+}
+
 export type UnbindDeviceResponse =
   | {
       success: false;

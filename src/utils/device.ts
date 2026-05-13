@@ -1,6 +1,7 @@
-import type { DeviceInfo } from 'stores/device/types';
+import type { ChildInfo, DeviceInfo } from 'stores/device/types';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
+import { useFamilyGroupStore } from 'stores/family-group';
 import { activateVirtualDevice, retrieveMine, unbindDevice } from 'src/utils/api/device';
 
 export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
@@ -39,12 +40,44 @@ export const activateAndAddVirtualDevice = async (): Promise<DeviceInfo> => {
 };
 
 /**
+ * Activate a new virtual device and associate child info in the store.
+ * The backend API does not accept child info; it is stored front-end only.
+ * @param childInfo - The child info to associate with the device.
+ * @param deviceName - Display name for the device (e.g. "小新的乐宝").
+ * @returns The newly created virtual device info with childInfo attached.
+ */
+export const activateAndAddVirtualDeviceWithChild = async (
+  childInfo: ChildInfo,
+  deviceName: string,
+): Promise<DeviceInfo> => {
+  const authStore = useAuthStore();
+  const deviceStore = useDeviceStore();
+
+  if (!authStore.accessToken) {
+    throw new Error('Failed to get access token');
+  }
+
+  const { data: response } = await activateVirtualDevice(authStore.accessToken);
+  if (!response.success) {
+    throw new Error(response.message || 'Failed to activate virtual device');
+  }
+
+  const device = response.data.device;
+  device.childInfo = childInfo;
+  device.name = deviceName;
+  deviceStore.addDevice(device);
+  return device;
+};
+
+/**
  * Unbind (delete) a device via the backend API and remove it from the store.
+ * Uses POST /devices/unbind with { deviceId } request body.
  * @param deviceId - The id of the device to unbind.
  */
 export const unbindAndRemoveDevice = async (deviceId: string): Promise<void> => {
   const authStore = useAuthStore();
   const deviceStore = useDeviceStore();
+  const familyGroupStore = useFamilyGroupStore();
 
   if (!authStore.accessToken) {
     throw new Error('Failed to get access token');
@@ -53,6 +86,12 @@ export const unbindAndRemoveDevice = async (deviceId: string): Promise<void> => 
   const { data: response } = await unbindDevice(authStore.accessToken, deviceId);
   if (!response.success) {
     throw new Error(response.message || 'Failed to unbind device');
+  }
+
+  // Remove associated family group (each virtual device maps to one family group)
+  const group = familyGroupStore.groups.find((g) => g.deviceId === deviceId);
+  if (group) {
+    familyGroupStore.removeGroup(group.id);
   }
 
   deviceStore.removeDevice(deviceId);

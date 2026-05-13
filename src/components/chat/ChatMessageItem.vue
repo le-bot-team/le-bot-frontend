@@ -1,4 +1,9 @@
 <script setup lang="ts">
+// ChatMessageItem — bubble rendered inside ChatMessageList.
+// Design a2096a64: AI bubble (white bg, dark text, left-aligned) / user
+// bubble (rgba(39,145,234,1), white text, right-aligned). Padding, radius
+// and shadow come from the `.chat-bubble*` classes in src/css/app.scss.
+
 import { computed } from 'vue';
 
 import type { ChatMessage } from 'src/types/chat/types';
@@ -8,65 +13,21 @@ const props = defineProps<{
 }>();
 
 const isUser = computed(() => props.message.role === 'user');
-const hasAudio = computed(() => !!props.message.audioUrl);
 const hasText = computed(() => props.message.text.length > 0);
-const timeLabel = computed(() => {
-  const date = new Date(props.message.timestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-});
+const isTyping = computed(
+  () => !props.message.isFinished && props.message.isStreaming && !hasText.value,
+);
 </script>
 
 <template>
-  <q-chat-message :sent="isUser" :stamp="timeLabel">
-    <template #avatar>
-      <q-avatar :color="isUser ? 'primary' : 'deep-orange'" size="36px" text-color="white">
-        <q-icon :name="isUser ? 'person' : 'smart_toy'" size="20px" />
-      </q-avatar>
+  <div class="chat-bubble" :class="isUser ? 'chat-bubble--user' : 'chat-bubble--ai'">
+    <template v-if="isTyping">
+      <span class="chat-bubble__typing" aria-label="typing">
+        <span class="chat-bubble__typing-dot" />
+        <span class="chat-bubble__typing-dot" />
+        <span class="chat-bubble__typing-dot" />
+      </span>
     </template>
-
-    <div class="chat-message-content">
-      <!-- Streaming / processing indicator -->
-      <div v-if="!message.isFinished && message.isStreaming" class="row items-center q-gutter-x-sm">
-        <q-spinner-dots color="grey-6" size="20px" />
-        <span v-if="!hasText" class="text-grey-6 text-caption">
-          {{ isUser ? 'Listening...' : 'Thinking...' }}
-        </span>
-      </div>
-
-      <!-- Text content -->
-      <div v-if="hasText" class="chat-text">
-        {{ message.text }}
-      </div>
-
-      <!-- Audio player (shown when audio URL is available) -->
-      <div v-if="hasAudio" class="chat-audio q-mt-xs">
-        <audio controls :src="message.audioUrl" preload="metadata" class="chat-audio-player" />
-      </div>
-
-      <!-- Finished indicator -->
-      <div v-if="message.isFinished && !hasText && !hasAudio" class="text-grey-5 text-caption">
-        (empty)
-      </div>
-    </div>
-  </q-chat-message>
+    <template v-else>{{ message.text }}</template>
+  </div>
 </template>
-
-<style lang="scss" scoped>
-.chat-message-content {
-  max-width: 100%;
-  min-width: 80px;
-}
-
-.chat-text {
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 1.5;
-}
-
-.chat-audio-player {
-  width: 100%;
-  min-width: 200px;
-  max-width: 300px;
-  height: 36px;
-}
-</style>

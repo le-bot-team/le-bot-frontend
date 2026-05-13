@@ -1,15 +1,25 @@
 <script setup lang="ts">
+// AuthPage — Container page for the full auth flow:
+// login/signup -> password setup (if needed) -> profile setup (required, no skip) -> add virtual device.
+// Page background uses the shared auth gradient (--gradient-page-bg).
+
 import { ref } from 'vue';
 
-import FinishPanel from 'components/auth/FinishPanel.vue';
 import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
 import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
+import { router } from 'src/router';
 
 const avatar = ref<string>('');
 const email = ref<string>('');
 const isNew = ref<boolean>(false);
 const panelIndex = ref<number>(0);
+
+function onProfileFinish() {
+  // After profile setup, navigate to the onboarding complete guide page
+  // where user can choose: add a virtual device OR scan to join an existing family group
+  void router.replace({ name: 'onboarding-complete' });
+}
 </script>
 
 <template>
@@ -67,12 +77,13 @@ const panelIndex = ref<number>(0);
       <q-tab-panels class="full-width bg-transparent" v-model="panelIndex">
         <sign-in-or-sign-up-panel
           :name="0"
-          @finish="panelIndex = 3"
           @next="
-            (_isNew, _email) => {
+            (_isNew, _email, _code, needsPassword) => {
               isNew = _isNew;
               email = _email;
-              panelIndex = 1;
+              // needsPassword: new user or existing user without password -> password setup
+              // otherwise: skip directly to profile setup
+              panelIndex = needsPassword ? 1 : 2;
             }
           "
         />
@@ -80,32 +91,18 @@ const panelIndex = ref<number>(0);
           :email="email"
           :is-new="isNew"
           :name="1"
-          @finish="panelIndex = 3"
           @next="panelIndex = 2"
           @previous="panelIndex = 0"
         />
-        <setup-profile-panel :name="2" @finish="panelIndex = 3" @previous="panelIndex = 1" />
-        <finish-panel :is-new="isNew" :name="3" :nickname="email" />
+        <setup-profile-panel :name="2" @finish="onProfileFinish" @previous="panelIndex = 1" />
       </q-tab-panels>
     </div>
   </q-page>
 </template>
 
-<style scoped>
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    180deg,
-    rgba(216, 244, 255, 1) 0%,
-    rgba(225, 255, 242, 1) 20.7%,
-    rgba(253, 255, 224, 1) 54.6%,
-    rgba(255, 255, 255, 1) 100%
-  );
-  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-}
+<style scoped lang="scss">
+// AuthPage — designs 72b3b33f / 4a4704cc / 883b0908 / 2d090f70
+// Page-level layout; `.auth-page` base styles come from app.scss global.
 
 .auth-container {
   width: 375px;
@@ -118,12 +115,11 @@ const panelIndex = ref<number>(0);
   position: relative;
 }
 
-/* When on profile setup page (panelIndex > 1), reduce padding since no logo/slogan */
 .auth-container--sub {
   padding-top: 44px;
 }
 
-/* Back arrow: positioned top-left, matching design spec (~9×16px) */
+// Back arrow (9×16 path, design 路径 element in all 4 artboards)
 .auth-back {
   position: absolute;
   top: 64px;
@@ -134,63 +130,65 @@ const panelIndex = ref<number>(0);
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--clr-text, rgba(21, 23, 23, 1));
+  color: var(--clr-text);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* Logo: 120x120px, matching design */
+// Logo: 容器 2633@1x, 120×120 in all entry-page designs
 .auth-logo {
-  width: 120px;
-  height: 120px;
+  width: var(--logo-size);
+  height: var(--logo-size);
   margin-bottom: 8px;
 }
+
 .logo-img,
 .logo-placeholder {
-  width: 120px;
-  height: 120px;
+  width: var(--logo-size);
+  height: var(--logo-size);
   border-radius: 50%;
   overflow: hidden;
 }
+
 .logo-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Slogan - entry page and password setup page */
+// Slogan: entry page (72b3b33f) — 20px/28px, deep purple rgba(18,14,44,1)
 .auth-slogan {
-  font-size: 20px;
+  font-size: var(--font-size-slogan-entry);
   font-weight: 500;
   line-height: 28px;
-  color: rgba(18, 14, 44, 1);
+  color: var(--clr-slogan-entry);
   text-align: center;
   margin-bottom: 48px;
   letter-spacing: 0;
 }
 
-/* Slogan on password setup page - smaller per design spec (登录页-注册) */
+// Slogan on registration page (2d090f70/883b0908/4a4704cc) — 15px/22px, text color
 .auth-slogan--sm {
-  font-size: 15px;
-  line-height: 22px;
-  color: rgba(21, 23, 23, 1);
+  font-size: var(--font-size-slogan);
+  line-height: var(--line-height-body);
+  color: var(--clr-text);
   margin-bottom: 32px;
 }
 
-/* Sub-page centered title (e.g. 完善个人信息) */
+// Sub-page centered title (e.g. 完善个人信息, design ed71eb82)
 .auth-title {
   width: 100%;
   text-align: center;
-  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family);
   font-size: 17px;
   font-weight: 500;
   line-height: 24px;
-  color: rgba(21, 23, 23, 1);
+  color: var(--clr-text);
   margin-bottom: 0;
   padding: 10px 0;
 }
 
-/* Override q-tab-panels */
+// Override q-tab-panels
 .auth-container :deep(.q-tab-panels) {
   flex: 1;
   display: flex;

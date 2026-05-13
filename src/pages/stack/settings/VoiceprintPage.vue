@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { router } from 'src/router';
 import type { Person } from 'src/types/api/voiceprint';
@@ -9,10 +10,17 @@ import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 
 const i18n = i18nSubPath('pages.stack.settings.VoiceprintPage');
-
 const { accessToken } = storeToRefs(useAuthStore());
-
 const persons = ref<Person[]>([]);
+const routerInstance = useRouter();
+
+const goDetail = (personId: string) => {
+  routerInstance.push(`/stack/settings/voiceprint/detail/${personId}`).catch(console.error);
+};
+
+const goNew = () => {
+  routerInstance.push('/stack/settings/voiceprint/new').catch(console.error);
+};
 
 onMounted(async () => {
   if (!accessToken.value) {
@@ -22,7 +30,6 @@ onMounted(async () => {
   try {
     const { data: response } = await getPersons(accessToken.value);
     if (response.success) {
-      console.log(response);
       persons.value = response.data;
     } else {
       console.error('Failed to fetch persons:', response.message);
@@ -34,37 +41,22 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-lg q-pa-md">
-    <q-card bordered flat>
-      <q-list>
-        <q-item v-for="(person, index) in persons" :key="index">
-          <q-item-section>
-            <q-item-label>{{ person.name }}</q-item-label>
-            <q-item-label caption>{{ person.person_id }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-btn
-              dense
-              flat
-              icon="mdi-chevron-right"
-              :to="`/stack/settings/voiceprint/detail/${person.person_id}`"
-            />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card>
-    <q-btn
-      color="primary"
-      :label="i18n('labels.addNewPerson')"
-      no-caps
-      to="/stack/settings/voiceprint/new"
-    />
-    <q-btn
-      color="secondary"
-      :label="i18n('labels.testVoice')"
-      no-caps
-      to="/stack/settings/voiceprint/test"
-    />
+  <q-page class="voiceprint-page">
+    <div class="me-card voiceprint-card">
+      <div
+        v-for="person in persons"
+        :key="person.person_id"
+        class="voiceprint-row"
+        @click="goDetail(person.person_id)"
+      >
+        <span>{{ i18n('labels.personVoiceprint', { name: person.name }) }}</span>
+        <q-icon class="voiceprint-row__chevron" name="chevron_right" size="12px" />
+      </div>
+    </div>
+    <button class="voiceprint-add-btn" type="button" @click="goNew">
+      <q-icon name="add" size="14px" />
+      {{ i18n('labels.addNewPerson') }}
+    </button>
   </q-page>
 </template>
 

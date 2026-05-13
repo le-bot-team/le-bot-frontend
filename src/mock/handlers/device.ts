@@ -13,7 +13,8 @@ const devices: DeviceInfo[] = [...MOCK_DEVICES];
  * Register mock handlers for the device module:
  *   GET    /devices/mine
  *   POST   /devices/virtual/activate
- *   DELETE /devices/:deviceId
+ *   POST   /devices/unbind
+ *   POST   /devices/bind (physical device binding)
  */
 export function setupDeviceMock(mock: MockAdapter): void {
   // Retrieve my devices
@@ -33,13 +34,16 @@ export function setupDeviceMock(mock: MockAdapter): void {
       createdAt: new Date().toISOString(),
       updatedAt: null,
       identifier: `virtual-${mockId().slice(0, 8)}`,
-      ownerId: 1,
+      ownerId: 'mock-owner-00000000-0000-0000-0000-000000000001',
       type: 'virtual',
       model: 'virtual-device',
       name: null,
       status: {},
       config: null,
       boundPhysicalDeviceId: null,
+      agentId: null,
+      xiaozhiDeviceId: null,
+      childInfo: null,
     };
 
     devices.push(newDevice);
@@ -47,9 +51,40 @@ export function setupDeviceMock(mock: MockAdapter): void {
     return [200, mockSuccess({ device: newDevice })];
   });
 
-  // Unbind / delete a device
-  mock.onDelete(/\/devices\/([^/]+)$/).reply((config: { url?: string }) => {
-    const deviceId = config.url?.split('/').pop();
+  // Bind a physical device
+  mock.onPost('/devices/bind').reply(() => {
+    const newDevice: DeviceInfo = {
+      id: mockId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+      identifier: `robot-${mockId().slice(0, 8)}`,
+      ownerId: 'mock-owner-00000000-0000-0000-0000-000000000001',
+      type: 'robot',
+      model: 'leBot-v1',
+      name: null,
+      status: {},
+      config: { voiceStyle: 'xiaole' },
+      boundPhysicalDeviceId: null,
+      agentId: null,
+      xiaozhiDeviceId: null,
+      childInfo: null,
+    };
+
+    devices.push(newDevice);
+    console.log(`[Mock Device] Physical device bound: ${newDevice.id}`);
+    return [200, mockSuccess({ device: newDevice })];
+  });
+
+  // Unbind a device (POST /devices/unbind with { deviceId })
+  mock.onPost('/devices/unbind').reply((config: { data?: string }) => {
+    let deviceId: string | undefined;
+    try {
+      const body = JSON.parse(config.data || '{}');
+      deviceId = body.deviceId;
+    } catch {
+      return [200, mockError('无效请求')];
+    }
+
     const index = devices.findIndex((d) => d.id === deviceId);
 
     if (index === -1) {

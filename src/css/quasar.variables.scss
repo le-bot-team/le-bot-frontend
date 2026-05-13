@@ -12,7 +12,11 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #20ccf9;
+// Primary brand color = design token "品牌色/辅助色深紫" rgba(18,14,44,1).
+// Applied per HomePage design ed2b5fdd (bottom tab active state) and propagated
+// globally to q-btn/q-tab/q-toggle defaults. Link/action tokens use --clr-link
+// (rgba(32,204,249,1)) which remains available via app.scss.
+$primary: #120e2c;
 $secondary: #4da7ff;
 $accent: #20ccf9;
 

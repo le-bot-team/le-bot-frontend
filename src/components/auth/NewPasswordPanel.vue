@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// NewPasswordPanel — design 2d090f70 (登录页-注册).
+// Password setup step: email display (readonly), verification code, new password,
+// confirm password, and submit button.
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -11,7 +14,6 @@ const props = defineProps<{
   name: string | number;
 }>();
 const emit = defineEmits<{
-  finish: [];
   next: [];
   previous: [];
 }>();
@@ -34,6 +36,30 @@ const codeError = computed(() => code.value?.length !== 6);
 const passwordError = computed(
   () => newPassword.value === undefined || newPassword.value.length < 8,
 );
+const passwordErrorMsg = computed(() => {
+  if (newPassword.value === undefined || newPassword.value.length === 0) return '';
+  if (newPassword.value.length < 8) return '密码至少 8 位';
+  return '';
+});
+
+// 密码强度计算
+const passwordStrength = computed(() => {
+  const pwd = newPassword.value ?? '';
+  if (!pwd.length) return { level: 0, label: '' };
+
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 12) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[a-z]/.test(pwd)) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) score++;
+
+  if (score <= 2) return { level: 1, label: '弱' };
+  if (score <= 4) return { level: 2, label: '中' };
+  return { level: 3, label: '强' };
+});
+
 const confirmError = computed(
   () =>
     !!newPassword.value?.length &&
@@ -117,11 +143,8 @@ const confirmNewPassword = async () => {
 
     accessToken.value = data.data.accessToken;
 
-    if (props.isNew) {
-      emit('next');
-    } else {
-      emit('finish');
-    }
+    // Both new and existing users go to profile setup after password is set
+    emit('next');
   } catch (err) {
     errorMsg.value = (err as Error).message || '操作失败，请稍后重试';
   } finally {
@@ -140,15 +163,15 @@ onMounted(() => {
 <template>
   <q-tab-panel :name="name" class="auth-panel">
     <!-- Email display (read-only, styled as input-group per design spec) -->
-    <div class="input-group input-group--readonly">
+    <div class="auth-input-group auth-input-group--readonly">
       <span class="email-text">{{ email }}</span>
     </div>
 
     <!-- Verification code -->
-    <div class="input-row">
-      <div class="input-group input-group--code">
+    <div class="auth-input-row">
+      <div class="auth-input-group auth-input-group--code">
         <input
-          class="design-input"
+          class="auth-input"
           v-model="code"
           placeholder="请输入验证码"
           maxlength="6"
@@ -156,10 +179,10 @@ onMounted(() => {
           :disabled="isSubmitting"
         />
       </div>
-      <div class="input-group input-group--action">
+      <div class="auth-input-group auth-input-group--action">
         <span
-          class="action-link"
-          :class="{ 'action-link--disabled': !canSendCode || isSubmitting }"
+          class="auth-action-link"
+          :class="{ 'auth-action-link--disabled': !canSendCode || isSubmitting }"
           @click="sendCode"
         >
           {{ sendCodeLabel }}
@@ -168,10 +191,10 @@ onMounted(() => {
     </div>
 
     <!-- New password -->
-    <div class="input-group">
-      <div class="input-with-action">
+    <div class="auth-input-group" :class="{ 'auth-input-group--error': passwordError && newPassword?.length }">
+      <div class="auth-input-with-action">
         <input
-          class="design-input design-input--flex"
+          class="auth-input auth-input--flex"
           :type="showPassword ? 'text' : 'password'"
           v-model="newPassword"
           placeholder="请设置密码"
@@ -182,7 +205,7 @@ onMounted(() => {
         />
         <span
           v-if="isNewPasswordFocused || newPassword?.length"
-          class="action-icon"
+          class="auth-action-icon"
           @click="showPassword = !showPassword"
         >
           <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -205,11 +228,34 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Password strength indicator -->
+    <div v-if="newPassword?.length" class="password-strength">
+      <div class="password-strength__bars">
+        <div
+          class="password-strength__bar"
+          :class="{ 'password-strength__bar--active': passwordStrength.level >= 1 }"
+        ></div>
+        <div
+          class="password-strength__bar"
+          :class="{ 'password-strength__bar--active': passwordStrength.level >= 2 }"
+        ></div>
+        <div
+          class="password-strength__bar"
+          :class="{ 'password-strength__bar--active': passwordStrength.level >= 3 }"
+        ></div>
+      </div>
+      <div class="password-strength__labels">
+        <span :class="{ 'active': passwordStrength.level >= 1 }">弱</span>
+        <span :class="{ 'active': passwordStrength.level >= 2 }">中</span>
+        <span :class="{ 'active': passwordStrength.level >= 3 }">强</span>
+      </div>
+    </div>
+
     <!-- Confirm password -->
-    <div class="input-group" :class="{ 'input-group--error': confirmError }">
-      <div class="input-with-action">
+    <div class="auth-input-group" :class="{ 'auth-input-group--error': confirmError }">
+      <div class="auth-input-with-action">
         <input
-          class="design-input design-input--flex"
+          class="auth-input auth-input--flex"
           :type="showConfirm ? 'text' : 'password'"
           v-model="confirmPassword"
           placeholder="请再次输入设置的密码"
@@ -220,7 +266,7 @@ onMounted(() => {
         />
         <span
           v-if="isConfirmFocused || confirmPassword?.length"
-          class="action-icon"
+          class="auth-action-icon"
           @click="showConfirm = !showConfirm"
         >
           <svg v-if="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -244,13 +290,14 @@ onMounted(() => {
     </div>
 
     <!-- Combined error message -->
-    <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
-    <div v-else-if="confirmError" class="error-msg">输入的两次密码不同</div>
+    <div v-if="errorMsg" class="auth-error-msg">{{ errorMsg }}</div>
+    <div v-else-if="passwordErrorMsg" class="auth-error-msg">{{ passwordErrorMsg }}</div>
+    <div v-else-if="confirmError" class="auth-error-msg">输入的两次密码不同</div>
 
     <!-- Primary button -->
     <button
-      class="btn-max"
-      :class="{ 'btn-max--disabled': !canSubmit }"
+      class="auth-btn-primary auth-btn-primary--mt-lg"
+      :class="{ 'auth-btn-primary--disabled': !canSubmit }"
       :disabled="!canSubmit"
       @click="confirmNewPassword"
     >
@@ -259,175 +306,65 @@ onMounted(() => {
   </q-tab-panel>
 </template>
 
-<style scoped>
-/* ===== Shared design tokens ===== */
-.auth-panel {
-  --clr-text: rgba(21, 23, 23, 1);
-  --clr-placeholder: rgba(147, 152, 169, 1);
-  --clr-link: rgba(32, 204, 249, 1);
-  --clr-error: rgba(255, 93, 93, 1);
-  --clr-weak: rgba(99, 104, 104, 1);
-  --clr-white: rgba(255, 255, 255, 1);
-  --font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-
-  font-family: var(--font-family);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 0 32px;
-}
-
-/* Email display — styled as input-group */
-.input-group--readonly {
-  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
-}
+<style scoped lang="scss">
+// NewPasswordPanel — design 2d090f70 (登录页-注册)
+// Shared input/button/error styles from app.scss globals.
+// Only component-specific overrides remain here.
 
 .email-text {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-text);
-  padding: 13px 16px;
-}
-
-/* ===== Input row (verification code: two independent boxes) ===== */
-.input-row {
-  display: flex;
-  gap: 12px;
-  width: 311px;
-  margin-top: 12px;
-}
-
-/* Input group */
-.input-group {
-  width: 311px;
-  height: 48px;
-  position: relative;
-  border: 1px solid var(--clr-input-border, rgba(147, 152, 169, 0.2));
-  border-radius: 8px;
-  transition: border-color 0.2s;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.input-group:focus-within {
-  border-color: var(--clr-link);
-}
-.input-group--error {
-  border-color: var(--clr-error);
-}
-.input-group--code {
-  width: 172px;
-}
-.input-group--action {
-  width: 127px;
-  justify-content: center;
-}
-
-/* Spacing between stacked inputs (design: 12px gap) */
-/* Only apply to top-level input-groups, not siblings inside .input-row */
-.input-group + .input-group:not(.input-group--action) {
-  margin-top: 12px;
-}
-.input-row + .input-group {
-  margin-top: 12px;
-}
-
-.design-input {
-  width: 100%;
-  height: 100%;
-  border: none;
-  outline: none;
-  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
   font-family: var(--font-family);
   font-size: 15px;
   font-weight: 500;
   line-height: 22px;
   color: var(--clr-text);
   padding: 13px 16px;
-  box-sizing: border-box;
-}
-.design-input::placeholder {
-  font-weight: 400;
-  color: var(--clr-placeholder);
-}
-/* Hide browser-native password reveal/clear buttons */
-.design-input::-ms-reveal,
-.design-input::-ms-clear,
-.design-input::-webkit-password-toggle {
-  display: none;
-}
-.design-input--flex {
-  width: calc(100% - 40px);
 }
 
-.input-with-action {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.action-link {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: var(--clr-link);
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  text-align: center;
-}
-.action-link--disabled {
-  color: var(--clr-placeholder);
-  cursor: not-allowed;
-}
-
-.action-icon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-}
-
-/* Error */
-.error-msg {
-  width: 311px;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  color: var(--clr-error);
-  margin-top: 8px;
-  text-align: left;
-}
-
-/* Max button */
-.btn-max {
-  width: 311px;
-  height: 56px;
-  border: none;
-  border-radius: 28px;
-  background: rgba(18, 14, 44, 1);
-  color: var(--clr-white);
-  font-family: var(--font-family);
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 24px;
-  cursor: pointer;
+.auth-btn-primary--mt-lg {
   margin-top: 48px;
-  transition: opacity 0.2s;
 }
-.btn-max:hover {
-  opacity: 0.9;
-}
-.btn-max--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+
+.password-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+
+  &__bars {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__bar {
+    flex: 1;
+    height: 4px;
+    background: #E5E6EB;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+  }
+
+  &__bar--active:first-of-type {
+    background: #FF4D4F;
+  }
+
+  &__bar--active:nth-of-type(2) {
+    background: #FFA940;
+  }
+
+  &__bar--active:last-of-type {
+    background: #52C41A;
+  }
+
+  &__labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #9398A9;
+    transition: color 0.3s ease;
+
+    span.active {
+      color: #52C41A;
+    }
+  }
 }
 </style>

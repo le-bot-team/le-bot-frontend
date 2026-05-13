@@ -1,18 +1,9 @@
-import { Notify } from 'quasar';
-
 import type { WsAction, WsHandler, WsRequest, WsResponseMapping } from 'src/types/websocket/types';
 
 export class WsWrapper {
   readonly url;
 
-  private _onOpenHandlers: (() => void)[] = [
-    () =>
-      Notify.create({
-        type: 'positive',
-        message: 'WebSocket connected',
-        icon: 'check',
-      }),
-  ];
+  private _onOpenHandlers: (() => void)[] = [];
   private _actionHandlers: Map<WsAction, WsHandler<never>> = new Map();
   private _ws: WebSocket | undefined;
 
@@ -61,11 +52,7 @@ export class WsWrapper {
   private _connect() {
     this._ws = new WebSocket(this.url);
     this._ws.onclose = () => {
-      Notify.create({
-        type: 'negative',
-        message: 'WebSocket closed, reconnecting...',
-        icon: 'close',
-      });
+      console.log('[WsWrapper] WebSocket closed, reconnecting in 3s...');
       setTimeout(() => {
         this._connect();
       }, 3000);
@@ -75,13 +62,7 @@ export class WsWrapper {
       if (this._actionHandlers.has(message.action)) {
         await this._actionHandlers.get(message.action)?.call(this, message as never);
       } else {
-        Notify.create({
-          type: 'warning',
-          message: `Unknown action: ${message.action}`,
-          caption: JSON.stringify(message.data),
-          icon: 'help_outline',
-        });
-        console.log(message);
+        console.warn('[WsWrapper] Unknown action:', message.action, message.data);
       }
     };
     this._ws.onopen = () => {

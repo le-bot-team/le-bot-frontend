@@ -11,9 +11,7 @@ export const useDeviceStore = defineStore(
     const devices = ref<DeviceInfo[]>([]);
 
     /** All virtual devices (type === 'virtual') */
-    const virtualDevices = computed(() =>
-      devices.value.filter((d) => d.type === 'virtual'),
-    );
+    const virtualDevices = computed(() => devices.value.filter((d) => d.type === 'virtual'));
 
     const updateDevices = (newDevices: DeviceInfo[] = []) => {
       devices.value = newDevices;
@@ -49,6 +47,15 @@ export const useDeviceStore = defineStore(
       }
     };
 
+    /** Merge a partial patch into currentDevice.config (persisted via pinia-plugin-persistedstate) */
+    const updateCurrentDeviceConfig = (patch: Partial<NonNullable<DeviceInfo['config']>>) => {
+      if (!currentDevice.value) return;
+      currentDevice.value.config = {
+        ...(currentDevice.value.config ?? { voiceStyle: '' }),
+        ...patch,
+      };
+    };
+
     return {
       currentDevice,
       devices,
@@ -57,6 +64,7 @@ export const useDeviceStore = defineStore(
       addDevice,
       removeDevice,
       setCurrentDevice,
+      updateCurrentDeviceConfig,
     };
   },
   {

@@ -1,133 +1,225 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
-import { reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
 
 import { useProfileStore } from 'stores/profile';
+import { useAuthStore } from 'stores/auth';
 import { i18nSubPath } from 'src/utils/common';
+import { deactivateAccount } from 'src/utils/api/profile';
+import ConfirmDialog from 'src/components/ConfirmDialog.vue';
 
 const i18n = i18nSubPath('pages.stack.ProfilePage');
 
-const { profile } = useProfileStore();
-const { dark } = useQuasar();
-const route = useRoute();
+const router = useRouter();
+const $q = useQuasar();
 
-const isEditing = ref<boolean>(route.query.edit === 'true');
+const profileStore = useProfileStore();
+const { profile } = storeToRefs(profileStore);
+const { updateProfile } = profileStore;
 
-const editableItems = reactive([
+const authStore = useAuthStore();
+const { accessToken } = storeToRefs(authStore);
+
+// ID account display text (e.g. "ID账号：LB55667788")
+const idAccountText = computed(() =>
+  profile.value?.id ? i18n('labels.idAccount', { id: profile.value.id }) : '',
+);
+
+// Menu rows — single card per design 448a71c7 (编辑资料):
+// 昵称, 生日, 手机号, 修改密码
+type FieldKey = 'nickname' | 'birthday';
+
+interface ProfileRow {
+  key: string;
+  label: string;
+  value?: string;
+  to?: string;
+  editable?: boolean;
+}
+
+const profileRows = computed<ProfileRow[]>(() => [
   {
-    clearable: true,
-    counter: true,
+    key: 'nickname',
     label: i18n('labels.nickname'),
-    maxlength: 32,
-    value: profile?.nickname,
+    value: profile.value?.nickname ?? '',
+    editable: true,
   },
   {
-    label: i18n('labels.region'),
-    value: profile?.region,
+    key: 'birthday',
+    label: i18n('labels.birthday'),
+    value: profile.value?.birthday ?? '',
+    editable: true,
   },
   {
-    autogrow: true,
-    clearable: true,
-    counter: true,
-    label: i18n('labels.bio'),
-    maxlength: 256,
-    value: profile?.bio,
+    key: 'phone',
+    label: i18n('labels.phone'),
+    value: profile.value?.phone ?? '',
+    to: '/stack/profile/change-phone',
+  },
+  {
+    key: 'changePassword',
+    label: i18n('labels.changePassword'),
+    to: '/stack/profile/change-password',
   },
 ]);
+
+const goEditField = (key: FieldKey) => {
+  void router.push({ path: '/stack/profile/edit', query: { field: key } });
+};
+
+const onRowClick = (row: ProfileRow) => {
+  if (row.to) {
+    void router.push(row.to);
+  } else if (row.editable) {
+    goEditField(row.key as FieldKey);
+  }
+};
+
+const onDeactivate = () => {
+  $q.dialog({
+    component: ConfirmDialog,
+    componentProps: {
+      title: i18n('labels.deactivateTitle'),
+      body: i18n('labels.deactivateConfirm'),
+      confirmType: 'danger',
+      confirmLabel: i18n('labels.deactivateConfirmOk'),
+    },
+  }).onOk(() => {
+    const token = accessToken.value;
+    if (!token) {
+      $q.notify({ type: 'negative', message: i18n('notifications.notLoggedIn') });
+      return;
+    }
+    deactivateAccount(token)
+      .then(({ data }) => {
+        if (data.success) {
+          $q.notify({ type: 'positive', message: i18n('notifications.deactivateSuccess') });
+          accessToken.value = '';
+          updateProfile(undefined);
+          void router.replace('/main/home');
+        } else {
+          $q.notify({ type: 'negative', message: data.message });
+        }
+      })
+      .catch(() => {
+        $q.notify({ type: 'negative', message: i18n('notifications.deactivateFailed') });
+      });
+  });
+};
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-lg q-pa-lg">
-    <div class="column items-center q-gutter-y-sm">
-      <q-avatar
-        class="cursor-pointer"
-        size="calc(max(10vw, 5rem))"
-        style="border: 1px solid #c2c2c2"
-        :text-color="dark.isActive ? 'grey-5' : 'grey-8'"
-      >
-        <q-img v-if="profile?.avatar" :src="profile?.avatar" />
-        <q-icon v-else name="person" size="calc(max(8vw, 4rem))" />
-      </q-avatar>
-      <div v-if="profile" class="text-grey">ID: {{ profile.id }}</div>
-    </div>
-    <q-card>
-      <div class="column q-gutter-y-md q-py-sm">
-        <div
-          v-for="(editableItem, index) in editableItems"
-          :key="index"
-          class="row items-center justify-between q-gutter-x-md q-px-md"
-        >
-          <div class="text-body1">
-            {{ editableItem.label }}
-          </div>
-          <div class="col-grow" style="max-width: 300px">
-            <q-input
-              v-if="isEditing"
-              :autogrow="editableItem.autogrow"
-              :clearable="editableItem.clearable"
-              :counter="editableItem.counter"
-              dense
-              input-class="text-right"
-              :maxlength="editableItem.maxlength"
-              v-model="editableItem.value"
-            />
-            <q-item-label
-              v-else
-              class="text-body2 text-right"
-              :class="{ 'text-grey text-italic': !editableItem.value }"
-            >
-              {{ editableItem.value || i18n('labels.notSet') }}
-            </q-item-label>
-          </div>
-        </div>
+  <q-page class="profile-page column items-center q-pa-lg q-gutter-y-lg">
+    <div class="profile-container column items-center q-gutter-y-lg">
+      <!-- Avatar: 72×72 with 3px white border (圆形 33, design 448a71c7) -->
+      <div class="me-avatar profile-avatar">
+        <q-img v-if="profile?.avatar" :src="profile.avatar" />
+        <q-icon v-else color="grey-5" name="person" size="40px" />
       </div>
-    </q-card>
-    <q-card>
-      <q-list separator>
-        <q-item>
-          <q-item-section>
-            <q-item-label class="text-body1">
-              {{ i18n('labels.changePassword') }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon name="chevron_right" />
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-item-label class="text-body1">
-              {{ i18n('labels.bindEmail') }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon name="chevron_right" />
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-item-label class="text-body1">
-              {{ i18n('labels.bindPhone') }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon name="chevron_right" />
-          </q-item-section>
-        </q-item>
-        <q-item class="text-red">
-          <q-item-section>
-            <q-item-label class="text-body1">
-              {{ i18n('labels.removeAccount') }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon color="red" name="chevron_right" />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card>
+
+      <!-- ID account text below avatar (design 448a71c7: 14px Regular, rgba(99,104,104,1)) -->
+      <div v-if="idAccountText" class="profile-id-text">
+        {{ idAccountText }}
+      </div>
+
+      <!-- Single card with all 4 menu rows (design 448a71c7: 矩形 1903, 335×248, radius 12) -->
+      <div class="me-card full-width">
+        <q-list separator>
+          <q-item
+            v-for="row in profileRows"
+            :key="row.key"
+            class="profile-row"
+            clickable
+            @click="onRowClick(row)"
+          >
+            <q-item-section>
+              <q-item-label class="profile-row-label">
+                {{ row.label }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <div class="row items-center no-wrap q-gutter-x-sm">
+                <span
+                  v-if="row.value !== undefined"
+                  class="profile-row-value"
+                  :class="{ 'profile-row-value--empty': !row.value }"
+                >
+                  {{ row.value || i18n('labels.notSet') }}
+                </span>
+                <q-icon color="grey-6" name="chevron_right" />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+
+      <!-- Deactivate button (矩形 1907: 335×56, rgba(255,93,93,1), radius 28) -->
+      <button class="me-btn-danger" type="button" @click="onDeactivate">
+        {{ i18n('labels.removeAccount') }}
+      </button>
+    </div>
   </q-page>
 </template>
 
-<style scoped></style>
+<style scoped lang="scss">
+// Design 448a71c7 artboard fill: rgba(241,248,248,1) ≈ --clr-page-bg-neutral
+// No glow effects on this page (unlike MePage).
+.profile-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 480px;
+}
+
+.profile-avatar {
+  // ProfilePage preserves 72×72 ring (verified against raw JSON 圆形 33 of 448a71c7).
+  // Global --profile-avatar-size is 64px (MePage-first); override locally.
+  width: 72px;
+  height: 72px;
+}
+
+// ID account text below avatar (design 448a71c7: "ID账号：LB55667788")
+// 14px Regular, rgba(99,104,104,1), center-aligned
+.profile-id-text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-small); // 14px
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-text-secondary); // rgba(83,89,89,1) — closest to design rgba(99,104,104,1)
+  text-align: center;
+}
+
+.profile-row {
+  min-height: var(--menu-row-height);
+}
+
+.profile-row-label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--clr-text);
+}
+
+.profile-row-value {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--clr-caption); // rgba(147,152,169,1) — matches design placeholder color
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &--empty {
+    color: var(--clr-caption);
+    font-style: italic;
+  }
+}
+</style>
