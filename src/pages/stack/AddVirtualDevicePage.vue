@@ -2,34 +2,59 @@
 // AddVirtualDevicePage — multi-step guided flow for adding a virtual device.
 // Step 1: Fill child info (required, no skip) → device named "{name}的乐宝"
 // Step 2: Activate virtual device (auto API call)
-// Step 3: Add voiceprint (optional, can skip) — defaults to child's name + "self"
+// Step 3: Add voiceprint (required, no skip) — defaults to child's name + "self"
 // Step 4: AI personality setup (default enabled, can skip)
 // Step 5: Done
 
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 
 import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.png';
 import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.png';
 import RecordPanel from 'components/settings/voiceprint/RecordPanel.vue';
-import SubmitPanel from 'components/settings/voiceprint/SubmitPanel.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 import PersonalityEditor from 'components/PersonalityEditor.vue';
-import { i18nSubPath } from 'src/utils/common';
+import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
+import { register } from 'src/utils/api/voiceprint';
 import { activateAndAddVirtualDeviceWithChild } from 'src/utils/device';
 import { useDeviceStore } from 'stores/device';
 import { useAuthStore } from 'stores/auth';
 import { useFamilyGroupStore } from 'stores/family-group';
-import type { FamilyMember } from 'stores/family-group/types';
+import type { FamilyMember, FamilyUserRole } from 'stores/family-group/types';
 import { router } from 'src/router';
 import type { ChildInfo } from 'stores/device/types';
 import { useProfileStore } from 'stores/profile';
+import { useTracker } from 'src/composables/useTracker';
 
 const i18n = i18nSubPath('pages.stack.AddVirtualDevicePage');
 const $q = useQuasar();
 const deviceStore = useDeviceStore();
 const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
+
+// 用户在 SetupProfilePanel 填写的中文"关系" → FamilyUserRole 枚举映射
+const relationshipRoleMap: Record<string, FamilyUserRole> = {
+  '爸爸': 'father',
+  '妈妈': 'mother',
+  '爷爷': 'grandpa',
+  '奶奶': 'grandma',
+  '外公': 'maternal_grandfather',
+  '外婆': 'maternal_grandma',
+  '朋友': 'friend',
+  '其他亲属': 'other',
+};
+
+// 中文"关系" → 性别（用于成员信息展示）
+const relationshipGenderMap: Record<string, 'male' | 'female'> = {
+  '爸爸': 'male',
+  '爷爷': 'male',
+  '外公': 'male',
+  '妈妈': 'female',
+  '奶奶': 'female',
+  '外婆': 'female',
+};
+const { trackClick, trackConversion } = useTracker();
 useAuthStore();
 
 const step = ref(0);
@@ -55,6 +80,7 @@ function goStep2() {
     $q.notify({ message: i18n('notifications.fieldsRequired'), type: 'warning' });
     return;
   }
+  trackConversion('device_activated');
   step.value = 1;
   // Auto-trigger activation
   void activateDevice();
@@ -91,20 +117,43 @@ async function activateDevice() {
 }
 
 // --- Step 3: Voiceprint ---
-const voiceprintData = ref<Blob>();
-const voiceprintPanelIndex = ref<number>(0);
+const isRegisteringVoiceprint = ref(false);
 
-function onVoiceprintNext(data: Blob) {
-  voiceprintData.value = data;
-  voiceprintPanelIndex.value = 1;
-}
+async function onVoiceprintRecorded(data: Blob) {
+  if (!activatedDeviceId.value) return;
+  isRegisteringVoiceprint.value = true;
+  try {
+    const authStore = useAuthStore();
+    const { accessToken } = storeToRefs(authStore);
+    if (!accessToken.value) return;
 
-function onVoiceprintFinish() {
-  step.value = 3;
-}
+    const dataUrl = await blobToDataUrl(data);
+    const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+    const result = (
+      await register(
+        accessToken.value,
+        audioBase64,
+        childName.value.trim(),
+        8, // child age default
+        'self' as const,
+      )
+    ).data;
 
-function skipVoiceprint() {
-  step.value = 3;
+    if (result.success) {
+      trackConversion('voiceprint_registered');
+      step.value = 3;
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: result.message || '声纹注册失败',
+      });
+    }
+  } catch (error) {
+    console.error('Error during voiceprint registration:', error);
+    $q.notify({ type: 'negative', message: '声纹注册失败' });
+  } finally {
+    isRegisteringVoiceprint.value = false;
+  }
 }
 
 // --- Step 4: AI personality ---
@@ -166,6 +215,7 @@ function createFamilyGroupForDevice() {
         joinedAt: now,
       },
       // Add current user as creator member
+      // birthday/relationship 来自 SetupProfilePanel 填写并同步到 profile 的信息
       ...(profile
         ? [{
             id: `member-user-${profile.id}`,
@@ -173,6 +223,9 @@ function createFamilyGroupForDevice() {
             userId: profile.id,
             nickname: profile.nickname ?? profile.id,
             avatar: profile.avatar,
+            role: relationshipRoleMap[profile.relationship ?? ''],
+            gender: relationshipGenderMap[profile.relationship ?? ''],
+            birthday: profile.birthday,
             isCreator: true,
             joinedAt: now,
           }]
@@ -185,6 +238,7 @@ function createFamilyGroupForDevice() {
 }
 
 function goToChat() {
+  trackConversion('first_chat');
   if (activatedDeviceId.value) {
     deviceStore.setCurrentDevice(activatedDeviceId.value);
   }
@@ -193,6 +247,7 @@ function goToChat() {
 }
 
 function goToHome() {
+  trackClick('btn_click_add_device_back_home');
   if (activatedDeviceId.value) {
     deviceStore.setCurrentDevice(activatedDeviceId.value);
   }
@@ -251,6 +306,7 @@ function goToHome() {
           <BirthdayPicker
             v-model="childBirthday"
             :placeholder="i18n('step1.placeholders.birthday')"
+            :default-year="2020"
           />
 
           <div class="step-bottom-actions">
@@ -291,23 +347,11 @@ function goToHome() {
       <!-- Step 3: Voiceprint -->
       <q-tab-panel :name="2" class="q-pa-none">
         <div class="voiceprint-step-inner">
-          <q-tab-panels v-model="voiceprintPanelIndex" class="full-width col-grow bg-transparent">
-            <RecordPanel
-              :name="0"
-              @next="onVoiceprintNext"
-            />
-            <SubmitPanel
-              :name="1"
-              :data="voiceprintData"
-              :default-name="childName.trim()"
-              default-relationship="self"
-              @finish="onVoiceprintFinish"
-              @previous="voiceprintPanelIndex = 0"
-            />
-          </q-tab-panels>
-          <button type="button" class="skip-voiceprint-btn" @click="skipVoiceprint">
-            {{ i18n('step3.labels.skip') }}
-          </button>
+          <RecordPanel
+            :name="0"
+            @next="onVoiceprintRecorded"
+          />
+          <q-inner-loading :showing="isRegisteringVoiceprint" />
         </div>
       </q-tab-panel>
 
@@ -437,22 +481,6 @@ function goToHome() {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.skip-voiceprint-btn {
-  font-family: var(--font-family);
-  font-size: 14px;
-  color: var(--clr-caption);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 16px 0;
-  text-align: center;
-  width: 100%;
-}
-
-.skip-voiceprint-btn:hover {
-  text-decoration: underline;
 }
 
 /* Done step */

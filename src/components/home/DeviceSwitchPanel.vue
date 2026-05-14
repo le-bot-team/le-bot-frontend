@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { i18nSubPath } from 'src/utils/common';
 import { useDeviceStore } from 'stores/device';
+import { useTracker } from 'src/composables/useTracker';
 
 /* 设计稿图标 — 容器2653 (蓝湖 ca93697e) */
 import boyDeviceUrl from 'src/assets/lanhu/home/img-lebot-example.png';     // img_lebot_example w32 h32
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 const i18n = i18nSubPath('pages.main.HomePage');
 const deviceStore = useDeviceStore();
 const { devices, currentDevice } = storeToRefs(deviceStore);
+const { trackClick, trackConversion } = useTracker();
 
 /** 根据设备性别返回对应头像 — 设计稿 img_lebot_example(男孩) / img_lebot2_example(女孩) */
 function getAvatarFor(device: { childInfo?: { gender?: string } | null }): string {
@@ -42,11 +44,13 @@ function close() {
 }
 
 function selectDevice(deviceId: string) {
+  trackConversion('device_switched');
   deviceStore.setCurrentDevice(deviceId);
   close();
 }
 
 function handleAddDevice() {
+  trackClick('btn_click_add_device_from_switch');
   emit('add-device');
   close();
 }

@@ -138,6 +138,9 @@ const routes: RouteRecordRaw[] = [
           default: () => import('pages/stack/AuthPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
+        meta: {
+          hideBackButton: true,
+        },
       },
       {
         name: 'chat',

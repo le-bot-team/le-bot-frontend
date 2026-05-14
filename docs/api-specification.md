@@ -260,9 +260,18 @@ POST /auth/email/code 或 /auth/email/password 返回 AuthResponse:
 ├── POST /auth/email/reset       用验证码设置新密码
 └── 成功后自动调用 POST /auth/email/password 完成登录
 
-完善个人信息页 (仅新用户 isNew=true 时进入)
+完善个人信息页 (仅新用户 isNew=true 时进入，不可跳过)
 ├── PUT /api/v1/profiles/info    提交昵称/生日/关系/头像
-└── 用户可跳过，直接进入完成页
+└── 完成后进入引导选择页
+
+引导选择页 (onboarding-complete)
+├── 添加虚拟设备 (添加乐宝)
+│   ├── Step 1: 填写儿童信息 (性别/姓名/生日，必填)
+│   ├── Step 2: POST /devices/virtual/activate  激活虚拟设备
+│   ├── Step 3: POST /voiceprint/register  声纹录入 (必须，不可跳过)
+│   ├── Step 4: AI 人格设置 (可跳过)
+│   └── Step 5: 完成 → 进入聊天或主页
+└── 扫码加入已有家庭组 (待实现)
 
 完成页 - 3秒后自动跳转到主页
 ```
@@ -607,6 +616,8 @@ x-access-token: <accessToken>
 | birthday     | string?           | 生日 (YYYY-MM-DD) |
 | phone        | string?           | 手机号            |
 | relationship | string?           | 与孩子的关系      |
+| role         | FamilyUserRole?   | 家庭角色 (father\|mother\|grandpa\|...) |
+| gender       | 'male'\|'female'? | 性别              |
 | last_active  | string (ISO 8601) | 最后活跃时间      |
 | last_login   | string (ISO 8601) | 最后登录时间      |
 
@@ -1125,6 +1136,8 @@ x-access-token: <accessToken>
 | name         | string? | 否   | 人物名称         |
 | relationship | string? | 否   | 关系类型         |
 | isTemporal   | boolean? | 否  | 是否为临时声纹   |
+
+> **注意**: 前端在声纹详情页 (DetailPage) 编辑人物信息时，会自动设置 `isTemporal: false`，即将临时声纹转为永久声纹。
 
 **成功响应 (HTTP 200):**
 
@@ -1836,3 +1849,154 @@ type DeviceType = 'robot' | 'virtual';
 | 33 | POST   | `/api/v1/family-groups/:groupId/leave`          | 退出家庭组            | Header |
 | 34 | PUT    | `/api/v1/family-groups/:groupId/child`          | 更新儿童信息          | Header |
 | -  | WS     | `/api/v1/chat/ws?token=&deviceId=`              | WebSocket 聊天连接    | Query |
+| 35 | POST   | `/api/v1/telemetry/batch`                       | 批量上报遥测事件      | 无     |
+
+---
+
+## 9. 遥测模块 (Telemetry)
+
+**源码**: `src/utils/api/telemetry.ts` / `src/types/api/telemetry.ts`
+
+### 9.1 批量上报遥测事件
+
+```
+POST /api/v1/telemetry/batch
+```
+
+> **认证**: 此接口不要求 `x-access-token` 认证。未登录用户也需要上报事件（如注册流程中的行为）。用户标识通过 `userIdHash`（SHA-256 哈希）匿名化传递。
+
+**请求体:**
+
+```json
+{
+  "events": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "page_enter",
+      "name": "home",
+      "page": "/main/home",
+      "referrer": "/stack/auth",
+      "userIdHash": "a1b2c3d4e5f67890",
+      "sessionId": "sess_m1r2x3k4",
+      "deviceId": "660e8400-e29b-41d4-a716-446655440001",
+      "timestamp": 1715666400000,
+      "duration": null,
+      "data": { "routeName": "home" },
+      "sampled": true
+    }
+  ],
+  "clientTime": 1715666405000,
+  "batchSeq": 42
+}
+```
+
+**TelemetryEvent 字段说明:**
+
+| 字段        | 类型                          | 必填 | 说明                                          |
+| ----------- | ----------------------------- | ---- | --------------------------------------------- |
+| id          | string (UUID)                 | 是   | 事件唯一标识，用于去重                        |
+| type        | string                        | 是   | 事件类型 (见下方枚举)                         |
+| name        | string                        | 是   | 事件名称：路由名或业务事件名                  |
+| page        | string                        | 是   | 当前页面路径                                  |
+| referrer    | string                        | 是   | 来源页面路径                                  |
+| userIdHash  | string                        | 是   | 用户 SHA-256 哈希（16位），未登录为设备指纹哈希 |
+| sessionId   | string                        | 是   | 会话 ID（单次访问期间不变）                   |
+| deviceId    | string \| null                | 是   | 当前活跃设备 ID                               |
+| timestamp   | number                        | 是   | 客户端时间戳 (ms)                             |
+| duration    | number \| null                | 否   | 停留时长 (ms)，仅 `page_leave` 事件           |
+| data        | Record<string, unknown> \| null | 否 | 事件自定义数据（白名单过滤后）                |
+| sampled     | boolean                       | 是   | 是否命中采样                                  |
+
+**TelemetryEventType 枚举:**
+
+| 值             | 说明                   |
+| -------------- | ---------------------- |
+| `page_enter`   | 页面进入（PV）         |
+| `page_leave`   | 页面离开（含停留时长） |
+| `click`        | 按钮/元素点击          |
+| `custom`       | 自定义业务事件         |
+| `session_start`| 会话开始（留存计算）   |
+| `app_resume`   | App 从后台恢复         |
+| `conversion`   | 转化节点事件           |
+
+**ConversionNode 枚举（转化节点名称，出现在 `name` 字段中，格式 `conv_{node}`）:**
+
+| 节点                   | 说明               |
+| ---------------------- | ------------------ |
+| `auth_view`            | 打开认证页         |
+| `auth_code_sent`       | 发送验证码         |
+| `auth_login_success`   | 登录/注册成功      |
+| `profile_setup`        | 完善个人信息       |
+| `onboarding_complete`  | 引导完成           |
+| `device_activated`     | 虚拟设备激活       |
+| `voiceprint_registered`| 声纹录入（必须）   |
+| `personality_set`      | AI 个性调节        |
+| `first_chat`           | 首次进入聊天       |
+| `first_voice_input`    | 首次语音输入       |
+| `first_ai_response`    | 首次收到 AI 回复   |
+| `family_group_joined`  | 加入家庭组         |
+| `device_switched`      | 切换设备           |
+
+**TelemetryBatchRequest 字段说明:**
+
+| 字段        | 类型              | 必填 | 说明                               |
+| ----------- | ----------------- | ---- | ---------------------------------- |
+| events      | TelemetryEvent[]  | 是   | 事件列表（建议单批上限 50 条）     |
+| clientTime  | number            | 是   | 客户端发送时间 (ms)                |
+| batchSeq    | number            | 是   | 批次序列号（单调递增，用于去重排序）|
+
+**成功响应 (HTTP 200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "received": 15
+  }
+}
+```
+
+**失败响应 (HTTP 4xx/5xx):**
+
+```json
+{
+  "success": false,
+  "message": "Invalid batch format"
+}
+```
+
+**错误码说明:**
+
+| HTTP 状态码 | 场景                          |
+| ----------- | ----------------------------- |
+| 200         | 成功接收                      |
+| 400         | 请求格式错误/缺少必填字段     |
+| 413         | 批次过大（建议单批 ≤ 50 条）  |
+| 429         | 请求频率过高                  |
+| 500         | 服务端内部错误                |
+
+### 9.2 上报策略
+
+| 参数           | 默认值   | 说明                                      |
+| -------------- | -------- | ----------------------------------------- |
+| 缓冲区大小     | 50 条    | 超过则立即触发批量上报                    |
+| 定时上报间隔   | 10 秒    | 每 10 秒自动 flush 一次                   |
+| 离线队列容量   | 500 条   | FIFO 淘汰，IndexedDB 持久化               |
+| 请求超时       | 5 秒     | 避免埋点请求阻塞业务                      |
+
+### 9.3 采样率配置
+
+| 页面/事件类型        | 采样率 | 说明           |
+| -------------------- | ------ | -------------- |
+| 核心页面 (首页/聊天/认证/设备添加/家庭组/引导/配置) | 100%  | 全量采集       |
+| 次要页面 (设置/帮助/消息/订单/关于等)               | 30%   | 采样采集       |
+| 转化节点事件         | 100%   | 始终全量       |
+| click 事件           | 100%   | 受页面采样率控制 |
+| custom 事件          | 100%   | 受页面采样率控制 |
+
+### 9.4 隐私合规
+
+- 用户标识：`userIdHash = SHA-256(accessToken + salt)`，取前 16 位，不可逆
+- 未登录用户：使用设备指纹哈希替代
+- data 字段：仅上传白名单 key，自动过滤 PII（邮箱/手机/密码/姓名/头像/生日等）
+- 不采集任何儿童个人信息明文

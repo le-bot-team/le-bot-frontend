@@ -81,7 +81,6 @@ const i18n = i18nSubPath('components.growthData.OverviewCard');
 
 .growth-avatar {
   background: rgba(134, 224, 248, 1); // 圆形 216 fill
-  border: 1px solid #c2c2c2;
   flex-shrink: 0;
 }
 

@@ -2,8 +2,10 @@
 import ProfileCard from 'components/me/ProfileCard.vue';
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
+import { useTracker } from 'src/composables/useTracker';
 
 const i18n = i18nSubPath('pages.main.MePage');
+const { trackClick } = useTracker();
 
 // Image slice asset URLs (Vite static imports).
 // Notification icon uses the scan-frame glyph (icon-msg-home.png) sampled from design 84fafb58.
@@ -55,6 +57,7 @@ const menuList: MenuEntry[] = [
 
 // Notification icon routes to the message center (design 5f6208e5).
 const onNotificationClick = () => {
+  trackClick('btn_click_me_notifications');
   router.push('/stack/messages').catch((err) => console.error(err));
 };
 </script>

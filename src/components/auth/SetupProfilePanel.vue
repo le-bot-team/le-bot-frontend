@@ -9,6 +9,7 @@ import BirthdayPicker from 'components/BirthdayPicker.vue';
 import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
+import { useTracker } from 'src/composables/useTracker';
 
 defineProps<{
   name: string | number;
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 const { dialog, notify } = useQuasar();
 const { accessToken } = storeToRefs(useAuthStore());
 const { updateProfile } = useProfileStore();
+const { trackConversion } = useTracker();
 
 const avatar = ref<string>();
 const nickname = ref<string>();
@@ -81,6 +83,7 @@ const confirm = async () => {
       return;
     }
     updateProfile(profileRes.data.data);
+    trackConversion('profile_setup');
     emit('finish');
   } catch (err) {
     notify({
@@ -123,7 +126,7 @@ const confirm = async () => {
     <!-- Birthday -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">生日</label>
-      <BirthdayPicker v-model="birthday" />
+      <BirthdayPicker v-model="birthday" :default-year="1995" />
     </div>
 
     <!-- Relationship -->

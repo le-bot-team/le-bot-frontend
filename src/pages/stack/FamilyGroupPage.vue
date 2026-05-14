@@ -13,11 +13,13 @@ import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useFamilyGroupStore } from 'stores/family-group';
 import type { FamilyGroup } from 'stores/family-group/types';
+import { useTracker } from 'src/composables/useTracker';
 import boyAvatarUrl from 'src/assets/lanhu/child-edit/boy-avatar.png';
 import girlAvatarUrl from 'src/assets/lanhu/child-edit/girl-avatar.png';
 
 const i18n = i18nSubPath('pages.stack.FamilyGroupPage');
 const familyGroupStore = useFamilyGroupStore();
+const { trackClick, trackConversion } = useTracker();
 
 /** 从 store 读取家庭组列表 */
 const familyGroups = computed<FamilyGroup[]>(() => familyGroupStore.groups);
@@ -34,11 +36,13 @@ function getChildAvatar(gender?: string) {
 }
 
 function onGroupClick(group: FamilyGroup) {
+  trackClick('card_click_family_group', { memberCount: group.members.length });
   familyGroupStore.setCurrentGroup(group.id);
   void router.push({ name: 'family-group-detail', query: { groupId: group.id } });
 }
 
 function onAddDevice() {
+  trackConversion('device_activated');
   void router.push({ name: 'add-virtual-device' });
 }
 </script>

@@ -2,9 +2,9 @@
 /**
  * FamilyGroupDetailPage — 家庭组详情页
  *
- * 展示某个家庭组的完整信息：
- * - 儿童信息头卡（头像 + 姓名 + 性别/年龄 + 设备名）
- * - 成员列表（儿童卡片可编辑，成人卡片可查看）
+ * 展示某个家庭组的完整信息（对齐蓝湖设计稿 eb36a568）：
+ * - 儿童区域：100×100px 圆形头像 + 居中姓名 + 性别/年龄
+ * - 成员列表（名称 | → | 角色行），点击跳转
  * - 底部"邀请成员"按钮（仅创建者可见）
  *
  * 数据源从 FamilyGroupStore.currentGroup 读取。
@@ -73,17 +73,20 @@ function childAge(birthday?: string): number {
   return Math.max(0, age);
 }
 
-/** 角色标签文本 */
+/** 角色标签文本（role 未定义时显示 - 以保证卡片布局完整） */
 function roleLabel(role?: FamilyMemberRole): string {
   const map: Record<string, string> = {
     father: i18n('role.father'),
     mother: i18n('role.mother'),
     grandpa: i18n('role.grandpa'),
     grandma: i18n('role.grandma'),
+    paternal_grandmother: i18n('role.paternalGrandmother'),
+    maternal_grandfather: i18n('role.maternalGrandfather'),
+    maternal_grandma: i18n('role.maternalGrandma'),
     friend: i18n('role.friend'),
     other: i18n('role.other'),
   };
-  return role ? (map[role] ?? role) : '';
+  return role ? (map[role] ?? role) : '-';
 }
 
 function onMemberClick(member: FamilyMember) {
@@ -106,63 +109,53 @@ function onInvite() {
 </script>
 
 <template>
-  <q-page class="detail-page">
-    <!-- ── 儿童信息头卡 ── -->
-    <div v-if="child" class="detail-child-header">
+  <q-page class="family-group-page detail-page">
+    <!-- ── 儿童区域：100px 圆形头像居中 ── -->
+    <div
+      v-if="child"
+      class="detail-child-zone"
+      role="button"
+      @click="onMemberClick(child)"
+    >
       <img
         :src="getAvatar(child)"
         alt=""
-        class="detail-child-header__avatar"
+        class="detail-child-zone__avatar"
       />
-      <div class="detail-child-header__info">
-        <span class="detail-child-header__name">{{ child.childInfo?.name }}</span>
-        <span class="detail-child-header__badge">
-          {{ child.childInfo?.gender === 'girl' ? i18n('meta.female') : i18n('meta.male') }}
-          {{ childAge(child.childInfo?.birthday) }}{{ i18n('meta.yearsUnit') }}
-        </span>
-      </div>
-      <span v-if="group" class="detail-child-header__device">
-        {{ child.childInfo?.name }}{{ i18n('meta.deviceSuffix') }}
+      <span class="detail-child-zone__name">{{ child.childInfo?.name }}</span>
+      <span class="detail-child-zone__meta">
+        {{ child.childInfo?.gender === 'girl' ? i18n('meta.female') : i18n('meta.male') }}
+        {{ childAge(child.childInfo?.birthday) }}{{ i18n('meta.yearsUnit') }}
       </span>
     </div>
 
-    <!-- ── 成员列表区域 ── -->
-    <p v-if="members.length > 0" class="detail-section-title">
-      {{ i18n('labels.membersTitle', { count: members.length }) }}
-    </p>
-
+    <!-- ── 成员列表（复用全局 .family-group-member-card 系列 class）── -->
     <template v-if="adultMembers.length">
       <div
         v-for="member in adultMembers"
         :key="member.id"
-        class="detail-member-card"
+        class="family-group-member-card"
         role="button"
         @click="onMemberClick(member)"
       >
-        <img :src="getAvatar(member)" alt="" class="detail-member-card__avatar" />
-        <div class="detail-member-card__info">
-          <div class="detail-member-card__name-row">
-            <span class="detail-member-card__name">{{ member.nickname }}</span>
-            <span v-if="member.isCreator" class="detail-member-card__creator-tag">{{ i18n('labels.creator') }}</span>
-          </div>
-          <span class="detail-member-card__role">{{ roleLabel(member.role) }}</span>
-        </div>
-        <!-- 创建者标识 -->
-        <q-icon
-          v-if="member.isCreator"
-          name="star"
-          size="16px"
-          color="#FFB800"
-          class="detail-member-card__creator-badge"
-        />
-        <q-icon v-else name="chevron_right" size="16px" color="#C4C4CC" />
+        <span class="family-group-member-name">
+          {{ member.nickname }}
+          <span
+            v-if="member.isCreator"
+            class="detail-creator-tag"
+          >{{ i18n('labels.creator') }}</span>
+        </span>
+        <span class="family-group-member-meta">{{ roleLabel(member.role) }}</span>
+        <svg class="family-group-member-chevron" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1L6 6L1 11" stroke="#9398A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
     </template>
 
-    <!-- 底部操作区：仅创建者可见邀请按钮 -->
+    <!-- 底部操作区：仅创建者可见邀请按钮（复用全局 .family-group-add-btn） -->
     <button
       v-if="isCreator"
-      class="family-group-add-btn detail-invite-btn"
+      class="family-group-add-btn"
       type="button"
       @click="onInvite"
     >
@@ -172,136 +165,57 @@ function onInvite() {
 </template>
 
 <style scoped lang="scss">
-.detail-page {
-  padding-top: 24px;
-}
-
-// ── 儿童头卡 ──
-.detail-child-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 28px 20px 24px;
-  margin-bottom: 4px;
-  background: var(--clr-white);
-  border-radius: 12px;
-}
-
-.detail-child-header__avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.detail-child-header__info {
+// ── 儿童区域：100px 圆形头像，居中布局 ──
+// 对齐蓝湖设计稿 eb36a568 组310
+.detail-child-zone {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-}
-
-.detail-child-header__name {
-  font-family: var(--font-family);
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--clr-text-primary);
-}
-
-.detail-child-header__badge {
-  display: inline-block;
-  padding: 2px 10px;
-  font-size: 12px;
-  color: #08A8DC;
-  background: rgba(32, 204, 249, 0.1);
-  border-radius: 10px;
-}
-
-.detail-child-header__device {
-  font-size: 13px;
-  color: var(--clr-link);
-}
-
-// ── Section 标题 ──
-.detail-section-title {
-  padding: 16px 20px 8px;
-  font-family: var(--font-family);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--clr-caption);
-}
-
-// ── 成员卡片 ──
-.detail-member-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  margin-bottom: 1px;
+  padding: 24px 0 28px;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: opacity 0.15s;
 
-  &:hover,
-  &:active {
-    background: rgba(0, 0, 0, 0.02);
+  &:hover {
+    opacity: 0.8;
   }
 }
 
-.detail-member-card__avatar {
-  width: 40px;
-  height: 40px;
+.detail-child-zone__avatar {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  flex-shrink: 0;
 }
 
-.detail-member-card__info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.detail-member-card__name {
+.detail-child-zone__name {
   font-family: var(--font-family);
   font-size: 15px;
   font-weight: 400;
-  color: var(--clr-text-primary);
+  line-height: 22px;
+  color: var(--clr-text);
+  margin-top: 2px;
 }
 
-.detail-member-card__name-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.detail-child-zone__meta {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
 }
 
-.detail-member-card__creator-tag {
+// ── 创建者标签（保留当前显示）──
+.detail-creator-tag {
   display: inline-block;
   padding: 0 6px;
+  margin-left: 6px;
   font-size: 10px;
   line-height: 16px;
   color: #FFB800;
   background: rgba(255, 184, 0, 0.1);
   border-radius: 8px;
   white-space: nowrap;
-}
-
-.detail-member-card__role {
-  font-size: 13px;
-  color: var(--clr-caption);
-}
-
-.detail-member-card__creator-badge {
-  flex-shrink: 0;
-}
-
-// ── 邀请按钮 ──
-.detail-invite-btn {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
+  vertical-align: middle;
 }
 </style>

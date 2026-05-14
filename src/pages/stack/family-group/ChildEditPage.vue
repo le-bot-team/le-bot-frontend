@@ -157,7 +157,7 @@ function onSkip() {
       :class="{ 'child-edit-primary-btn--single': !isCreateMode }"
       @click="onSubmit"
     >
-      {{ isCreateMode ? i18n('labels.next') : i18n('labels.saveAndBack') }}
+      {{ isCreateMode ? i18n('labels.next') : i18n('labels.submitChanges') }}
     </button>
     <button v-if="isCreateMode" type="button" class="child-edit-skip-btn" @click="onSkip">
       {{ i18n('labels.skip') }}

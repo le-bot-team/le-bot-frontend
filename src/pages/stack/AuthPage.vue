@@ -20,6 +20,12 @@ function onProfileFinish() {
   // where user can choose: add a virtual device OR scan to join an existing family group
   void router.replace({ name: 'onboarding-complete' });
 }
+
+function goBack() {
+  if (panelIndex.value > 0) {
+    panelIndex.value--;
+  }
+}
 </script>
 
 <template>
@@ -29,7 +35,7 @@ function onProfileFinish() {
       <div
         v-if="panelIndex === 1 || panelIndex === 2"
         class="auth-back"
-        @click="panelIndex > 0 ? panelIndex-- : null"
+        @click="goBack"
       >
         <svg width="9" height="16" viewBox="0 0 9 16" fill="none">
           <path

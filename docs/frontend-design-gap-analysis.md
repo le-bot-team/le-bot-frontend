@@ -71,7 +71,7 @@
 | 验证码登录    | 同上                                      | 4a4704cc            | 已同步                                                 |
 | 密码登录      | 同上                                      | 883b0908            | 已同步                                                 |
 | 注册-设置密码 | `components/auth/NewPasswordPanel.vue`    | 2d090f70            | 已同步                                                 |
-| 完善个人信息  | `components/auth/SetupProfilePanel.vue`   | ed71eb82 / fb8d01d5 | 已同步                                                 |
+| 完善儿童信息  | `components/auth/SetupProfilePanel.vue`   | ed71eb82 / fb8d01d5 | 已同步                                                 |
 | 注册完成      | `components/auth/FinishPanel.vue`         | —                   | 有代码无设计，已改用设计token (已改进 2026-05-09)      |
 | 启动页/闪屏   | `src/pages/SplashPage.vue`                | 03fd2e0a            | 占位稿注明"还没设计"，已有代码实现 (已实现 2026-05-09) |
 | 功能引导      | `src/pages/stack/OnboardingGuidePage.vue` | 4b2d5a38            | 占位稿，已实现4步引导页 (已实现 2026-05-09)            |

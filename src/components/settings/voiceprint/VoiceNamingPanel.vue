@@ -108,6 +108,7 @@ const chooseRelationship = (): void => {
         <span class="voice-naming-input voice-naming-input--readonly">
           {{ relationshipText }}
         </span>
+        <q-icon class="voice-naming-relationship-chevron" name="expand_more" size="18px" />
       </div>
     </template>
 

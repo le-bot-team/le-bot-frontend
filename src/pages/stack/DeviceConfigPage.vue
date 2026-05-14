@@ -11,9 +11,11 @@ import { logoutAccount } from 'src/utils/account';
 import { i18nSubPath } from 'src/utils/common';
 import { unbindAndRemoveDevice } from 'src/utils/device';
 import { useDeviceStore } from 'stores/device';
+import { useTracker } from 'src/composables/useTracker';
 
 const i18n = i18nSubPath('pages.stack.DeviceConfigPage');
 const $q = useQuasar();
+const { trackClick } = useTracker();
 
 const deviceStore = useDeviceStore();
 const { currentDevice } = storeToRefs(deviceStore);
@@ -26,6 +28,7 @@ const HIDE_HARDWARE_MENUS = true;
 function handleUnbind() {
   if (!currentDevice.value) return;
 
+  trackClick('btn_click_unbind_device');
   $q.dialog({
     component: ConfirmDialog,
     componentProps: {

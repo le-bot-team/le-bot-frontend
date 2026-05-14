@@ -8,6 +8,7 @@
 
 **技术栈**: Quasar Framework + Vue 3 + Pinia + TypeScript
 **通信方式**: REST API（Axios，`x-access-token` 鉴权） + WebSocket（实时聊天）
+**遥测埋点**: `useTracker` composable（`trackClick`/`trackConversion`/`trackPageView`），批量上报至 `POST /api/v1/telemetry/batch`
 **布局体系**: `MainLayout`（底部 Tab 主页） + `StackLayout`（带返回头的堆栈页面）
 **核心实体关系**: 用户 → 拥有多个设备 → 每个虚拟设备关联一个家庭组 → 家庭组包含儿童+成人成员
 
@@ -28,7 +29,7 @@
 ### 流程图
 
 ```
-/stack/auth (AuthPage)
+/stack/auth (AuthPage) [hideBackButton: 隐藏返回按钮]
   │
   ├── Step 0: 登录/注册 (SignInOrSignUpPanel)
   │    │
@@ -44,9 +45,10 @@
   └── Step 2: 完善个人信息 (SetupProfilePanel) [必填，不可跳过]
        ├── 设置头像（CropperDialog 裁剪）
        ├── 设置昵称
-       ├── 设置生日（BirthdayPicker）
+       ├── 设置生日（BirthdayPicker — 自定义年/月/日下拉选择器）
        ├── 选择与孩子的关系（妈妈/爸爸/奶奶/爷爷/外婆/外公/朋友/其他亲属）
        └── PUT /profiles/info → GET /profiles/info
+            ├── 遥测: trackConversion('profile_setup')
             └── 跳转到 /stack/onboarding-complete
 ```
 
@@ -100,6 +102,8 @@ interface UserProfile {
   birthday: string;
   phone: string;
   relationship: string;
+  role?: FamilyUserRole;          // 新增: 家庭角色 (father|mother|grandpa|...)
+  gender?: 'male' | 'female';    // 新增: 性别
   created_at: string;
   updated_at: string;
   last_active: string;
@@ -138,7 +142,7 @@ interface UserProfile {
   ├── Step 1: 填写儿童信息 [必填，不可跳过]
   │    ├── 选择性别（男孩/女孩）
   │    ├── 输入姓名（设备自动命名为 "{姓名}的乐宝"）
-  │    ├── 输入生日
+  │    ├── 输入生日（BirthdayPicker — 自定义年/月/日下拉选择器，默认年份可配置）
   │    └── 校验: 姓名和生日均为必填
   │
   ├── Step 2: 激活虚拟设备 [自动触发]
@@ -146,18 +150,23 @@ interface UserProfile {
   │    ├── 成功: 获得设备 ID，1s 后自动进入 Step 3
   │    └── 失败: 显示错误，可重试
   │
-  ├── Step 3: 录制声纹 [可跳过]
-  │    ├── RecordPanel: 按住录音
-  │    └── SubmitPanel: 提交声纹（姓名默认儿童名，关系默认 "self"）
-  │         └── POST /voiceprint/register
+  ├── Step 3: 录制声纹 [必须，不可跳过]
+  │    ├── RecordPanel: 按住录音 → 松开结束 → 播放预览 → 重新录制/完成
+  │    ├── 录制完成后自动注册声纹:
+  │    │    POST /voiceprint/register (姓名=儿童名, 关系=self)
+  │    └── 遥测: trackConversion('voiceprint_registered')
   │
   ├── Step 4: AI 个性调节 [可跳过]
   │    ├── PersonalityEditor: 设置 enabled/traits/goals
+  │    │    ├── 预设性格标签 (traitTags): 开朗/内向/活泼/敏感/专注/倔强
+  │    │    ├── 预设目标标签 (goalTags): 自信/专注/善良/独立/坚韧/乐观
+  │    │    └── 自由文本输入
   │    ├── 跳过: 默认启用（无 traits/goals）
   │    └── 禁用: aiPersonality.enabled = false
   │
   └── Step 5: 完成
        ├── "开始聊天" → /stack/chat（自动创建家庭组 + 切换设备）
+       │    └── 遥测: trackConversion('first_chat')
        └── "回到首页" → /main/home
 ```
 
@@ -203,21 +212,26 @@ interface DeviceInfo {
 
 #### 添加设备流程中的声纹录入
 
-在 `AddVirtualDevicePage` Step 3 中内嵌声纹录制：
-1. **RecordPanel**: 按住按钮录音，松开结束
-2. **SubmitPanel**: 填写姓名（默认儿童名）、年龄、关系（默认 `self`），提交
-3. 可跳过，跳过后不影响后续流程
+在 `AddVirtualDevicePage` Step 3 中内嵌声纹录制，**必须完成，不可跳过**：
+1. **RecordPanel**: 按住录音 → 松开结束 → 可播放预览 → 支持重新录制
+2. 录制完成后自动注册声纹（`POST /voiceprint/register`，姓名默认儿童名，关系默认 `self`）
 
 #### 独立声纹管理页面
 
 ```
 /stack/settings/voiceprint (VoiceprintPage)
   ├── 查看所有声纹人员列表 (GET /voiceprint/persons)
+  │    ├── 每个人员显示 "{name}的声纹"
+  │    ├── 临时声纹标记 (is_temporal=true 时显示 "临时声纹" 标签)
+  │    └── 临时声纹提示: "临时声纹保存一段时间后会自动清除，点击声纹去保留"
+  │
   ├── 点击人员 → /stack/settings/voiceprint/detail/:personId
   │    ├── 查看声纹详情 (GET /voiceprint/persons/:id)
   │    ├── 添加新声纹 (POST /voiceprint/persons/:id/voices/add)
   │    ├── 删除声纹 (DELETE /voiceprint/persons/:id/voices/:voiceId)
-  │    └── 删除人员 (DELETE /voiceprint/persons/:id)
+  │    ├── 删除人员 (DELETE /voiceprint/persons/:id)
+  │    └── 更新人员信息时自动设置 isTemporal=false (转为永久声纹)
+  │
   └── 新建声纹 → /stack/settings/voiceprint/new
        └── POST /voiceprint/register
 
@@ -282,6 +296,13 @@ interface AiPersonality {
 }
 ```
 
+#### 预设标签（PersonalityEditor）
+
+性格标签 (traitTags): 开朗 / 内向 / 活泼 / 敏感 / 专注 / 倔强
+目标标签 (goalTags): 自信 / 专注 / 善良 / 独立 / 坚韧 / 乐观
+
+用户可选择预设标签，也可自由输入文本。
+
 #### 个性调节在两个场景中的使用
 
 1. **添加设备时**: `AddVirtualDevicePage` Step 4，通过 `PersonalityEditor` 组件设置
@@ -297,10 +318,19 @@ interface AiPersonality {
 /main/home (HomePage) — 主页
   ├── 顶部导航: 设备名称 + 设备切换 + 设置 + 消息
   ├── 陪伴天数 (mock 数据)
-  ├── 乐宝形象 (点击 → 进入聊天)
+  ├── 乐宝形象 (点击 → 进入聊天，遥测: trackConversion('first_chat'))
   ├── 气泡文案
-  └── 高频话题 (点击话题 → 带参数进入聊天)
+  └── 高频话题 (点击话题 → 带参数进入聊天，遥测: trackClick('btn_click_topic_chip'))
        └── /stack/chat?topic=xxx
+
+遥测埋点:
+  - 点击乐宝聊天: trackConversion('first_chat')
+  - 点击聊天记录: trackClick('btn_click_chat_history')
+  - 点击话题标签: trackClick('btn_click_topic_chip', { routeQuery: topic })
+  - 点击消息: trackClick('btn_click_messages')
+  - 点击设备切换: trackClick('btn_click_device_switch')
+  - 点击机器人设置: trackClick('btn_click_robot_settings')
+  - 添加设备: trackConversion('device_activated')
 ```
 
 ### 聊天页面
@@ -395,6 +425,23 @@ WS: {LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token={accessToken}&deviceId={de
 | `/stack/chat/history` | ChatHistoryPage | 聊天历史 |
 | `/stack/chat/mute-settings` | MuteSettingsPage | 静音设置 |
 
+### 成长数据中心
+
+```
+/stack/growth-data (GrowthDataPage) — 成长数据中心
+  ├── 顶部概览卡片 (OverviewCard)
+  ├── 锚点导航栏 (4 个 Tab: 情绪变化/互动时长/能力发展/高频话题)
+  │    └── 点击 Tab → 滚动到对应 section (ScrollSpy + IntersectionObserver)
+  ├── 长滚动布局 (所有 section 在同一滚动流中渲染)
+  │    ├── 情绪变化: 多折线图 (5 种情绪: 开心/愉悦/平静/担忧/难过)
+  │    ├── 互动时长: 柱状图
+  │    ├── 能力发展: 雷达图 (社交理解力/知识整合度/...)
+  │    └── 高频话题: 饼图
+  └── 子页面:
+       ├── /stack/growth-data/weekly-report → ChatWeeklyReportPage
+       └── /stack/growth-data/capability/:key → CapabilityDetailPage
+```
+
 ---
 
 ## 流程七：查看我的家庭组
@@ -413,7 +460,9 @@ WS: {LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token={accessToken}&deviceId={de
   ├── 展示所有家庭组卡片（以儿童信息为维度）
   │    ├── 儿童头像 + 家庭组名称 + 成员数量
   │    └── 点击 → /stack/family-groups/detail?groupId=xxx
+  │         └── 遥测: trackClick('card_click_family_group', { memberCount })
   └── 空状态: 提示添加第一个设备 → /stack/add-virtual-device
+       └── 遥测: trackConversion('device_activated')
 ```
 
 ### 家庭组详情页
@@ -513,6 +562,7 @@ interface FamilyMember {
   ├── 个性调节 → /stack/device-config/personality
   ├── [物理设备专属] WiFi管理 / 固件升级 / 关于本设备 [当前隐藏]
   └── "解除绑定"按钮 [红色危险按钮]
+       ├── 遥测: trackClick('btn_click_unbind_device')
        ├── 虚拟设备: POST /devices/unbind → 删除设备 → 回首页
        └── 物理设备: 调用 logoutAccount()
 ```
@@ -540,7 +590,7 @@ interface FamilyMember {
                  │
                  ├── 填写儿童信息
                  ├── 激活虚拟设备
-                 ├── [可选] 录制声纹
+                 ├── [必须] 录制声纹
                  ├── [可选] AI个性调节
                  └── 完成 → 进入聊天/回首页
                       │
@@ -636,6 +686,42 @@ authStore (accessToken)
 ```
 
 > **注意**: 所有 Store 均启用了 `persist: true`（Pinia 持久化插件），数据自动持久化到 localStorage。
+
+---
+
+## 遥测埋点 (Telemetry)
+
+### useTracker composable
+
+所有核心页面已接入 `useTracker`，提供两个主要方法：
+- `trackClick(name, data?)` — 按钮点击事件
+- `trackConversion(node)` — 转化节点事件
+
+### 已接入的埋点事件
+
+| 页面/组件 | 事件名 | 类型 | 说明 |
+|-----------|--------|------|------|
+| SignInOrSignUpPanel | `auth_view` | conversion | 打开认证页 |
+| SignInOrSignUpPanel | `auth_code_sent` | conversion | 发送验证码 |
+| SignInOrSignUpPanel | `auth_login_success` | conversion | 登录/注册成功 |
+| SetupProfilePanel | `profile_setup` | conversion | 完善个人信息 |
+| AddVirtualDevicePage | `device_activated` | conversion | 虚拟设备激活 |
+| AddVirtualDevicePage | `voiceprint_registered` | conversion | 声纹录入 |
+| AddVirtualDevicePage | `first_chat` | conversion | 首次进入聊天 |
+| HomePage | `first_chat` | conversion | 点击乐宝聊天 |
+| HomePage | `btn_click_chat_history` | click | 点击聊天记录 |
+| HomePage | `btn_click_topic_chip` | click | 点击话题标签 |
+| HomePage | `btn_click_messages` | click | 点击消息 |
+| HomePage | `btn_click_device_switch` | click | 点击设备切换 |
+| HomePage | `btn_click_robot_settings` | click | 点击机器人设置 |
+| HomePage | `device_activated` | conversion | 添加设备 |
+| FamilyGroupPage | `card_click_family_group` | click | 点击家庭组卡片 |
+| FamilyGroupPage | `device_activated` | conversion | 添加设备 |
+| DeviceConfigPage | `btn_click_unbind_device` | click | 点击解绑设备 |
+
+### 上报方式
+
+所有事件通过 `POST /api/v1/telemetry/batch` 批量上报，详见 [api-specification.md 遥测模块](api-specification.md)。
 
 ---
 

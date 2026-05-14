@@ -277,7 +277,8 @@
   // PersonalityPage / PersonalityDetailPage (f001e23d / 31e9fabe / 31c5986a).
   // Card radius inherits --card-radius (12px). Submit button reuses
   // --btn-width/--btn-height/--btn-radius.
-  --personality-textarea-h: 160px;
+  // Design 04c9e61c updated: textarea h=100px, tags w=100px h=40px
+  --personality-textarea-h: 100px;
   --personality-textarea-radius: 12px; // equals --card-radius, kept named for clarity
   --personality-hint-color: rgba(147, 152, 169, 1); // equals --clr-placeholder / --clr-caption
   --personality-section-gap: 16px;
@@ -939,10 +940,46 @@ body {
   }
 }
 
+.voiceprint-row__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .voiceprint-row__chevron {
   width: 12px;
   height: 12px;
   color: var(--clr-placeholder);
+}
+
+.voiceprint-row__temporal-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(253, 153, 58, 1);
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 16px;
+  color: rgba(255, 255, 255, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.voiceprint-hint {
+  width: 295px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: rgba(147, 152, 169, 1);
+  margin-top: 12px;
+  text-align: left;
 }
 
 .voiceprint-add-btn {
@@ -1044,6 +1081,16 @@ body {
 
   &--clickable {
     cursor: pointer;
+    justify-content: space-between;
+
+    &:hover .voice-naming-input {
+      color: rgba(64, 158, 255, 1);
+    }
+
+    .voice-naming-input {
+      flex: 1;
+      text-align: left;
+    }
   }
 }
 
@@ -1061,9 +1108,14 @@ body {
   text-align: center;
 
   &--readonly {
-    display: block;
     line-height: 48px;
   }
+}
+
+.voice-naming-relationship-chevron {
+  flex-shrink: 0;
+  color: var(--clr-placeholder);
+  pointer-events: none;
 }
 
 .voice-naming-audio {
@@ -1776,9 +1828,11 @@ body {
   // `.device-personality-card`), tip text, two labelled textareas, submit
   // button. All dimensions extracted verbatim from raw sketch JSON:
   //   artboard.fills[0]                 -> --clr-page-bg-neutral
-  //   矩形 1993 (20,252) 335×160 r12   -> .device-personality-textarea
-  //   矩形 1994 (20,466) 335×160 r12   -> .device-personality-textarea
+  //   矩形 1993 (20,252) 335×100 r12   -> .device-personality-textarea
+  //   矩形 1994 (20,466) 335×100 r12   -> .device-personality-textarea
   //   矩形 1907 (32,666) 311×56 r28    -> .device-personality-submit
+  //   标签: w100 h40, 每行3个, 水平gap≈18px, 垂直gap=8px
+  //   标签到textarea间距=24px, textarea到下一标题间距=16px
   background: var(--clr-page-bg-neutral);
   min-height: 100%;
   padding: 20px 20px 40px;
@@ -2082,7 +2136,6 @@ body {
   font-weight: 400;
   line-height: 22px;
   color: var(--clr-caption);
-  text-align: right;
 }
 
 .family-group-member-chevron {
@@ -2090,10 +2143,6 @@ body {
   margin-left: 8px;
   width: 7px;
   height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--clr-caption);
 }
 
 // ===== FamilyGroupMemberPage (成员信息), design 5d6d5199 =====
@@ -2767,34 +2816,29 @@ body {
   margin-bottom: 20px;
 }
 
-// Reading-phrase page (1ed5ff10): pet stage + phrase text + waveform strip.
-// Design has a 70×70 wake-pulse ring centred behind the 108×115 aipet visual.
-// We approximate the ring with a soft radial halo + bordered circle pseudo-element
-// so we can keep the existing q-icon (no slice was annotated for the aipet).
+// Reading-phrase page (1ed5ff10 / 10d09505): pet stage + phrase text + waveform strip.
+// Design 10d09505 (声纹录制4) has a 120×120 rounded-rect background (rgba(255,245,223,1)
+// radius 20) behind the 108×115 aipet visual, plus a 70×70 recording pulse ring below
+// the waveform. The pulse ring consists of:
+//   - 外环 (圆形 229): 70×70, border 3px rgba(227,227,227,1) gray
+//   - 内圆 (圆形 230): 64×64, fill rgba(255,87,69,1) red, border 3px white
 .voiceprint-record-pet-stage {
   width: 120px;
   height: 120px;
-  margin: 24px 0 16px;
+  margin: 24px 0 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  border-radius: 20px;
+  background: rgba(255, 245, 223, 1);
+  overflow: hidden;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 2px solid rgba(32, 204, 249, 0.4);
-    background: radial-gradient(circle, rgba(32, 204, 249, 0.18) 0%, rgba(32, 204, 249, 0) 70%);
-    pointer-events: none;
-  }
-
-  > * {
-    position: relative;
-    z-index: 1;
-  }
+.voiceprint-record-pet-img {
+  width: 108px;
+  height: 115px;
+  object-fit: contain;
 }
 
 .voiceprint-record-phrase {
@@ -2803,7 +2847,7 @@ body {
   line-height: 24px;
   color: rgba(48, 49, 51, 1);
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   padding: 0 16px;
 }
 
@@ -2858,11 +2902,116 @@ body {
   }
 }
 
-.voiceprint-record-mic {
+// Recording pulse ring (组 366 from design 10d09505):
+// Outer ring 70×70 gray border, inner circle 64×64 red fill + white border.
+// Represents the "recording" indicator; placed below the waveform.
+.voiceprint-record-pulse-ring {
+  width: 70px;
+  height: 70px;
+  margin: 24px 0 16px;
+  border-radius: 50%;
+  border: 3px solid rgba(227, 227, 227, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.voiceprint-record-pulse-ring--recording {
+  border-color: rgba(255, 87, 69, 1);
+  animation: voiceprintRecordPulse 1.2s ease-in-out infinite;
+}
+
+.voiceprint-record-pulse-ring--recording .voiceprint-record-pulse-inner {
+  background: rgba(200, 50, 30, 1);
+}
+
+@keyframes voiceprintRecordPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 87, 69, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(255, 87, 69, 0);
+  }
+}
+
+.voiceprint-record-pulse-inner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 87, 69, 1);
+  border: 3px solid rgba(255, 255, 255, 1);
+}
+
+// Read icon (容器 2619 from design 10d09505): 24×24 read icon slice.
+.voiceprint-record-read-icon {
   width: 24px;
   height: 24px;
-  margin-bottom: 16px;
-  background: url('../assets/lanhu/voiceprint/record-mic.webp') center / contain no-repeat;
+  margin-bottom: 56px;
+  object-fit: contain;
+}
+
+// Audio playback UI after recording.
+.voiceprint-record-playback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  padding: 0 32px;
+}
+
+.voiceprint-record-playback-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 87, 69, 1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: white;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(200, 50, 30, 1);
+  }
+}
+
+.voiceprint-record-progress {
+  flex: 1;
+  height: 4px;
+  background: rgba(227, 227, 227, 1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.voiceprint-record-progress-bar {
+  height: 100%;
+  background: rgba(255, 87, 69, 1);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.voiceprint-record-reset-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(48, 49, 51, 0.3);
+  border-radius: 16px;
+  font-size: 14px;
+  color: rgba(48, 49, 51, 0.7);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: rgba(48, 49, 51, 0.5);
+    color: rgba(48, 49, 51, 1);
+  }
 }
 
 // Primary button anchored at the bottom of the recording screens.
@@ -4043,7 +4192,6 @@ body {
   font-weight: 500;
   line-height: 24px;
   color: var(--clr-growth-section-title);
-  margin-bottom: 12px;
 }
 
 .growth-section-caption {

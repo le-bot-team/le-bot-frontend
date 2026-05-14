@@ -1,3 +1,5 @@
+import type { FamilyUserRole } from 'stores/family-group/types';
+
 export interface UserProfile {
   id: string;
   created_at: Date;
@@ -10,6 +12,8 @@ export interface UserProfile {
   birthday?: string;
   phone?: string;
   relationship?: string;
+  role?: FamilyUserRole;
+  gender?: 'male' | 'female';
   last_active: Date;
   last_login: Date;
 }

@@ -2,8 +2,8 @@
 /**
  * FamilyGroupMemberPage — 成员信息页
  *
- * 展示成人成员的详细信息：头像、昵称、角色、性别、生日、加入时间、声纹。
- * 创建者可见"移除成员"操作（带二次确认）。
+ * 展示成人成员的详细信息：称呼、性别、身份、生日。
+ * 创建者可见"删除成员"操作（带二次确认），不可删除自己。
  * 数据从 FamilyGroupStore.currentMembers 读取。
  */
 
@@ -17,6 +17,7 @@ import { useFamilyGroupStore } from 'stores/family-group';
 import type { FamilyMember, FamilyUserRole } from 'stores/family-group/types';
 import { removeMember as removeMemberApi } from 'src/utils/api/family-group';
 import { useAuthStore } from 'stores/auth';
+import { useProfileStore } from 'stores/profile';
 import { router } from 'src/router';
 
 const i18n = i18nSubPath('pages.stack.family-group.MemberPage');
@@ -24,6 +25,7 @@ const $q = useQuasar();
 const route = useRoute();
 const familyGroupStore = useFamilyGroupStore();
 const authStore = useAuthStore();
+const profileStore = useProfileStore();
 
 /** 当前查看的成员 */
 const member = computed<FamilyMember>(() => {
@@ -67,20 +69,28 @@ function roleLabel(role?: FamilyUserRole): string {
   return labels[role] ?? role;
 }
 
-/** 格式化日期 */
+/** 格式化日期（年 / 月 / 日） */
 function formatDate(isoString: string): string {
   try {
     const d = new Date(isoString);
-    return `${d.getFullYear()}年${d.getMonth() + 1}月`;
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
   } catch {
     return '-';
   }
 }
 
-/** 是否为创建者（可执行删除） */
+/** 当前家庭组 */
+const group = computed(() => familyGroupStore.currentGroup);
+
+/**
+ * 是否可以删除该成员：
+ * - 当前用户必须是家庭组创建者
+ * - 目标成员不能是创建者自己（不能删除自己）
+ */
 const canRemove = computed(() => {
-  // TODO: 与 authStore.userId 比对当前用户是否为 creator
-  return !member.value.isCreator;
+  if (!group.value) return false;
+  const isCurrentUserCreator = group.value.creatorId === profileStore.profile?.id;
+  return isCurrentUserCreator && !member.value.isCreator;
 });
 
 function onRemove() {
@@ -117,185 +127,39 @@ function onRemove() {
 </script>
 
 <template>
-  <q-page class="family-member-page">
-    <!-- 头部：大头像 + 昵称 + 角色 -->
-    <div class="member-header">
-      <div class="member-header__avatar">
-        <img v-if="member.avatar" :src="member.avatar" alt="" />
-        <q-icon v-else name="person" size="40px" color="#C4C4CC" />
+  <q-page class="family-group-page member-page">
+    <!-- 信息卡片（复用全局 .family-member-info-* class） -->
+    <div class="family-member-info-card">
+      <div class="family-member-info-row">
+        <span class="family-member-info-label">{{ i18n('labels.nickname') }}</span>
+        <span class="family-member-info-value">{{ member.nickname }}</span>
       </div>
-      <span class="member-header__name">{{ member.nickname }}</span>
-      <span class="member-header__badge">{{ roleLabel(member.role) }}</span>
-      <p class="member-header__joined">
-        {{ i18n('labels.joinedAt', { time: formatDate(member.joinedAt) }) }}
-      </p>
-    </div>
-
-    <!-- 信息卡片 -->
-    <div class="member-info-card">
-      <div class="member-info-row">
-        <span class="member-info-label">{{ i18n('labels.nickname') }}</span>
-        <span class="member-info-value">{{ member.nickname }}</span>
-      </div>
-      <div class="member-info-row">
-        <span class="member-info-label">{{ i18n('labels.gender') }}</span>
-        <span class="member-info-value">
+      <div class="family-member-info-row">
+        <span class="family-member-info-label">{{ i18n('labels.gender') }}</span>
+        <span class="family-member-info-value">
           {{ member.gender === 'female' ? i18n('meta.female') : i18n('meta.male') }}
         </span>
       </div>
-      <div class="member-info-row">
-        <span class="member-info-label">{{ i18n('labels.roleLabel') }}</span>
-        <span class="member-info-value">{{ roleLabel(member.role) }}</span>
+      <div class="family-member-info-row">
+        <span class="family-member-info-label">{{ i18n('labels.roleLabel') }}</span>
+        <span class="family-member-info-value">{{ roleLabel(member.role) }}</span>
       </div>
-      <div class="member-info-row">
-        <span class="member-info-label">{{ i18n('labels.birthday') }}</span>
-        <span class="member-info-value">{{ member.birthday ? formatDate(member.birthday) : '-' }}</span>
-      </div>
-
-      <!-- 声纹信息行 -->
-      <div
-        v-if="member.hasVoiceprint"
-        class="member-info-row member-info-row--clickable"
-        @click="
-          void router.push({
-            name: 'settings-voiceprint-detail',
-            params: { personId: member.voiceprintPersonId },
-          })
-        "
-      >
-        <span class="member-info-label">
-          <q-icon name="graphic_eq" size="16px" color="#08A8DC" class="q-mr-xs" />
-          {{ i18n('labels.voiceprint') }}
-        </span>
-        <span class="member-info-value member-info-value--link">
-          {{ i18n('labels.viewVoiceprint') }}
-          <q-icon name="chevron_right" size="14px" color="#C4C4CC" />
-        </span>
+      <div class="family-member-info-row">
+        <span class="family-member-info-label">{{ i18n('labels.birthday') }}</span>
+        <span class="family-member-info-value">{{ member.birthday ? formatDate(member.birthday) : '-' }}</span>
       </div>
     </div>
 
-    <!-- 危险操作区：仅非本人且当前用户为 creator 时显示 -->
-    <button v-if="canRemove" type="button" class="member-remove-btn" @click="onRemove">
+    <!-- 删除成员按钮（复用全局 .family-member-delete-btn） -->
+    <button v-if="canRemove" type="button" class="family-member-delete-btn" @click="onRemove">
       {{ i18n('buttons.remove') }}
     </button>
   </q-page>
 </template>
 
 <style scoped lang="scss">
-.family-member-page {
-  padding-top: 24px;
-}
-
-// ── 头部 ──
-.member-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding-bottom: 28px;
-}
-
-.member-header__avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F5F5F5;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.member-header__name {
-  font-family: var(--font-family);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--clr-text-primary);
-}
-
-.member-header__badge {
-  display: inline-block;
-  padding: 2px 10px;
-  font-size: 12px;
-  color: #08A8DC;
-  background: rgba(32, 204, 249, 0.08);
-  border-radius: 8px;
-}
-
-.member-header__joined {
-  font-size: 13px;
-  color: var(--clr-caption);
-  margin: 0;
-}
-
-// ── 信息卡片 ──
-.member-info-card {
-  background: var(--clr-white);
-  border-radius: 12px;
-  padding: 0 20px;
-  border: 1.5px solid rgba(200, 200, 210, 0.2);
-}
-
-.member-info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &--clickable {
-    cursor: pointer;
-
-    &:hover {
-      background: rgba(32, 204, 249, 0.03);
-    }
-  }
-}
-
-.member-info-label {
-  font-size: 14px;
-  color: var(--clr-caption);
-}
-
-.member-info-value {
-  font-size: 14px;
-  color: var(--clr-text-primary);
-
-  &--link {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    color: #08A8DC;
-  }
-}
-
-// ── 删除按钮 ──
-.member-remove-btn {
-  width: calc(100% - 64px);
-  max-width: 311px;
-  height: 48px;
-  margin: 36px auto 20px;
-  display: block;
-  background: transparent;
-  border: none;
-  font-family: var(--font-family);
-  font-size: 15px;
-  color: var(--clr-danger-bg, #FF5C5C);
-  cursor: pointer;
-  text-align: center;
-
-  &:hover {
-    opacity: 0.75;
-  }
+// 页面级微调，所有主要样式复用 app.scss 中的全局 class
+.member-page {
+  padding-top: 16px;
 }
 </style>

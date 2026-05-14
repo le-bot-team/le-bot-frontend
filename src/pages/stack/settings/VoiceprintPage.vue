@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { router } from 'src/router';
@@ -13,6 +13,8 @@ const i18n = i18nSubPath('pages.stack.settings.VoiceprintPage');
 const { accessToken } = storeToRefs(useAuthStore());
 const persons = ref<Person[]>([]);
 const routerInstance = useRouter();
+
+const hasTemporal = computed(() => persons.value.some((p) => p.is_temporal));
 
 const goDetail = (personId: string) => {
   routerInstance.push(`/stack/settings/voiceprint/detail/${personId}`).catch(console.error);
@@ -49,10 +51,18 @@ onMounted(async () => {
         class="voiceprint-row"
         @click="goDetail(person.person_id)"
       >
-        <span>{{ i18n('labels.personVoiceprint', { name: person.name }) }}</span>
+        <div class="voiceprint-row__left">
+          <span>{{ i18n('labels.personVoiceprint', { name: person.name }) }}</span>
+          <span v-if="person.is_temporal" class="voiceprint-row__temporal-tag">
+            {{ i18n('labels.temporalTag') }}
+          </span>
+        </div>
         <q-icon class="voiceprint-row__chevron" name="chevron_right" size="12px" />
       </div>
     </div>
+    <p v-if="hasTemporal" class="voiceprint-hint">
+      {{ i18n('labels.temporalHint') }}
+    </p>
     <button class="voiceprint-add-btn" type="button" @click="goNew">
       <q-icon name="add" size="14px" />
       {{ i18n('labels.addNewPerson') }}

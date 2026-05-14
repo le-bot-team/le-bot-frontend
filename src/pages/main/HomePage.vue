@@ -21,6 +21,7 @@ import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
+import { useTracker } from 'src/composables/useTracker';
 import DeviceSwitchPanel from 'components/home/DeviceSwitchPanel.vue';
 
 // Mascot placeholder: 设计稿中"乐宝正面"为shape占位符，暂无透明背景PNG切图。
@@ -37,6 +38,7 @@ const i18n = i18nSubPath('pages.main.HomePage');
 const { accessToken } = storeToRefs(useAuthStore());
 const deviceStore = useDeviceStore();
 const { currentDevice } = storeToRefs(deviceStore);
+const { trackClick, trackConversion } = useTracker();
 
 /** 当前设备名称（如"小新的乐宝"） */
 const currentDeviceName = computed(() => {
@@ -76,31 +78,37 @@ onBeforeMount(() => {
 });
 
 function goChat() {
+  trackConversion('first_chat');
   router.push('/stack/chat').catch((err) => console.error(err));
 }
 
 function goChatHistory() {
-  // Chat history route not implemented yet; fall back to ChatPage for now.
+  trackClick('btn_click_chat_history');
   router.push('/stack/chat').catch((err) => console.error(err));
 }
 
 function pickTopic(topic: string) {
+  trackClick('btn_click_topic_chip', { routeQuery: topic });
   router.push({ path: '/stack/chat', query: { topic } }).catch((err) => console.error(err));
 }
 
 function goMessages() {
+  trackClick('btn_click_messages');
   router.push('/stack/messages').catch((err) => console.error(err));
 }
 
 function goDeviceSwitch() {
+  trackClick('btn_click_device_switch');
   showDeviceSwitch.value = true;
 }
 
 function goRobotSettings() {
+  trackClick('btn_click_robot_settings');
   router.push('/stack/device-config').catch((err) => console.error(err));
 }
 
 function handleAddDevice() {
+  trackConversion('device_activated');
   router.push('/stack/add-virtual-device').catch((err) => console.error(err));
 }
 </script>

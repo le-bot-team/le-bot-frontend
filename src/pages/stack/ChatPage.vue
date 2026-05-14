@@ -18,6 +18,7 @@ import ChatInputBar from 'src/components/chat/ChatInputBar.vue';
 import ChatMessageList from 'src/components/chat/ChatMessageList.vue';
 import { bus } from 'src/boot/bus';
 import { useChatSession } from 'src/composables/useChatSession';
+import { useTracker } from 'src/composables/useTracker';
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
@@ -25,6 +26,7 @@ import { useAuthStore } from 'stores/auth';
 const i18n = i18nSubPath('pages.stack.ChatPage');
 const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
+const { trackClick, trackConversion } = useTracker();
 
 const { messages, isConnected, isMediaReady, connect, wake, destroy } = useChatSession();
 
@@ -54,6 +56,7 @@ function onPress() {
     notify({ type: 'warning', message: i18n('notifications.notReady') });
     return;
   }
+  trackConversion('first_voice_input');
   pressing.value = true;
   wake().catch((err) => {
     console.error('[ChatPage] wake failed', err);
@@ -63,8 +66,7 @@ function onPress() {
 }
 
 function onRelease() {
-  // Silence detector inside useChatSession auto-transitions the turn when
-  // the user stops speaking; this handler only clears the visual press state.
+  trackClick('btn_click_release_talk');
   pressing.value = false;
 }
 

@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 
 import { emailChallenge, emailCode, emailPassword } from 'src/utils/api/auth';
 import { useAuthStore } from 'stores/auth';
+import { useTracker } from 'src/composables/useTracker';
 
 defineProps<{
   name: string | number;
@@ -20,6 +21,7 @@ const router = useRouter();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
   storeToRefs(useAuthStore());
 const { notify } = useQuasar();
+const { trackConversion } = useTracker();
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const processFunctionsMatrix = {
@@ -66,6 +68,7 @@ const sendCode = async () => {
   if (!isValidEmail.value || !email.value?.length || isSendingCode.value) return;
   if (!isNeverSendCode.value && remainedSendCodeCooldownSeconds.value) return;
 
+  trackConversion('auth_code_sent');
   isSendingCode.value = true;
   try {
     const result = await emailChallenge(email.value);
@@ -97,6 +100,7 @@ const processSignInOrSignUp = async () => {
     }
 
     accessToken.value = data.data.accessToken;
+    trackConversion('auth_login_success');
 
     if (data.data.isNew) {
       // New user: go to password setup first

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// RecordPanel — lanhu designs 4e6ad306 (录制准备) / 1ed5ff10 (朗读短语)
-import { onBeforeUnmount, ref } from 'vue';
+// RecordPanel — lanhu designs 4e6ad306 (录制准备) / 1ed5ff10 (朗读短语) / 10d09505 (声纹录制4)
+import { ref, watch } from 'vue';
 
-import AudioRecorder from 'components/AudioRecorder.vue';
+import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
+import robotImg from 'src/assets/lanhu/home/icon-robot-set-home.png';
 import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
@@ -39,27 +40,103 @@ const preparationHints: { variant: HintVariant; label: string; caption: string }
 
 const audioData = ref<Blob>();
 const audioSrc = ref<string>();
+const isRecording = ref(false);
+const isPlaying = ref(false);
+const playbackProgress = ref(0);
+let audioEl: HTMLAudioElement | null = null;
 
-const onAudioRecordData = (blobData: Blob): void => {
-  if (!audioData.value) {
-    audioData.value = blobData;
+watch(audioData, (val) => {
+  if (val) {
+    if (audioSrc.value) URL.revokeObjectURL(audioSrc.value);
+    audioSrc.value = URL.createObjectURL(val);
   } else {
-    audioData.value = new Blob([audioData.value, blobData], { type: 'audio/wav' });
-  }
-};
-
-const onAudioRecordStop = (): void => {
-  if (audioSrc.value) {
-    URL.revokeObjectURL(audioSrc.value);
-  }
-  audioSrc.value = audioData.value ? URL.createObjectURL(audioData.value) : undefined;
-};
-
-onBeforeUnmount(() => {
-  if (audioSrc.value) {
-    URL.revokeObjectURL(audioSrc.value);
+    if (audioSrc.value) URL.revokeObjectURL(audioSrc.value);
+    audioSrc.value = undefined;
+    isPlaying.value = false;
+    playbackProgress.value = 0;
   }
 });
+
+const onAudioLoaded = (e: Event): void => {
+  audioEl = e.target as HTMLAudioElement;
+};
+
+const togglePlayback = (): void => {
+  if (!audioEl) return;
+  if (isPlaying.value) {
+    audioEl.pause();
+    isPlaying.value = false;
+  } else {
+    void audioEl.play().catch(() => {
+      isPlaying.value = false;
+    });
+    isPlaying.value = true;
+  }
+};
+
+const onAudioEnded = (): void => {
+  isPlaying.value = false;
+  playbackProgress.value = 0;
+};
+
+const onAudioTimeUpdate = (): void => {
+  if (audioEl && audioEl.duration) {
+    playbackProgress.value = (audioEl.currentTime / audioEl.duration) * 100;
+  }
+};
+
+const resetRecording = (): void => {
+  audioData.value = undefined;
+};
+
+let mediaRecorder: MediaRecorder | null = null;
+let mediaStream: MediaStream | null = null;
+let recordedChunks: Blob[] = [];
+
+const startRecording = async (): Promise<void> => {
+  if (isRecording.value) return;
+  audioData.value = undefined;
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        sampleRate: 16000,
+        sampleSize: 16,
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    });
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+    mediaRecorder.onstop = () => {
+      audioData.value = new Blob(recordedChunks, { type: 'audio/webm' });
+      cleanup();
+    };
+    mediaRecorder.start(200);
+    isRecording.value = true;
+  } catch (err) {
+    console.error('Failed to start recording:', err);
+    cleanup();
+  }
+};
+
+const stopRecording = (): void => {
+  if (!isRecording.value) return;
+  mediaRecorder?.stop();
+  isRecording.value = false;
+};
+
+const cleanup = (): void => {
+  mediaStream?.getTracks().forEach((track) => track.stop());
+  mediaStream = null;
+  mediaRecorder = null;
+};
 </script>
 
 <template>
@@ -91,38 +168,81 @@ onBeforeUnmount(() => {
       </button>
     </template>
 
-    <!-- Stage 2: read aloud + record (design 1ed5ff10) -->
+    <!-- Stage 2: read aloud + record (design 1ed5ff10 / 10d09505) -->
     <template v-else>
       <div class="voiceprint-record-page-title">
         {{ i18n('labels.readAloudPhrases') }}
       </div>
 
       <div class="voiceprint-record-pet-stage">
-        <q-icon name="pets" size="80px" color="primary" />
+        <img :src="robotImg" alt="aipet" class="voiceprint-record-pet-img" />
       </div>
 
       <p class="voiceprint-record-phrase">
         {{ i18n('labels.readAloudPhrasesDescription') }}
       </p>
 
+      <img :src="iconRead" alt="read" class="voiceprint-record-read-icon" />
+
       <div class="voiceprint-record-waveform" aria-hidden="true">
         <span v-for="n in 21" :key="n" class="voiceprint-record-wave-bar" />
       </div>
 
-      <div class="voiceprint-record-mic" aria-hidden="true" />
+      <!-- Audio playback UI (shown after recording) -->
+      <div v-if="audioSrc" class="voiceprint-record-playback">
+        <audio
+          ref="audioRef"
+          :src="audioSrc"
+          @loadedmetadata="onAudioLoaded"
+          @ended="onAudioEnded"
+          @timeupdate="onAudioTimeUpdate"
+        />
+        <button
+          class="voiceprint-record-playback-btn"
+          type="button"
+          @click="togglePlayback"
+        >
+          <q-icon :name="isPlaying ? 'pause' : 'play_arrow'" size="24px" />
+        </button>
+        <div class="voiceprint-record-progress">
+          <div
+            class="voiceprint-record-progress-bar"
+            :style="{ width: playbackProgress + '%' }"
+          />
+        </div>
+        <button
+          class="voiceprint-record-reset-btn"
+          type="button"
+          @click="resetRecording"
+        >
+          {{ i18n('labels.rerecord') }}
+        </button>
+      </div>
 
-      <audio v-if="audioSrc" class="full-width q-mb-md" controls :src="audioSrc" />
-
-      <AudioRecorder
-        @data="onAudioRecordData"
-        @start="audioData = undefined"
-        @stop="onAudioRecordStop"
-      />
+      <!-- Recording button (shown when no audio) -->
+      <div v-else>
+        <div
+          class="voiceprint-record-pulse-ring"
+          :class="{ 'voiceprint-record-pulse-ring--recording': isRecording }"
+          role="button"
+          tabindex="0"
+          aria-label="record"
+          @mousedown.prevent="startRecording"
+          @mouseup="stopRecording"
+          @mouseleave="stopRecording"
+          @touchstart.prevent="startRecording"
+          @touchend.prevent="stopRecording"
+          @touchcancel="stopRecording"
+          @keydown.enter.space.prevent="isRecording ? stopRecording() : startRecording()"
+        >
+          <div class="voiceprint-record-pulse-inner" />
+        </div>
+      </div>
 
       <button
         class="auth-btn-primary voiceprint-record-cta"
         type="button"
-        :disabled="!audioSrc"
+        :disabled="!audioData"
         @click="audioData ? emit('next', audioData) : undefined"
       >
         {{ i18n('labels.finish') }}
