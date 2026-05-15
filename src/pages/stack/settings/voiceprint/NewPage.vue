@@ -28,7 +28,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-lg q-pa-md">
+  <q-page class="voiceprint-record-page">
     <q-tab-panels class="full-width col-grow bg-transparent" v-model="panelIndex">
       <record-panel
         :name="0"
