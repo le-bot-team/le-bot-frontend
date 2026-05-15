@@ -15,7 +15,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['axios', 'bus', 'i18n', 'media-encoder'],
+    boot: ['mock', 'axios', 'bus', 'i18n', 'media-encoder', 'telemetry'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -66,6 +66,8 @@ export default defineConfig((ctx) => {
           : ctx.dev
             ? 'ws://localhost:3000'
             : '',
+        VITE_MOCK_ENABLED: process.env.VITE_MOCK_ENABLED ?? (ctx.dev ? 'true' : 'false'),
+        VITE_MOCK_WS_ENABLED: process.env.VITE_MOCK_WS_ENABLED ?? (ctx.dev ? 'true' : 'false'),
       },
 
       target: {
@@ -158,7 +160,7 @@ export default defineConfig((ctx) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Dialog', 'Notify'],
+      plugins: ['Dialog', 'Notify', 'BottomSheet'],
     },
 
     // animations: 'all', // --- includes all animations
@@ -210,7 +212,11 @@ export default defineConfig((ctx) => {
       // extendManifestJson (json) {},
       // useCredentialsForManifestTag: true,
       // injectPwaMetaTags: false,
-      // extendPWACustomSWConf (esbuildConf) {},
+      extendPWACustomSWConf(esbuildConf) {
+        // Workbox uses destructuring patterns that esbuild cannot downlevel
+        // to es2022. Target a modern environment that natively supports it.
+        esbuildConf.target = 'es2022';
+      },
       // extendGenerateSWOptions (cfg) {},
       // extendInjectManifestOptions (cfg) {}
     },

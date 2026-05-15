@@ -1,1 +1,4522 @@
 // app global css in SCSS form
+
+// ===== Design Token CSS Custom Properties =====
+// These tokens are inherited by all components.
+// Reference: Blue Lake design specs for 登录认证模块
+
+:root {
+  // Colors
+  --clr-text: rgba(21, 23, 23, 1);
+  --clr-placeholder: rgba(147, 152, 169, 1);
+  --clr-link: rgba(32, 204, 249, 1);
+  --clr-error: rgba(255, 93, 93, 1);
+  --clr-weak: rgba(83, 89, 89, 1); // #535959 文本2 (设计规范 0b33e4ae)
+  --clr-text-secondary: rgba(83, 89, 89, 1); // #535959 文本2 (同 --clr-weak，语义别名)
+  --clr-text-tertiary: rgba(74, 74, 74, 1); // #4A4A4A 文本3 (设计规范 0b33e4ae)
+  --clr-white: rgba(255, 255, 255, 1);
+  --clr-slogan-entry: rgba(18, 14, 44, 1);
+  --clr-divider: rgba(229, 229, 239, 1); // 设计稿分割线规范
+
+  // Typography (设计规范 0b33e4ae)
+  --font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-size-body: 15px;
+  --font-size-btn: 17px;
+  --font-size-subtitle: 17px;
+  --font-size-slogan: 15px;
+  --font-size-slogan-entry: 20px;
+  --font-size-terms: 12px;
+  --font-size-small: 14px; // 小按钮、正文2
+  --font-size-caption: 13px; // 说明文字
+  --line-height-body: 22px;
+  --line-height-subtitle: 24px;
+  --line-height-btn: 24px;
+  --line-height-small: 24px; // 14px 对应行高
+  --line-height-caption: 20px; // 13px 对应行高
+
+  // Sizing
+  --input-width: 311px;
+  --input-height: 48px;
+  --input-radius: 8px;
+  --btn-width: 311px;
+  --btn-height: 56px;
+  --btn-radius: 28px;
+  --logo-size: 120px;
+  --avatar-size: 87px;
+
+  // Spacing (设计规范 0b33e4ae)
+  --spacing-sm: 8px; // 小间距
+  --spacing-xs: 12px; // 较小间距
+  --spacing-md: 16px; // 中间距 (框架默认)
+  --spacing-regular: 20px; // 中等间距 (设计规范)
+  --spacing-lg: 32px; // 较大间距
+  --spacing-xl: 40px; // 大间距
+  --spacing-2xl: 64px; // 超大间距
+
+  // Primary color (semantic alias for dark brand color)
+  --clr-primary: rgba(18, 14, 44, 1);
+
+  // Button colors
+  --clr-btn-primary-bg: rgba(18, 14, 44, 1);
+  --clr-btn-weak-border: rgba(18, 14, 44, 1);
+  --clr-btn-weak-text: rgba(83, 89, 89, 1); // #535959 (同 --clr-weak)
+  // Soft-green weak-button border shared by SetupProfilePanel skip btn
+  // (ed71eb82 rect-199:6282) and ChildEditPage skip btn (c7826afa rect-2015).
+  --clr-btn-weak-border-soft: rgba(212, 246, 170, 1);
+
+  // Input field colors (from raw JSON: fills=white, radius=8px)
+  --clr-input-bg: rgba(255, 255, 255, 1);
+  --clr-input-border: rgba(147, 152, 169, 0.2);
+
+  // Action link (inline button within input, e.g. "发送验证码")
+  --clr-action-link: rgba(32, 204, 249, 1);
+  --font-size-action-link: 15px;
+  --font-weight-action-link: 400;
+  --line-height-action-link: 22px;
+  --clr-action-link-disabled: rgba(147, 152, 169, 1);
+
+  // Page background gradient (design spec: vertical, light-blue → white)
+  --gradient-page-bg: linear-gradient(
+    180deg,
+    rgba(216, 244, 255, 1) 0%,
+    rgba(225, 255, 242, 1) 20.7%,
+    rgba(253, 255, 224, 1) 54.6%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
+  // Me module tokens (我的 / 编辑资料 / 修改密码)
+  --clr-page-bg-neutral: rgba(241, 249, 248, 1); // #F1F9F8 浅绿背景 (设计规范 0b33e4ae)
+  --clr-card-bg: rgba(255, 255, 255, 1);
+  --card-radius: 12px;
+  --menu-row-height: 64px;
+  --clr-caption: rgba(147, 152, 169, 1);
+  --clr-danger-bg: rgba(255, 93, 93, 1); // #FF5D5D 危险色 (与 --clr-error 统一，设计规范 0b33e4ae)
+  --profile-avatar-size: 64px;
+  --profile-avatar-border: 3px solid rgba(255, 255, 255, 1);
+
+  // MePage page background — design 84fafb58 artboard is a solid white base
+  // with two translucent ellipse "glow" layers on top (圆形 171 top-right,
+  // 圆形 172 bottom-left). Values are extracted verbatim from the raw sketch
+  // JSON (`artboard.style.fills`, and each shape's `fills[].gradient`).
+  //
+  // NOTE on gradient type: Sketch file-format encodes `gradient.type` as
+  // 0=linear, 1=radial, 2=angular. Both glow shapes are `type: 1` — they MUST
+  // be rendered as `radial-gradient`, not `linear-gradient`.
+  //
+  // Viewport strategy (explicit user decision 2026-04, option B1): the
+  // product runs on phone viewports only. Glows are positioned directly on
+  // the page using raw-JSON (left, top) values relative to the viewport's
+  // top-left; no 375px centered canvas is used. On phones wider than 375px
+  // (iPhone 12/Pro Max, large Android) the glows stay pinned to the left and
+  // the right edge shows extra white, matching native mobile rendering.
+  //
+  // Alpha strategy (explicit user decision 2026-04, option A2): each stop's
+  // alpha is used as-authored (fill.opacity=0.4 is NOT pre-multiplied). This
+  // yields a 2.5× more saturated glow than Sketch's literal render model
+  // (peak alpha 0.4 vs 0.16) and matches the product's desired visual
+  // emphasis, per user preference over strict 1:1 Sketch parity.
+  --clr-me-page-bg: rgba(255, 255, 255, 1);
+
+  // 圆形 171 — 675×675 ellipse anchored at (-235, -288) relative to the 375px
+  // design artboard (now placed relative to the mobile viewport, since the
+  // 375px canvas was removed per decision B1 — the ellipse still extends
+  // left/above the viewport as the design intended).
+  // raw JSON:
+  //   paths[0].type = "ellipse"  (so the shape itself clips to a circle)
+  //   gradient.type = 1          (radial)
+  //   gradient.from = (0, 0.5)   (normalized shape coord: left-center)
+  //   gradient.to   = (0.5, 1)   (normalized shape coord: bottom-center)
+  //   radius = |to-from| * size  = sqrt(0.5²+0.5²) * 675 ≈ 477.3px
+  //   fill.opacity = 0.4         (NOT applied per decision A2: stops keep
+  //   their as-authored alpha and pseudo-element opacity stays 1, giving a
+  //   2.5× more saturated glow than literal Sketch rendering)
+  --glow-171-size: 675px;
+  --glow-171-left: -235px;
+  --glow-171-top: -288px;
+  --glow-171-opacity: 1;
+  --glow-171-gradient: radial-gradient(
+    circle 477.3px at 0% 50%,
+    rgba(129, 236, 223, 0.4) 10.14%,
+    rgba(131, 212, 202, 0.24) 40.14%,
+    rgba(245, 255, 219, 0.4) 72.29%,
+    rgba(245, 255, 219, 0) 100%
+  );
+
+  // 圆形 172 — 540×540 ellipse anchored at (20, 519). Same projection as 171:
+  //   radial center at shape-local (0, 0.5), radius ≈ 381.8px.
+  //   fill.opacity = 0.4 skipped per decision A2 (see 171 for rationale).
+  --glow-172-size: 540px;
+  --glow-172-left: 20px;
+  --glow-172-top: 519px;
+  --glow-172-opacity: 1;
+  --glow-172-gradient: radial-gradient(
+    circle 381.8px at 0% 50%,
+    rgba(146, 217, 246, 0.4) 26.57%,
+    rgba(146, 217, 246, 0) 100%
+  );
+
+  // MePage highlight cards (会员中心 / 服务中心) — design shows vertical
+  // linear gradients on 矩形 1897 / 矩形 1898 (transform `[[0,-1,2],[1,0,0]]`
+  // rotates the `from→to` axis so it runs top→bottom with stop 0 at the top).
+  // Values below are the two-stop endpoints read directly from raw JSON.
+  --clr-me-card-member-bg-top: rgba(210, 246, 162, 1);
+  --clr-me-card-member-bg-bottom: rgba(210, 246, 162, 0.4);
+  --clr-me-card-service-bg-top: rgba(206, 238, 255, 1);
+  --clr-me-card-service-bg-bottom: rgba(206, 238, 255, 0.4);
+  --me-card-radius: 12px;
+  --clr-me-card-title: rgba(21, 23, 23, 1);
+  --clr-me-card-caption: rgba(83, 89, 89, 1);
+  --me-highlight-card-h: 88px;
+  --me-highlight-icon-size: 48px;
+  --me-notify-icon-size: 24px;
+
+  // ===== HomePage (首页) tokens, design ed2b5fdd =====
+  //
+  // Viewport strategy (user decision 2026-05 revised): the 375×812 canvas is
+  // fixed-size and centered horizontally via `margin: 0 auto`. Any viewport
+  // wider than 375px shows the page-background gradient on both sides;
+  // narrower viewports scroll horizontally (acceptable edge case for iPhone
+  // SE and legacy devices). Supersedes the earlier B3 proportional-scale
+  // strategy which caused desktop spacer bloat.
+  //
+  // Tab icon strategy (explicit user decision 2026-05, option D6-a): the
+  // design's 4 bottom-tab icons are Sketch symbolInstence without imageRef or
+  // extractable paths, so they cannot be obtained via `lanhu_download_slices`.
+  // Retain mdi icons (home / mdi-sprout / mdi-shopping / person) and adopt
+  // the design's #120E2C active color + 12px label typography only.
+  //
+  // Mascot strategy (explicit user decision 2026-05, option D2-b): the
+  // `乐宝正面` 230×334 shape has no imageRef in raw JSON. Render a rounded
+  // gradient placeholder box with text "乐宝" + TODO, awaiting a user-provided
+  // PNG to drop into src/assets/lanhu/home/mascot.png later.
+
+  // Page background: 5-stop vertical linear gradient (raw JSON artboard fills[0])
+  --home-bg-gradient: linear-gradient(
+    180deg,
+    rgba(219, 244, 255, 1) 0%,
+    rgba(236, 255, 246, 1) 21.57%,
+    rgba(255, 255, 255, 1) 43.71%,
+    rgba(254, 255, 229, 1) 65.86%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
+  // Hero radial glow 1 (圆形 4, 374×367 at (1, 189)):
+  // raw JSON fills[0].gradient:
+  //   type = 1 (radial)
+  //   from = (0, 0.5), to = (0.5, 1)
+  //   radius_px = sqrt(0.5^2 + 0.5^2) * avg(374,367) ≈ 262.1
+  // Note: the raw `from = (0, 0.5)` would anchor the gradient center to the
+  // LEFT edge of the elliptical box, which renders only the right semi-circle
+  // and gets visually clipped (issue reported 2026-05). Rendering the gradient
+  // at the CENTER (50% 50%) so the halo is a complete circle behind the
+  // mascot — consistent with how the amber glow below converts the same Sketch
+  // gradient pattern. The elliptical border-radius mask still softens the
+  // outer edge of the halo.
+  --home-glow-warm-size-w: 374px;
+  --home-glow-warm-size-h: 367px;
+  --home-glow-warm-left: 1px;
+  --home-glow-warm-top: 189px;
+  --home-glow-warm-gradient: radial-gradient(
+    ellipse 262.1px 262.1px at 50% 50%,
+    rgba(255, 238, 205, 0.6) 63.71%,
+    rgba(255, 246, 227, 0.44) 80.86%,
+    rgba(255, 245, 222, 0) 100%
+  );
+
+  // Hero radial glow 2 (圆形 5, 364×75 at (6, 478)) — amber highlight
+  --home-glow-amber-size-w: 364px;
+  --home-glow-amber-size-h: 75px;
+  --home-glow-amber-left: 6px;
+  --home-glow-amber-top: 478px;
+  --home-glow-amber-gradient: radial-gradient(
+    ellipse 182px 37.5px at 50% 50%,
+    rgba(246, 223, 175, 1) 40.86%,
+    rgba(255, 245, 222, 0) 100%
+  );
+
+  // Speech bubble (矩形 1907, 175×86): 设计稿位置 left:168, top:168
+  --home-bubble-w: 175px;
+  --home-bubble-h: 86px;
+  --home-bubble-left: 168px;
+  --home-bubble-top: 168px;
+  --home-bubble-radius: 16px;
+  --clr-home-bubble-bg: rgba(255, 255, 255, 1);
+  --clr-home-bubble-border: rgba(175, 238, 255, 1);
+  --clr-home-bubble-text: rgba(32, 204, 249, 1);
+
+  // Topic chips: 7 chips on y=~672..722, white 0.9 alpha, 15px Medium text.
+  --clr-home-chip-bg: rgba(255, 255, 255, 0.9);
+  --home-chip-radius: 14px;
+  --clr-home-chip-text: rgba(21, 23, 23, 1);
+
+  // Bottom tab bar (mobile): 375×68, white base, active #120E2C, inactive #9398A9,
+  // 12px Regular / lineHeight 16, font AlibabaPuHuiTi.
+  --home-tab-h: 68px;
+  --clr-tab-active: rgba(18, 14, 44, 1);
+  --clr-tab-inactive: rgba(147, 152, 169, 1);
+  --font-size-tab: 12px;
+  --line-height-tab: 16px;
+
+  // ===== DeviceConfig sub-pages tokens =====
+  // Designs: d4baeedf (LanguagePage), 4b20baad (VoiceStylePage),
+  //          f001e23d (PersonalityPage empty state), 31e9fabe/31c5986a (PersonalityDetailPage).
+  // Shared card geometry (335px wide card, neutral bg) matches SettingsPage/VoiceprintPage.
+  --device-card-max-w: 335px;
+  --device-row-height-lang: 66px; // LanguagePage row stride (d4baeedf: 198 / 3 rows)
+  --device-row-height-personality: 64px; // PersonalityPage toggle row (f001e23d)
+  --voice-style-row-height: 69px; // VoiceStylePage list row (4b20baad)
+
+  // VoiceStyle slider (4b20baad): track 6px, thumb 22px, filled portion uses
+  // the raw cyan rgba(32,204,249,1) which equals Quasar $accent.
+  --clr-voice-slider-fill: rgba(32, 204, 249, 1);
+  --clr-voice-slider-track: rgba(209, 216, 219, 1);
+  --clr-voice-slider-thumb-bg: rgba(255, 255, 255, 1);
+  --clr-voice-slider-thumb-border: rgba(32, 204, 249, 1);
+  --voice-slider-track-h: 6px;
+  --voice-slider-thumb-size: 22px;
+
+  // PersonalityPage / PersonalityDetailPage (f001e23d / 31e9fabe / 31c5986a).
+  // Card radius inherits --card-radius (12px). Submit button reuses
+  // --btn-width/--btn-height/--btn-radius.
+  // Design 04c9e61c updated: textarea h=100px, tags w=100px h=40px
+  --personality-textarea-h: 100px;
+  --personality-textarea-radius: 12px; // equals --card-radius, kept named for clarity
+  --personality-hint-color: rgba(147, 152, 169, 1); // equals --clr-placeholder / --clr-caption
+  --personality-section-gap: 16px;
+
+  // HomePage mascot (3D 乐宝机器人) — 位置对齐设计稿乐宝正面 shape
+  --home-mascot-w: 240px;
+  --home-mascot-h: 320px;
+  --home-mascot-left: 68px;
+  --home-mascot-top: 210px;
+
+  // ===== Shared dialog / confirm-dialog tokens =====
+  // Design 33aebf1c (raw JSON verified):
+  //   Card: 311x238px, r32, gradient bg D8E7FF→FFF at 35.47%
+  //   Padding: top 32px, bottom 32px, horizontal 20px (311-252=59/2≈29.5, use 20 for safety)
+  //   Title: 17px/24px Medium 500 #151717 center, margin-bottom 20px
+  //   Body: 15px/22px Regular 400 #4A4A4A center, margin-bottom 24px
+  //   Actions: flex gap 27px, two buttons 110x40px r20 each
+  //     Cancel: bg #120E2C text white
+  //     Confirm/Danger-confirm: bg white text #151717 border 1px solid #120E2C
+  --dialog-width: 311px;
+  --dialog-radius: 32px;
+  --dialog-padding-top: 32px;
+  --dialog-padding-bottom: 32px;
+  --dialog-padding-x: 20px;
+  --dialog-title-size: 17px;
+  --dialog-body-size: 15px;
+  --dialog-body-line-height: 22px;
+  --dialog-btn-height: 40px;
+  --dialog-btn-width: 110px;
+  --dialog-btn-radius: 20px;
+  --dialog-btn-gap: 27px;
+  --clr-dialog-bg: linear-gradient(to bottom, rgba(216.63716733455658, 247.0445492863655, 255, 1) 0%, rgba(255, 255, 255, 1) 35.47%);
+  --clr-dialog-title: rgba(21.000000648200512, 23.000000528991222, 23.000000528991222, 1);
+  --clr-dialog-body: rgba(74.0000031888485, 74.0000031888485, 74.0000031888485, 1);
+  --clr-dialog-btn-cancel-bg: rgba(18.000000827014446, 14.000000115484, 44.000001177191734, 1);
+  --clr-dialog-btn-cancel-text: rgba(255, 255, 255, 1);
+  --clr-dialog-btn-confirm-bg: rgba(255, 255, 255, 1);
+  --clr-dialog-btn-confirm-text: rgba(21.000000648200512, 23.000000528991222, 23.000000528991222, 1);
+  --clr-dialog-btn-danger-bg: rgba(18.000000827014446, 14.000000115484, 44.000001177191734, 1);
+  --clr-dialog-btn-danger-text: rgba(255, 255, 255, 1);
+  --clr-dialog-btn-link-bg: rgba(32, 204, 249, 1);
+  --clr-dialog-btn-link-text: rgba(255, 255, 255, 1);
+
+  // ===== Settings sub-page tokens (batch 4) =====
+  --settings-sub-card-max-w: 335px;
+  --settings-sub-row-height: 52px;
+  --settings-sub-toggle-track-h: 24px;
+  --settings-sub-toggle-thumb-size: 20px;
+  --clr-settings-sub-toggle-active: rgba(32, 204, 249, 1);
+  --clr-settings-sub-toggle-inactive: rgba(209, 216, 219, 1);
+
+  // ===== Splash page tokens =====
+  --splash-bg: linear-gradient(
+    180deg,
+    rgba(216, 244, 255, 1) 0%,
+    rgba(225, 255, 242, 1) 30%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  --splash-logo-size: 120px;
+  --splash-slogan-size: 20px;
+  --splash-progress-h: 4px;
+  --splash-progress-radius: 2px;
+  --clr-splash-slogan: rgba(18, 14, 44, 1);
+  --clr-splash-progress-bg: rgba(209, 216, 219, 1);
+  --clr-splash-progress-fill: rgba(32, 204, 249, 1);
+
+  // ===== Chat history page tokens =====
+  --chat-history-search-h: 40px;
+  --chat-history-search-radius: 20px;
+  --chat-history-item-h: 72px;
+  --clr-chat-history-search-bg: rgba(241, 249, 248, 1);
+  --clr-chat-history-date: rgba(147, 152, 169, 1);
+  --clr-chat-history-summary: rgba(83, 89, 89, 1);
+
+  // ===== Growth data page tokens (design 824d2d70) =====
+  --growth-card-radius: 12px;
+  --growth-section-gap: 16px;
+  --growth-radar-size: 150px;
+  --clr-growth-section-title: rgba(21, 23, 23, 1);
+  --clr-growth-section-caption: rgba(147, 152, 169, 1);
+  --clr-growth-page-title: rgba(36, 61, 59, 1);
+  --clr-growth-page-date: rgba(58, 89, 86, 1);
+  --clr-growth-stats-bg: rgba(241, 249, 248, 1);
+  --clr-growth-stats-divider: rgba(32, 204, 249, 1);
+  --clr-growth-accent-bar-top: rgba(129, 236, 223, 1);
+  --clr-growth-accent-bar-bottom: rgba(32, 204, 249, 1);
+  --clr-growth-summary-text: rgba(74, 74, 74, 1);
+  --clr-growth-summary-tag-bg: rgba(18, 14, 44, 1);
+  --clr-growth-summary-tag-text: rgba(255, 255, 255, 1);
+  --clr-growth-chart-label: rgba(74, 74, 74, 1);
+  --clr-growth-accompany-badge: rgba(32, 204, 249, 1);
+  --clr-growth-view-report: rgba(83, 89, 89, 1);
+  --clr-growth-capability-score: rgba(32, 204, 249, 1);
+
+  // Chat weekly report & capability detail tokens (designs b84ab479, 8c683896)
+  --clr-report-section-title: rgba(21, 23, 23, 1);
+  --clr-report-story-title: rgba(32, 204, 249, 1); // #20CCF9 品牌青色
+  --clr-report-body-text: rgba(21, 23, 23, 1);
+  --clr-report-growth-signal-text: rgba(83, 89, 89, 1); // #535959 文本2
+  --clr-report-growth-signal-bg: rgba(241, 249, 248, 1); // #F1F9F8 浅绿背景
+  --clr-report-section-accent: rgba(32, 204, 249, 1); // #20CCF9 品牌青色
+  --clr-capability-tag-advantage: rgba(32, 204, 249, 1);
+  --clr-capability-tag-disadvantage: rgba(255, 183, 77, 1);
+  --clr-capability-tag-progress: rgba(129, 236, 223, 1);
+  --clr-capability-tag-develop: rgba(255, 138, 128, 1);
+  --clr-capability-compare-desc: rgba(83, 89, 89, 1);
+  --growth-tab-active-color: rgba(32, 204, 249, 1);
+  --clr-growth-avatar-bg: rgba(134, 224, 248, 1);
+  --growth-page-bg: linear-gradient(
+    180deg,
+    rgba(114, 228, 218, 1) 0%,
+    rgba(236, 255, 246, 1) 8.7%,
+    rgba(255, 255, 255, 1) 20%
+  );
+  --growth-glow-171-left: -158px;
+  --growth-glow-171-top: -349px;
+  --growth-glow-171-size: 675px;
+  --growth-glow-171-opacity: 1;
+  --growth-glow-171-gradient: radial-gradient(
+    ellipse at 0% 50%,
+    rgba(129, 236, 223, 1) 10.1%,
+    rgba(131, 212, 202, 0.6) 43.7%,
+    rgba(245, 255, 219, 1) 83%
+  );
+  --growth-glow-172-left: 239px;
+  --growth-glow-172-top: 61px;
+  --growth-glow-172-size: 357px;
+  --growth-glow-172-opacity: 0.8;
+  --growth-glow-172-gradient: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(146, 217, 246, 1) 27%,
+    rgba(146, 217, 246, 0) 100%
+  );
+}
+
+// ===== AlibabaPuHuiTi Font Face =====
+// Fall back to system fonts if not installed
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src: local('AlibabaPuHuiTi'), local('Alibaba PuHuiTi'), local('AlibabaPuHuiTi-Regular');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src:
+    local('AlibabaPuHuiTi Medium'), local('Alibaba PuHuiTi Medium'), local('AlibabaPuHuiTi-Medium');
+  font-weight: 500;
+  font-style: normal;
+}
+
+// ===== YouSheBiaoTiHei Font Face (Growth Data title, design 824d2d70) =====
+@font-face {
+  font-family: 'YouSheBiaoTiHei';
+  src: local('YouSheBiaoTiHei'), local('YouSheBiaoTiHei-Bold');
+  font-weight: 400;
+  font-style: normal;
+}
+
+// ===== Global resets =====
+body {
+  font-family: var(--font-family);
+}
+
+// ===== AuthPage (登录/注册) patterns, designs 72b3b33f / 4a4704cc / 883b0908 / 2d090f70 =====
+// Auth module shared styles. These designs share the same page background gradient,
+// 120×120 logo, slogan text, input boxes (311×48 r8), primary button (311×56 r28),
+// weak button (311×56 r28 green border), terms checkbox (14×14), and error messages.
+// All values extracted verbatim from raw JSON of the four auth artboards.
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-page-bg);
+  font-family: var(--font-family);
+}
+
+.auth-panel {
+  font-family: var(--font-family);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0 32px;
+}
+
+.auth-input-group {
+  width: 311px;
+  height: 48px;
+  position: relative;
+  border: 1px solid var(--clr-input-border, rgba(147, 152, 169, 0.2));
+  border-radius: 8px;
+  transition: border-color 0.2s;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
+
+  &:focus-within {
+    border-color: var(--clr-link);
+  }
+
+  &--error {
+    border-color: var(--clr-error);
+  }
+
+  &--readonly {
+    background: var(--clr-input-bg, rgba(255, 255, 255, 1));
+  }
+
+  &--code {
+    width: 172px;
+  }
+
+  &--action {
+    width: 127px;
+    justify-content: center;
+  }
+
+  // Spacing between stacked input groups (design: 12px gap)
+  & + &:not(&--action) {
+    margin-top: 12px;
+  }
+}
+
+.auth-input-row {
+  display: flex;
+  gap: 12px;
+  width: 311px;
+  margin-top: 12px;
+
+  & + .auth-input-group {
+    margin-top: 12px;
+  }
+}
+
+.auth-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+  padding: 13px 16px;
+  box-sizing: border-box;
+
+  &::placeholder {
+    font-weight: 400;
+    color: var(--clr-placeholder);
+  }
+
+  // Hide browser-native password reveal/clear buttons
+  &::-ms-reveal,
+  &::-ms-clear,
+  &::-webkit-password-toggle {
+    display: none;
+  }
+
+  &--flex {
+    width: calc(100% - 40px);
+  }
+}
+
+.auth-input-with-action {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-action-link {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-action-link);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  text-align: center;
+
+  &--disabled {
+    color: var(--clr-action-link-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.auth-action-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.auth-error-msg {
+  width: 311px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-error);
+  margin-top: 8px;
+  text-align: left;
+}
+
+.auth-btn-primary {
+  width: var(--btn-width);
+  height: var(--btn-height);
+  border: none;
+  border-radius: var(--btn-radius);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 500;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled,
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.auth-btn-weak {
+  width: var(--btn-width);
+  height: var(--btn-height);
+  border: 1px solid var(--clr-btn-weak-border);
+  border-radius: var(--btn-radius);
+  background: transparent;
+  color: var(--clr-btn-weak-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 400;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+// Clickable variant of .auth-input-group (for read-only rows that open
+// pickers/sheets, e.g. SetupProfilePanel birthday & relationship fields).
+.auth-input-group--clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 311px;
+  margin-top: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-checkbox {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+}
+
+.auth-terms-text {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-placeholder);
+
+  .link {
+    color: var(--clr-link);
+  }
+}
+
+// Legacy aliases (kept for backward compat with non-auth pages referencing these)
+.input-row {
+  display: flex;
+  gap: 12px;
+  width: 311px;
+}
+
+.input-group {
+  background: var(--clr-input-bg, rgba(255, 255, 255, 1));
+}
+
+.auth-input-base {
+  width: var(--input-width);
+  height: var(--input-height);
+  border: 1px solid var(--clr-input-border);
+  border-radius: var(--input-radius);
+  outline: none;
+  background: var(--clr-input-bg);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+  color: var(--clr-text);
+  padding: 13px 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+
+  &::placeholder {
+    font-weight: 400;
+    color: var(--clr-placeholder);
+  }
+
+  &:focus {
+    border-color: var(--clr-link);
+  }
+}
+
+// ===== Shared me module patterns =====
+// Used by MePage / ProfilePage / ChangePasswordPage.
+
+.me-page {
+  // Exact replication of design 84fafb58: white base + two ellipse "glow"
+  // layers (圆形 171 / 圆形 172). Pseudo-elements carry the per-layer opacity
+  // and the gradient; all numeric values match the raw sketch JSON exactly.
+  position: relative;
+  background: var(--clr-me-page-bg);
+  min-height: 100%;
+  overflow: hidden;
+}
+
+// 圆形 171 (top-right mint-lime glow)
+.me-page::before {
+  content: '';
+  position: absolute;
+  left: var(--glow-171-left);
+  top: var(--glow-171-top);
+  width: var(--glow-171-size);
+  height: var(--glow-171-size);
+  border-radius: 50%;
+  background: var(--glow-171-gradient);
+  opacity: var(--glow-171-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+
+// 圆形 172 (bottom-left sky glow)
+.me-page::after {
+  content: '';
+  position: absolute;
+  left: var(--glow-172-left);
+  top: var(--glow-172-top);
+  width: var(--glow-172-size);
+  height: var(--glow-172-size);
+  border-radius: 50%;
+  background: var(--glow-172-gradient);
+  opacity: var(--glow-172-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+
+// Keep all content above the glow pseudo-elements.
+.me-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.me-card {
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+}
+
+.me-menu-row {
+  display: flex;
+  align-items: center;
+  min-height: var(--menu-row-height);
+  padding: 0 16px;
+  gap: 12px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--clr-text);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.me-menu-caption {
+  font-size: var(--font-size-terms);
+  font-weight: 400;
+  color: var(--clr-caption);
+}
+
+// Caption used inside MePage highlight cards (stronger than .me-menu-caption).
+.me-card-caption {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-me-card-caption);
+}
+
+// Title used inside MePage highlight cards.
+.me-card-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-me-card-title);
+}
+
+.me-btn-danger {
+  width: 100%;
+  max-width: 335px;
+  height: 56px;
+  border: none;
+  border-radius: var(--btn-radius);
+  background: var(--clr-danger-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 500;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.me-avatar {
+  width: var(--profile-avatar-size);
+  height: var(--profile-avatar-size);
+  border-radius: 50%;
+  border: var(--profile-avatar-border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+// ===== SettingsPage (设置) patterns, design daac9da5 =====
+// Neutral page background (same as me module) with 4 white cards containing
+// text-only menu rows (no left icon), right-side optional caption + 12×12
+// chevron. Logout button at the bottom reuses `.me-btn-danger`.
+
+.settings-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.settings-menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 62px;
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  cursor: pointer;
+
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.settings-menu-row__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--clr-placeholder);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+.settings-menu-row__caption {
+  color: var(--clr-placeholder);
+}
+
+.settings-menu-row__chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--clr-placeholder);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-logout {
+  margin-top: 20px;
+  align-self: center;
+}
+
+// ===== VoiceprintPage (声纹设置列表) patterns, design 94e98b66 =====
+.voiceprint-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.voiceprint-card {
+  width: 335px;
+  box-sizing: border-box;
+}
+
+.voiceprint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 69px;
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  cursor: pointer;
+
+  & + & {
+    border-top: 1px solid rgba(147, 152, 169, 0.15);
+  }
+}
+
+.voiceprint-row__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.voiceprint-row__chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--clr-placeholder);
+}
+
+.voiceprint-row__temporal-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(253, 153, 58, 1);
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 16px;
+  color: rgba(255, 255, 255, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.voiceprint-hint {
+  width: 295px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: rgba(147, 152, 169, 1);
+  margin-top: 12px;
+  text-align: left;
+}
+
+.voiceprint-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  margin-top: 20px;
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn);
+  font-weight: 500;
+  line-height: var(--line-height-btn);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  & > .q-icon {
+    color: var(--clr-white);
+  }
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== VoiceprintPage DetailPage (修改声纹设置) page container, design d2a7b5f3 =====
+// Inner elements now live in VoiceNamingPanel (shared). See the
+// "===== VoiceNamingPanel (shared) patterns =====" block below.
+.voiceprint-detail-page {
+  background: #ffffff;
+  min-height: 100%;
+  padding: 120px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+// ===== VoiceNamingPanel (shared) patterns, designs d2a7b5f3 / affd466e =====
+// Shared "这是谁的声音" panel. Visual baseline is design d2a7b5f3 (DetailPage):
+// 88x88 central avatar (or icon fallback) → question label → 311x48 rounded
+// gray input box → relationship question → clickable relationship row →
+// audio preview (311 wide) → flex spacer → 311x56 r28 primary + secondary.
+.voice-naming-panel {
+  width: 100%;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.voice-naming-avatar {
+  width: 88px;
+  height: 88px;
+  margin-bottom: 12px;
+  object-fit: cover;
+
+  &--icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(32, 204, 249, 1);
+    object-fit: unset;
+  }
+}
+
+.voice-naming-question {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-text);
+  margin-top: 20px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.voice-naming-input-box {
+  width: 311px;
+  height: 48px;
+  border-radius: 8px;
+  background: rgba(245, 245, 245, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  &--clickable {
+    cursor: pointer;
+    justify-content: space-between;
+
+    &:hover .voice-naming-input {
+      color: rgba(64, 158, 255, 1);
+    }
+
+    .voice-naming-input {
+      flex: 1;
+      text-align: left;
+    }
+  }
+}
+
+.voice-naming-input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  text-align: center;
+
+  &--readonly {
+    line-height: 48px;
+  }
+}
+
+.voice-naming-relationship-chevron {
+  flex-shrink: 0;
+  color: var(--clr-placeholder);
+  pointer-events: none;
+}
+
+.voice-naming-audio {
+  width: 311px;
+  margin-top: 16px;
+  outline: none;
+}
+
+.voice-naming-spacer {
+  flex: 1 1 auto;
+  min-height: 24px;
+  width: 100%;
+}
+
+.voice-naming-primary-btn,
+.voice-naming-secondary-btn {
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border-radius: var(--btn-radius, 28px);
+  border: none;
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  color: var(--clr-white);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.9;
+  }
+}
+
+.voice-naming-primary-btn {
+  margin-top: 0;
+  background: var(--clr-btn-primary-bg);
+}
+
+.voice-naming-secondary-btn {
+  margin-top: 8px;
+
+  &--weak {
+    background: rgba(18, 14, 44, 1);
+  }
+
+  &--danger {
+    background: rgba(255, 93, 93, 1);
+  }
+}
+
+// ===== HomePage (首页) shared patterns =====
+// Design ed2b5fdd, 375×812 artboard. The canvas is fixed-size and centered
+// horizontally via `margin: 0 auto`, per user decision 2026-05 revised.
+// All inner (left, top, width, height) values are the raw-JSON authored px.
+
+.home-page {
+  position: relative;
+  min-height: 100%;
+  background: var(--home-bg-gradient);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+.home-canvas {
+  position: relative;
+  width: 375px;
+  height: 812px;
+  margin: 0 auto;
+}
+
+// --- Top nav (absolute within canvas, 0,0 375×90) ---
+.home-topnav {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 375px;
+  height: 90px;
+  pointer-events: auto;
+  // 设计稿顺序：消息 → 标题+设备切换 → 设置
+}
+
+.home-icon-msg {
+  position: absolute;
+  right: 20px;
+  top: 55px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.home-icon-msg-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: #e53935;
+  border-radius: 50%;
+}
+
+.home-title-row {
+  position: absolute;
+  left: 20px;
+  top: 53px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-robot-name {
+  font-family: var(--font-family);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  color: var(--clr-text);
+}
+
+.home-device-change {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.home-icon-robot-set {
+  position: absolute;
+  right: 52px;
+  top: 55px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.home-companion-days {
+  position: absolute;
+  left: 20px;
+  top: 89px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--clr-weak);
+}
+
+.home-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+// --- Hero (absolute) ---
+.home-hero {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 375px;
+  height: 580px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-hero-glow-warm {
+  position: absolute;
+  left: var(--home-glow-warm-left);
+  top: var(--home-glow-warm-top);
+  width: var(--home-glow-warm-size-w);
+  height: var(--home-glow-warm-size-h);
+  border-radius: 50%;
+  background: var(--home-glow-warm-gradient);
+  pointer-events: none;
+}
+
+.home-hero-glow-amber {
+  position: absolute;
+  left: var(--home-glow-amber-left);
+  top: var(--home-glow-amber-top);
+  width: var(--home-glow-amber-size-w);
+  height: var(--home-glow-amber-size-h);
+  border-radius: 50%;
+  background: var(--home-glow-amber-gradient);
+  pointer-events: none;
+}
+
+.home-hero-mascot {
+  position: absolute;
+  left: var(--home-mascot-left);
+  top: var(--home-mascot-top);
+  width: var(--home-mascot-w);
+  height: var(--home-mascot-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.home-mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+// Mascot 占位：设计稿暂无透明背景PNG切图时显示
+.home-mascot-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(255,214,158,0.35), rgba(255,180,120,0.2));
+  border: 2px dashed rgba(255,160,80,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+
+  .home-hero-mascot:hover & {
+    background: linear-gradient(145deg, rgba(255,214,158,0.5), rgba(255,180,120,0.35));
+  }
+}
+.home-mascot-placeholder-text {
+  font-size: 32px;
+  font-weight: 700;
+  color: rgba(255,140,50,0.6);
+  letter-spacing: 4px;
+}
+
+.home-hero-bubble {
+  position: absolute;
+  left: var(--home-bubble-left);
+  top: var(--home-bubble-top);
+  width: var(--home-bubble-w);
+  height: var(--home-bubble-h);
+  background: var(--clr-home-bubble-bg);
+  border: 1px solid var(--clr-home-bubble-border);
+  border-radius: var(--home-bubble-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  pointer-events: none;
+
+  // 气泡下方小三角（指向机器人头部，偏左）
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 28%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--clr-home-bubble-bg);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 28%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 9px solid var(--clr-home-bubble-border);
+  }
+}
+
+.home-bubble-line1,
+.home-bubble-line2 {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-home-bubble-text);
+  text-align: center;
+  margin: 0;
+}
+
+// --- Topics section (高频话题) ---
+// Design ed2b5fdd: white rounded-rect chip background, grid layout, icon + text per chip.
+// Chip bg shapes (矩形 1941/1950/1948/1951/1949/1952/1953): w varies, h=28px, rounded.
+// Row 1: 画画(74) 奥特曼(90) 猫咪(74) 过家家酒(103)
+// Row 2: 妈妈(74) 托托(74) 唱歌(47) ...(13)
+// Icon: 16×16 circular gradient with # glyph inside each chip.
+// Text: 14px Regular rgba(21,23,23,1).
+.home-topics {
+  position: absolute;
+  left: 20px;
+  top: 618px;
+  width: 335px;
+  z-index: 1;
+}
+
+.home-topics-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+}
+
+.home-topics-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+}
+
+.home-topics-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--clr-weak);
+  cursor: pointer;
+}
+
+.home-topics-history-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Layout: flex wrap with left-align, matching design screenshot row arrangement
+// Row1: 画画/猫咪/过家家酒 (3 chips), Row2: 奥特曼/妈妈/托托/... (4 items)
+// Gap ~16px horizontal, ~12px vertical (from design y positions)
+.home-topics-chips {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+// Each chip: white background, rounded corners, 28px height, #icon + text
+.home-topic-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  background: #fff;
+  border-radius: 14px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(21, 23, 23, 1);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.home-topic-chip-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// ... more indicator (设计稿: 14px rgba(35,35,35,1), no bg/icon)
+.home-topics-more {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(35, 35, 35, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+// --- Bottom tab bar overrides (MainFooter on mobile) ---
+.q-footer .q-tabs .q-tab__label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-tab);
+  font-weight: 400;
+  line-height: var(--line-height-tab);
+}
+
+.q-footer .q-tabs .q-tab:not(.q-tab--active):not(.q-tab--disabled) {
+  color: var(--clr-tab-inactive);
+}
+
+.q-footer .q-tabs .q-tab--disabled {
+  color: var(--clr-tab-inactive);
+  opacity: 0.7;
+}
+
+// ===== VoiceStylePage (乐宝设置-语音风格) patterns, design 4b20baad =====
+// Layout follows the neutral-bg + white-card pattern shared with SettingsPage
+// and VoiceprintPage. Two cards stacked: the top card hosts the current voice
+// style header and a rate slider; the bottom card lists selectable styles.
+//
+// All tokens below are extracted verbatim from the raw sketch JSON:
+//   artboard.fills[0]                 -> --clr-page-bg-neutral (已定义)
+//   矩形 1904 (20,108) 335×136      -> .voice-style-card (top)
+//   矩形 1903 (20,300) 335×338      -> .voice-style-card (bottom)
+//   矩形 2003 295×6 radius 4         -> slider track, grey rgba(209,216,219,1)
+//   矩形 2004 148×6                   -> slider fill, rgba(32,204,249,1)
+//   圆形 198 22×22 border cyan 2px  -> slider thumb
+//   Row height 69px (y-deltas 300→369→438→502→571)
+
+.voice-style-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.voice-style-card {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  align-self: center;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.voice-style-card--current {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.voice-style-current-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voice-style-current-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.voice-style-current-name {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.voice-style-rate-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.voice-style-rate-value {
+  color: var(--clr-text);
+  font-weight: 500;
+}
+
+.voice-style-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: var(
+    --voice-slider-thumb-size
+  ); // match thumb footprint so clicks anywhere on the row work
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+
+  // Track (Chromium/WebKit)
+  &::-webkit-slider-runnable-track {
+    height: var(--voice-slider-track-h);
+    border-radius: 4px;
+    // filled portion on the left comes from a linear-gradient driven by
+    // --voice-slider-pct (0..100) set inline on the element
+    background: linear-gradient(
+      to right,
+      var(--clr-voice-slider-fill) 0%,
+      var(--clr-voice-slider-fill) var(--voice-slider-pct, 0%),
+      var(--clr-voice-slider-track) var(--voice-slider-pct, 0%),
+      var(--clr-voice-slider-track) 100%
+    );
+  }
+
+  // Track (Firefox)
+  &::-moz-range-track {
+    height: var(--voice-slider-track-h);
+    border-radius: 4px;
+    background: var(--clr-voice-slider-track);
+  }
+
+  &::-moz-range-progress {
+    height: var(--voice-slider-track-h);
+    border-radius: 4px;
+    background: var(--clr-voice-slider-fill);
+  }
+
+  // Thumb (Chromium/WebKit)
+  &::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: var(--voice-slider-thumb-size);
+    height: var(--voice-slider-thumb-size);
+    border-radius: 50%;
+    background: var(--clr-voice-slider-thumb-bg);
+    border: 2px solid var(--clr-voice-slider-thumb-border);
+    margin-top: -8px; // center thumb on 6px track
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+  }
+
+  // Thumb (Firefox)
+  &::-moz-range-thumb {
+    width: var(--voice-slider-thumb-size);
+    height: var(--voice-slider-thumb-size);
+    border-radius: 50%;
+    background: var(--clr-voice-slider-thumb-bg);
+    border: 2px solid var(--clr-voice-slider-thumb-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+  }
+}
+
+.voice-style-section-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+  margin-top: 4px;
+}
+
+.voice-style-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--voice-style-row-height);
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  cursor: pointer;
+
+  & + & {
+    border-top: 1px solid rgba(147, 152, 169, 0.15);
+  }
+}
+
+.voice-style-mark {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+// ===== LanguagePage (乐宝设置-多语言) patterns, design d4baeedf =====
+// Single white card containing three rows (中文/Chinese, 英文/English,
+// 粤语/Cantonese). Values extracted verbatim from raw JSON:
+//   artboard.fills[0]                -> --clr-page-bg-neutral
+//   矩形 1903 (20,108) 335×198 r12   -> .device-lang-card
+//   text rows top 128/197/266        -> 69px row stride (3 rows × 66px)
+//   矩形 2025 295×1 fill = page bg   -> row divider
+//   标记 14×14 at left 321           -> .device-lang-mark (shared icon-check/radio PNG)
+
+.device-lang-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.device-lang-card {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  align-self: center;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.device-lang-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--device-row-height-lang); // 198px card height ÷ 3 rows
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--clr-text);
+  cursor: pointer;
+
+  & + & {
+    // Divider color = page bg per raw JSON 矩形 2025
+    border-top: 1px solid var(--clr-page-bg-neutral);
+  }
+
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.device-lang-mark {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+// ===== PersonalityPage (乐宝设置-未开启AI个性调节) patterns, design f001e23d =====
+// Empty state: single white card with one toggle row + 12px grey tip below.
+// Values from raw JSON:
+//   artboard.fills[0]                -> --clr-page-bg-neutral
+//   矩形 (20,108) 335×64 r12         -> .device-personality-card
+//   text "AI个性调节" size 15         -> .device-personality-row label
+//   tip (23,180) size 12 rgba(147,152,169,1) -> .device-personality-tip
+
+.device-personality-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.device-personality-card {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  align-self: center;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.device-personality-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--device-row-height-personality);
+  padding: 0 20px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.device-personality-tip {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  align-self: center;
+  margin: 0;
+  padding: 0 3px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--personality-hint-color);
+}
+
+.device-personality-detail-page {
+  // Design 31e9fabe / 31c5986a: neutral bg, top toggle card (reuses
+  // `.device-personality-card`), tip text, two labelled textareas, submit
+  // button. All dimensions extracted verbatim from raw sketch JSON:
+  //   artboard.fills[0]                 -> --clr-page-bg-neutral
+  //   矩形 1993 (20,252) 335×100 r12   -> .device-personality-textarea
+  //   矩形 1994 (20,466) 335×100 r12   -> .device-personality-textarea
+  //   矩形 1907 (32,666) 311×56 r28    -> .device-personality-submit
+  //   标签: w100 h40, 每行3个, 水平gap≈18px, 垂直gap=8px
+  //   标签到textarea间距=24px, textarea到下一标题间距=16px
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--personality-section-gap);
+  box-sizing: border-box;
+}
+
+.device-personality-section-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-text);
+  margin: 4px 0 0;
+  align-self: center;
+  width: 100%;
+  max-width: var(--device-card-max-w);
+}
+
+.device-personality-textarea {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  align-self: center;
+  height: var(--personality-textarea-h);
+  border: none;
+  border-radius: var(--personality-textarea-radius);
+  background: var(--clr-card-bg);
+  padding: 12px 20px;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-text);
+  outline: none;
+  resize: none;
+
+  &::placeholder {
+    color: var(--personality-hint-color);
+    font-weight: 400;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.device-personality-submit {
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  margin: auto auto 0;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== ChangePasswordPage (修改密码) patterns, design ec169e34 =====
+// Neutral background page with 3 borderless white rounded inputs stacked
+// vertically, error text below, and a primary button at the bottom.
+// All values extracted verbatim from raw JSON:
+//   artboard.fills[0]             -> --clr-page-bg-neutral (rgba(241,248,248,1))
+//   矩形 2013/2015/2016 (32,108/168/228) 311×48 r8 -> .cpw-input
+//   placeholder text 16px Regular rgba(147,152,169,1) -> --clr-placeholder
+//   error text 16px Regular rgba(255,93,93,1)         -> --clr-error
+//   矩形 1907 (32,318) 311×56 r28 品牌色/辅助色深紫 -> --clr-btn-primary-bg
+//   button text "提交修改并返回" 17px Medium white
+
+.change-password-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.cpw-container {
+  width: 311px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cpw-input-wrap {
+  position: relative;
+  width: 311px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--clr-card-bg);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  // Design ec169e34: NO border on inputs (borders[] is empty in raw JSON).
+  // White fill on neutral page bg provides natural visual separation.
+}
+
+.cpw-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  &::placeholder {
+    font-weight: 400;
+    color: var(--clr-placeholder);
+  }
+
+  &::-ms-reveal,
+  &::-ms-clear,
+  &::-webkit-password-toggle {
+    display: none;
+  }
+}
+
+.cpw-input--with-action {
+  padding-right: 44px; // leave room for eye icon (20px icon + 12px right margin + 12px gap)
+}
+
+.cpw-action-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cpw-error {
+  width: 100%;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-error);
+  text-align: left;
+}
+
+.cpw-submit {
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== FamilyGroupPage (家庭组设置) patterns, design 902f07b4 =====
+// Neutral background page with white rounded cards listing family groups,
+// and a primary button anchored near the bottom. Values from raw JSON:
+//   artboard.fills[0]               -> --clr-page-bg-neutral (rgba(241,248,248,1))
+//   矩形 1904/1905 (20,108/178) 335×62 r12 -> .family-group-card
+//   text 15px Regular lineHeight 22  -> card label
+//   矩形 1907 (32,715) 311×56 r28    -> .family-group-add-btn
+
+.family-group-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.family-group-card {
+  width: 335px;
+  height: 62px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  & + & {
+    margin-top: 8px;
+  }
+}
+
+.family-group-add-btn {
+  position: absolute;
+  bottom: 41px;
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== FamilyGroupDetailPage (xx的家庭组), design eb36a568 =====
+// 4 member cards 335×62 r12, rows show name (left, 15px Regular black) and
+// meta (right-align, 15px Regular rgba(147,152,169,1)) with 7×12 chevron.
+// Bottom primary button 311×56 r28 reuses .family-group-add-btn.
+.family-group-member-card {
+  width: 335px;
+  height: 62px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  padding: 0 16px 0 20px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  & + & {
+    margin-top: 8px;
+  }
+}
+
+.family-group-member-name {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.family-group-member-meta {
+  margin-left: auto;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+}
+
+.family-group-member-chevron {
+  flex-shrink: 0;
+  margin-left: 8px;
+  width: 7px;
+  height: 12px;
+}
+
+// ===== FamilyGroupMemberPage (成员信息), design 5d6d5199 =====
+// Single white card 335×302 r12 with 5 rows (称呼/性别/身份/生日/声纹),
+// left label 15px Regular black, right value 15px Regular caption color,
+// last row is clickable with a 7×12 chevron. Bottom danger button 335×56 r28.
+.family-member-info-card {
+  // Raw 5d6d5199 rect-1903: 335x302, 5 rows at y=128/188/248/308/368 relative
+  // to card top 108 -> padding 20 + row-height 22 + 4 gaps of 38 + padding 20.
+  width: 335px;
+  height: 302px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.family-member-info-row {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 22px;
+
+  // Raw: rows are 22px tall; gap between rows is 60-22 = 38px.
+  & + & {
+    margin-top: 38px;
+  }
+
+  &--clickable {
+    cursor: pointer;
+  }
+}
+
+.family-member-info-label {
+  font-weight: 400;
+  color: var(--clr-text);
+}
+
+.family-member-info-value {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--clr-caption);
+  text-align: right;
+}
+
+.family-member-info-chevron {
+  flex-shrink: 0;
+  margin-left: 8px;
+  width: 7px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-caption);
+}
+
+.family-member-delete-btn {
+  position: absolute;
+  bottom: 41px;
+  width: 335px;
+  height: var(--btn-height, 56px);
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-danger-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ===== FamilyGroupInvitePage (邀请成员), design 90de50b4 =====
+// Title "扫码加入家庭组" 15px Medium black at top 120, 240×240 r12 frame
+// centered with a 200×200 QR inside. Bottom tip "直接分享到微信聊天"
+// 14px Medium rgba(147,152,169,1) at top 679, primary button at top 703.
+.family-invite-title {
+  // Raw 90de50b4 text (137,120): header bottom 88 + 32 => margin-top 32.
+  margin-top: 32px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+  text-align: center;
+}
+
+.family-invite-qr-frame {
+  // Raw 90de50b4 rect-2131 (68,162): title bottom 142 + 20 => margin-top 20.
+  margin-top: 20px;
+  width: 240px;
+  height: 240px;
+  border-radius: var(--card-radius);
+  background: var(--clr-card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.family-invite-qr-placeholder {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-text);
+  background: var(--clr-white);
+}
+
+.family-invite-share-tip {
+  position: absolute;
+  bottom: 109px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-caption);
+  text-align: center;
+}
+
+// ===== ChildEditPage (修改/填写儿童信息), designs b7df1135 / c7826afa =====
+// Three questions stacked vertically with 17px Medium black headings
+// (你是男生还是女生？/ 你的名字是什么呢？/ 你的生日是哪一天？).
+// Gender row: two 100×100 circular avatars (boy/girl) with chip labels,
+// selected chip uses rgba(32,204,249,1) Medium, unselected uses caption color.
+// Two 311×48 r8 center-aligned input fields for name/birthday.
+// Primary button 311×56 r28 at top 574; optional skip button 311×56 at top 642
+// with light gray background and weak color text.
+.child-edit-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 0 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.child-edit-question {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+  text-align: left;
+
+  // Raw b7df1135 text (32,120): header bottom 88 + 32 => first question top 32.
+  &--first {
+    margin-top: 32px;
+  }
+
+  // Raw: gender-label bottom page-y = 276+22 = 298, Q2 page-y = 338 => 40px gap.
+  &--followup {
+    margin-top: 40px;
+  }
+}
+
+.child-edit-gender-row {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.child-edit-gender-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.child-edit-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--clr-card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.child-edit-gender-label {
+  // Raw: avatar bottom page-y 268, label page-y 276 => margin-top 8px.
+  margin-top: 8px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+  text-align: center;
+
+  &--active {
+    font-weight: 500;
+    color: var(--clr-link);
+  }
+}
+
+.child-edit-input {
+  // Raw: Q2 bottom 338+24=362 -> input1 page-y 374 => margin-top 12.
+  // Q3 bottom 462+24=486 -> input2 page-y 498 => margin-top 12.
+  margin-top: 12px;
+  width: var(--input-width, 311px);
+  height: var(--input-height, 48px);
+  border-radius: var(--input-radius, 8px);
+  background: var(--clr-input-bg);
+  border: 1px solid var(--clr-input-border);
+  align-self: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+  text-align: center;
+  outline: none;
+
+  &::placeholder {
+    font-weight: 400;
+    color: var(--clr-caption);
+  }
+
+  // Hide native date-picker indicator on WebKit while keeping the input clickable
+  &[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.child-edit-primary-btn {
+  // Raw b7df1135/c7826afa sym (32,586) 311x56 in 375x812 artboard =>
+  //   distance from page bottom = 812 - (586 + 56) = 170.
+  position: absolute;
+  bottom: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border: none;
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-btn-primary-bg);
+  color: var(--clr-white);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 500;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  // When there is no skip btn below, the primary btn still sits at the same
+  // raw position (170 from page bottom). Keep modifier for semantic override.
+  &--single {
+    bottom: 170px;
+  }
+}
+
+.child-edit-skip-btn {
+  // Raw c7826afa sym (32,653) 311x56, rect-2015 fill white + border 1.5px
+  // rgba(212,246,170,1), text rgba(99,104,104,1). Distance from page bottom
+  // = 812 - (653 + 56) = 103. Shares --clr-btn-weak-border-soft token with
+  // SetupProfilePanel skip btn (ed71eb82 rect-199:6282).
+  position: absolute;
+  bottom: 103px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--btn-width, 311px);
+  height: var(--btn-height, 56px);
+  border: 1.5px solid var(--clr-btn-weak-border-soft);
+  border-radius: var(--btn-radius, 28px);
+  background: var(--clr-white);
+  color: var(--clr-weak);
+  font-family: var(--font-family);
+  font-size: var(--font-size-btn, 17px);
+  font-weight: 400;
+  line-height: var(--line-height-btn, 24px);
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+// ===== SetupProfilePanel (完善个人信息) patterns, designs ed71eb82 / fb8d01d5 =====
+// Avatar (87×87 circular, 3px white border, fill rgba(229,229,239,1)), field rows
+// (label 15px Medium placeholder color +8px left-inset, value 15px Medium text
+// color), clickable rows using .auth-input-group + .auth-input-group--clickable
+// with a right chevron, and the relationship bottom-sheet (375×auto, 3-col
+// 100×40 r12 chip grid, 7 options: 爸爸/妈妈/爷爷/奶奶/外公/外婆/朋友).
+// Values extracted from raw JSON of artboards ed71eb82 and fb8d01d5.
+// Principle 10 override: skip button uses 1.5px soft-green rgba(212,246,170,1)
+// border via scoped .setup-profile-btn-skip (global --clr-btn-weak-border stays).
+
+.setup-profile-avatar-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+  cursor: pointer;
+}
+
+.setup-profile-avatar-circle {
+  width: 87px;
+  height: 87px;
+  border-radius: 50%;
+  background: rgba(229, 229, 239, 1);
+  border: 3px solid rgba(255, 255, 255, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.setup-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.setup-profile-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+}
+
+.setup-profile-field-row {
+  width: 311px;
+  margin-bottom: 12px;
+
+  // The hidden native date input should not inherit row flow
+  & > .setup-profile-date-hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // Suppress the global stack gap between consecutive .auth-input-group items
+  // when they are nested inside a field-row (we only render one per row).
+  .auth-input-group + .auth-input-group {
+    margin-top: 0;
+  }
+}
+
+.setup-profile-field-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-placeholder);
+  margin-bottom: 8px;
+  // Raw: label x=40, input x=32 => +8px label indent (ed71eb82)
+  padding-left: 8px;
+}
+
+.setup-profile-field-value {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+  padding-left: 16px;
+
+  &--placeholder {
+    font-weight: 400;
+    color: var(--clr-placeholder);
+  }
+}
+
+.setup-profile-field-arrow {
+  flex-shrink: 0;
+  width: 7px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+// Primary button layout offset specific to SetupProfilePanel (48px below last field).
+.setup-profile-btn-primary {
+  margin-top: 48px;
+}
+
+// Skip button scoped override (design ed71eb82 rect-199:6282).
+// Raw: 311×56 r28 fill #fff, border 1.5px solid rgba(212,246,170,1) — diverges
+// from global --clr-btn-weak-border rgba(33,186,69,1) 1px. Scoped to this class
+// so SignInOrSignUpPanel and other .auth-btn-weak consumers keep global token.
+.setup-profile-btn-skip {
+  border: 1.5px solid var(--clr-btn-weak-border-soft);
+}
+
+// Relationship bottom sheet (design fb8d01d5, 375×auto white round-top panel,
+// 3-col grid of 100×40 rounded chips; active chip uses primary bg + white text).
+.setup-profile-relation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  // Raw fb8d01d5 rect-190:6333: fill rgba(0,0,0,1) * opacity 0.5
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.setup-profile-relation-sheet {
+  width: 375px;
+  max-height: 60vh;
+  background: var(--clr-white, #fff);
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: setupProfileSheetSlideUp 0.25s ease-out;
+}
+
+@keyframes setupProfileSheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.setup-profile-relation-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 32px 16px;
+  position: relative;
+}
+
+.setup-profile-relation-title {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+}
+
+.setup-profile-relation-body {
+  padding: 16px 20px 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 40px);
+  gap: 12px;
+  overflow-y: auto;
+  // Design fb8d01d5: 3 rows of chips, row 3 only has 2 chips (left-aligned)
+}
+
+.setup-profile-relation-chip {
+  width: 100px;
+  height: 40px;
+  // Raw fb8d01d5 rect-190:6337: cornerRadius 12, border #E5E5EF 1px
+  border-radius: 12px;
+  border: 1px solid rgba(229, 229, 239, 1);
+  background: rgba(255, 255, 255, 1);
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: rgba(21, 23, 23, 1);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(32, 204, 249, 0.04);
+  }
+
+  &--active {
+    background: rgba(18, 14, 44, 1);
+    border-color: rgba(18, 14, 44, 1);
+    color: rgba(255, 255, 255, 1);
+  }
+}
+
+// ===== Voiceprint Recording module patterns, designs =====
+//   e545d325 (什么是声纹 intro) / affd466e (这是谁的声音 naming)
+//   4e6ad306 (录制准备 tips)       / 1ed5ff10 (朗读短语 recording)
+// All four artboards share the 375×812 iPhone frame with "声纹录制" nav title
+// (17px Medium, rgba(21,23,23,1)). Body font stack inherits --font-family.
+// Primary button reuses global .auth-btn-primary (311×56 r28 dark-indigo).
+//
+// Page background fix (2026-05): the neutral cyan-tinted background MUST live
+// on the `<q-page>` (`.voiceprint-record-page`) so it tiles full-screen. The
+// inner stage class (`.voiceprint-record-stage`) only owns flex layout and
+// padding so q-tab-panel default padding doesn't double up.
+
+.voiceprint-record-page {
+  min-height: 100%;
+  box-sizing: border-box;
+  background: var(--clr-page-bg-neutral, rgba(241, 248, 248, 1));
+  font-family: var(--font-family);
+  display: flex;
+  flex-direction: column;
+
+  // Quasar's q-tab-panels wraps content in .q-tab-panels > .q-panel > .q-tab-panel.
+  // The middle .q-panel keeps a default white background, which masks the page
+  // tinted background only inside the panel area. Force all three layers to be
+  // transparent so .voiceprint-record-page bg shows full-screen.
+  .q-tab-panels,
+  .q-panel,
+  .q-tab-panel {
+    background: transparent;
+  }
+}
+
+.voiceprint-record-stage {
+  flex: 1 1 auto;
+  min-height: 100%;
+  padding: 0 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  background: transparent;
+}
+
+// Page heading (20px Medium, rgba(48,49,51,1)) used on 录制准备 and 朗读短语 pages.
+.voiceprint-record-page-title {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  color: rgba(48, 49, 51, 1);
+  text-align: center;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  align-self: stretch;
+}
+
+// "跳过" link in the nav bar (design e545d325; 14px Medium placeholder color).
+.voiceprint-record-nav-skip {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-placeholder);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+// Info section used by intro (e545d325) and tips (4e6ad306) pages: 32×32 icon on
+// the left, title + description stacked on the right. 295/291 width in design, we
+// use 311 to align with the primary button width for visual rhythm.
+.voiceprint-record-section {
+  width: 311px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.voiceprint-record-section-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(32, 204, 249, 1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  // Lanhu slices for design 4e6ad306 (录制准备) tip rows.
+  &--quiet {
+    background-image: url('../assets/lanhu/voiceprint/prepare-quiet.webp');
+  }
+  &--natural {
+    background-image: url('../assets/lanhu/voiceprint/prepare-natural.webp');
+  }
+  &--distance {
+    background-image: url('../assets/lanhu/voiceprint/prepare-distance.webp');
+  }
+}
+
+.voiceprint-record-section-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.voiceprint-record-section-title {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: rgba(21, 23, 23, 1);
+  margin: 0 0 12px;
+}
+
+.voiceprint-record-section-desc {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-text-secondary);
+  margin: 0;
+}
+
+// Naming page (affd466e): 88×88 central icon + headline (17px Regular) +
+// placeholder text (15px Regular) + 311×48 text input.
+.voiceprint-record-voice-icon {
+  width: 88px;
+  height: 88px;
+  margin: 40px 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(32, 204, 249, 1);
+}
+
+.voiceprint-record-voice-headline {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 24px;
+  color: rgba(21, 23, 23, 1);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.voiceprint-record-voice-hint {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-placeholder);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+// Reading-phrase page (1ed5ff10 / 10d09505): pet stage + phrase text + waveform strip.
+// Design 10d09505 (声纹录制4) has a 120×120 rounded-rect background (rgba(255,245,223,1)
+// radius 20) behind the 108×115 aipet visual, plus a 70×70 recording pulse ring below
+// the waveform. The pulse ring consists of:
+//   - 外环 (圆形 229): 70×70, border 3px rgba(227,227,227,1) gray
+//   - 内圆 (圆形 230): 64×64, fill rgba(255,87,69,1) red, border 3px white
+.voiceprint-record-pet-stage {
+  width: 120px;
+  height: 120px;
+  margin: 24px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 20px;
+  background: rgba(255, 245, 223, 1);
+  overflow: hidden;
+}
+
+.voiceprint-record-pet-img {
+  width: 108px;
+  height: 115px;
+  object-fit: contain;
+}
+
+.voiceprint-record-phrase {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 24px;
+  color: rgba(48, 49, 51, 1);
+  text-align: center;
+  margin-bottom: 12px;
+  padding: 0 16px;
+}
+
+// Waveform strip: 21 bars of 4px width on a 204px wide container.
+// Bar color rgba(32, 204, 249, 1) (accent link blue) with rounded corners.
+// Design 1ed5ff10 emphasises the centre with bars of 15/23/15 px (idx 10/11/12).
+.voiceprint-record-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 204px;
+  height: 23px;
+  margin: 8px 0 16px;
+}
+
+.voiceprint-record-wave-bar {
+  width: 4px;
+  height: 7px;
+  border-radius: 2px;
+  background: rgba(32, 204, 249, 1);
+  transform-origin: center;
+  animation: voiceprintWaveBar 1s ease-in-out infinite;
+}
+
+.voiceprint-record-wave-bar:nth-child(11) {
+  height: 23px;
+}
+.voiceprint-record-wave-bar:nth-child(10),
+.voiceprint-record-wave-bar:nth-child(12) {
+  height: 15px;
+}
+
+// Staggered delays so the bars breathe in a wave pattern (mimics design pattern).
+.voiceprint-record-wave-bar:nth-child(3n) {
+  animation-delay: 0.15s;
+}
+.voiceprint-record-wave-bar:nth-child(3n + 1) {
+  animation-delay: 0.3s;
+}
+.voiceprint-record-wave-bar:nth-child(3n + 2) {
+  animation-delay: 0.45s;
+}
+
+@keyframes voiceprintWaveBar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+// Recording pulse ring (组 366 from design 10d09505):
+// Outer ring 70×70 gray border, inner circle 64×64 red fill + white border.
+// Represents the "recording" indicator; placed below the waveform.
+.voiceprint-record-pulse-ring {
+  width: 70px;
+  height: 70px;
+  margin: 24px 0 16px;
+  border-radius: 50%;
+  border: 3px solid rgba(227, 227, 227, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.voiceprint-record-pulse-ring--recording {
+  border-color: rgba(255, 87, 69, 1);
+  animation: voiceprintRecordPulse 1.2s ease-in-out infinite;
+}
+
+.voiceprint-record-pulse-ring--recording .voiceprint-record-pulse-inner {
+  background: rgba(200, 50, 30, 1);
+}
+
+@keyframes voiceprintRecordPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 87, 69, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(255, 87, 69, 0);
+  }
+}
+
+.voiceprint-record-pulse-inner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 87, 69, 1);
+  border: 3px solid rgba(255, 255, 255, 1);
+}
+
+// Read icon (容器 2619 from design 10d09505): 24×24 read icon slice.
+.voiceprint-record-read-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 56px;
+  object-fit: contain;
+}
+
+// Audio playback UI after recording.
+.voiceprint-record-playback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 16px;
+  padding: 0 32px;
+}
+
+.voiceprint-record-playback-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 87, 69, 1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: white;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(200, 50, 30, 1);
+  }
+}
+
+.voiceprint-record-progress {
+  flex: 1;
+  height: 4px;
+  background: rgba(227, 227, 227, 1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.voiceprint-record-progress-bar {
+  height: 100%;
+  background: rgba(255, 87, 69, 1);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.voiceprint-record-reset-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(48, 49, 51, 0.3);
+  border-radius: 16px;
+  font-size: 14px;
+  color: rgba(48, 49, 51, 0.7);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: rgba(48, 49, 51, 0.5);
+    color: rgba(48, 49, 51, 1);
+  }
+}
+
+// Primary button anchored at the bottom of the recording screens.
+.voiceprint-record-cta {
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+// Audio preview element used inside SubmitPanel — clamp to input width so it
+// doesn't overflow the 32px stage padding on wider viewports.
+.voiceprint-record-audio {
+  width: 311px;
+  max-width: 100%;
+  margin: 0 0 16px;
+}
+
+// q-select borderless rendered inside .auth-input-group needs vertical
+// centering inside the 48px shell (its native control is shorter).
+.auth-input-group .voiceprint-record-relation {
+  width: 100%;
+  padding: 0 16px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--clr-text);
+}
+
+// ===== ChatPage (聊天页) patterns, design a2096a64 =====
+// 375×812 artboard (artboard.fills[0] = rgba(241.22,248.93,248.16,1) which
+// matches --clr-page-bg-neutral rgba(241,248,248,1) within 1/255 tolerance).
+// The canvas is fixed-size and centered horizontally (matches HomePage
+// strategy). Bubbles flow top-down inside a scrollable list bounded by the
+// nav (top 88) and the input bar (bottom 24 + 48 + safe area). The
+// decorative hero group (组 385, realFrame 374×367 @ left:1 top:88) sits
+// behind the list at opacity 0.3 so early-conversation bubbles feel
+// anchored to the mascot.
+//
+// Raw-derived tokens:
+//   artboard fill           -> --clr-page-bg-neutral (shared)
+//   组 385 opacity          -> --chat-hero-opacity: 0.3
+//   乐宝正面 frame          -> 230×334 @ left:73 top:118 (on artboard);
+//                              inside hero container that starts at top:88,
+//                              mascot top becomes 118-88 = 30.
+//   矩形 1904/1908/1906/1910 (AI bubbles) fills[0] -> rgba(255,255,255,1)
+//   矩形 1903/1909/1905 (User bubbles) fills[0]    -> rgba(39.3,145.4,233.75,1)
+//                                                     ≈ rgba(39,145,234,1)
+//   矩形 1907 (input bar) frame -> 335×48 @ left:20 top:740, radius 12,
+//                                  fills[0] = rgba(255,255,255,1)
+//   bubble / input radius    -> 12 (rect.radius.topLeft=12 on all)
+// Text color tokens reuse --clr-text for AI and white for user (raw has no
+// type:text layer — typography renders as paths; colors derived from
+// Quasar theme and ChatMessageItem.vue authoring comment).
+//
+// NOTE (Principle 10 — code enhancement beyond raw):
+//   * 组 385 raw has empty fills; the radial-gradient on .chat-page__hero-bg
+//     is a code enhancement to soften the mascot silhouette area. Kept
+//     behind --chat-hero-bg-gradient so it can be removed without touching
+//     selectors.
+//   * Raw bubbles and input bar carry no shadows (shadows: []). The
+//     drop-shadows here are code enhancements for layer separation and are
+//     flagged below in tokens.md.
+
+:root {
+  // Hero decoration (组 385)
+  --chat-hero-opacity: 0.3;
+  --chat-hero-top: 88px;
+  --chat-hero-h: 367px;
+  --chat-hero-bg-gradient: radial-gradient(
+    closest-side at 50% 45%,
+    rgba(224, 240, 255, 1) 0%,
+    rgba(224, 240, 255, 0) 100%
+  );
+  --chat-hero-mascot-w: 230px;
+  --chat-hero-mascot-h: 334px;
+  --chat-hero-mascot-left: 73px;
+  --chat-hero-mascot-top: 30px; // = raw mascot top 118 - hero top 88
+
+  // Bubbles (AI / User)
+  // Design a2096a64: AI text = white (#FFFFFF), User text = blue (#2791EA)
+  --chat-bubble-radius: 12px;
+  --chat-bubble-max-w: 295px; // implementation bound; raw widest AI = 335, user = 214
+  --chat-bubble-gap: 16px;
+  --chat-list-padding-x: 20px;
+  --chat-list-padding-top: 16px;
+  --chat-list-padding-bottom: 24px;
+  --chat-ai-bg: transparent; // no bubble bg — text overlays directly on robot area
+  --chat-ai-color: rgba(255, 255, 255, 1); // AI text: white (设计稿)
+  --chat-user-bg: transparent; // no bubble bg
+  --chat-user-color: rgba(39, 145, 234, 1); // User text: blue (设计稿 #2791EA)
+
+  // Input bar (矩形 1907)
+  --chat-input-bar-w: 335px;
+  --chat-input-bar-h: 48px;
+  --chat-input-bar-left: 20px;
+  --chat-input-bar-bottom: 24px;
+  --chat-input-bg: rgba(255, 255, 255, 1);
+  --chat-input-pressing-bg: rgba(224, 240, 255, 1);
+  --chat-input-bar-shadow: 0 2px 12px rgba(18, 14, 44, 0.06); // code-enhanced
+}
+
+.chat-page {
+  position: relative;
+  width: 375px;
+  height: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+  background: var(--clr-page-bg-neutral);
+  overflow: hidden;
+}
+
+// Hero decoration (组 385, opacity 0.3). Covers the upper 374×367 region
+// under the nav and behind the bubble list. Pointer-events none so taps
+// pass through to the bubbles.
+// Design a2096a64: uses img_lebot_bg_chat (transparent robot + yellow circle)
+.chat-page__hero {
+  position: absolute;
+  left: 0;
+  top: var(--chat-hero-top);
+  width: 375px;
+  height: var(--chat-hero-h);
+  opacity: var(--chat-hero-opacity);
+  pointer-events: none;
+  overflow: hidden;
+  background: url('../assets/lanhu/chat/img-1.png') center / contain no-repeat;
+}
+
+.chat-page__hero-bg {
+  // Replaced by img-1.png background on .chat-page__hero itself
+  display: none;
+}
+
+.chat-page__hero-mascot {
+  // Replaced by img-1.png which includes the robot image
+  display: none;
+}
+
+// Scrollable bubble list. Absolute inside the canvas so the decorative
+// layer underneath stays fixed while messages scroll on top of it.
+.chat-page__list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--chat-hero-top);
+  bottom: 88px;
+  padding: var(--chat-list-padding-top) var(--chat-list-padding-x) var(--chat-list-padding-bottom);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--chat-bubble-gap);
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  // Hide native scrollbar — mobile-first design, no track needed.
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.chat-page__empty {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 40px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-weak);
+  text-align: center;
+}
+
+// --- Bubbles ---
+// AI bubble: left-aligned, 335px max (matches 矩形 1904/1908/1906 width).
+// User bubble: right-aligned, hugs content (192–214px range observed).
+.chat-bubble {
+  max-width: var(--chat-bubble-max-w);
+  padding: 12px 16px;
+  border-radius: var(--chat-bubble-radius);
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  word-break: break-word;
+  white-space: pre-wrap;
+  box-shadow: var(--chat-bubble-shadow);
+}
+
+.chat-bubble--ai {
+  align-self: flex-start;
+  background: var(--chat-ai-bg);
+  color: var(--chat-ai-color); // white text for AI (设计稿)
+}
+
+.chat-bubble--user {
+  align-self: flex-end;
+  background: var(--chat-user-bg);
+  color: var(--chat-user-color); // blue text for user (设计稿 #2791EA)
+}
+
+.chat-bubble__typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+}
+
+.chat-bubble__typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  animation: chat-typing-dot 1.2s ease-in-out infinite;
+
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes chat-typing-dot {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+// --- Input bar (矩形 1907 @ left:20 top:740, 335×48, radius 12) ---
+.chat-input-bar {
+  position: absolute;
+  left: var(--chat-input-bar-left);
+  bottom: var(--chat-input-bar-bottom);
+  width: var(--chat-input-bar-w);
+  height: var(--chat-input-bar-h);
+  padding: 0;
+  border: none;
+  border-radius: var(--chat-bubble-radius);
+  background: var(--chat-input-bg);
+  box-shadow: var(--chat-input-bar-shadow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+.chat-input-bar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-input-bar--pressing {
+  background: var(--chat-input-pressing-bg);
+  transform: scale(0.985);
+}
+
+.chat-input-bar__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-text);
+}
+
+// --- StackHeader action buttons (shared across pages that declare
+// `route.meta.headerActions`). Icons render inside 24×24 boxes via the
+// `lanhu:<subdir>/<file>` convention resolved in StackHeader.vue. ---
+.stack-header-actions {
+  gap: 20px;
+}
+
+.stack-header-action {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  min-width: 24px;
+  min-height: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+
+.stack-header-action--chat-mute {
+  // 未静音（开启朗读）状态
+  background-image: url('../assets/lanhu/chat/icon-mute-design.png');
+}
+
+.stack-header-action--chat-mute-muted {
+  // 已静音（关闭朗读）状态
+  background-image: url('../assets/lanhu/chat/icon_mute.png');
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    background-image: url('../assets/lanhu/chat/icon_mute@2x.png');
+  }
+  @media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+    background-image: url('../assets/lanhu/chat/icon_mute@3x.png');
+  }
+}
+
+.stack-header-action--chat-call {
+  background-image: url('../assets/lanhu/chat/icon-call-design.png');
+}
+
+.stack-header-action--chat-text-toggle {
+  // Design: "字" toggle icon (circle + 字 text + check mark)
+  background-image: url('../assets/lanhu/chat/icon_text_open_nav_chat@3x.png');
+}
+
+.stack-header-action--chat-text-toggle-off {
+  // 文字模式关闭时：降低透明度表示未激活
+  opacity: 0.35;
+}
+
+// ===== MessagesPage (消息页) patterns, design 5f6208e5 =====
+// Neutral page background with 4 independent white rounded cards stacked
+// vertically with 12px gap. Raw 5f6208e5 shows shapeLayer (20,108/192/276/360)
+// each 335×72 r12 — 108+72=180, next card starts at 192 → gap=12.
+//   行卡 335×72 r12                 -> .messages-row (each row IS a card)
+//   图标 48×48 at (32, top+12)      -> .messages-row__icon, padding-left 12
+//   标题 15px Medium rgba(21,23,23,1)-> .messages-row__title
+//   内容 12px Regular rgba(74,74,74,1) -> .messages-row__content
+//   日期 12px Regular rgba(147,152,169,1) right -> .messages-row__date
+//   红点 4×4 rgba(255,92,92,1)       -> .messages-row__dot
+
+.messages-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px; // Raw: 4 cards with 12px gap between them
+  box-sizing: border-box;
+}
+
+// ===== MessagesPage Nav Bar (design 5f6208e5 / a75fd4bb 容器2602) =====
+// Default state (5f6208e5): "消息" title centered + icon_delete_nav (24×24) right-aligned
+// Editing state (a75fd4bb): "消息" title centered + "完成" text button right-aligned
+.messages-nav {
+  width: 100%;
+  max-width: 335px;
+  height: 44px; // Raw nav container h=44
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.messages-nav__title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500; // Medium
+  line-height: 24px;
+  color: var(--clr-text); // #151717
+}
+
+// Shared base for both nav action buttons (delete icon / done text)
+.messages-nav__action {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+// Delete icon in nav bar — design 5f6208e5: icon_delete_nav (24×24) inside msg_icon_set
+.messages-nav__delete-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.messages-nav__delete-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+// "完成" text button in editing mode — design a75fd4bb: 15px Medium rgba(255,92,92,1)
+.messages-nav__done {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500; // Medium
+  line-height: 22px;
+  color: var(--clr-danger-bg); // rgba(255,92,92,1)
+}
+
+// .messages-card is now a transparent wrapper (keeps DOM structure flexible).
+.messages-card {
+  width: 335px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.messages-row {
+  width: 335px;
+  height: 72px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 0 12px; // Raw: icon x=32 (card x=20) => padding-left 12
+  cursor: pointer;
+  transition: background 0.15s;
+  box-sizing: border-box;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.messages-row__icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.messages-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messages-row__title {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--clr-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages-row__content {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: rgba(74, 74, 74, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages-row__aside {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.messages-row__date {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--clr-caption);
+}
+
+.messages-row__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--clr-danger-bg); // Raw rgba(255,92,92,1) ≡ --clr-danger-bg
+}
+
+// Delete button (design a75fd4bb 组394): 20×20 circle with minus icon (矩形2136 12×2px)
+// Shown when isEditing = true. Circle bg uses subtle neutral tone.
+.messages-row__delete {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06); // Design 圆形255 fill
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--clr-text);
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  &:active {
+    background: rgba(0, 0, 0, 0.12);
+  }
+}
+
+// Editing state: reduce row opacity slightly to indicate edit mode
+.messages-row--editing {
+  // No style change needed — delete button visibility handles the affordance
+}
+
+.messages-empty {
+  margin-top: 120px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+  text-align: center;
+}
+
+// ===== ActivityMessagesPage (活动消息) patterns, design a4b42889 =====
+// Raw JSON verified:
+//   Page: 375 width, title "活动消息" 17px Medium #151717
+//   Card: 335x221px, inner image area 319x149px (centered in card)
+//   Title: 14px/24px Regular #151717 left-aligned at padding-left ~16px (raw x=36 relative to container)
+//   Date: 12px/16px Regular rgba(147,152,169,1) opacity 80%
+//   "查看详情": 12px/16px Regular rgba(147,152,169,1) right-aligned
+
+.activity-messages-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.activity-messages-list {
+  width: 335px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; // Raw: cards spaced vertically (top=260, next top=493 → gap≈233, use 16)
+}
+
+.activity-card {
+  width: 335px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-sizing: border-box;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.activity-card__image {
+  width: 100%;
+  height: 149px; // Raw: inner image 319x149px inside 335px card → full-width with horizontal centering
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.activity-card__img {
+  width: 319px;
+  height: 149px;
+  object-fit: cover;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+.activity-card__placeholder {
+  width: 319px;
+  height: 149px;
+  background: linear-gradient(135deg, rgba(216, 244, 255, 1), rgba(225, 255, 242, 1));
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+.activity-card__info {
+  padding: 16px; // Raw: title at y=273, card starts at y=252+221? Actually card is 221px total. Image 149 + info = 72px
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-card__title {
+  font-family: var(--font-family);
+  font-size: 14px; // Raw: size 14
+  font-weight: 400; // Raw: Regular
+  line-height: 24px; // Raw: lineHeight 24
+  color: rgba(21.000000648200512, 23.000000528991222, 23.000000528991222, 1); // Raw #151717
+}
+
+.activity-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-card__date,
+.activity-card__detail {
+  font-family: var(--font-family);
+  font-size: 12px; // Raw: size 12
+  font-weight: 400; // Raw: Regular
+  line-height: 16px; // Raw: lineHeight 16
+  color: rgba(147.00000643730164, 152.0000061392784, 169.00000512599945, 1); // Raw #9398A9
+  opacity: 0.8; // Raw: opacity-80 class on date element
+}
+
+// ===== OrdersPage (我的订单) patterns, design 64595f70 =====
+// Neutral page bg; top 5-item tab row (active 17px Medium rgba(48,49,51,1),
+// inactive 14px Regular rgba(96,98,102,1)); body is a vertical list of order
+// cards. Values from raw JSON:
+//   tab 全部(x=22,y=106) 17px Medium rgba(48,49,51,1)
+//   tab 其他(y=108)       14px Regular rgba(96,98,102,1)
+//   订单卡片 335 r12, padding 16, gap 12, 商品图 64×64 占位
+//   商品名 15px rgba(21,23,23,1) (2 行省略)
+//   规格 12px rgba(147,152,169,1)
+//   价格 15px Medium rgba(21,23,23,1)
+//   操作按钮 14px 高 31 r16 1px border rgba(147,152,169,1)
+
+.orders-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 0 0 20px;
+  box-sizing: border-box;
+}
+
+.orders-tabs {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 20px;
+  background: var(--clr-card-bg);
+}
+
+.orders-tab {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(96, 98, 102, 1);
+  cursor: pointer;
+  padding: 2px 0;
+  transition: color 0.15s;
+
+  &:hover {
+    color: rgba(48, 49, 51, 1);
+  }
+}
+
+.orders-tab--active {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: rgba(48, 49, 51, 1);
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 20px 0;
+  box-sizing: border-box;
+}
+
+.orders-card {
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.orders-product {
+  display: flex;
+  gap: 12px;
+}
+
+.orders-product__img {
+  // Raw 64595f70 矩形 1985: 88×88 at (28, card_top+16). Design shows a square
+  // product thumb that is noticeably larger than other pages' 64px avatars.
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(241, 243, 246, 1);
+  object-fit: cover;
+}
+
+.orders-product__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orders-product__name {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.orders-product__variant {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--clr-caption);
+}
+
+.orders-product__price {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.orders-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orders-action-btn {
+  // Raw 64595f70 矩形 1987/1988/1989: 64×24 with 1px border, not pill-shaped.
+  // corner is ~4 (unspecified in raw), keep 12 for softer feel per Principle 10.
+  min-width: 64px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(203, 203, 203, 1);
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--clr-caption);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.orders-action-btn--primary {
+  // Raw: primary action (e.g. 再次购买) uses rgba(32,204,249,1) stroke + text.
+  border-color: var(--clr-link);
+  color: var(--clr-link);
+}
+
+.orders-empty {
+  margin-top: 120px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+  text-align: center;
+}
+
+// ===== HelpPage (帮助与反馈) patterns, design 689263cd =====
+// Neutral page bg with 2 stacked white cards. Top card 335×62 with a
+// single row (常见问题, 15px Regular + chevron). Body card 335×310 with 5
+// rows. Values from raw JSON:
+//   矩形 1902 335×62 r12 (20,108)  -> .help-card-head
+//   矩形 1903 335×310 r12 (20,182) -> .help-card-body (padding 20, row h 22,
+//                                      4 gaps of 40 → 20 + 5×22 + 4×40 + 20 = 310)
+//   labels 15px Regular rgba(21,23,23,1) left=40
+//   values 15px Regular rgba(32,204,249,1) right-aligned (both phone & email)
+//   chevron 7×12 rgba(21,23,23,1)
+
+.help-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.help-card-head {
+  width: 335px;
+  height: 62px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-sizing: border-box;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.help-card-body {
+  // Raw: 335×310 r12, padding 20 + 5 rows 22h + 4 gaps 40.
+  width: 335px;
+  height: 310px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.help-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  line-height: 22px;
+  cursor: pointer;
+
+  // Raw: 5 rows at y=202/264/326/388/450 → gap = 62-22 = 40 between rows.
+  & + & {
+    margin-top: 40px;
+  }
+}
+
+.help-row__label {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-text);
+}
+
+.help-row__value {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  // Raw 689263cd: both 客服电话 & 邮箱 values use rgba(32,204,249,1) = link color.
+  color: var(--clr-link);
+}
+
+.help-row__value--link {
+  color: var(--clr-link);
+}
+
+.help-row__chevron {
+  width: 12px;
+  height: 12px;
+  // Raw: chevron fill rgba(21,23,23,1) = --clr-text (not caption).
+  color: var(--clr-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ===== AboutPage (关于我们) patterns, design 897ffb14 =====
+// White page bg (artboard fill rgba(255,255,255,1)) with a centered
+// 15px Regular "公司简介" title (top=120 per artboard) followed by a 14px
+// long paragraph at (28, 152), 319×462. Values from raw JSON:
+//   artboard fill rgba(1,1,1,1) ≡ rgba(255,255,255,1) → bg white (not neutral)
+//   title 15px Regular rgba(21,23,23,1) center
+//   body  14px Regular rgba(99,104,104,1) lineHeight 24 padding 28px
+
+.about-page {
+  // Raw: fill rgba(1,1,1,1) normalized = rgba(255,255,255,1) pure white.
+  background: var(--clr-white);
+  min-height: 100%;
+  padding: 0 28px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.about-section-title {
+  // Raw text (156,120) 64×20: 15px Regular, page-y 120 = header 88 + 32.
+  margin-top: 32px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--clr-text);
+  text-align: center;
+}
+
+.about-body {
+  // Raw text (28,152): title bottom 140 + 12 → margin-top 12.
+  margin-top: 12px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-weak);
+  white-space: pre-wrap;
+}
+
+// ===== ConfirmDialog (shared) — design 33aebf1c raw JSON verified =====
+// Raw JSON paths[].radius (弹框背景矩形): topLeft/topRight/bottomLeft/bottomRight = 32px
+// Raw JSON 取消/确定按钮 paths[].radius (按钮背景矩形): 四角 = 20px
+.confirm-dialog {
+  width: var(--dialog-width);
+  border-radius: var(--dialog-radius) !important;
+  background: var(--clr-dialog-bg);
+  padding: var(--dialog-padding-top) var(--dialog-padding-x) var(--dialog-padding-bottom);
+
+  &__title {
+    font-family: var(--font-family);
+    font-size: var(--dialog-title-size);
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--clr-dialog-title);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  &__body {
+    font-family: var(--font-family);
+    font-size: var(--dialog-body-size);
+    font-weight: 400;
+    line-height: var(--dialog-body-line-height);
+    color: var(--clr-dialog-body);
+    text-align: center;
+    margin-bottom: 24px;
+    white-space: pre-line;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--dialog-btn-gap);
+    justify-content: center;
+  }
+
+  &__btn {
+    width: var(--dialog-btn-width);
+    height: var(--dialog-btn-height);
+    flex: none;
+    border-radius: var(--dialog-btn-radius) !important;
+    border: none;
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &__btn--cancel {
+    background: var(--clr-dialog-btn-cancel-bg);
+    color: var(--clr-dialog-btn-cancel-text);
+  }
+
+  // danger 模式下：confirm 按钮显示为白底+边框的"确定"按钮（设计稿右侧按钮）
+  &__btn--danger {
+    background: var(--clr-dialog-btn-confirm-bg);
+    color: var(--clr-dialog-btn-confirm-text);
+    border: 1px solid rgba(18.000000827014446, 14.000000115484, 44.000001177191734, 1);
+  }
+
+  &__btn--primary,
+  &__btn--confirm {
+    background: var(--clr-dialog-btn-confirm-bg);
+    color: var(--clr-dialog-btn-confirm-text);
+    border: 1px solid rgba(18.000000827014446, 14.000000115484, 44.000001177191734, 1);
+  }
+
+  &__btn--link {
+    background: var(--clr-dialog-btn-link-bg);
+    color: var(--clr-dialog-btn-link-text);
+  }
+}
+
+// ===== Splash page =====
+.splash-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--splash-bg);
+  padding: 0 40px;
+
+  &__logo {
+    width: var(--splash-logo-size);
+    height: var(--splash-logo-size);
+    object-fit: contain;
+    margin-bottom: 24px;
+  }
+
+  &__slogan {
+    font-family: var(--font-family);
+    font-size: var(--splash-slogan-size);
+    font-weight: 500;
+    line-height: 28px;
+    color: var(--clr-splash-slogan);
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  &__progress-track {
+    width: 200px;
+    height: var(--splash-progress-h);
+    border-radius: var(--splash-progress-radius);
+    background: var(--clr-splash-progress-bg);
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    border-radius: var(--splash-progress-radius);
+    background: var(--clr-splash-progress-fill);
+    transition: width 0.3s ease;
+  }
+}
+
+// ===== Chat history page =====
+.chat-history-page {
+  padding: 16px 20px;
+  background: var(--clr-page-bg-neutral);
+
+  &__search {
+    height: var(--chat-history-search-h);
+    border-radius: var(--chat-history-search-radius);
+    background: var(--clr-chat-history-search-bg);
+    border: none;
+    padding: 0 16px;
+    font-family: var(--font-family);
+    font-size: 14px;
+    color: var(--clr-text);
+    outline: none;
+    width: 100%;
+    margin-bottom: 16px;
+
+    &::placeholder {
+      color: var(--clr-placeholder);
+    }
+  }
+
+  &__date-group {
+    margin-bottom: 16px;
+  }
+
+  &__date-label {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--clr-chat-history-date);
+    margin-bottom: 8px;
+  }
+
+  &__card {
+    background: var(--clr-card-bg);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(147, 152, 169, 0.1);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__item-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__item-title {
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    color: var(--clr-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__item-summary {
+    font-family: var(--font-family);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    color: var(--clr-chat-history-summary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+
+  &__empty {
+    text-align: center;
+    color: var(--clr-caption);
+    font-size: 14px;
+    padding: 80px 0;
+  }
+}
+
+// ===== Growth data page sections (design 824d2d70) =====
+.growth-page-title {
+  font-family: 'YouSheBiaoTiHei', var(--font-family);
+  font-size: 36px;
+  font-weight: 400; // YouSheBiaoTiHei has no weight variants
+  line-height: 47px;
+  letter-spacing: 4%;
+  color: var(--clr-growth-page-title);
+}
+
+.growth-page-date {
+  font-family: 'Roboto', var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-growth-page-date);
+}
+
+.growth-section-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-growth-section-title);
+}
+
+.growth-section-caption {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-growth-section-caption);
+}
+
+.growth-stats-value {
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-growth-section-title);
+  text-align: center;
+}
+
+.growth-summary-text {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--clr-growth-summary-text);
+}
+
+.growth-chart-label {
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-growth-chart-label);
+}
+
+.growth-summary-tag {
+  display: inline-block;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--clr-growth-summary-tag-text);
+  background: var(--clr-growth-summary-tag-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.growth-accent-bar {
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--clr-growth-accent-bar-top),
+    var(--clr-growth-accent-bar-bottom)
+  );
+}
+
+.growth-view-report {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-growth-view-report);
+  cursor: pointer;
+}
+
+.growth-accompany-badge {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-growth-accompany-badge);
+}
+
+// ===== Settings sub-page common =====
+.settings-sub-page {
+  padding: 16px 20px;
+  background: var(--clr-page-bg-neutral);
+
+  &__card {
+    background: var(--clr-card-bg);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    max-width: var(--settings-sub-card-max-w);
+    margin-bottom: var(--growth-section-gap);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--settings-sub-row-height);
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(147, 152, 169, 0.1);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__row-label {
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: var(--clr-text);
+  }
+
+  &__row-value {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--clr-caption);
+  }
+
+  &__row-chevron {
+    color: var(--clr-caption);
+  }
+}
+
+// ===== Share sheet dialog =====
+.share-sheet {
+  border-radius: 16px 16px 0 0;
+  background: var(--clr-dialog-bg);
+  padding: 20px 20px 32px;
+
+  &__title {
+    font-family: var(--font-family);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--clr-dialog-title);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  &__options {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 24px;
+  }
+
+  &__option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  &__option-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--clr-white);
+  }
+
+  &__option-label {
+    font-family: var(--font-family);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--clr-text);
+  }
+
+  &__cancel {
+    width: 100%;
+    height: 44px;
+    border-radius: 22px;
+    border: none;
+    background: var(--clr-dialog-btn-cancel-bg);
+    color: var(--clr-dialog-btn-cancel-text);
+    font-family: var(--font-family);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+}
+
+// ===== Onboarding guide =====
+.onboarding-page {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(18, 14, 44, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-white);
+
+  &__step-content {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 0 40px;
+  }
+
+  &__step-title {
+    font-family: var(--font-family);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+    margin-bottom: 12px;
+  }
+
+  &__step-desc {
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    opacity: 0.8;
+  }
+
+  &__dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
+
+    &--active {
+      background: var(--clr-link);
+      width: 24px;
+      border-radius: 4px;
+    }
+  }
+
+  &__skip {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--clr-white);
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-family: var(--font-family);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  &__next {
+    background: var(--clr-btn-primary-bg);
+    color: var(--clr-white);
+    border: none;
+    border-radius: 28px;
+    padding: 12px 48px;
+    font-family: var(--font-family);
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+}
+
+// Dark mode — keep AI bubble & input bar readable on a dark backdrop.
+.body--dark {
+  .stack-header-action {
+    filter: invert(1);
+  }
+  .chat-page {
+    background: rgba(32, 34, 42, 1);
+  }
+  // Hide hero decoration in dark mode to avoid dark boxes on dark background
+  .chat-page__hero {
+    display: none;
+  }
+  .chat-bubble--ai {
+    background: rgba(52, 56, 68, 1);
+    color: rgba(240, 242, 247, 1);
+  }
+  .chat-input-bar {
+    background: rgba(52, 56, 68, 1);
+    color: rgba(240, 242, 247, 1);
+  }
+  .chat-input-bar--pressing {
+    background: rgba(78, 96, 128, 1);
+  }
+  .chat-input-bar__icon {
+    color: rgba(240, 242, 247, 1);
+  }
+
+  .messages-card,
+  .orders-card,
+  .help-card-head,
+  .help-card-body {
+    background: rgba(52, 56, 68, 1);
+  }
+  .messages-row__title,
+  .orders-product__name,
+  .orders-product__price,
+  .orders-tab--active,
+  .help-row__label,
+  .about-section-title {
+    color: rgba(240, 242, 247, 1);
+  }
+  .messages-row__content {
+    color: rgba(200, 205, 215, 1);
+  }
+  .about-body {
+    color: rgba(180, 186, 198, 1);
+  }
+  .orders-tabs {
+    background: rgba(32, 34, 42, 1);
+  }
+  .orders-tab {
+    color: rgba(180, 186, 198, 1);
+  }
+  .orders-action-btn {
+    color: rgba(220, 226, 238, 1);
+    border-color: rgba(180, 186, 198, 0.5);
+  }
+  .orders-action-btn--primary {
+    color: rgba(255, 255, 255, 1);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+}
