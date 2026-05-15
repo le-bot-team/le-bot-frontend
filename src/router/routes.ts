@@ -7,6 +7,10 @@ const routes: RouteRecordRaw[] = [
     redirect: '/main/home',
   },
   {
+    path: '/splash',
+    component: () => import('pages/SplashPage.vue'),
+  },
+  {
     path: '/main',
     component: () => import('layouts/MainLayout.vue'),
     children: [
@@ -51,11 +55,91 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'messages',
+        path: 'messages',
+        components: {
+          default: () => import('pages/stack/MessagesPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.MessagesPage.labels.title',
+        },
+      },
+      {
+        name: 'message-detail',
+        path: 'messages/:id',
+        components: {
+          default: () => import('pages/stack/messages/MessageDetailPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.messages.MessageDetailPage.labels.title',
+        },
+      },
+      {
+        name: 'activity-messages',
+        path: 'messages/activity',
+        components: {
+          default: () => import('pages/stack/messages/ActivityMessagesPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.messages.ActivityMessagesPage.labels.title',
+        },
+      },
+      {
+        name: 'orders',
+        path: 'orders',
+        components: {
+          default: () => import('pages/stack/OrdersPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.OrdersPage.labels.title',
+        },
+      },
+      {
+        name: 'help',
+        path: 'help',
+        components: {
+          default: () => import('pages/stack/HelpPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.HelpPage.labels.title',
+        },
+      },
+      {
+        name: 'help-faq',
+        path: 'help/faq',
+        components: {
+          default: () => import('pages/stack/help/FaqPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.help.FaqPage.labels.title',
+        },
+      },
+      {
+        name: 'help-feedback',
+        path: 'help/feedback',
+        components: {
+          default: () => import('pages/stack/help/FeedbackPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.help.FeedbackPage.labels.title',
+        },
+      },
+      {
         name: 'auth',
         path: 'auth',
         components: {
           default: () => import('pages/stack/AuthPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          hideBackButton: true,
         },
       },
       {
@@ -65,14 +149,88 @@ const routes: RouteRecordRaw[] = [
           default: () => import('pages/stack/ChatPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
+        meta: {
+          title: 'pages.stack.ChatPage.labels.pageTitle',
+          headerActions: [
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabel: 'mute' },
+            { icon: 'chat-call', event: 'chat:call', ariaLabel: 'call' },
+          ],
+        },
       },
       {
-        name: 'growth-data',
-        path: 'growth-data',
+        name: 'chat-history',
+        path: 'chat/history',
         components: {
-          default: () => import('pages/stack/GrowthDataPage.vue'),
+          default: () => import('pages/stack/chat/ChatHistoryPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
+        meta: {
+          title: 'pages.stack.chat.ChatHistoryPage.labels.title',
+        },
+      },
+      {
+        name: 'chat-mute-settings',
+        path: 'chat/mute-settings',
+        components: {
+          default: () => import('pages/stack/chat/MuteSettingsPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.chat.MuteSettingsPage.labels.title',
+        },
+      },
+      {
+        name: 'chat-voice-call',
+        path: 'chat/voice-call',
+        components: {
+          default: () => import('pages/stack/chat/VoiceCallPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        // Design 64d5ecc8 raw JSON: nav title "小新的乐宝", right icon "字" (icon_text_n_nav_chat)
+        // No back button — user exits via hangup
+        meta: {
+          title: 'pages.stack.ChatPage.labels.pageTitle',
+          hideBackButton: true,
+          headerActions: [{ icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabel: '文字模式' }],
+        },
+      },
+      {
+        path: 'growth-data',
+        children: [
+          {
+            name: 'growth-data',
+            path: '',
+            components: {
+              default: () => import('pages/stack/GrowthDataPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.GrowthDataPage.title',
+            },
+          },
+          {
+            name: 'growth-data-weekly-report',
+            path: 'weekly-report',
+            components: {
+              default: () => import('pages/stack/growth-data/ChatWeeklyReportPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.growth-data.ChatWeeklyReportPage.title',
+            },
+          },
+          {
+            name: 'growth-data-capability-detail',
+            path: 'capability/:capabilityKey',
+            components: {
+              default: () => import('pages/stack/growth-data/CapabilityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.growth-data.CapabilityDetailPage.title',
+            },
+          },
+        ],
       },
       {
         name: 'profile',
@@ -83,6 +241,33 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'profile-edit',
+        path: 'profile/edit',
+        components: {
+          default: () => import('pages/stack/profile/ProfileFieldEditPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'profile-change-password',
+        path: 'profile/change-password',
+        components: {
+          default: () => import('pages/stack/profile/ChangePasswordPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'profile-change-phone',
+        path: 'profile/change-phone',
+        components: {
+          default: () => import('pages/stack/profile/ChangePhonePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.ChangePhonePage.labels.title',
+        },
+      },
+      {
         path: 'device-config',
         children: [
           {
@@ -90,6 +275,154 @@ const routes: RouteRecordRaw[] = [
             path: '',
             components: {
               default: () => import('pages/stack/DeviceConfigPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-voice',
+            path: 'voice',
+            components: {
+              default: () => import('pages/stack/device-config/VoiceStylePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-language',
+            path: 'language',
+            components: {
+              default: () => import('pages/stack/device-config/LanguagePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-personality',
+            path: 'personality',
+            components: {
+              default: () => import('pages/stack/device-config/PersonalityPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-personality-detail',
+            path: 'personality/detail',
+            components: {
+              default: () => import('pages/stack/device-config/PersonalityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-wifi',
+            path: 'wifi',
+            components: {
+              default: () => import('pages/stack/device-config/WifiPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.device-config.WifiPage.labels.title',
+            },
+          },
+          {
+            name: 'device-config-update',
+            path: 'update',
+            components: {
+              default: () => import('pages/stack/device-config/FirmwareUpdatePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.device-config.FirmwareUpdatePage.labels.title',
+            },
+          },
+          {
+            name: 'device-config-about',
+            path: 'about',
+            components: {
+              default: () => import('pages/stack/device-config/AboutDevicePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.device-config.AboutDevicePage.labels.title',
+            },
+          },
+        ],
+      },
+      {
+        name: 'devices',
+        path: 'devices',
+        components: {
+          default: () => import('pages/stack/DevicesPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'onboarding-complete',
+        path: 'onboarding-complete',
+        components: {
+          default: () => import('pages/stack/OnboardingCompletePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.OnboardingCompletePage.labels.title',
+        },
+      },
+      {
+        name: 'add-virtual-device',
+        path: 'add-virtual-device',
+        components: {
+          default: () => import('pages/stack/AddVirtualDevicePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.AddVirtualDevicePage.labels.title',
+        },
+      },
+      {
+        path: 'family-groups',
+        children: [
+          {
+            name: 'family-groups',
+            path: '',
+            components: {
+              default: () => import('pages/stack/FamilyGroupPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-detail',
+            path: 'detail',
+            components: {
+              default: () => import('pages/stack/family-group/DetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-member',
+            path: 'member',
+            components: {
+              default: () => import('pages/stack/family-group/MemberPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-invite',
+            path: 'invite',
+            components: {
+              default: () => import('pages/stack/family-group/InvitePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-child-edit',
+            path: 'child-edit',
+            components: {
+              default: () => import('pages/stack/family-group/ChildEditPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-create',
+            path: 'create',
+            components: {
+              default: () => import('pages/stack/family-group/ChildEditPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },
@@ -143,9 +476,171 @@ const routes: RouteRecordRaw[] = [
               },
             ],
           },
+          {
+            name: 'settings-addresses',
+            path: 'addresses',
+            components: {
+              default: () => import('pages/stack/settings/AddressesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.AddressesPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-app-language',
+            path: 'language',
+            components: {
+              default: () => import('pages/stack/settings/AppLanguagePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.AppLanguagePage.labels.title',
+            },
+          },
+          {
+            name: 'settings-notifications',
+            path: 'notifications',
+            components: {
+              default: () => import('pages/stack/settings/NotificationSettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.NotificationSettingsPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-general',
+            path: 'general',
+            components: {
+              default: () => import('pages/stack/settings/GeneralSettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.GeneralSettingsPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-privacy',
+            path: 'privacy',
+            components: {
+              default: () => import('pages/stack/settings/PrivacySettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.PrivacySettingsPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-permissions',
+            path: 'permissions',
+            components: {
+              default: () => import('pages/stack/settings/PermissionManagementPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.PermissionManagementPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-word-filter',
+            path: 'word-filter',
+            components: {
+              default: () => import('pages/stack/settings/WordFilterPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.WordFilterPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-clear-cache',
+            path: 'clear-cache',
+            components: {
+              default: () => import('pages/stack/settings/ClearCachePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.ClearCachePage.labels.title',
+            },
+          },
+          {
+            name: 'settings-network',
+            path: 'network',
+            components: {
+              default: () => import('pages/stack/settings/NetworkDiagnosticsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.NetworkDiagnosticsPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-storage',
+            path: 'storage',
+            components: {
+              default: () => import('pages/stack/settings/StorageSpacePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.StorageSpacePage.labels.title',
+            },
+          },
+          {
+            name: 'settings-privacy-policy',
+            path: 'privacy-policy',
+            components: {
+              default: () => import('pages/stack/settings/PrivacyPolicyPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.PrivacyPolicyPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-terms-of-service',
+            path: 'terms-of-service',
+            components: {
+              default: () => import('pages/stack/settings/TermsOfServicePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.TermsOfServicePage.labels.title',
+            },
+          },
+          {
+            name: 'settings-user-agreement',
+            path: 'user-agreement',
+            components: {
+              default: () => import('pages/stack/settings/UserAgreementPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.UserAgreementPage.labels.title',
+            },
+          },
+          {
+            name: 'settings-info-list',
+            path: 'info-list',
+            components: {
+              default: () => import('pages/stack/settings/PersonalInfoListPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.settings.PersonalInfoListPage.labels.title',
+            },
+          },
         ],
       },
     ],
+  },
+  {
+    name: 'onboarding',
+    path: '/stack/onboarding',
+    components: {
+      default: () => import('pages/stack/OnboardingGuidePage.vue'),
+      header: () => import('layouts/headers/StackHeader.vue'),
+    },
   },
 
   // Always leave this as the last one,
