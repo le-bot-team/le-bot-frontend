@@ -107,7 +107,20 @@ export default {
         },
       },
     },
-    home: {},
+    home: {
+      DeviceCard: {
+        labels: {
+          noDevice: 'No device connected',
+          addNewDevice: 'Add Device',
+        },
+      },
+      TopicCard: {
+        labels: {
+          title: 'Topics',
+          chatHistory: 'Chat History',
+        },
+      },
+    },
     me: {
       ProfileCard: {
         labels: {
@@ -389,6 +402,7 @@ export default {
           serviceCenter: 'Service Center',
           serviceCenterDescription: 'Devices & Tips',
           myOrders: 'My Orders',
+          sharedDevices: 'Shared Devices',
           familyGroup: 'Family Group Settings',
           helpAndFeedback: 'Help & Feedback',
           aboutUs: 'About Us',
@@ -1004,9 +1018,10 @@ export default {
           storageSpace: 'Storage Space',
           appVersion: 'About Version',
           privacyPolicy: 'Privacy Policy',
+          termsOfService: 'Terms of Service',
           personalInfoList: 'Personal Information List',
           icpFilingNumber: 'ICP Filing Number',
-          internetICPCode: '沪ICP备00000000号-1',
+          internetICPCode: '{code}',
           logout: 'Log Out',
         },
       },

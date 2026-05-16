@@ -15,7 +15,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['mock', 'axios', 'bus', 'i18n', 'media-encoder', 'telemetry'],
+    boot: ['axios', 'bus', 'i18n', 'media-encoder'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],

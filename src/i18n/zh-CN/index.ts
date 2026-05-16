@@ -107,7 +107,20 @@ export default {
         },
       },
     },
-    home: {},
+    home: {
+      DeviceCard: {
+        labels: {
+          noDevice: '暂无设备连接',
+          addNewDevice: '添加设备',
+        },
+      },
+      TopicCard: {
+        labels: {
+          title: '话题',
+          chatHistory: '聊天记录',
+        },
+      },
+    },
     me: {
       ProfileCard: {
         labels: {
@@ -384,6 +397,7 @@ export default {
           serviceCenter: '服务中心',
           serviceCenterDescription: '设备与贴士',
           myOrders: '我的订单',
+          sharedDevices: '共享设备',
           familyGroup: '家庭组设置',
           helpAndFeedback: '帮助与反馈',
           aboutUs: '关于我们',
@@ -998,9 +1012,10 @@ export default {
           storageSpace: '存储空间',
           appVersion: '关于版本',
           privacyPolicy: '隐私政策',
+          termsOfService: '服务条款',
           personalInfoList: '个人信息收集清单',
           icpFilingNumber: '备案号',
-          internetICPCode: '沪ICP备00000000号-1',
+          internetICPCode: '{code}',
           logout: '退出登录',
         },
       },
