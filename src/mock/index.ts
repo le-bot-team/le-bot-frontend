@@ -36,14 +36,13 @@ export function setupMock(): void {
 }
 
 /**
- * Replace global WebSocket with MockChatWebSocket for chat simulation.
+ * Replace global WebSocket with MockChatWebSocket for development.
  */
 export function setupWsMock(): void {
   if (originalWebSocket) return;
 
   originalWebSocket = window.WebSocket;
-  const g = window as unknown as Record<string, unknown>;
-  g.WebSocket = MockChatWebSocket;
+  (window as { WebSocket: unknown }).WebSocket = MockChatWebSocket as unknown as typeof WebSocket;
 
   console.warn('[Mock] WebSocket mocking enabled — send() returns a stub echo response only');
 }

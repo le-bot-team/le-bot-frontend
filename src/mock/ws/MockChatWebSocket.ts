@@ -1,7 +1,8 @@
 /**
- * Mock WebSocket implementation for chat simulation.
- * Replaces the global WebSocket during mock mode to simulate
- * server-side chat responses without a real backend connection.
+ * Mock WebSocket stub for development.
+ * Replaces the global WebSocket during mock mode. Currently echoes back
+ * a generic acknowledgment on send(); full chat protocol simulation
+ * will be implemented in a future PR.
  */
 export class MockChatWebSocket extends EventTarget implements Partial<WebSocket> {
   static readonly CONNECTING = 0;
