@@ -15,7 +15,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['axios', 'bus', 'i18n', 'media-encoder'],
+    boot: ['axios', 'bus', 'i18n', 'media-encoder', 'mock'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -66,6 +66,8 @@ export default defineConfig((ctx) => {
           : ctx.dev
             ? 'ws://localhost:3000'
             : '',
+        VITE_MOCK_ENABLED: process.env.VITE_MOCK_ENABLED ?? 'false',
+        VITE_MOCK_WS_ENABLED: process.env.VITE_MOCK_WS_ENABLED ?? 'false',
       },
 
       target: {
