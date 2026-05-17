@@ -14,7 +14,7 @@ export class MockChatWebSocket extends EventTarget implements Partial<WebSocket>
   readonly CLOSING = 2;
   readonly CLOSED = 3;
 
-  readyState: number = MockChatWebSocket.OPEN;
+  readyState: number = MockChatWebSocket.CONNECTING;
   url: string;
   protocol = '';
   extensions = '';
@@ -33,6 +33,7 @@ export class MockChatWebSocket extends EventTarget implements Partial<WebSocket>
 
     // Simulate async connection open
     queueMicrotask(() => {
+      this.readyState = MockChatWebSocket.OPEN;
       const event = new Event('open');
       this.onopen?.(event);
       this.dispatchEvent(event);

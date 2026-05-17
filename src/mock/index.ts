@@ -31,7 +31,7 @@ export function setupMock(): void {
     handler(mock);
   }
 
-  console.log('[Mock] HTTP API mocking enabled');
+  console.warn('[Mock] HTTP API mocking enabled — handlers are stubs, no routes registered yet');
 }
 
 /**
