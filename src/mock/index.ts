@@ -44,7 +44,7 @@ export function setupWsMock(): void {
   const g = window as unknown as Record<string, unknown>;
   g.WebSocket = MockChatWebSocket;
 
-  console.log('[Mock] WebSocket mocking enabled — chat simulation active');
+  console.warn('[Mock] WebSocket mocking enabled — send() is stubbed, no responses will be simulated yet');
 }
 
 /**

@@ -42,7 +42,14 @@ export class MockChatWebSocket extends EventTarget implements Partial<WebSocket>
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
-    // TODO: implement mock message handling and response simulation
+    // Stub: echo back a minimal acknowledgment so chat flows don't hang silently
+    queueMicrotask(() => {
+      if (this.readyState !== MockChatWebSocket.OPEN) return;
+      const response = JSON.stringify({ type: 'echo', message: 'Mock WS received message (stub)' });
+      const event = new MessageEvent('message', { data: response });
+      this.onmessage?.(event);
+      this.dispatchEvent(event);
+    });
   }
 
   close(code?: number, reason?: string): void {
