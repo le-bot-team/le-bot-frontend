@@ -26,7 +26,7 @@ const handlers: MockSetupFn[] = [
 export function setupMock(): void {
   if (mock) return;
 
-  mock = new MockAdapter(api, { delayResponse: MOCK_DELAY_MS });
+  mock = new MockAdapter(api, { delayResponse: MOCK_DELAY_MS, onNoMatch: 'passthrough' });
 
   for (const handler of handlers) {
     handler(mock);
