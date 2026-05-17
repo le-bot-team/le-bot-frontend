@@ -33,6 +33,7 @@ export class MockChatWebSocket extends EventTarget implements Partial<WebSocket>
 
     // Simulate async connection open
     queueMicrotask(() => {
+      if (this.readyState !== MockChatWebSocket.CONNECTING) return;
       this.readyState = MockChatWebSocket.OPEN;
       const event = new Event('open');
       this.onopen?.(event);
