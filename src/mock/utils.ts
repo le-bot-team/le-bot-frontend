@@ -1,10 +1,15 @@
 import type MockAdapter from 'axios-mock-adapter';
 
 /**
+ * Default simulated network delay in milliseconds.
+ */
+export const MOCK_DELAY_MS = 300;
+
+/**
  * Simulate network latency for mock responses.
  * Default delay is 300ms to feel realistic but not sluggish.
  */
-export const mockDelay = (ms = 300): Promise<void> =>
+export const mockDelay = (ms = MOCK_DELAY_MS): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 /**

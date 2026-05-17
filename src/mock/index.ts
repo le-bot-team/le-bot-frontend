@@ -8,6 +8,7 @@ import { setupVoiceprintMock } from 'src/mock/handlers/voiceprint';
 import { MockChatWebSocket } from 'src/mock/ws/MockChatWebSocket';
 
 import type { MockSetupFn } from 'src/mock/utils';
+import { MOCK_DELAY_MS } from 'src/mock/utils';
 
 let mock: MockAdapter | null = null;
 let originalWebSocket: typeof WebSocket | null = null;
@@ -25,7 +26,7 @@ const handlers: MockSetupFn[] = [
 export function setupMock(): void {
   if (mock) return;
 
-  mock = new MockAdapter(api, { delayResponse: 300 });
+  mock = new MockAdapter(api, { delayResponse: MOCK_DELAY_MS });
 
   for (const handler of handlers) {
     handler(mock);
