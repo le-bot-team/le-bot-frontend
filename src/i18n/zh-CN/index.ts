@@ -131,6 +131,7 @@ export default {
     },
     navigations: {
       main: {
+        home: '首页',
         devices: '设备',
         growth: '成长',
         mall: '商城',

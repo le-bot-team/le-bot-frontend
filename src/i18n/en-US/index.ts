@@ -131,6 +131,7 @@ export default {
     },
     navigations: {
       main: {
+        home: 'Home',
         devices: 'Devices',
         growth: 'Growth',
         mall: 'Mall',
