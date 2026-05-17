@@ -21,7 +21,8 @@ declare module 'vue-i18n' {
 }
 
 const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-  locale: 'en-US',
+  locale: 'zh-CN',
+  fallbackLocale: 'en-US',
   legacy: false,
   messages,
 });
