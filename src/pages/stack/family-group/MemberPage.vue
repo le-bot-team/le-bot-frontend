@@ -84,7 +84,7 @@ function onRemove() {
   const m = member.value;
   $q.dialog({
     title: i18n('confirm.title'),
-    message: i18n('confirm.message', { name: m.nickname }),
+    message: i18n('confirm.message', { name: m.nickname ?? '-' }),
     cancel: { label: i18n('confirm.cancel'), flat: true },
     ok: { label: i18n('confirm.ok'), color: 'negative' },
     persistent: true,
@@ -131,7 +131,7 @@ function onRemove() {
         <div class="family-member-info-row">
           <span class="family-member-info-label">{{ i18n('labels.gender') }}</span>
           <span class="family-member-info-value">
-            {{ member!.gender === 'female' ? i18n('meta.female') : i18n('meta.male') }}
+            {{ member!.gender === 'female' ? i18n('meta.female') : member!.gender === 'male' ? i18n('meta.male') : '-' }}
           </span>
         </div>
         <div class="family-member-info-row">

@@ -108,7 +108,7 @@ function onDialogHide() {
           v-if="inviterAvatar"
         />
         <div class="join-inviter-avatar" v-else>
-          <q-icon name="person" size="24px" color="#BDBDBD" />
+          <q-icon name="person" size="24px" class="join-inviter-avatar__icon" />
         </div>
         <span class="join-inviter-name">{{ inviterNickname }}</span>
         <span class="join-inviter-label">{{ i18n('labels.invitesYou') }}</span>
@@ -204,6 +204,10 @@ function onDialogHide() {
   font-size: 15px;
   font-weight: 500;
   color: var(--clr-text-primary);
+}
+
+.join-inviter-avatar__icon {
+  color: #BDBDBD;
 }
 
 .join-inviter-label {

@@ -148,7 +148,7 @@ function formatDuration(totalSeconds: number): string {
       <!-- 无 QR 时展示占位 -->
       <div v-else class="family-invite-qr-placeholder" aria-label="qr-code">
         <q-icon v-if="isGenerating" name="mdi-loading" size="64px" color="primary" class="q-ma-sm q-animated-spin" />
-        <q-icon v-else name="mdi-qrcode" size="160px" color="#C4C4CC" />
+        <q-icon v-else name="mdi-qrcode" size="160px" class="family-invite-qr-placeholder__icon" />
       </div>
     </div>
 
@@ -237,6 +237,10 @@ function formatDuration(totalSeconds: number): string {
   width: 200px;
   height: 200px;
   object-fit: contain;
+}
+
+.family-invite-qr-placeholder__icon {
+  color: #C4C4CC;
 }
 </style>
 

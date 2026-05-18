@@ -82,14 +82,12 @@ function getMetaText(): string {
       v-if="member.isCreator && member.memberType !== 'child'"
       name="star"
       size="14px"
-      color="#FFB800"
       class="member-card__badge"
     />
     <q-icon
       v-else
       name="chevron_right"
       size="16px"
-      color="#C4C4CC"
       class="member-card__arrow"
     />
   </button>
@@ -149,5 +147,13 @@ function getMetaText(): string {
 .member-card__badge,
 .member-card__arrow {
   flex-shrink: 0;
+}
+
+.member-card__badge {
+  color: #FFB800;
+}
+
+.member-card__arrow {
+  color: #C4C4CC;
 }
 </style>

@@ -72,7 +72,7 @@ function onAddDevice() {
           </span>
         </div>
         <!-- 箭头 -->
-        <q-icon name="chevron_right" size="20px" color="#C4C4CC" />
+        <q-icon name="chevron_right" size="20px" class="family-group-card__chevron" />
       </button>
     </template>
 
@@ -169,5 +169,9 @@ function onAddDevice() {
   font-family: var(--font-family);
   font-size: 13px;
   color: var(--clr-caption);
+}
+
+.family-group-card__chevron {
+  color: #C4C4CC;
 }
 </style>
