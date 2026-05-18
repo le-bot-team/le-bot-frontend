@@ -50,9 +50,16 @@ export default {
           nickname: '昵称',
           bio: '个人简介',
           confirm: '确认',
+          nicknamePlaceholder: '请输入昵称',
+          birthday: '生日',
+          relationship: '您与孩子的关系',
+          selectRelationship: '选择关系',
+          selectPlaceholder: '请选择',
         },
         notifications: {
           unknownError: '未知错误',
+          saveFailed: '保存失败',
+          fetchFailed: '获取资料失败',
         },
       },
       SignInOrSignUpPanel: {

@@ -17,7 +17,7 @@ export const useDeviceStore = defineStore(
     const updateCurrentDeviceConfig = (patch: Partial<DeviceConfig>) => {
       if (!currentDevice.value) return;
       currentDevice.value.config = {
-        ...currentDevice.value.config,
+        ...(currentDevice.value.config ?? {}),
         ...patch,
       };
     };

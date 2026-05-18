@@ -50,9 +50,16 @@ export default {
           nickname: 'Nickname',
           bio: 'Bio',
           confirm: 'Confirm',
+          nicknamePlaceholder: 'Enter nickname',
+          birthday: 'Birthday',
+          relationship: 'Relationship with child',
+          selectRelationship: 'Select Relationship',
+          selectPlaceholder: 'Please select',
         },
         notifications: {
           unknownError: 'Unknown error',
+          saveFailed: 'Save failed',
+          fetchFailed: 'Failed to fetch profile',
         },
       },
       SignInOrSignUpPanel: {

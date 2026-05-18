@@ -47,10 +47,14 @@ watch([year, month], () => {
   }
 }, { immediate: true });
 
-// Emit formatted date on any change
+// Track whether user has interacted or a value was provided
+const hasValue = ref(!!props.modelValue);
+
+// Emit formatted date on any change (skip initial emit when no value provided)
 watch(
   [year, month, day],
   () => {
+    if (!hasValue.value) return;
     const m = String(month.value).padStart(2, '0');
     const d = String(day.value).padStart(2, '0');
     emit('update:modelValue', `${year.value}-${m}-${d}`);
@@ -62,6 +66,7 @@ watch(
 watch(
   () => props.modelValue,
   (val) => {
+    if (val) hasValue.value = true;
     const parsed = parseDate(val);
     year.value = parsed.y;
     month.value = parsed.m;
@@ -73,13 +78,13 @@ watch(
 
 <template>
   <div class="birthday-picker">
-    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year">
+    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" @change="hasValue = true">
       <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
     </select>
-    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month">
+    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" @change="hasValue = true">
       <option v-for="m in months" :key="m" :value="m">{{ m }}月</option>
     </select>
-    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day">
+    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day" @change="hasValue = true">
       <option v-for="d in days" :key="d" :value="d">{{ d }}日</option>
     </select>
   </div>

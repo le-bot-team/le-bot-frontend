@@ -51,7 +51,9 @@ const sections = computed(() => {
           <h2 class="legal-section-title">{{ section.title }}</h2>
           <p class="legal-section-body">{{ section.body }}</p>
         </template>
-        <p v-if="!sections.length" class="legal-placeholder">Loading...</p>
+        <div v-if="!sections.length" class="legal-placeholder">
+          <q-spinner size="24px" color="primary" />
+        </div>
       </div>
     </div>
   </q-page>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 
@@ -7,11 +7,12 @@ const i18n = i18nSubPath('pages.stack.device-config.WifiPage');
 
 const scanning = ref(false);
 const networks = ref<{ ssid: string; signal: number; secured: boolean }[]>([]);
+let scanTimer: ReturnType<typeof setTimeout> | undefined;
 
 function scan() {
   scanning.value = true;
   // Placeholder — real implementation will call device API
-  setTimeout(() => {
+  scanTimer = setTimeout(() => {
     networks.value = [
       { ssid: 'Home-WiFi', signal: 80, secured: true },
       { ssid: 'Office-5G', signal: 60, secured: true },
@@ -20,6 +21,10 @@ function scan() {
     scanning.value = false;
   }, 1500);
 }
+
+onUnmounted(() => {
+  if (scanTimer !== undefined) clearTimeout(scanTimer);
+});
 
 scan();
 </script>

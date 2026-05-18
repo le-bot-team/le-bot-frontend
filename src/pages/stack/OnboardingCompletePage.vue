@@ -1,9 +1,16 @@
 <script setup lang="ts">
 // OnboardingCompletePage — Post-registration landing page.
 // User can choose: add a virtual device OR scan to join an existing family group.
+import { useQuasar } from 'quasar';
+
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.OnboardingCompletePage');
+const { notify } = useQuasar();
+
+const scanJoin = () => {
+  notify({ type: 'info', message: i18n('notifications.scanComingSoon') });
+};
 </script>
 
 <template>
@@ -28,7 +35,7 @@ const i18n = i18nSubPath('pages.stack.OnboardingCompletePage');
         <button class="auth-btn-primary" @click="$router.replace('/main/home')">
           {{ i18n('options.addDevice.title') }}
         </button>
-        <button class="auth-btn-weak" @click="$router.replace('/main/home')">
+        <button class="auth-btn-weak" @click="scanJoin">
           {{ i18n('options.scanJoin.title') }}
         </button>
       </div>

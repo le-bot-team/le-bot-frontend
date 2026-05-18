@@ -10,6 +10,7 @@ import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
 import { useTracker } from 'src/composables/useTracker';
+import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
   name: string | number;
@@ -23,6 +24,7 @@ const { dialog, notify } = useQuasar();
 const { accessToken } = storeToRefs(useAuthStore());
 const { updateProfile } = useProfileStore();
 const { trackConversion } = useTracker();
+const i18n = i18nSubPath('components.auth.SetupProfilePanel');
 
 const avatar = ref<string>();
 const nickname = ref<string>();
@@ -67,7 +69,7 @@ const confirm = async () => {
     if (!data.success) {
       notify({
         type: 'negative',
-        message: data.message || '保存失败',
+        message: data.message || i18n('notifications.saveFailed'),
       });
       isSending.value = false;
       return;
@@ -77,7 +79,7 @@ const confirm = async () => {
     if (!profileRes.data.success) {
       notify({
         type: 'negative',
-        message: profileRes.data.message || '获取资料失败',
+        message: profileRes.data.message || i18n('notifications.fetchFailed'),
       });
       isSending.value = false;
       return;
@@ -88,7 +90,7 @@ const confirm = async () => {
   } catch (err) {
     notify({
       type: 'negative',
-      message: (err as Error).message || '未知错误',
+        message: (err as Error).message || i18n('notifications.unknownError'),
     });
   }
   isSending.value = false;
@@ -100,7 +102,7 @@ const confirm = async () => {
     <!-- Avatar: 87x87px circular, fill rgba(229,229,239,1), 3px white border -->
     <div class="setup-profile-avatar-shell" @click="editAvatar">
       <div class="setup-profile-avatar-circle">
-        <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" alt="头像" />
+        <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" :alt="i18n('labels.avatar')" />
         <div v-else class="setup-profile-avatar-placeholder">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <circle cx="16" cy="10" r="6" stroke="#9398A9" stroke-width="1.5" />
@@ -117,27 +119,27 @@ const confirm = async () => {
 
     <!-- Nickname -->
     <div class="setup-profile-field-row">
-      <label class="setup-profile-field-label">昵称</label>
+      <label class="setup-profile-field-label">{{ i18n('labels.nickname') }}</label>
       <div class="auth-input-group">
-        <input class="auth-input" v-model="nickname" placeholder="请输入昵称" maxlength="20" />
+        <input class="auth-input" v-model="nickname" :placeholder="i18n('labels.nicknamePlaceholder')" maxlength="20" />
       </div>
     </div>
 
     <!-- Birthday -->
     <div class="setup-profile-field-row">
-      <label class="setup-profile-field-label">生日</label>
+      <label class="setup-profile-field-label">{{ i18n('labels.birthday') }}</label>
       <BirthdayPicker v-model="birthday" :default-year="1995" />
     </div>
 
     <!-- Relationship -->
     <div class="setup-profile-field-row">
-      <label class="setup-profile-field-label">您与孩子的关系</label>
+      <label class="setup-profile-field-label">{{ i18n('labels.relationship') }}</label>
       <div class="auth-input-group auth-input-group--clickable" @click="showRelationSheet = true">
         <span
           class="setup-profile-field-value"
           :class="{ 'setup-profile-field-value--placeholder': !relationship }"
         >
-          {{ relationship || '请选择' }}
+          {{ relationship || i18n('labels.selectPlaceholder') }}
         </span>
         <span class="setup-profile-field-arrow">
           <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
@@ -159,7 +161,7 @@ const confirm = async () => {
       :disabled="isSending"
       @click="confirm"
     >
-      完成
+      {{ i18n('labels.confirm') }}
     </button>
   </q-tab-panel>
 
@@ -172,7 +174,7 @@ const confirm = async () => {
       >
         <div class="setup-profile-relation-sheet">
           <div class="setup-profile-relation-head">
-            <span class="setup-profile-relation-title">选择关系</span>
+            <span class="setup-profile-relation-title">{{ i18n('labels.selectRelationship') }}</span>
           </div>
           <div class="setup-profile-relation-body">
             <button

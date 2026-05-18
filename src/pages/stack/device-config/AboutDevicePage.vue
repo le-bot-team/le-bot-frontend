@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 import { useDeviceStore } from 'stores/device';
@@ -8,14 +9,14 @@ const i18n = i18nSubPath('pages.stack.device-config.AboutDevicePage');
 
 const { currentDevice } = storeToRefs(useDeviceStore());
 
-const infoItems = [
+const infoItems = computed(() => [
   { key: 'serialNumber', value: currentDevice.value?.identifier ?? '-' },
   { key: 'model', value: currentDevice.value?.model ?? '-' },
   { key: 'firmwareVersion', value: '1.0.0' },
   { key: 'macAddress', value: '-' },
   { key: 'manufactureDate', value: '-' },
   { key: 'hardwareVersion', value: '-' },
-];
+]);
 </script>
 
 <template>

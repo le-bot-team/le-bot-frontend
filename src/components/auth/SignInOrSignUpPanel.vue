@@ -145,16 +145,18 @@ const processSignInOrSignUp = async () => {
         />
       </div>
       <div class="auth-input-group auth-input-group--action">
-        <span
+        <button
+          type="button"
           class="auth-action-link"
           :class="{
             'auth-action-link--disabled':
               !isValidEmail || (!isNeverSendCode && remainedSendCodeCooldownSeconds),
           }"
+          :disabled="!isValidEmail || (!isNeverSendCode && !!remainedSendCodeCooldownSeconds)"
           @click="sendCode"
         >
           {{ isSendingCode ? '发送中...' : sendCodeLabel }}
-        </span>
+        </button>
       </div>
     </div>
 
@@ -170,10 +172,12 @@ const processSignInOrSignUp = async () => {
           @focus="isPasswordFocused = true"
           @blur="isPasswordFocused = false"
         />
-        <span
+        <button
           v-if="isPasswordFocused || codeOrPassword?.length"
+          type="button"
           class="auth-action-icon"
           @click="showPassword = !showPassword"
+          aria-label="Toggle password visibility"
         >
           <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
@@ -191,7 +195,7 @@ const processSignInOrSignUp = async () => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
     </div>
 
@@ -217,8 +221,13 @@ const processSignInOrSignUp = async () => {
     </button>
 
     <!-- Terms agreement checkbox -->
-    <div class="auth-terms-row" @click="agreeTerms = !agreeTerms">
-      <div class="auth-checkbox">
+    <label class="auth-terms-row">
+      <input
+        type="checkbox"
+        v-model="agreeTerms"
+        class="auth-checkbox-input"
+      />
+      <span class="auth-checkbox-visual">
         <svg v-if="agreeTerms" width="14" height="14" viewBox="0 0 14 14" fill="none">
           <rect width="14" height="14" rx="4" fill="#20CCF9" />
           <path
@@ -232,15 +241,15 @@ const processSignInOrSignUp = async () => {
         <svg v-else width="14" height="14" viewBox="0 0 14 14" fill="none">
           <rect width="14" height="14" rx="4" stroke="#9398A9" stroke-width="1" fill="none" />
         </svg>
-      </div>
-      <span class="auth-terms-text">
-        我已阅读并同意<span class="link" @click.stop="goToTermsOfService">《服务条款》</span>、<span
-          class="link"
-          @click.stop="goToUserAgreement"
-          >《用户协议》</span
-        >和<span class="link" @click.stop="goToPrivacyPolicy">《隐私政策》</span>
       </span>
-    </div>
+      <span class="auth-terms-text">
+        我已阅读并同意<span class="link" @click.prevent="goToTermsOfService">《服务条款》</span>、<span
+          class="link"
+          @click.prevent="goToUserAgreement"
+          >《用户协议》</span
+        >和<span class="link" @click.prevent="goToPrivacyPolicy">《隐私政策》</span>
+      </span>
+    </label>
   </q-tab-panel>
 </template>
 
@@ -251,5 +260,13 @@ const processSignInOrSignUp = async () => {
 
 .auth-btn-primary--mt {
   margin-top: 24px;
+}
+
+.auth-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
 </style>

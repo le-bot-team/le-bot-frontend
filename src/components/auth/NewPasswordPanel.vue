@@ -182,13 +182,15 @@ onMounted(() => {
         />
       </div>
       <div class="auth-input-group auth-input-group--action">
-        <span
+        <button
+          type="button"
           class="auth-action-link"
           :class="{ 'auth-action-link--disabled': !canSendCode || isSubmitting }"
+          :disabled="!canSendCode || isSubmitting"
           @click="sendCode"
         >
           {{ sendCodeLabel }}
-        </span>
+        </button>
       </div>
     </div>
 
@@ -205,10 +207,12 @@ onMounted(() => {
           @focus="isNewPasswordFocused = true"
           @blur="isNewPasswordFocused = false"
         />
-        <span
+        <button
           v-if="isNewPasswordFocused || newPassword?.length"
+          type="button"
           class="auth-action-icon"
           @click="showPassword = !showPassword"
+          aria-label="Toggle password visibility"
         >
           <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
@@ -226,7 +230,7 @@ onMounted(() => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
     </div>
 
@@ -266,10 +270,12 @@ onMounted(() => {
           @focus="isConfirmFocused = true"
           @blur="isConfirmFocused = false"
         />
-        <span
+        <button
           v-if="isConfirmFocused || confirmPassword?.length"
+          type="button"
           class="auth-action-icon"
           @click="showConfirm = !showConfirm"
+          aria-label="Toggle password visibility"
         >
           <svg v-if="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
@@ -287,7 +293,7 @@ onMounted(() => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
     </div>
 
