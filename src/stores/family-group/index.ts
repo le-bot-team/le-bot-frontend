@@ -81,7 +81,10 @@ export const useFamilyGroupStore = defineStore(
      */
     const setGroups = (newGroups: FamilyGroup[]) => {
       groups.value = newGroups;
-      if (newGroups.length > 0 && !currentGroupId.value) {
+      // Validate currentGroupId: reset if it no longer exists in the new list
+      if (currentGroupId.value && !newGroups.some((g) => g.id === currentGroupId.value)) {
+        currentGroupId.value = newGroups[0]?.id;
+      } else if (newGroups.length > 0 && !currentGroupId.value) {
         currentGroupId.value = newGroups[0]!.id;
       }
     };

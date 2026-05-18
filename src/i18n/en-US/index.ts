@@ -807,6 +807,7 @@ export default {
           },
           errors: {
             removeFailed: 'Removal failed',
+            memberNotFound: 'Member not found',
           },
           role: {
             father: 'Father',

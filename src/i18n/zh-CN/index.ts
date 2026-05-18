@@ -802,6 +802,7 @@ export default {
           },
           errors: {
             removeFailed: '移除失败',
+            memberNotFound: '成员信息未找到',
           },
           role: {
             father: '爸爸',

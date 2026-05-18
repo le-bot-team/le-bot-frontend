@@ -82,7 +82,6 @@ function onConfirm() {
 
 function onCancel() {
   emit('update:modelValue', false);
-  emit('cancel');
 }
 
 function onDialogHide() {
