@@ -381,8 +381,8 @@ export function useChatSession(): UseChatSessionReturn {
     setupWsHandlers();
 
     // Connect WebSocket with optional deviceId for virtual device binding
-    const deviceParam = deviceId ? `&deviceId=${deviceId}` : '';
-    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${token}${deviceParam}`;
+    const deviceParam = deviceId ? `&deviceId=${encodeURIComponent(deviceId)}` : '';
+    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}`;
     wsClient.connect(wsUrl);
 
     // Initialize microphone

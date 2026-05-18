@@ -1258,10 +1258,15 @@ export default {
             endTime: '结束时间',
             enabled: '已开启',
             disabled: '已关闭',
+            tip: '开启静音模式后，乐宝将不再主动说话，但您仍可随时唤醒对话。',
           },
           notifications: {
             muteEnabled: '已开启静音模式',
             muteDisabled: '已关闭静音模式',
+            notificationsEnabled: '已开启静音通知',
+            notificationsDisabled: '已关闭静音通知',
+            autoMuteEnabled: '已开启定时静音',
+            autoMuteDisabled: '已关闭定时静音',
           },
         },
         VoiceCallPage: {

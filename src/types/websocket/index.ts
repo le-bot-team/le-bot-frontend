@@ -6,6 +6,7 @@ export class WsWrapper {
   private _onOpenHandlers: (() => void)[] = [];
   private _actionHandlers: Map<WsAction, WsHandler<never>> = new Map();
   private _ws: WebSocket | undefined;
+  private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(url: string) {
     this.url = url;
@@ -13,6 +14,10 @@ export class WsWrapper {
   }
 
   destroy() {
+    if (this._reconnectTimer !== undefined) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = undefined;
+    }
     if (this._ws) {
       this._ws.onclose = null;
       this._ws.close();
@@ -53,7 +58,8 @@ export class WsWrapper {
     this._ws = new WebSocket(this.url);
     this._ws.onclose = () => {
       console.log('[WsWrapper] WebSocket closed, reconnecting in 3s...');
-      setTimeout(() => {
+      this._reconnectTimer = setTimeout(() => {
+        this._reconnectTimer = undefined;
         this._connect();
       }, 3000);
     };

@@ -23,6 +23,11 @@ import { useRouter } from 'vue-router';
 import { i18nSubPath } from 'src/utils/common';
 import { bus } from 'src/boot/bus';
 
+import imgRobot from 'src/assets/lanhu/chat/img-1.png';
+import imgBtnUnmute from 'src/assets/lanhu/chat/btn-unmute-chat.png';
+import imgBtnMute from 'src/assets/lanhu/chat/btn-mute-mode-chat.png';
+import imgBtnClose from 'src/assets/lanhu/chat/btn-close-chat.png';
+
 const i18n = i18nSubPath('pages.stack.chat.VoiceCallPage');
 const router = useRouter();
 
@@ -96,7 +101,7 @@ onBeforeUnmount(() => {
     <div class="voice-call__robot-area">
       <img
         class="voice-call__robot-img"
-        src="src/assets/lanhu/chat/img-1.png"
+        :src="imgRobot"
         alt="乐宝"
       />
     </div>
@@ -140,7 +145,7 @@ onBeforeUnmount(() => {
           @click="toggleMute"
         >
           <img
-            src="src/assets/lanhu/chat/btn-unmute-chat.png"
+            :src="imgBtnUnmute"
             alt="取消静音"
             class="voice-call__btn-icon"
           />
@@ -153,7 +158,7 @@ onBeforeUnmount(() => {
           @click="toggleMute"
         >
           <img
-            src="src/assets/lanhu/chat/btn-mute-mode-chat.png"
+            :src="imgBtnMute"
             alt="静音模式"
             class="voice-call__btn-icon"
           />
@@ -172,7 +177,7 @@ onBeforeUnmount(() => {
         <!-- Close/Hangup button — btn_close_chat: red circle with X -->
         <button class="voice-call__btn voice-call__btn--close" @click="endCall">
           <img
-            src="src/assets/lanhu/chat/btn-close-chat.png"
+            :src="imgBtnClose"
             alt="挂断"
             class="voice-call__btn-icon"
           />
@@ -197,7 +202,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   min-height: 100%;
-  background: #f5f5f0 url('../assets/lanhu/chat/img-1.png') no-repeat center top;
+  background: #f5f5f0 url('../../../assets/lanhu/chat/img-1.png') no-repeat center top;
   background-size: 375px 367px; // match design 组385 dimensions
   padding-bottom: env(safe-area-inset-bottom);
   overflow: hidden;

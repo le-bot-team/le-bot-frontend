@@ -27,8 +27,8 @@ function toggleNotifications() {
   notify({
     type: 'info',
     message: muteNotifications.value
-      ? '已开启静音通知'
-      : '已关闭静音通知',
+      ? i18n('notifications.notificationsEnabled')
+      : i18n('notifications.notificationsDisabled'),
   });
 }
 
@@ -36,8 +36,8 @@ function toggleAutoMute() {
   notify({
     type: 'info',
     message: autoMute.value
-      ? '已开启定时静音'
-      : '已关闭定时静音',
+      ? i18n('notifications.autoMuteEnabled')
+      : i18n('notifications.autoMuteDisabled'),
   });
 }
 </script>
@@ -101,7 +101,7 @@ function toggleAutoMute() {
     <!-- Tip -->
     <div class="mute-settings-tip">
       <q-icon name="info_outline" size="16px" />
-      <span>开启静音模式后，乐宝将不再主动说话，但您仍可随时唤醒对话。</span>
+      <span>{{ i18n('labels.tip') }}</span>
     </div>
   </q-page>
 </template>

@@ -1279,10 +1279,15 @@ export default {
             endTime: 'End Time',
             enabled: 'Enabled',
             disabled: 'Disabled',
+            tip: 'When mute mode is enabled, Lebao will not speak proactively, but you can still wake it up anytime.',
           },
           notifications: {
             muteEnabled: 'Mute mode enabled',
             muteDisabled: 'Mute mode disabled',
+            notificationsEnabled: 'Mute notifications enabled',
+            notificationsDisabled: 'Mute notifications disabled',
+            autoMuteEnabled: 'Scheduled mute enabled',
+            autoMuteDisabled: 'Scheduled mute disabled',
           },
         },
         VoiceCallPage: {

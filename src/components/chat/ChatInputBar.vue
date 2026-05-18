@@ -34,7 +34,10 @@ function handleDown(event: PointerEvent) {
 function handleUp(event: PointerEvent) {
   if (!isDown.value) return;
   isDown.value = false;
-  (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
+  const el = event.currentTarget as HTMLElement;
+  if (el.hasPointerCapture?.(event.pointerId)) {
+    el.releasePointerCapture(event.pointerId);
+  }
   emit('release');
 }
 </script>
