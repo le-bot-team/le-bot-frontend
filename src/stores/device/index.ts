@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import type { DeviceInfo } from 'stores/device/types';
+import type { DeviceConfig, DeviceInfo } from 'stores/device/types';
 
 export const useDeviceStore = defineStore(
   'device',
@@ -14,10 +14,19 @@ export const useDeviceStore = defineStore(
       currentDevice.value = newDevices[0];
     };
 
+    const updateCurrentDeviceConfig = (patch: Partial<DeviceConfig>) => {
+      if (!currentDevice.value) return;
+      currentDevice.value.config = {
+        ...currentDevice.value.config,
+        ...patch,
+      };
+    };
+
     return {
       currentDevice,
       devices,
       updateDevices,
+      updateCurrentDeviceConfig,
     };
   },
   {
