@@ -25,7 +25,7 @@ const emit = defineEmits<{
 const isDown = ref(false);
 
 function handleDown(event: PointerEvent) {
-  if (props.disabled) return;
+  if (props.disabled || isDown.value) return;
   isDown.value = true;
   (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
   emit('press');

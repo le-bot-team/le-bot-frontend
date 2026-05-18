@@ -92,7 +92,7 @@ export class MockChatWebSocket {
 
   private _handleUpdateConfig(request: { id: string; data?: Record<string, unknown> }): void {
     const data = request.data as { conversationId?: string } | undefined;
-    this._conversationId = data?.conversationId ?? uid();
+    this._conversationId = data?.conversationId || uid();
     this._dispatch({
       id: uid(),
       action: WsAction.updateConfig,

@@ -107,6 +107,15 @@ export default {
         },
       },
     },
+    chat: {
+      ChatMessageItem: {
+        labels: {
+          typing: 'Typing',
+          playAudio: 'Play audio',
+          stopAudio: 'Stop audio',
+        },
+      },
+    },
     home: {
       DeviceCard: {
         labels: {

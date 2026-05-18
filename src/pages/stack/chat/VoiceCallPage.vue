@@ -205,8 +205,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   min-height: 100%;
-  background: #f5f5f0 url('../../../assets/lanhu/chat/img-1.png') no-repeat center top;
-  background-size: 375px 367px; // match design 组385 dimensions
+  background: #f5f5f0;
   padding-bottom: env(safe-area-inset-bottom);
   overflow: hidden;
 }

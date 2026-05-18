@@ -107,6 +107,15 @@ export default {
         },
       },
     },
+    chat: {
+      ChatMessageItem: {
+        labels: {
+          typing: '正在输入',
+          playAudio: '播放语音',
+          stopAudio: '停止播放',
+        },
+      },
+    },
     home: {
       DeviceCard: {
         labels: {

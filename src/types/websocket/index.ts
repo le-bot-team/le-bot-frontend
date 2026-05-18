@@ -58,13 +58,22 @@ export class WsWrapper {
     this._ws = new WebSocket(this.url);
     this._ws.onclose = () => {
       console.log('[WsWrapper] WebSocket closed, reconnecting in 3s...');
+      if (this._reconnectTimer !== undefined) {
+        clearTimeout(this._reconnectTimer);
+      }
       this._reconnectTimer = setTimeout(() => {
         this._reconnectTimer = undefined;
         this._connect();
       }, 3000);
     };
     this._ws.onmessage = async (event) => {
-      const message = JSON.parse(event.data as string);
+      let message: { action: WsAction; data?: unknown };
+      try {
+        message = JSON.parse(event.data as string);
+      } catch {
+        console.warn('[WsWrapper] Failed to parse message:', event.data);
+        return;
+      }
       if (this._actionHandlers.has(message.action)) {
         await this._actionHandlers.get(message.action)?.call(this, message as never);
       } else {

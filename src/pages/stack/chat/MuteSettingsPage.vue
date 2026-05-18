@@ -14,28 +14,28 @@ const autoMute = ref(false);
 const autoMuteStart = ref('22:00');
 const autoMuteEnd = ref('07:00');
 
-function toggleMuteMode() {
+function toggleMuteMode(val: boolean) {
   notify({
     type: 'info',
-    message: muteMode.value
+    message: val
       ? i18n('notifications.muteEnabled')
       : i18n('notifications.muteDisabled'),
   });
 }
 
-function toggleNotifications() {
+function toggleNotifications(val: boolean) {
   notify({
     type: 'info',
-    message: muteNotifications.value
+    message: val
       ? i18n('notifications.notificationsEnabled')
       : i18n('notifications.notificationsDisabled'),
   });
 }
 
-function toggleAutoMute() {
+function toggleAutoMute(val: boolean) {
   notify({
     type: 'info',
-    message: autoMute.value
+    message: val
       ? i18n('notifications.autoMuteEnabled')
       : i18n('notifications.autoMuteDisabled'),
   });

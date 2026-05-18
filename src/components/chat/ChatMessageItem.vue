@@ -7,6 +7,9 @@
 import { computed, ref } from 'vue';
 
 import type { ChatMessage } from 'src/types/chat/types';
+import { i18nSubPath } from 'src/utils/common';
+
+const i18n = i18nSubPath('components.chat.ChatMessageItem');
 
 const props = defineProps<{
   message: ChatMessage;
@@ -30,12 +33,20 @@ function toggleAudio() {
     el.currentTime = 0;
     isPlaying.value = false;
   } else {
-    el.play().catch(console.error);
-    isPlaying.value = true;
+    el.play()
+      .then(() => { isPlaying.value = true; })
+      .catch((err) => {
+        console.error('[ChatMessageItem] audio play failed:', err);
+        isPlaying.value = false;
+      });
   }
 }
 
 function onAudioEnded() {
+  isPlaying.value = false;
+}
+
+function onAudioError() {
   isPlaying.value = false;
 }
 </script>
@@ -43,7 +54,7 @@ function onAudioEnded() {
 <template>
   <div class="chat-bubble" :class="isUser ? 'chat-bubble--user' : 'chat-bubble--ai'">
     <template v-if="isTyping">
-      <span class="chat-bubble__typing" aria-label="typing">
+      <span class="chat-bubble__typing" :aria-label="i18n('labels.typing')">
         <span class="chat-bubble__typing-dot" />
         <span class="chat-bubble__typing-dot" />
         <span class="chat-bubble__typing-dot" />
@@ -55,7 +66,7 @@ function onAudioEnded() {
         v-if="hasAudio && message.isFinished"
         class="chat-bubble__audio-btn"
         :class="{ 'chat-bubble__audio-btn--playing': isPlaying }"
-        :aria-label="isPlaying ? 'Stop audio' : 'Play audio'"
+        :aria-label="isPlaying ? i18n('labels.stopAudio') : i18n('labels.playAudio')"
         @click.stop="toggleAudio"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -69,6 +80,7 @@ function onAudioEnded() {
         :src="message.audioUrl"
         preload="none"
         @ended="onAudioEnded"
+        @error="onAudioError"
       />
     </template>
   </div>
