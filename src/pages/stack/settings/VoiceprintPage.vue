@@ -56,7 +56,7 @@ onMounted(async () => {
         @keydown.space.prevent="goDetail(person.person_id)"
       >
         <div class="voiceprint-row__left">
-          <span>{{ i18n('labels.personVoiceprint', { name: person.name }) }}</span>
+          <span>{{ i18n('labels.personVoiceprint', { name: person.name || '' }) }}</span>
           <span v-if="person.is_temporal" class="voiceprint-row__temporal-tag">
             {{ i18n('labels.temporalTag') }}
           </span>

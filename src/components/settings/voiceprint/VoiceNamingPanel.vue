@@ -79,7 +79,7 @@ const chooseRelationship = (): void => {
 <template>
   <div class="voice-naming-panel">
     <!-- Central avatar or fallback icon (88×88, design d2a7b5f3) -->
-    <img v-if="avatarSrc" class="voice-naming-avatar" :src="avatarSrc" alt="voiceprint" />
+    <img v-if="avatarSrc" class="voice-naming-avatar" :src="avatarSrc" alt="" aria-hidden="true" />
     <div v-else class="voice-naming-avatar voice-naming-avatar--icon">
       <q-icon name="record_voice_over" size="80px" color="primary" />
     </div>

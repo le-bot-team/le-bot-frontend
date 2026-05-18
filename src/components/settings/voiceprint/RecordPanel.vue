@@ -201,14 +201,14 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="voiceprint-record-pet-stage">
-        <img :src="robotImg" alt="aipet" class="voiceprint-record-pet-img" />
+        <img :src="robotImg" alt="" aria-hidden="true" class="voiceprint-record-pet-img" />
       </div>
 
       <p class="voiceprint-record-phrase">
         {{ i18n('labels.readAloudPhrasesDescription') }}
       </p>
 
-      <img :src="iconRead" alt="read" class="voiceprint-record-read-icon" />
+      <img :src="iconRead" alt="" aria-hidden="true" class="voiceprint-record-read-icon" />
 
       <div class="voiceprint-record-waveform" aria-hidden="true">
         <span v-for="n in 21" :key="n" class="voiceprint-record-wave-bar" />
