@@ -1,6 +1,9 @@
 <script setup lang="ts">
 // OnboardingCompletePage — Post-registration landing page.
 // User can choose: add a virtual device OR scan to join an existing family group.
+import { i18nSubPath } from 'src/utils/common';
+
+const i18n = i18nSubPath('pages.stack.OnboardingCompletePage');
 </script>
 
 <template>
@@ -18,17 +21,19 @@
           />
         </svg>
       </div>
-      <h2 class="onboarding-complete-title">注册完成</h2>
-      <p class="onboarding-complete-desc">欢迎加入乐宝！请选择下一步操作：</p>
+      <h2 class="onboarding-complete-title">{{ i18n('labels.title') }}</h2>
+      <p class="onboarding-complete-desc">{{ i18n('labels.subtitle') }}</p>
 
       <div class="onboarding-complete-actions">
         <button class="auth-btn-primary" @click="$router.replace('/main/home')">
-          添加虚拟设备
+          {{ i18n('options.addDevice.title') }}
         </button>
         <button class="auth-btn-weak" @click="$router.replace('/main/home')">
-          扫码加入家庭组
+          {{ i18n('options.scanJoin.title') }}
         </button>
       </div>
+
+      <p class="onboarding-complete-footer">{{ i18n('labels.footerHint') }}</p>
     </div>
   </q-page>
 </template>
@@ -72,5 +77,12 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
+}
+
+.onboarding-complete-footer {
+  font-size: 13px;
+  color: var(--clr-text-secondary, #9398a9);
+  margin: 16px 0 0;
+  text-align: center;
 }
 </style>

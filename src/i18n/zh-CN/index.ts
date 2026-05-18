@@ -358,6 +358,7 @@ export default {
         labels: {
           title: '乐宝',
           description: '您的智能宠物好伙伴',
+          profileSetupTitle: '完善个人信息',
         },
       },
       HomePage: {

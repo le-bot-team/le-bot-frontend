@@ -25,7 +25,7 @@ export const MOCK_CODE_COOLDOWN_MS = 60_000;
 
 /**
  * Mock user data returned after successful login/registration.
- * Default: existing user with password, goes directly to finish.
+ * Default: existing user with password, goes directly to profile setup.
  */
 export const MOCK_AUTH_DATA = {
   accessToken: MOCK_ACCESS_TOKEN,

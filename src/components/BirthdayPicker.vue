@@ -40,12 +40,12 @@ const daysInMonth = computed(() => {
 
 const days = computed(() => Array.from({ length: daysInMonth.value }, (_, i) => i + 1));
 
-// Clamp day if month/year changes
+// Clamp day if month/year changes (immediate to handle invalid initial values)
 watch([year, month], () => {
   if (day.value > daysInMonth.value) {
     day.value = daysInMonth.value;
   }
-});
+}, { immediate: true });
 
 // Emit formatted date on any change
 watch(
@@ -65,7 +65,8 @@ watch(
     const parsed = parseDate(val);
     year.value = parsed.y;
     month.value = parsed.m;
-    day.value = parsed.d;
+    const maxDay = new Date(parsed.y, parsed.m, 0).getDate();
+    day.value = Math.min(parsed.d, maxDay);
   },
 );
 </script>

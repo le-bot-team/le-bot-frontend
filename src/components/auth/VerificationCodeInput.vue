@@ -81,13 +81,15 @@ const sendCode = async () => {
       />
     </div>
     <div class="input-group input-group--action">
-      <span
+      <button
+        type="button"
         class="action-link"
         :class="{ 'action-link--disabled': !canSendCode }"
+        :disabled="!canSendCode"
         @click="sendCode"
       >
         {{ sendCodeLabel }}
-      </span>
+      </button>
     </div>
   </div>
 </template>
@@ -160,6 +162,10 @@ const sendCode = async () => {
   white-space: nowrap;
   user-select: none;
   text-align: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
 }
 
 .action-link--disabled {

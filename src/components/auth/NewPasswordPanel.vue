@@ -18,8 +18,9 @@ const emit = defineEmits<{
   previous: [];
 }>();
 
+const authStore = useAuthStore();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
-  storeToRefs(useAuthStore());
+  storeToRefs(authStore);
 
 const code = ref<string>();
 const newPassword = ref<string>();
@@ -107,6 +108,7 @@ const sendCode = async () => {
       isSendingCode.value = false;
       return;
     }
+    authStore.markCodeSent();
   } catch (err) {
     errorMsg.value = (err as Error).message || '验证码发送失败';
   }

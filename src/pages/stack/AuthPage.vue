@@ -9,11 +9,15 @@ import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
 import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
 import { router } from 'src/router';
+import { i18nSubPath } from 'src/utils/common';
+
+const i18n = i18nSubPath('pages.main.AuthPage');
 
 const avatar = ref<string>('');
 const email = ref<string>('');
 const isNew = ref<boolean>(false);
 const panelIndex = ref<number>(0);
+const skippedPassword = ref<boolean>(false);
 
 function onProfileFinish() {
   // After profile setup, navigate to the onboarding complete guide page
@@ -22,7 +26,9 @@ function onProfileFinish() {
 }
 
 function goBack() {
-  if (panelIndex.value > 0) {
+  if (panelIndex.value === 2 && skippedPassword.value) {
+    panelIndex.value = 0;
+  } else if (panelIndex.value > 0) {
     panelIndex.value--;
   }
 }
@@ -74,11 +80,11 @@ function goBack() {
         class="auth-slogan"
         :class="{ 'auth-slogan--sm': panelIndex === 1 }"
       >
-        您的智宠好伙伴
+        {{ i18n('labels.description') }}
       </div>
 
       <!-- Sub-page title: centered title bar for non-entry pages -->
-      <div v-if="panelIndex === 2" class="auth-title">完善个人信息</div>
+      <div v-if="panelIndex === 2" class="auth-title">{{ i18n('labels.profileSetupTitle') }}</div>
 
       <q-tab-panels class="full-width bg-transparent" v-model="panelIndex">
         <sign-in-or-sign-up-panel
@@ -87,8 +93,7 @@ function goBack() {
             (_isNew, _email, _code, needsPassword) => {
               isNew = _isNew;
               email = _email;
-              // needsPassword: new user or existing user without password -> password setup
-              // otherwise: skip directly to profile setup
+              skippedPassword = !needsPassword;
               panelIndex = needsPassword ? 1 : 2;
             }
           "

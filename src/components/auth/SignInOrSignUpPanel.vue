@@ -18,8 +18,9 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const authStore = useAuthStore();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
-  storeToRefs(useAuthStore());
+  storeToRefs(authStore);
 const { notify } = useQuasar();
 const { trackConversion } = useTracker();
 
@@ -78,6 +79,7 @@ const sendCode = async () => {
       return;
     }
     notify({ type: 'positive', message: '验证码已发送' });
+    authStore.markCodeSent();
   } catch (err) {
     errorMsg.value = (err as Error).message || '验证码发送失败';
   }

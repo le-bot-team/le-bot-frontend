@@ -21,9 +21,14 @@ export const useAuthStore = defineStore(
       }
     };
 
+    const markCodeSent = () => {
+      sendCodeTime.value = Date.now();
+    };
+
     return {
       accessToken,
       isNeverSendCode,
+      markCodeSent,
       remainedSendCodeCooldownSeconds,
       tryResetSendCodeCooldown,
     };

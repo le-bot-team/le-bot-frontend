@@ -363,6 +363,7 @@ export default {
         labels: {
           title: 'Le Bot',
           description: 'Your intelligent pet and good companion',
+          profileSetupTitle: 'Complete Your Profile',
         },
       },
       HomePage: {
@@ -1416,6 +1417,26 @@ export default {
         },
       },
       // ===== Batch 5: Onboarding =====
+      OnboardingCompletePage: {
+        labels: {
+          title: 'Setup Complete!',
+          subtitle: "What would you like to do next?",
+          footerHint: 'You can also do this later in "Family Group"',
+        },
+        options: {
+          addDevice: {
+            title: 'Add Virtual LeBot',
+            description: 'Create a dedicated intelligent companion for your child',
+          },
+          scanJoin: {
+            title: 'Scan to Join Family Group',
+            description: 'Join an existing family group via invitation code',
+          },
+        },
+        notifications: {
+          scanComingSoon: 'Scan feature coming soon',
+        },
+      },
       OnboardingGuidePage: {
         labels: {
           skip: 'Skip',

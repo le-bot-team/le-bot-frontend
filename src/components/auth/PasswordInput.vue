@@ -21,10 +21,12 @@ const i18n = i18nSubPath('components.auth.PasswordInput');
         @focus="isFocusedPassword = true"
         @blur="isFocusedPassword = false"
       />
-      <span
+      <button
         v-if="isFocusedPassword || modelValue?.length"
+        type="button"
         class="action-icon"
         @click="showPassword = !showPassword"
+        aria-label="Toggle password visibility"
       >
         <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path
@@ -42,7 +44,7 @@ const i18n = i18nSubPath('components.auth.PasswordInput');
           />
           <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
         </svg>
-      </span>
+      </button>
     </div>
   </div>
 </template>
@@ -114,5 +116,8 @@ const i18n = i18nSubPath('components.auth.PasswordInput');
   align-items: center;
   justify-content: center;
   margin-right: 12px;
+  border: none;
+  background: none;
+  padding: 0;
 }
 </style>

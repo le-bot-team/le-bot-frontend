@@ -1,15 +1,17 @@
 <script setup lang="ts">
 // LegalPage — Generic legal document page (terms of service, user agreement, privacy policy).
-// Content will be fetched from backend or loaded from static assets when available.
+// Routes to the appropriate i18n content based on the URL slug.
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { i18nSubPath } from 'src/utils/common';
+
 const route = useRoute();
 
-const titleMap: Record<string, string> = {
-  'terms-of-service': '服务条款',
-  'user-agreement': '用户协议',
-  'privacy-policy': '隐私政策',
+const pageKeyMap: Record<string, string> = {
+  'terms-of-service': 'TermsOfServicePage',
+  'user-agreement': 'UserAgreementPage',
+  'privacy-policy': 'PrivacyPolicyPage',
 };
 
 const slug = computed(() => {
@@ -18,7 +20,26 @@ const slug = computed(() => {
   return segments[segments.length - 1] || '';
 });
 
-const title = computed(() => titleMap[slug.value] || '法律条款');
+const pageKey = computed(() => pageKeyMap[slug.value] || 'TermsOfServicePage');
+const i18n = computed(() => i18nSubPath(`pages.stack.settings.${pageKey.value}`));
+
+const title = computed(() => i18n.value('labels.title'));
+
+// Collect content sections dynamically (title1/body1, title2/body2, etc.)
+const sections = computed(() => {
+  const result: { title: string; body: string }[] = [];
+  for (let i = 1; i <= 10; i++) {
+    const t = i18n.value(`content.title${i}`);
+    const b = i18n.value(`content.body${i}`);
+    // i18nSubPath returns the key path if not found
+    if (t && !t.includes(`content.title${i}`) && b && !b.includes(`content.body${i}`)) {
+      result.push({ title: t, body: b });
+    } else {
+      break;
+    }
+  }
+  return result;
+});
 </script>
 
 <template>
@@ -26,7 +47,11 @@ const title = computed(() => titleMap[slug.value] || '法律条款');
     <div class="legal-container">
       <h1 class="legal-title">{{ title }}</h1>
       <div class="legal-content">
-        <p class="legal-placeholder">内容加载中…</p>
+        <template v-for="(section, idx) in sections" :key="idx">
+          <h2 class="legal-section-title">{{ section.title }}</h2>
+          <p class="legal-section-body">{{ section.body }}</p>
+        </template>
+        <p v-if="!sections.length" class="legal-placeholder">Loading...</p>
       </div>
     </div>
   </q-page>
@@ -54,11 +79,23 @@ const title = computed(() => titleMap[slug.value] || '法律条款');
 .legal-content {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--clr-text-secondary, #9398a9);
+  color: var(--clr-text-secondary, #666);
+}
+
+.legal-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--clr-text, #120e2c);
+  margin: 20px 0 8px;
+}
+
+.legal-section-body {
+  margin: 0 0 16px;
 }
 
 .legal-placeholder {
   text-align: center;
   padding: 40px 0;
+  color: var(--clr-text-secondary, #9398a9);
 }
 </style>
