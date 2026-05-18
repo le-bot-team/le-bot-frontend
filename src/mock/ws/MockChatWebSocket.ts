@@ -35,17 +35,19 @@ export class MockChatWebSocket {
     this.url = url;
     this._conversationId = '';
 
-    setTimeout(() => {
-      this.readyState = 1;
-      this.onopen?.();
+    this._addTimer(
+      setTimeout(() => {
+        this.readyState = 1;
+        this.onopen?.();
 
-      this._dispatch({
-        id: uid(),
-        action: WsAction.establishConnection,
-        success: true,
-        message: 'Connection established',
-      });
-    }, 100);
+        this._dispatch({
+          id: uid(),
+          action: WsAction.establishConnection,
+          success: true,
+          message: 'Connection established',
+        });
+      }, 100),
+    );
   }
 
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {

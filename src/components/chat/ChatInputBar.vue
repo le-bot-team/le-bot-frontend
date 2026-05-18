@@ -40,6 +40,18 @@ function handleUp(event: PointerEvent) {
   }
   emit('release');
 }
+
+function handleKeyDown() {
+  if (props.disabled || isDown.value) return;
+  isDown.value = true;
+  emit('press');
+}
+
+function handleKeyUp() {
+  if (!isDown.value) return;
+  isDown.value = false;
+  emit('release');
+}
 </script>
 
 <template>
@@ -53,6 +65,10 @@ function handleUp(event: PointerEvent) {
     @pointerup="handleUp"
     @pointercancel="handleUp"
     @pointerleave="handleUp"
+    @keydown.enter.prevent="handleKeyDown"
+    @keydown.space.prevent="handleKeyDown"
+    @keyup.enter="handleKeyUp"
+    @keyup.space="handleKeyUp"
     @contextmenu.prevent
   >
     <span class="chat-input-bar__icon" aria-hidden="true">

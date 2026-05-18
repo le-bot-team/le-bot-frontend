@@ -18,7 +18,7 @@ const props = defineProps<{
 const isUser = computed(() => props.message.role === 'user');
 const hasText = computed(() => props.message.text.length > 0);
 const isTyping = computed(
-  () => !props.message.isFinished && props.message.isStreaming && !hasText.value,
+  () => !isUser.value && !props.message.isFinished && props.message.isStreaming && !hasText.value,
 );
 const hasAudio = computed(() => !!props.message.audioUrl);
 
