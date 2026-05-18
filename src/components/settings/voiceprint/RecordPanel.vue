@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // RecordPanel — lanhu designs 4e6ad306 (录制准备) / 1ed5ff10 (朗读短语) / 10d09505 (声纹录制4)
-import { ref, watch } from 'vue';
+import type { IMediaRecorder } from 'extendable-media-recorder';
+import { MediaRecorder } from 'extendable-media-recorder';
+import { onBeforeUnmount, ref, watch } from 'vue';
 
 import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
 import robotImg from 'src/assets/lanhu/home/icon-robot-set-home.png';
@@ -89,7 +91,7 @@ const resetRecording = (): void => {
   audioData.value = undefined;
 };
 
-let mediaRecorder: MediaRecorder | null = null;
+let mediaRecorder: IMediaRecorder | null = null;
 let mediaStream: MediaStream | null = null;
 let recordedChunks: Blob[] = [];
 
@@ -108,14 +110,14 @@ const startRecording = async (): Promise<void> => {
       },
     });
     recordedChunks = [];
-    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
+    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/wav' });
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         recordedChunks.push(event.data);
       }
     };
     mediaRecorder.onstop = () => {
-      audioData.value = new Blob(recordedChunks, { type: 'audio/webm' });
+      audioData.value = new Blob(recordedChunks, { type: 'audio/wav' });
       cleanup();
     };
     mediaRecorder.start(200);
@@ -137,6 +139,21 @@ const cleanup = (): void => {
   mediaStream = null;
   mediaRecorder = null;
 };
+
+onBeforeUnmount(() => {
+  if (isRecording.value) {
+    stopRecording();
+  }
+  cleanup();
+  if (audioEl) {
+    audioEl.pause();
+    audioEl = null;
+  }
+  if (audioSrc.value) {
+    URL.revokeObjectURL(audioSrc.value);
+    audioSrc.value = undefined;
+  }
+});
 </script>
 
 <template>
@@ -233,7 +250,8 @@ const cleanup = (): void => {
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel="stopRecording"
-          @keydown.enter.space.prevent="isRecording ? stopRecording() : startRecording()"
+          @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
+          @keydown.space.prevent="isRecording ? stopRecording() : startRecording()"
         >
           <div class="voiceprint-record-pulse-inner" />
         </div>

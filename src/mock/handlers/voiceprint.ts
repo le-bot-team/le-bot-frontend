@@ -6,8 +6,8 @@ import { mockError, mockId, mockSuccess } from 'src/mock/utils';
 import type { Person, PersonDetail, UpdatePersonRequest } from 'src/types/api/voiceprint';
 import type { VprRelationship } from 'components/vpr-relationships';
 
-/** Mutable copy of persons that mock endpoints operate on */
-const persons: PersonDetail[] = [...MOCK_PERSONS];
+/** Mutable deep copy of persons that mock endpoints operate on */
+const persons: PersonDetail[] = structuredClone(MOCK_PERSONS);
 
 /**
  * Register mock handlers for the voiceprint module.
@@ -123,7 +123,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
       return [200, mockError('人物不存在')];
     }
 
-    const data = JSON.parse(config.data) as UpdatePersonRequest;
+    const data = JSON.parse(config.data ?? '{}') as UpdatePersonRequest;
     if (data.name !== undefined) person.name = data.name;
     if (data.relationship !== undefined) person.relationship = data.relationship;
     if (data.isTemporal !== undefined) person.is_temporal = data.isTemporal;

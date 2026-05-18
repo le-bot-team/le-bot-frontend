@@ -49,7 +49,11 @@ onMounted(async () => {
         v-for="person in persons"
         :key="person.person_id"
         class="voiceprint-row"
+        role="button"
+        tabindex="0"
         @click="goDetail(person.person_id)"
+        @keydown.enter="goDetail(person.person_id)"
+        @keydown.space.prevent="goDetail(person.person_id)"
       >
         <div class="voiceprint-row__left">
           <span>{{ i18n('labels.personVoiceprint', { name: person.name }) }}</span>

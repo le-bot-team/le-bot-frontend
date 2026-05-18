@@ -112,8 +112,8 @@ const chooseRelationship = (): void => {
       </div>
     </template>
 
-    <!-- Audio preview (placeholder when audioSrc is empty) -->
-    <audio class="voice-naming-audio" controls :src="audioSrc || undefined" />
+    <!-- Audio preview (only rendered when audioSrc is available) -->
+    <audio v-if="audioSrc" class="voice-naming-audio" controls :src="audioSrc" />
 
     <div class="voice-naming-spacer" aria-hidden="true" />
 
