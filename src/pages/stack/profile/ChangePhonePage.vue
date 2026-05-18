@@ -29,6 +29,17 @@ const { updateProfile } = profileStore;
 type Step = 'verifyOld' | 'bindNew';
 const step = ref<Step>(profile.value?.phone ? 'verifyOld' : 'bindNew');
 
+// Keep step in sync with profile phone state (handles async profile load)
+watch(
+  () => profile.value?.phone,
+  (phone) => {
+    // Only auto-adjust if user hasn't already advanced to step 2
+    if (step.value === 'verifyOld' && !phone) {
+      step.value = 'bindNew';
+    }
+  },
+);
+
 // ── Shared state ──
 const isSubmitting = ref(false);
 const errorMsg = ref('');
