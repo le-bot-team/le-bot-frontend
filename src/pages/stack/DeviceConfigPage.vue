@@ -7,7 +7,6 @@ import { onBeforeMount, computed } from 'vue';
 
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
 import { router } from 'src/router';
-import { logoutAccount } from 'src/utils/account';
 import { i18nSubPath } from 'src/utils/common';
 import { unbindAndRemoveDevice } from 'src/utils/device';
 import { useDeviceStore } from 'stores/device';
@@ -39,25 +38,21 @@ function handleUnbind() {
     },
   }).onOk(() => {
     void (async () => {
-      if (isVirtual.value) {
-        try {
-          await unbindAndRemoveDevice(currentDevice.value!.id);
-          $q.notify({
-            type: 'positive',
-            message: i18n('notifications.unbindSuccess'),
-            icon: 'check',
-          });
-          router.replace('/main/home').catch(console.error);
-        } catch (err) {
-          console.error('Failed to unbind device:', err);
-          $q.notify({
-            type: 'negative',
-            message: i18n('notifications.unbindFailed'),
-            icon: 'error',
-          });
-        }
-      } else {
-        logoutAccount();
+      try {
+        await unbindAndRemoveDevice(currentDevice.value!.id);
+        $q.notify({
+          type: 'positive',
+          message: i18n('notifications.unbindSuccess'),
+          icon: 'check',
+        });
+        router.replace('/main/home').catch(console.error);
+      } catch (err) {
+        console.error('Failed to unbind device:', err);
+        $q.notify({
+          type: 'negative',
+          message: i18n('notifications.unbindFailed'),
+          icon: 'error',
+        });
       }
     })();
   });

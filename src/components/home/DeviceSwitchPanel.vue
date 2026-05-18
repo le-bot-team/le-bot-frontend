@@ -32,11 +32,11 @@ function getAvatarFor(device: { childInfo?: { gender?: string } | null }): strin
 
 /**
  * 设备显示名称 — 设计稿格式："小新的乐宝"、"小葵的乐宝"
- * 优先使用 childInfo.name + "的乐宝"，fallback 到 device.name
+ * 优先使用 childInfo.name + suffix，fallback 到 device.name
  */
 function getDeviceDisplayName(device: { name?: string | null; childInfo?: { name?: string } | null }): string {
   const childName = device.childInfo?.name;
-  return childName ? `${childName}的乐宝` : (device.name || '未命名设备');
+  return childName ? i18n('deviceSwitch.deviceNameFormat', { name: childName }) : (device.name || i18n('deviceSwitch.unnamedDevice'));
 }
 
 function close() {
@@ -69,12 +69,12 @@ function handleAddDevice() {
 
           <!-- 设备列表: 矩形2023/2024 w335 h64 圆角12 #F2F4F8 -->
           <div class="device-switch-list">
-            <div
+            <button
               v-for="device in devices"
               :key="device.id"
+              type="button"
               class="device-switch-item"
               :class="{ 'device-switch-item--active': device.id === currentDevice?.id }"
-              role="button"
               @click="selectDevice(device.id)"
             >
               <!-- 头像: img_lebot_example w32 h32 -->
@@ -87,14 +87,14 @@ function handleAddDevice() {
               <div class="device-switch-arrow">
                 <img :src="arrowRightUrl" alt="" />
               </div>
-            </div>
+            </button>
           </div>
 
           <!-- 添加乐宝按钮: 矩形2025 w335 h56 浅绿边框胶囊 + btn_add_lebot_home w12h12 + "添加乐宝" 15px Medium #1FCBF8 -->
-          <div class="device-switch-add" role="button" @click="handleAddDevice">
+          <button type="button" class="device-switch-add" @click="handleAddDevice">
             <img :src="addIconUrl" alt="" class="device-switch-add-icon-img" />
             <span class="device-switch-add-text">{{ i18n('deviceSwitch.addDevice') }}</span>
-          </div>
+          </button>
         </div>
       </div>
     </Transition>

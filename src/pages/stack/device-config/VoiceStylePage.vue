@@ -57,8 +57,10 @@ import speakerIcon from 'src/assets/lanhu/device-config/voice/icon-speaker.png';
 import checkIcon from 'src/assets/lanhu/device-config/voice/icon-check.png';
 import radioIcon from 'src/assets/lanhu/device-config/voice/icon-radio.png';
 import { i18nSubPath } from 'src/utils/common';
+import { useDeviceStore } from 'stores/device';
 
 const i18n = i18nSubPath('pages.stack.VoiceStylePage');
+const deviceStore = useDeviceStore();
 
 type VoiceStyleKey = 'cuteChild' | 'gentleSister' | 'sunnyBoy' | 'cuteRobot' | 'sweetLady';
 
@@ -70,8 +72,9 @@ const styles: ReadonlyArray<{ key: VoiceStyleKey }> = [
   { key: 'sweetLady' },
 ];
 
-// TODO: wire to useDeviceStore voiceStyle/rate once backend contract is ready.
-const selectedKey = ref<VoiceStyleKey>('cuteChild');
+const selectedKey = ref<VoiceStyleKey>(
+  (deviceStore.currentDevice?.config?.voiceStyle as VoiceStyleKey) || 'cuteChild',
+);
 const rate = ref<number>(1.5);
 
 // Slider fill ratio: rate range 0.5..2.0 (span 1.5)
@@ -79,5 +82,6 @@ const ratePct = computed(() => `${((rate.value - 0.5) / 1.5) * 100}%`);
 
 function selectStyle(key: VoiceStyleKey) {
   selectedKey.value = key;
+  deviceStore.updateCurrentDeviceConfig({ voiceStyle: key });
 }
 </script>

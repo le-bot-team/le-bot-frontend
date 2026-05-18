@@ -112,6 +112,7 @@ export default {
         labels: {
           noDevice: '暂无设备连接',
           addNewDevice: '添加设备',
+          defaultName: '我的乐宝',
         },
       },
       TopicCard: {
@@ -388,6 +389,8 @@ export default {
         deviceSwitch: {
           title: '切换设备',
           addDevice: '添加乐宝',
+          deviceNameFormat: '{name}的乐宝',
+          unnamedDevice: '未命名设备',
         },
         notifications: {},
       },
@@ -729,6 +732,7 @@ export default {
             startChat: '开始聊天',
             backToHome: '回到首页',
           },
+          familyGroupName: '{name}的家庭组',
         },
         notifications: {
           fieldsRequired: '请完整填写宝宝的名字和生日',

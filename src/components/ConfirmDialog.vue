@@ -8,6 +8,10 @@
  */
 import { useDialogPluginComponent } from 'quasar';
 
+import { i18nSubPath } from 'src/utils/common';
+
+const i18n = i18nSubPath('components.ConfirmDialog');
+
 const props = withDefaults(
   defineProps<{
     title?: string;
@@ -19,8 +23,8 @@ const props = withDefaults(
   {
     title: '',
     body: '',
-    confirmLabel: '确认',
-    cancelLabel: '取消',
+    confirmLabel: '',
+    cancelLabel: '',
     confirmType: 'primary',
   },
 );
@@ -40,10 +44,10 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
         {{ props.body }}
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat :label="props.cancelLabel" color="grey" @click="onDialogCancel" />
+        <q-btn flat :label="props.cancelLabel || i18n('labels.cancel')" color="grey" @click="onDialogCancel" />
         <q-btn
           flat
-          :label="props.confirmLabel"
+          :label="props.confirmLabel || i18n('labels.confirm')"
           :color="props.confirmType === 'danger' ? 'negative' : 'primary'"
           @click="onDialogOK"
         />

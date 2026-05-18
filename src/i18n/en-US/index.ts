@@ -112,6 +112,7 @@ export default {
         labels: {
           noDevice: 'No device connected',
           addNewDevice: 'Add Device',
+          defaultName: 'My LeBot',
         },
       },
       TopicCard: {
@@ -393,6 +394,8 @@ export default {
         deviceSwitch: {
           title: 'Switch Device',
           addDevice: 'Add Lebot',
+          deviceNameFormat: "{name}'s LeBot",
+          unnamedDevice: 'Unnamed Device',
         },
         notifications: {},
       },
@@ -734,6 +737,7 @@ export default {
             startChat: 'Start Chat',
             backToHome: 'Back to Home',
           },
+          familyGroupName: "{name}'s Family Group",
         },
         notifications: {
           fieldsRequired: "Please fill in your child's name and birthday",

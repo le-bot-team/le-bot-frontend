@@ -80,7 +80,6 @@ function goStep2() {
     $q.notify({ message: i18n('notifications.fieldsRequired'), type: 'warning' });
     return;
   }
-  trackConversion('device_activated');
   step.value = 1;
   // Auto-trigger activation
   void activateDevice();
@@ -104,6 +103,7 @@ async function activateDevice() {
     };
     const device = await activateAndAddVirtualDeviceWithChild(childInfo, deviceDisplayName.value);
     activatedDeviceId.value = device.id;
+    trackConversion('device_activated');
     // Auto advance after short delay
     setTimeout(() => {
       step.value = 2;
@@ -207,7 +207,7 @@ function createFamilyGroupForDevice() {
   const profile = profileStore.profile;
   const newGroup = {
     id: `local-${activatedDeviceId.value}`,
-    name: `${childInfo.name}的家庭组`,
+    name: i18n('step5.familyGroupName', { name: childInfo.name }),
     childName: childInfo.name,
     deviceId: activatedDeviceId.value,
     creatorId: profile?.id ?? '',
