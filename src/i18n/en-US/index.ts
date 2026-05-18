@@ -739,6 +739,7 @@ export default {
           fieldsRequired: "Please fill in your child's name and birthday",
           activateFailed: 'Failed to activate virtual device',
           tokenMissing: 'Session expired, please log in again',
+          voiceprintFailed: 'Voiceprint registration failed',
         },
       },
       FamilyGroupPage: {

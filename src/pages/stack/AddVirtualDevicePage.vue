@@ -152,12 +152,12 @@ async function onVoiceprintRecorded(data: Blob) {
     } else {
       $q.notify({
         type: 'negative',
-        message: result.message || '声纹注册失败',
+        message: result.message || i18n('notifications.voiceprintFailed'),
       });
     }
   } catch (error) {
     console.error('Error during voiceprint registration:', error);
-    $q.notify({ type: 'negative', message: '声纹注册失败' });
+    $q.notify({ type: 'negative', message: i18n('notifications.voiceprintFailed') });
   } finally {
     isRegisteringVoiceprint.value = false;
   }

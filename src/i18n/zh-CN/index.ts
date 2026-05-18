@@ -734,6 +734,7 @@ export default {
           fieldsRequired: '请完整填写宝宝的名字和生日',
           activateFailed: '激活虚拟设备失败',
           tokenMissing: '登录已过期，请重新登录',
+          voiceprintFailed: '声纹注册失败',
         },
       },
       FamilyGroupPage: {
