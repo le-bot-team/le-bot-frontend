@@ -361,6 +361,8 @@
   --clr-growth-section-caption: rgba(147, 152, 169, 1);
   --clr-growth-page-title: rgba(36, 61, 59, 1);
   --clr-growth-page-date: rgba(58, 89, 86, 1);
+  --clr-growth-date-picker-bg: rgba(208, 255, 249, 1);
+  --clr-growth-card-border: rgba(229, 255, 252, 1);
   --clr-growth-stats-bg: rgba(241, 249, 248, 1);
   --clr-growth-stats-divider: rgba(32, 204, 249, 1);
   --clr-growth-accent-bar-top: rgba(129, 236, 223, 1);
@@ -372,6 +374,7 @@
   --clr-growth-accompany-badge: rgba(32, 204, 249, 1);
   --clr-growth-view-report: rgba(83, 89, 89, 1);
   --clr-growth-capability-score: rgba(32, 204, 249, 1);
+  --clr-growth-tab-inactive: rgba(21, 23, 23, 1);
 
   // Chat weekly report & capability detail tokens (designs b84ab479, 8c683896)
   --clr-report-section-title: rgba(21, 23, 23, 1);
@@ -390,28 +393,33 @@
   --growth-page-bg: linear-gradient(
     180deg,
     rgba(114, 228, 218, 1) 0%,
-    rgba(236, 255, 246, 1) 8.7%,
-    rgba(255, 255, 255, 1) 20%
+    rgba(236, 255, 246, 1) 20%,
+    rgba(255, 255, 255, 1) 45%
   );
-  --growth-glow-171-left: -158px;
-  --growth-glow-171-top: -349px;
+  --growth-glow-171-left: -180px;
+  --growth-glow-171-top: -300px;
   --growth-glow-171-size: 675px;
-  --growth-glow-171-opacity: 1;
+  --growth-glow-171-opacity: 0.6;
   --growth-glow-171-gradient: radial-gradient(
-    ellipse at 0% 50%,
-    rgba(129, 236, 223, 1) 10.1%,
-    rgba(131, 212, 202, 0.6) 43.7%,
-    rgba(245, 255, 219, 1) 83%
+    circle 477.3px at 0% 50%,
+    rgba(129, 236, 223, 0.6) 10%,
+    rgba(131, 212, 202, 0.4) 40%,
+    rgba(245, 255, 219, 0.5) 70%,
+    rgba(245, 255, 219, 0) 100%
   );
-  --growth-glow-172-left: 239px;
-  --growth-glow-172-top: 61px;
+  --growth-glow-172-left: 180px;
+  --growth-glow-172-top: -150px;
   --growth-glow-172-size: 357px;
   --growth-glow-172-opacity: 0.8;
   --growth-glow-172-gradient: radial-gradient(
-    ellipse at 50% 0%,
-    rgba(146, 217, 246, 1) 27%,
+    circle 381.8px at 50% 0%,
+    rgba(146, 217, 246, 0.6) 27%,
     rgba(146, 217, 246, 0) 100%
   );
+  --growth-cloud-1-left: -20px;
+  --growth-cloud-1-top: 20px;
+  --growth-cloud-2-right: -10px;
+  --growth-cloud-2-top: 80px;
 }
 
 // ===== AlibabaPuHuiTi Font Face =====
@@ -4172,7 +4180,7 @@ body {
 .growth-page-title {
   font-family: 'YouSheBiaoTiHei', var(--font-family);
   font-size: 36px;
-  font-weight: 400; // YouSheBiaoTiHei has no weight variants
+  font-weight: 700; // YouSheBiaoTiHei-Bold is the design font (postScriptName: YouSheBiaoTiHei-Bold)
   line-height: 47px;
   letter-spacing: 4%;
   color: var(--clr-growth-page-title);

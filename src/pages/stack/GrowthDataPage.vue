@@ -60,14 +60,6 @@ const sectionCapability = ref<HTMLElement>();
 const sectionHotTopics = ref<HTMLElement>();
 const scrollableContainer = ref<HTMLElement>();
 
-// Fixed-top wrapper (title + overview + tab bar). We measure its rendered
-// height via ResizeObserver and feed it into a CSS variable on the page
-// root, so .growth-scrollable can anchor right below it regardless of how
-// tall the overview card becomes (i18n, dynamic content, etc.).
-const fixedTopRef = ref<HTMLElement>();
-const fixedTopHeight = ref(0);
-let fixedTopResizeObserver: ResizeObserver | null = null;
-
 const sectionRefs: Record<string, Ref<HTMLElement | undefined>> = {
   emotion: sectionEmotion,
   interaction: sectionInteraction,
@@ -76,70 +68,118 @@ const sectionRefs: Record<string, Ref<HTMLElement | undefined>> = {
 };
 
 function scrollToSection(name: string) {
+  // Immediately update active tab for instant visual feedback
+  activeTab.value = name;
+
   const el = sectionRefs[name]?.value;
   const container = scrollableContainer.value;
   if (!el || !container) return;
 
-  // IMPORTANT: avoid el.scrollIntoView() — it scrolls ALL scrollable ancestors
-  // (including q-page-container), causing the whole page to shift. Instead we
-  // compute the offset within the scroll container and only scroll the
-  // container itself, keeping the header + tab bar visually fixed.
+  // If content doesn't overflow the container, no scroll is needed
+  if (container.scrollHeight <= container.clientHeight) return;
+
+  // Account for sticky header height so the section's top appears
+  // right below the pinned tab bar, not hidden behind it.
+  const fixedTop = container.querySelector<HTMLElement>('.growth-fixed-top');
+  const stickyHeight = fixedTop?.offsetHeight ?? 0;
+
   const containerRect = container.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
-  const nextTop = container.scrollTop + (elRect.top - containerRect.top);
+  const rawOffset = container.scrollTop + (elRect.top - containerRect.top);
+  const nextTop = Math.max(0, rawOffset - stickyHeight);
   container.scrollTo({ top: nextTop, behavior: 'smooth' });
 }
 
-// --- ScrollSpy: IntersectionObserver updates activeTab ---
-let observer: IntersectionObserver | null = null;
+// --- ScrollSpy: scroll-based section tracking ---
+// Uses scroll position + requestAnimationFrame to determine which section
+// is at the top of the visible area (just below the sticky header).
+// More predictable than IntersectionObserver with complex rootMargin.
 
 onMounted(() => {
-  // Measure the fixed-top zone (title + overview + tab bar) and expose its
-  // height through a reactive ref -> CSS variable.
-  if (fixedTopRef.value) {
-    const applyHeight = () => {
-      if (!fixedTopRef.value) return;
-      fixedTopHeight.value = fixedTopRef.value.getBoundingClientRect().height;
-    };
-    applyHeight();
-    fixedTopResizeObserver = new ResizeObserver(applyHeight);
-    fixedTopResizeObserver.observe(fixedTopRef.value);
-  }
+  const container = scrollableContainer.value;
+  if (!container) return;
 
-  observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          const name = entry.target.getAttribute('data-section');
-          if (name) activeTab.value = name;
-        }
+  const fixedTop = container.querySelector<HTMLElement>('.growth-fixed-top');
+  const stickyH = fixedTop?.offsetHeight ?? 0;
+  const BUFFER = 10; // px tolerance
+
+  function updateActiveTab() {
+    if (!container) return;
+    // If content doesn't overflow, no scrolling is happening
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    const viewTop = container.scrollTop + stickyH + BUFFER;
+
+    // Find which section's top border is closest to viewTop
+    let bestSection = '';
+    let bestDist = Infinity;
+
+    for (const [name, ref] of Object.entries(sectionRefs)) {
+      const el = ref.value;
+      if (!el) continue;
+      const sectionTop = el.offsetTop;
+      const dist = Math.abs(sectionTop - viewTop);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestSection = name;
       }
-    },
-    {
-      root: scrollableContainer.value ?? null,
-      rootMargin: '-20% 0px -70% 0px',
-      threshold: 0,
-    },
-  );
+    }
 
-  for (const [name, ref] of Object.entries(sectionRefs)) {
-    const el = ref.value;
-    if (el) {
-      el.setAttribute('data-section', name);
-      observer.observe(el);
+    if (bestSection) {
+      activeTab.value = bestSection;
     }
   }
+
+  // Throttle scroll handler via requestAnimationFrame
+  let rafId = 0;
+  const onScroll = () => {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = 0;
+      updateActiveTab();
+    });
+  };
+
+  container.addEventListener('scroll', onScroll, { passive: true });
+  // Run once at mount to set initial active tab
+  updateActiveTab();
 });
 
 onBeforeUnmount(() => {
-  observer?.disconnect();
-  observer = null;
-  fixedTopResizeObserver?.disconnect();
-  fixedTopResizeObserver = null;
+  // Cleanup is handled by Vue's reactive system;
+  // scroll listeners on the ref are cleaned up automatically.
 });
 
+// --- Week selection ---
+const selectedWeek = ref('2025.5.12~2025.5.18');
+const weekOptions = computed(() => [
+  { label: '2025.5.12~2025.5.18', value: '2025.5.12~2025.5.18' },
+  { label: '2025.5.5~2025.5.11', value: '2025.5.5~2025.5.11' },
+  { label: '2025.4.28~2025.5.4', value: '2025.4.28~2025.5.4' },
+]);
+
+const showDatePicker = ref(false);
+
+function toggleDatePicker() {
+  showDatePicker.value = !showDatePicker.value;
+}
+
+function selectWeek(value: string) {
+  selectedWeek.value = value;
+  showDatePicker.value = false;
+}
+
+// --- Action handlers ---
+function handleShare() {
+  // Share functionality
+}
+
+function handleRefresh() {
+  // Refresh functionality
+}
+
 // --- Mock data ---
-const dateRange = computed<string>(() => i18n('mock.dateRange'));
+const dateRange = computed<string>(() => selectedWeek.value);
 const bestCapability = computed<string>(() => i18n('mock.bestCapability'));
 const hotTopic = computed<string>(() => i18n('mock.hotTopic'));
 
@@ -353,62 +393,122 @@ const pieOption = computed(() => ({
 
 // Chart init theme (transparent bg)
 const chartInitOpts = { renderer: 'canvas' as const };
+
+// Override Quasar's default q-page min-height: calc(100vh - X). The default
+// forces q-page to be AT LEAST the viewport tall regardless of content,
+// which combined with our long inner content makes the entire q-page
+// inflate and breaks the flex column scroll-isolation. Returning an
+// explicit `height` (= viewport - header/footer offset) locks q-page to
+// the exact available area. Inside, .growth-scroll-wrapper fills 100 %
+// of that height and is the only scrollable container, with
+// .growth-fixed-top using position: sticky; top: 0 to stay pinned.
+function growthPageStyleFn(offset: number) {
+  return {
+    height: `calc(100vh - ${offset}px)`,
+    maxHeight: `calc(100vh - ${offset}px)`,
+    minHeight: 0,
+  };
+}
 </script>
 
 <template>
-  <q-page class="growth-page" :style="{ '--growth-fixed-top-height': fixedTopHeight + 'px' }">
+  <q-page class="growth-page" :style-fn="growthPageStyleFn">
     <!-- Glow layers -->
     <div class="growth-glow growth-glow--171" aria-hidden="true" />
     <div class="growth-glow growth-glow--172" aria-hidden="true" />
 
-    <!-- Top decoration images (fixed, not scrollable) -->
-    <div class="growth-decorations" aria-hidden="true">
-      <img class="growth-decor-top" src="/lanhu-slices/img-1.webp" alt="" />
-      <img class="growth-decor-illust" src="/lanhu-slices/img-2.webp" alt="" />
-      <img class="growth-decor-board" src="/lanhu-slices/img-3.webp" alt="" />
+    <!-- Cloud decorations -->
+    <div class="growth-clouds" aria-hidden="true">
+      <div class="growth-cloud growth-cloud--1" />
+      <div class="growth-cloud growth-cloud--2" />
+      <div class="growth-cloud growth-cloud--3" />
+    </div>
+
+    <!-- Top-right refresh button only (design: 组338, 1 button at top-right) -->
+    <div class="growth-actions">
+      <button class="growth-action-btn" @click="handleRefresh" :title="i18n('actions.refresh')">
+        <img src="/lanhu-slices/icon-9.webp" alt="" class="growth-action-icon" />
+      </button>
     </div>
 
     <!--
-      Fixed-top zone: title + overview card + tab bar.
-      Absolutely positioned so it stays pinned to the top of the page
-      regardless of how the content below scrolls. Its measured height is
-      exposed as --growth-fixed-top-height for the scrollable area to anchor.
+      Scroll wrapper — the ONLY scrollable region.
+      Contains both sticky header (sticks to top) and sections (flow below).
     -->
-    <div ref="fixedTopRef" class="growth-fixed-top">
-      <div class="growth-content">
-        <!-- Page title + date -->
-        <div class="growth-header">
-          <h1 class="growth-page-title q-ma-none">{{ i18n('title') }}</h1>
-          <div class="growth-page-date q-mt-xs">{{ dateRange }}</div>
+    <div ref="scrollableContainer" class="growth-scroll-wrapper">
+      <!-- Sticky header zone (position: sticky; top: 0) -->
+      <div class="growth-fixed-top">
+        <div class="growth-content">
+          <!-- 3D illustration (design: img-1.webp, 345×326, positioned top-right) -->
+          <img
+            class="growth-main-illust"
+            src="/lanhu-slices/img-1.webp"
+            alt=""
+            aria-hidden="true"
+          />
+          <!-- Page title + date picker (matching design: pill shape with text + dropdown icon) -->
+          <div class="growth-header">
+            <h1 class="growth-page-title q-ma-none">{{ i18n('title') }}</h1>
+            <div class="growth-date-picker q-mt-xs" @click="toggleDatePicker">
+              <span class="growth-date-text">{{ selectedWeek }}</span>
+              <span class="growth-date-arrow" aria-hidden="true" />
+              <!-- Dropdown popup -->
+              <div v-if="showDatePicker" class="growth-date-dropdown">
+                <div
+                  v-for="opt in weekOptions"
+                  :key="opt.value"
+                  class="growth-date-option"
+                  :class="{ 'growth-date-option--active': selectedWeek === opt.value }"
+                  @click.stop="selectWeek(opt.value)"
+                >
+                  {{ opt.label }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile + Stats overview card -->
+          <div class="growth-overview-wrap">
+            <!-- Writing board — positioned above the card as top decoration -->
+            <img
+              class="growth-decor-board"
+              src="/lanhu-slices/img-3.webp"
+              alt=""
+              aria-hidden="true"
+            />
+            <!-- Character illustration — leans on/above the card -->
+            <img
+              class="growth-decor-illust"
+              src="/lanhu-slices/img-2.webp"
+              alt=""
+              aria-hidden="true"
+            />
+            <overview-card
+              nickname="绵绵"
+              gender="female"
+              :age="5"
+              :weekly-interact="4.6"
+              :best-capability="bestCapability"
+              :hot-topic="hotTopic"
+            />
+          </div>
         </div>
 
-        <!-- Profile + Stats overview card -->
-        <overview-card
-          nickname="绵绵"
-          gender="female"
-          :age="5"
-          :weekly-interact="4.6"
-          :best-capability="bestCapability"
-          :hot-topic="hotTopic"
-        />
+        <!-- Anchor Tab bar (sticks below overview) -->
+        <div class="growth-tab-bar">
+          <button
+            v-for="tab in tabs"
+            :key="tab.name"
+            class="growth-anchor-tab"
+            :class="{ 'growth-anchor-tab--active': activeTab === tab.name }"
+            @click="scrollToSection(tab.name)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
       </div>
 
-      <!-- Anchor Tab bar (fixed under overview, outside scroll) -->
-      <div class="growth-tab-bar">
-        <button
-          v-for="tab in tabs"
-          :key="tab.name"
-          class="growth-anchor-tab"
-          :class="{ 'growth-anchor-tab--active': activeTab === tab.name }"
-          @click="scrollToSection(tab.name)"
-        >
-          {{ tab.label }}
-        </button>
-      </div>
-    </div>
-
-    <!-- ==================== Scrollable sections ==================== -->
-    <div ref="scrollableContainer" class="growth-scrollable">
+      <!-- ==================== Sections ==================== -->
       <!-- ==================== Section: 情绪变化 ==================== -->
       <div ref="sectionEmotion" class="growth-section-card">
         <div class="growth-section-header">
@@ -500,7 +600,7 @@ const chartInitOpts = { renderer: 'canvas' as const };
       </div>
 
       <!-- ==================== Section: 高频话题 ==================== -->
-      <div ref="sectionHotTopics" class="growth-section-card">
+      <div ref="sectionHotTopics" class="growth-section-card q-pb-xl">
         <div class="growth-section-header">
           <div class="growth-accent-bar" />
           <span class="growth-section-title q-ma-none">{{ i18n('sections.hotTopics') }}</span>
@@ -532,19 +632,43 @@ const chartInitOpts = { renderer: 'canvas' as const };
   </q-page>
 </template>
 
+<!--
+  Non-scoped style block for GLOBAL overrides that must NOT be
+  affected by Vue's scoping or SCSS compilation transformations.
+  - `!important` to win over Quasar's JS-injected inline styles
+  - Targets html, body, #q-app and key Quasar containers to
+    root out ANY ancestor that could be scrolling the whole page.
+-->
+<style lang="scss">
+html,
+body,
+#q-app {
+  height: 100% !important;
+  overflow: hidden !important;
+}
+html {
+  overscroll-behavior: none !important;
+}
+.q-layout {
+  overflow: hidden !important;
+}
+.q-page-container {
+  overflow: hidden !important;
+}
+</style>
+
 <style lang="scss" scoped>
-// ===== Page: flex column, locked to viewport, NO page scroll =====
+// ===== Page locked to viewport; internal scroll-container does the rest =====
+// .growth-page gets a fixed height from style-fn (calc(100vh - offset)).
+// Its children: absolutely-positioned glows/decorations (z-index: 0 at top)
+// and .growth-scroll-wrapper (height: 100%, overflow-y: auto). Inside that
+// wrapper, .growth-fixed-top uses position: sticky; top: 0 to stay pinned
+// while the 4 section cards scroll behind/under it.
 .growth-page {
   background: var(--growth-page-bg);
-  // CRITICAL: strip Quasar's default min-height: calc(100vh - X) so the page
-  // can't outgrow its container, and force its box to fill the parent flex
-  // column (q-page-container has `height: 100vh; display: flex`).
   position: relative !important;
-  display: block !important;
-  flex: 1 1 auto !important;
-  height: 100% !important;
-  min-height: 0 !important;
-  max-height: 100% !important;
+  // Height from style-fn calc(100vh - offset), overflow clips
+  // the absolutely-positioned glows/decorations to viewport.
   overflow: hidden !important;
 }
 
@@ -573,117 +697,313 @@ const chartInitOpts = { renderer: 'canvas' as const };
   background: var(--growth-glow-172-gradient);
 }
 
-// --- Top decoration images (absolute, inside flex child) ---
-.growth-decorations {
+// --- Cloud decorations ---
+.growth-clouds {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
-  height: 340px;
 }
 
-.growth-decor-top {
+.growth-cloud {
   position: absolute;
-  left: 0;
-  top: -60px;
-  width: 345px;
-  height: 326px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  filter: blur(2px);
 }
 
-.growth-decor-illust {
+.growth-cloud--1 {
+  left: -20px;
+  top: 40px;
+  width: 120px;
+  height: 60px;
+}
+
+.growth-cloud--1::before,
+.growth-cloud--1::after {
+  content: '';
   position: absolute;
-  right: 0;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.growth-cloud--1::before {
+  width: 50px;
+  height: 50px;
+  top: -25px;
+  left: 20px;
+}
+
+.growth-cloud--1::after {
+  width: 40px;
+  height: 40px;
+  top: -20px;
+  left: 50px;
+}
+
+.growth-cloud--2 {
+  right: 20px;
+  top: 80px;
+  width: 90px;
+  height: 45px;
+}
+
+.growth-cloud--2::before,
+.growth-cloud--2::after {
+  content: '';
+  position: absolute;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.growth-cloud--2::before {
+  width: 40px;
+  height: 40px;
+  top: -20px;
+  left: 15px;
+}
+
+.growth-cloud--2::after {
+  width: 35px;
+  height: 35px;
+  top: -15px;
+  left: 40px;
+}
+
+.growth-cloud--3 {
+  left: 60px;
   top: 100px;
-  width: 170px;
-  height: 162px;
+  width: 80px;
+  height: 40px;
+  opacity: 0.6;
 }
 
+// --- Overview card wrapper (positions overview card + top decorations) ---
+.growth-overview-wrap {
+  position: relative;
+  width: 100%;
+}
+
+// 3D illustration (design: img-1.webp, 345×326, positioned top-right behind title)
+.growth-main-illust {
+  position: absolute;
+  right: -12px;
+  top: 32px;
+  width: 200px;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
+}
+
+// Writing board — positioned above the overview card as top-right decoration.
+// Design layer: 181×176, semantic name "写字板" (writing board), CDN hash 14406f...
 .growth-decor-board {
   position: absolute;
-  right: -30px;
-  top: 80px;
-  width: 181px;
-  height: 176px;
+  right: 8px;
+  top: -24px;
+  width: 140px;
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
 }
 
-// --- Fixed-top zone: title + overview + tab bar (pinned, never scrolls) ---
-// Absolutely positioned inside .growth-page. Its height is measured at
-// runtime (see fixedTopRef / ResizeObserver) and exported via the CSS
-// variable --growth-fixed-top-height, which the scrollable area uses as its
-// `top` offset so it starts right below this zone.
-.growth-fixed-top {
+// Character illustration — positioned above the card, overlapping slightly.
+// Design 组390: character leaning on or above the overview card.
+.growth-decor-illust {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  pointer-events: auto;
+  right: 16px;
+  top: -12px;
+  width: 110px;
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
 }
 
-// --- Fixed top: title + overview (never scrolls) ---
+// --- Top right action buttons (design-consistent, using lanhu slices) ---
+.growth-actions {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.growth-action-btn {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.growth-action-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.growth-action-btn:active {
+  opacity: 0.6;
+}
+
+// --- Sticky header zone (title + overview + tab bar) ---
+// Uses `position: sticky; top: 0` to stay at top when .growth-scroll-wrapper
+// scrolls. Background is transparent to show glow layers underneath.
+.growth-fixed-top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: transparent;
+}
+
+// --- Title + overview card (inside sticky header zone) ---
 .growth-content {
   position: relative;
   z-index: 1;
   padding: 0 16px;
 }
 
-// --- Fixed tab bar (never scrolls) ---
-// Rendered inside .growth-fixed-top so it's absolutely pinned along with the
-// title + overview. Kept as a normal block-flow child inside that wrapper.
-.growth-tab-bar {
-  display: flex;
-  gap: 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 0 20px;
+// ===== Scroll wrapper — THE ONLY SCROLLABLE CONTAINER =====
+// Fills .growth-page height exactly (height: 100%). Its own content
+// (sticky header + 4 sections) overflows, creating a scrollbar here.
+// overflow-y: auto vs. scroll to avoid permanent scrollbar on desktop.
+.growth-scroll-wrapper {
   position: relative;
-  z-index: 10;
-  background: linear-gradient(180deg, rgba(236, 255, 246, 1) 0%, rgba(255, 255, 255, 1) 100%);
-}
-
-// ===== THE ONLY SCROLLABLE AREA =====
-// Absolutely positioned inside .growth-page, anchored right below the
-// fixed-top zone via --growth-fixed-top-height (computed from JS). This
-// completely isolates scrolling here: neither the page, the tab bar, nor the
-// title/overview can move. overscroll-behavior: contain also blocks scroll
-// chaining to q-page-container / body on mobile fling gestures.
-.growth-scrollable {
-  position: absolute;
-  top: var(--growth-fixed-top-height, 0px);
-  left: 0;
-  right: 0;
-  bottom: 0;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
   padding: 0 16px 24px;
   -webkit-overflow-scrolling: touch;
-  z-index: 1;
 }
 
 .growth-header {
-  padding-top: 48px;
+  padding-top: 92px;
+  padding-left: 28px;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+// Page title (design: YouSheBiaoTiHei Bold 36px, line-height 47px, letter-spacing 4%, rgba(36,61,59,1))
+.growth-page-title {
+  font-family: 'YouSheBiaoTiHei', var(--font-family);
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 47px;
+  letter-spacing: 0.04em;
+  color: var(--clr-growth-page-title);
+}
+
+// --- Date picker pill (design: 矩形1966, 150×28, r14, bg rgba(208,255,249,1)) ---
+.growth-date-picker {
+  position: relative;
+  width: 150px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--clr-growth-date-picker-bg, rgba(208, 255, 249, 1));
+  border-radius: 14px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.growth-date-text {
+  font-family: 'Roboto', var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+  color: rgba(58, 89, 86, 1);
+  white-space: nowrap;
+}
+
+.growth-date-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+// Dropdown arrow — black down triangle matching design spec (smaller, sharper)
+.growth-date-arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid rgba(21, 23, 23, 0.8);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+// Date dropdown popup
+.growth-date-dropdown {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  width: 170px;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.growth-date-option {
+  padding: 8px 14px;
+  font-family: 'Roboto', var(--font-family);
+  font-size: 13px;
+  color: rgba(21, 23, 23, 1);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(241, 249, 248, 1);
+  }
+
+  &--active {
+    color: rgba(32, 204, 249, 1);
+    font-weight: 500;
+  }
+}
+
+// --- Tab bar (design: 17px Medium active / 16px Regular inactive, wider spacing) ---
+.growth-tab-bar {
+  display: flex;
+  gap: 28px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0 24px;
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(236, 255, 246, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
 }
 
 .growth-anchor-tab {
   background: none;
   border: none;
-  font-family: var(--font-family);
-  font-size: 14px;
+  font-family: 'AlibabaPuHuiTi', var(--font-family);
+  font-size: 16px;
   font-weight: 400;
-  color: rgba(21, 23, 23, 1);
-  padding: 8px 4px;
+  color: var(--clr-growth-tab-inactive, rgba(21, 23, 23, 1));
+  padding: 10px 2px;
   cursor: pointer;
   position: relative;
-  min-height: 36px;
+  min-height: 40px;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s;
 
   &--active {
     color: var(--growth-tab-active-color);
+    font-size: 17px;
     font-weight: 500;
 
     &::after {
@@ -692,10 +1012,10 @@ const chartInitOpts = { renderer: 'canvas' as const };
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 2px;
-      height: 16px;
+      width: 20px;
+      height: 3px;
       background: var(--growth-tab-active-color);
-      border-radius: 1px;
+      border-radius: 2px;
     }
   }
 }
