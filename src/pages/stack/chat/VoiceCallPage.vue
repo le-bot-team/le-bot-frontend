@@ -33,6 +33,7 @@ const router = useRouter();
 
 type CallStatus = 'connecting' | 'connected' | 'ended' | 'failed';
 
+const isMockMode = process.env.VITE_MOCK_WS_ENABLED === 'true';
 const callStatus = ref<CallStatus>('connecting');
 const isMuted = ref(false);
 const showTextMode = ref(true);
@@ -110,7 +111,9 @@ onBeforeUnmount(() => {
     <!-- Text nodes OVERLAP on top of robot area (组385: h=367, top≈98, bottom≈465) -->
     <!-- Raw text positions (relative to page): left=36, tops at 142/262/406/550... -->
     <!-- Messages span from inside robot area down past robot base (to ~634) -->
-    <div v-if="callStatus === 'connected' && showTextMode" class="voice-chat__messages">
+    <!-- NOTE: Mock transcript for layout verification only; real implementation
+         should source messages from the chat session state. -->
+    <div v-if="callStatus === 'connected' && showTextMode && isMockMode" class="voice-chat__messages">
       <div class="voice-chat__message voice-chat__message--ai">
         <p class="voice-chat__message-text voice-chat__message-text--gradient">
           这个坏蛋太坏了！我们得想个办法把中中救出来，小新你有什么好主意吗？
