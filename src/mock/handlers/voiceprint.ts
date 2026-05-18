@@ -148,7 +148,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
 
   // Add voice to person
   mock.onPost(/\/voiceprint\/persons\/([^/]+)\/voices\/add$/).reply((config: { url?: string }) => {
-    const personId = extractSecondLastPathSegment(config.url ?? '');
+    const personId = extractPersonIdFromVoiceUrl(config.url ?? '');
     const person = persons.find((p) => p.person_id === personId);
 
     if (!person) {
@@ -172,7 +172,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
   mock
     .onPut(/\/voiceprint\/persons\/([^/]+)\/voices\/([^/]+)$/)
     .reply((config: { url?: string }) => {
-      const personId = extractSecondLastPathSegment(config.url ?? '');
+      const personId = extractPersonIdFromVoiceUrl(config.url ?? '');
       const voiceId = extractLastPathSegment(config.url ?? '');
       const person = persons.find((p) => p.person_id === personId);
 
@@ -203,7 +203,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
   mock
     .onDelete(/\/voiceprint\/persons\/([^/]+)\/voices\/([^/]+)$/)
     .reply((config: { url?: string }) => {
-      const personId = extractSecondLastPathSegment(config.url ?? '');
+      const personId = extractPersonIdFromVoiceUrl(config.url ?? '');
       const voiceId = extractLastPathSegment(config.url ?? '');
       const person = persons.find((p) => p.person_id === personId);
 
@@ -229,7 +229,13 @@ function extractLastPathSegment(url: string): string {
   return segments[segments.length - 1] ?? '';
 }
 
-function extractSecondLastPathSegment(url: string): string {
-  const segments = url.replace(/\/$/, '').split('/');
-  return segments[segments.length - 2] ?? '';
+/**
+ * Extract person ID from voice-related URLs like:
+ *   /voiceprint/persons/:personId/voices/add
+ *   /voiceprint/persons/:personId/voices/:voiceId
+ * The personId is always the segment immediately after "persons".
+ */
+function extractPersonIdFromVoiceUrl(url: string): string {
+  const match = url.match(/\/persons\/([^/]+)\/voices/);
+  return match?.[1] ?? '';
 }

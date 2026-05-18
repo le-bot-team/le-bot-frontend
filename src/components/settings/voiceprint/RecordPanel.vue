@@ -208,7 +208,6 @@ onBeforeUnmount(() => {
       <!-- Audio playback UI (shown after recording) -->
       <div v-if="audioSrc" class="voiceprint-record-playback">
         <audio
-          ref="audioRef"
           :src="audioSrc"
           @loadedmetadata="onAudioLoaded"
           @ended="onAudioEnded"
