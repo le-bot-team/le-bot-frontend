@@ -32,14 +32,14 @@ const onConfirm = () => {
   }
 };
 
-const onFileChange = (file: File) => {
+const onFileChange = (file: File | null) => {
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = (event) => {
-    console.log(event);
     if (!event.target?.result || typeof event.target.result !== 'string') {
       return;
     }
-    image.value = event.target.result.toString();
+    image.value = event.target.result;
   };
   reader.readAsDataURL(file);
 };
