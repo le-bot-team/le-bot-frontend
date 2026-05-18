@@ -75,12 +75,41 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'profile',
         path: 'profile',
-        components: {
-          default: () => import('pages/stack/ProfilePage.vue'),
-          header: () => import('layouts/headers/StackHeader.vue'),
-        },
+        children: [
+          {
+            name: 'profile',
+            path: '',
+            components: {
+              default: () => import('pages/stack/ProfilePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'profile-edit',
+            path: 'edit',
+            components: {
+              default: () => import('pages/stack/profile/ProfileFieldEditPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'profile-change-password',
+            path: 'change-password',
+            components: {
+              default: () => import('pages/stack/profile/ChangePasswordPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'profile-change-phone',
+            path: 'change-phone',
+            components: {
+              default: () => import('pages/stack/profile/ChangePhonePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
       },
       {
         path: 'device-config',

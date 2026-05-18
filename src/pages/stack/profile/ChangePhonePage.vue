@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
@@ -28,7 +27,7 @@ const { updateProfile } = profileStore;
 
 // ── Step management ──
 type Step = 'verifyOld' | 'bindNew';
-const step = ref<Step>('verifyOld');
+const step = ref<Step>(profile.value?.phone ? 'verifyOld' : 'bindNew');
 
 // ── Shared state ──
 const isSubmitting = ref(false);
@@ -119,9 +118,8 @@ const onVerifyOld = async () => {
     } else {
       errorMsg.value = i18n('errors.invalidCode');
     }
-  } catch (err) {
-    const msg = axios.isAxiosError(err) ? err.message : i18n('errors.verifyFailed');
-    errorMsg.value = msg;
+  } catch {
+    errorMsg.value = i18n('errors.verifyFailed');
   } finally {
     isSubmitting.value = false;
   }
@@ -221,9 +219,8 @@ const onSubmitNew = async () => {
     } else {
       errorMsg.value = data.message || i18n('errors.submitFailed');
     }
-  } catch (err) {
-    const msg = axios.isAxiosError(err) ? err.message : i18n('errors.submitFailed');
-    errorMsg.value = msg;
+  } catch {
+    errorMsg.value = i18n('errors.submitFailed');
   } finally {
     isSubmitting.value = false;
   }

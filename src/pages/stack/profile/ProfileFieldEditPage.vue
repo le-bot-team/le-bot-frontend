@@ -77,7 +77,7 @@ const onSave = async () => {
   isSubmitting.value = true;
   try {
     const payload: UpdateProfileInfoRequest = {};
-    payload[fieldKey.value] = value.value;
+    (payload as Record<string, string | undefined>)[fieldKey.value] = value.value;
     const { data } = await updateProfileInfo(token, payload);
     if (data.success) {
       if (profile.value) {
