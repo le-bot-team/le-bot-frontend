@@ -55,6 +55,16 @@ export default {
           relationship: '您与孩子的关系',
           selectRelationship: '选择关系',
           selectPlaceholder: '请选择',
+          relations: {
+            mother: '妈妈',
+            father: '爸爸',
+            grandma: '奶奶',
+            grandpa: '爷爷',
+            maternalGrandma: '外婆',
+            maternalGrandpa: '外公',
+            friend: '朋友',
+            otherRelative: '其他亲属',
+          },
         },
         notifications: {
           unknownError: '未知错误',
@@ -70,6 +80,10 @@ export default {
           signIn: '登录',
           usePassword: '使用密码',
           useCode: '使用验证码',
+          sendCode: '发送验证码',
+          resendCode: '重新发送',
+          codePlaceholder: '请输入验证码',
+          passwordPlaceholder: '请输入密码',
         },
         errors: {
           invalidEmail: '邮箱地址无效',
@@ -77,6 +91,7 @@ export default {
         notifications: {
           codeSent: '验证码已发送',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
         },
       },
       VerificationCodeInput: {

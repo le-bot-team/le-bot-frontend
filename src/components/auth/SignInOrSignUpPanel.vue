@@ -9,6 +9,7 @@ import { useRouter } from 'vue-router';
 import { emailChallenge, emailCode, emailPassword } from 'src/utils/api/auth';
 import { useAuthStore } from 'stores/auth';
 import { useTracker } from 'src/composables/useTracker';
+import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
   name: string | number;
@@ -23,6 +24,7 @@ const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
   storeToRefs(authStore);
 const { notify } = useQuasar();
 const { trackConversion } = useTracker();
+const i18n = i18nSubPath('components.auth.SignInOrSignUpPanel');
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const processFunctionsMatrix = {
@@ -49,10 +51,10 @@ const canSubmit = computed(
 );
 
 const sendCodeLabel = computed(() => {
-  if (isNeverSendCode.value) return '发送验证码';
+  if (isNeverSendCode.value) return i18n('labels.sendCode');
   if (remainedSendCodeCooldownSeconds.value)
-    return `重新发送(${remainedSendCodeCooldownSeconds.value}s)`;
-  return '重新发送';
+    return `${i18n('labels.resendCode')}(${remainedSendCodeCooldownSeconds.value}s)`;
+  return i18n('labels.resendCode');
 });
 
 // Navigation to legal pages
@@ -74,14 +76,14 @@ const sendCode = async () => {
   try {
     const result = await emailChallenge(email.value);
     if (!result.data.success) {
-      errorMsg.value = '验证码发送失败';
+      errorMsg.value = i18n('notifications.sendCodeFailed');
       isSendingCode.value = false;
       return;
     }
-    notify({ type: 'positive', message: '验证码已发送' });
+    notify({ type: 'positive', message: i18n('notifications.codeSent') });
     authStore.markCodeSent();
   } catch (err) {
-    errorMsg.value = (err as Error).message || '验证码发送失败';
+    errorMsg.value = (err as Error).message || i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;
 };
@@ -97,7 +99,7 @@ const processSignInOrSignUp = async () => {
     const p = codeOrPassword.value ?? '';
     const { data } = await processFunction(e, p);
     if (!data.success) {
-      errorMsg.value = data.message ?? '未知错误';
+      errorMsg.value = data.message ?? i18n('notifications.unknownError');
       return;
     }
 
@@ -139,7 +141,7 @@ const processSignInOrSignUp = async () => {
         <input
           class="auth-input"
           v-model="codeOrPassword"
-          placeholder="请输入验证码"
+          :placeholder="i18n('labels.codePlaceholder')"
           maxlength="6"
           autocomplete="one-time-code"
         />
@@ -167,7 +169,7 @@ const processSignInOrSignUp = async () => {
           class="auth-input auth-input--flex"
           :type="showPassword ? 'text' : 'password'"
           v-model="codeOrPassword"
-          placeholder="请输入密码"
+          :placeholder="i18n('labels.passwordPlaceholder')"
           autocomplete="current-password"
           @focus="isPasswordFocused = true"
           @blur="isPasswordFocused = false"

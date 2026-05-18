@@ -2,7 +2,7 @@
 // SetupProfilePanel — lanhu designs ed71eb82 (完善个人信息) / fb8d01d5 (选择关系弹窗)
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import CropperDialog from 'components/CropperDialog.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
@@ -35,7 +35,13 @@ const isSending = ref(false);
 
 // Relationship options: order matches design fb8d01d5 grid (3-col, L-to-R, top-to-bottom).
 // Raw JSON text frames at y=621/681/741: 妈妈/爸爸/奶奶 | 爷爷/外婆/外公 | 朋友/其他亲属 (8 items).
-const relationOptions = ['妈妈', '爸爸', '奶奶', '爷爷', '外婆', '外公', '朋友', '其他亲属'];
+const relationOptionKeys = ['mother', 'father', 'grandma', 'grandpa', 'maternalGrandma', 'maternalGrandpa', 'friend', 'otherRelative'] as const;
+const relationOptions = computed(() =>
+  relationOptionKeys.map((key) => ({
+    key,
+    label: i18n(`labels.relations.${key}`),
+  })),
+);
 
 const showRelationSheet = ref(false);
 
@@ -139,7 +145,7 @@ const confirm = async () => {
           class="setup-profile-field-value"
           :class="{ 'setup-profile-field-value--placeholder': !relationship }"
         >
-          {{ relationship || i18n('labels.selectPlaceholder') }}
+          {{ relationship ? i18n(`labels.relations.${relationship}`) : i18n('labels.selectPlaceholder') }}
         </span>
         <span class="setup-profile-field-arrow">
           <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
@@ -165,31 +171,33 @@ const confirm = async () => {
     </button>
   </q-tab-panel>
 
-    <!-- Relationship bottom sheet (grid layout per design fb8d01d5) -->
-    <transition name="sheet">
-      <div
-        v-if="showRelationSheet"
-        class="setup-profile-relation-overlay"
-        @click.self="showRelationSheet = false"
-      >
-        <div class="setup-profile-relation-sheet">
-          <div class="setup-profile-relation-head">
-            <span class="setup-profile-relation-title">{{ i18n('labels.selectRelationship') }}</span>
-          </div>
-          <div class="setup-profile-relation-body">
-            <button
-              v-for="opt in relationOptions"
-              :key="opt"
-              class="setup-profile-relation-chip"
-              :class="{ 'setup-profile-relation-chip--active': relationship === opt }"
-              @click="selectRelationship(opt)"
-            >
-              {{ opt }}
-            </button>
+    <!-- Relationship bottom sheet — teleported to body to avoid multi-root in q-tab-panels -->
+    <Teleport to="body">
+      <transition name="sheet">
+        <div
+          v-if="showRelationSheet"
+          class="setup-profile-relation-overlay"
+          @click.self="showRelationSheet = false"
+        >
+          <div class="setup-profile-relation-sheet">
+            <div class="setup-profile-relation-head">
+              <span class="setup-profile-relation-title">{{ i18n('labels.selectRelationship') }}</span>
+            </div>
+            <div class="setup-profile-relation-body">
+              <button
+                v-for="opt in relationOptions"
+                :key="opt.key"
+                class="setup-profile-relation-chip"
+                :class="{ 'setup-profile-relation-chip--active': relationship === opt.key }"
+                @click="selectRelationship(opt.key)"
+              >
+                {{ opt.label }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
 </template>
 
 <style scoped>

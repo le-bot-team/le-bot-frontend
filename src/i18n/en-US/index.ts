@@ -55,6 +55,16 @@ export default {
           relationship: 'Relationship with child',
           selectRelationship: 'Select Relationship',
           selectPlaceholder: 'Please select',
+          relations: {
+            mother: 'Mother',
+            father: 'Father',
+            grandma: 'Grandma',
+            grandpa: 'Grandpa',
+            maternalGrandma: 'Maternal Grandma',
+            maternalGrandpa: 'Maternal Grandpa',
+            friend: 'Friend',
+            otherRelative: 'Other Relative',
+          },
         },
         notifications: {
           unknownError: 'Unknown error',
@@ -70,6 +80,10 @@ export default {
           signIn: 'Sign In',
           usePassword: 'Use Password',
           useCode: 'Use Code',
+          sendCode: 'Send Code',
+          resendCode: 'Resend',
+          codePlaceholder: 'Enter verification code',
+          passwordPlaceholder: 'Enter password',
         },
         errors: {
           invalidEmail: 'Invalid email address',
@@ -77,6 +91,7 @@ export default {
         notifications: {
           codeSent: 'Verification code sent',
           unknownError: 'Unknown error',
+          sendCodeFailed: 'Failed to send verification code',
         },
       },
       VerificationCodeInput: {
