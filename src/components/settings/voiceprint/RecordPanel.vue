@@ -93,11 +93,12 @@ const resetRecording = (): void => {
 
 let mediaRecorder: IMediaRecorder | null = null;
 let mediaStream: MediaStream | null = null;
-let recordedChunks: Blob[] = [];
+let pendingStop = false;
 
 const startRecording = async (): Promise<void> => {
   if (isRecording.value) return;
   audioData.value = undefined;
+  pendingStop = false;
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -109,19 +110,26 @@ const startRecording = async (): Promise<void> => {
         autoGainControl: true,
       },
     });
-    recordedChunks = [];
+    // If user released before getUserMedia resolved, abort immediately
+    if (pendingStop) {
+      cleanup();
+      return;
+    }
     mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/wav' });
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
-        recordedChunks.push(event.data);
+        audioData.value = event.data;
       }
     };
     mediaRecorder.onstop = () => {
-      audioData.value = new Blob(recordedChunks, { type: 'audio/wav' });
       cleanup();
     };
-    mediaRecorder.start(200);
+    mediaRecorder.start();
     isRecording.value = true;
+    // Handle race: user released during setup
+    if (pendingStop) {
+      stopRecording();
+    }
   } catch (err) {
     console.error('Failed to start recording:', err);
     cleanup();
@@ -129,6 +137,7 @@ const startRecording = async (): Promise<void> => {
 };
 
 const stopRecording = (): void => {
+  pendingStop = true;
   if (!isRecording.value) return;
   mediaRecorder?.stop();
   isRecording.value = false;

@@ -7,7 +7,7 @@ import type { Person, PersonDetail, UpdatePersonRequest } from 'src/types/api/vo
 import type { VprRelationship } from 'components/vpr-relationships';
 
 /** Mutable deep copy of persons that mock endpoints operate on */
-const persons: PersonDetail[] = structuredClone(MOCK_PERSONS);
+const persons: PersonDetail[] = JSON.parse(JSON.stringify(MOCK_PERSONS)) as PersonDetail[];
 
 /**
  * Register mock handlers for the voiceprint module.

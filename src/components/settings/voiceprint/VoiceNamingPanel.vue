@@ -101,15 +101,16 @@ const chooseRelationship = (): void => {
     <!-- Relationship block -->
     <template v-if="relationshipEditable">
       <div class="voice-naming-question">{{ relationshipLabel }}</div>
-      <div
+      <button
         class="voice-naming-input-box voice-naming-input-box--clickable"
+        type="button"
         @click="chooseRelationship"
       >
         <span class="voice-naming-input voice-naming-input--readonly">
           {{ relationshipText }}
         </span>
         <q-icon class="voice-naming-relationship-chevron" name="expand_more" size="18px" />
-      </div>
+      </button>
     </template>
 
     <!-- Audio preview (only rendered when audioSrc is available) -->
