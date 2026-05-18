@@ -46,7 +46,7 @@ export type GenerateInviteCodeResponse =
 
 export interface AcceptInviteRequest {
   code: string;
-  role: FamilyMember['role'];
+  role: NonNullable<FamilyMember['role']>;
 }
 
 export type AcceptInviteResponse =

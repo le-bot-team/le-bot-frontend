@@ -7,7 +7,7 @@
  * 后续接入后端生成的 QR 图片或前端本地生成。
  */
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useQuasar } from 'quasar';
@@ -27,8 +27,8 @@ const authStore = useAuthStore();
 const groupId = computed(() => route.query.groupId as string | undefined);
 if (groupId.value) familyGroupStore.setCurrentGroup(groupId.value);
 
-const currentGroup = familyGroupStore.currentGroup;
-const inviteCode = computed(() => currentGroup?.inviteCode);
+const currentGroup = computed(() => familyGroupStore.currentGroup);
+const inviteCode = computed(() => currentGroup.value?.inviteCode);
 
 /** 是否正在加载/刷新 */
 const isGenerating = ref(false);
@@ -41,7 +41,7 @@ let countdownTimer: ReturnType<typeof setInterval> | null = null;
  * 生成/刷新邀请码
  */
 async function generateOrRefresh() {
-  if (!currentGroup || isGenerating.value) return;
+  if (!currentGroup.value || isGenerating.value) return;
 
   const token = authStore.accessToken;
   if (!token) {
@@ -52,7 +52,7 @@ async function generateOrRefresh() {
   isGenerating.value = true;
 
   try {
-    const res = await generateInviteCode(currentGroup.id, token);
+    const res = await generateInviteCode(currentGroup.value.id, token);
     if (res.data?.success && res.data.data?.inviteCode) {
       familyGroupStore.setInviteCode(res.data.data.inviteCode);
       startCountdown(res.data.data.inviteCode.expiresAt);
@@ -109,6 +109,22 @@ onMounted(() => {
     void generateOrRefresh();
   }
 });
+
+onBeforeUnmount(() => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+});
+
+/** 格式化剩余秒数为可读字符串 */
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds <= 0) return '00:00:00';
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':');
+}
 </script>
 
 <template>
@@ -222,13 +238,3 @@ onMounted(() => {
 }
 </style>
 
-<script lang="ts">
-/** 格式化剩余秒数为可读字符串 */
-function formatDuration(totalSeconds: number): string {
-  if (totalSeconds <= 0) return '00:00:00';
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  return [h, m, s].map((v) => String(v).padStart(2, '0')).join(':');
-}
-</script>

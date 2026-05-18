@@ -111,10 +111,10 @@ function onInvite() {
 <template>
   <q-page class="family-group-page detail-page">
     <!-- ── 儿童区域：100px 圆形头像居中 ── -->
-    <div
+    <button
       v-if="child"
       class="detail-child-zone"
-      role="button"
+      type="button"
       @click="onMemberClick(child)"
     >
       <img
@@ -127,15 +127,15 @@ function onInvite() {
         {{ child.childInfo?.gender === 'girl' ? i18n('meta.female') : i18n('meta.male') }}
         {{ childAge(child.childInfo?.birthday) }}{{ i18n('meta.yearsUnit') }}
       </span>
-    </div>
+    </button>
 
     <!-- ── 成员列表（复用全局 .family-group-member-card 系列 class）── -->
     <template v-if="adultMembers.length">
-      <div
+      <button
         v-for="member in adultMembers"
         :key="member.id"
         class="family-group-member-card"
-        role="button"
+        type="button"
         @click="onMemberClick(member)"
       >
         <span class="family-group-member-name">
@@ -149,7 +149,7 @@ function onInvite() {
         <svg class="family-group-member-chevron" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M1 1L6 6L1 11" stroke="#9398A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </div>
+      </button>
     </template>
 
     <!-- 底部操作区：仅创建者可见邀请按钮（复用全局 .family-group-add-btn） -->

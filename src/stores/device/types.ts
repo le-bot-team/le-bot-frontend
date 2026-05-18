@@ -14,3 +14,10 @@ export interface DeviceInfo {
     voiceStyle: string;
   } | null;
 }
+
+/** Child information associated with a family group */
+export interface ChildInfo {
+  name: string;
+  gender: 'boy' | 'girl';
+  birthday: string;
+}

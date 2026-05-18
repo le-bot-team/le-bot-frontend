@@ -51,11 +51,11 @@ function onAddDevice() {
   <q-page class="family-group-page">
     <!-- Family group list -->
     <template v-if="familyGroups.length">
-      <div
+      <button
         v-for="group in familyGroups"
         :key="group.id"
         class="family-group-card"
-        role="button"
+        type="button"
         @click="onGroupClick(group)"
       >
         <!-- 儿童头像 -->
@@ -73,7 +73,7 @@ function onAddDevice() {
         </div>
         <!-- 箭头 -->
         <q-icon name="chevron_right" size="20px" color="#C4C4CC" />
-      </div>
+      </button>
     </template>
 
     <!-- Empty state -->

@@ -54,8 +54,11 @@ function getMetaText(): string {
     mother: '妈妈',
     grandpa: '爷爷',
     grandma: '奶奶',
+    paternal_grandmother: '奶奶(祖母)',
+    maternal_grandfather: '外公',
+    maternal_grandma: '外婆',
     friend: '朋友',
-    other: '其他亲属',
+    other: '其他',
   };
   return roleMap[props.member.role ?? ''] ?? '-';
 }

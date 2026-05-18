@@ -111,9 +111,9 @@ export const FAMILY_ROLE_OPTIONS: { value: FamilyUserRole; label: string }[] = [
   { value: 'mother', label: '妈妈' },
   { value: 'grandpa', label: '爷爷' },
   { value: 'grandma', label: '奶奶' },
-  { value: 'paternal_grandmother', label: '外婆' },
+  { value: 'paternal_grandmother', label: '奶奶(祖母)' },
   { value: 'maternal_grandfather', label: '外公' },
-  { value: 'maternal_grandma', label: '其他亲属' },
+  { value: 'maternal_grandma', label: '外婆' },
   { value: 'friend', label: '朋友' },
   { value: 'other', label: '其他' },
 ];

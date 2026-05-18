@@ -71,12 +71,9 @@ function roleLabel(role?: FamilyUserRole): string {
 
 /** 格式化日期（年 / 月 / 日） */
 function formatDate(isoString: string): string {
-  try {
-    const d = new Date(isoString);
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-  } catch {
-    return '-';
-  }
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return '-';
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 /** 当前家庭组 */

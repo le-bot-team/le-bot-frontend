@@ -78,6 +78,7 @@ function onConfirm() {
 }
 
 function onCancel() {
+  emit('update:modelValue', false);
   emit('cancel');
 }
 </script>
