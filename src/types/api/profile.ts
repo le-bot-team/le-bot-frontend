@@ -29,4 +29,6 @@ export interface UpdateProfileInfoRequest {
   bio?: string | undefined;
   avatar?: string | undefined;
   region?: string | undefined;
+  birthday?: string | undefined;
+  relationship?: string | undefined;
 }

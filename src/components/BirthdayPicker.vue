@@ -1,0 +1,116 @@
+<script setup lang="ts">
+// BirthdayPicker — A simple year/month/day date picker for profile setup.
+// Emits ISO date string (YYYY-MM-DD) via v-model.
+import { computed, ref, watch } from 'vue';
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string;
+    defaultYear?: number;
+  }>(),
+  {
+    modelValue: '',
+    defaultYear: 1995,
+  },
+);
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+}>();
+
+// Parse initial value or use defaults
+const parseDate = (val: string) => {
+  if (!val) return { y: props.defaultYear, m: 1, d: 1 };
+  const parts = val.split('-').map(Number);
+  return { y: parts[0] || props.defaultYear, m: parts[1] || 1, d: parts[2] || 1 };
+};
+
+const initial = parseDate(props.modelValue);
+const year = ref(initial.y);
+const month = ref(initial.m);
+const day = ref(initial.d);
+
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => 1920 + i);
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const daysInMonth = computed(() => {
+  return new Date(year.value, month.value, 0).getDate();
+});
+
+const days = computed(() => Array.from({ length: daysInMonth.value }, (_, i) => i + 1));
+
+// Clamp day if month/year changes
+watch([year, month], () => {
+  if (day.value > daysInMonth.value) {
+    day.value = daysInMonth.value;
+  }
+});
+
+// Emit formatted date on any change
+watch(
+  [year, month, day],
+  () => {
+    const m = String(month.value).padStart(2, '0');
+    const d = String(day.value).padStart(2, '0');
+    emit('update:modelValue', `${year.value}-${m}-${d}`);
+  },
+  { immediate: true },
+);
+
+// Sync from parent
+watch(
+  () => props.modelValue,
+  (val) => {
+    const parsed = parseDate(val);
+    year.value = parsed.y;
+    month.value = parsed.m;
+    day.value = parsed.d;
+  },
+);
+</script>
+
+<template>
+  <div class="birthday-picker">
+    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year">
+      <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
+    </select>
+    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month">
+      <option v-for="m in months" :key="m" :value="m">{{ m }}月</option>
+    </select>
+    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day">
+      <option v-for="d in days" :key="d" :value="d">{{ d }}日</option>
+    </select>
+  </div>
+</template>
+
+<style scoped>
+.birthday-picker {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.birthday-picker__select {
+  flex: 1;
+  height: 44px;
+  border: 1px solid rgba(147, 152, 169, 0.3);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 15px;
+  color: var(--clr-text, #120e2c);
+  background: var(--clr-input-bg, #fff);
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239398A9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.birthday-picker__select--year {
+  flex: 1.4;
+}
+</style>
