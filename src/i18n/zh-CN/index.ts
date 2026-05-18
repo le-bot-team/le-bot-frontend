@@ -733,6 +733,7 @@ export default {
         notifications: {
           fieldsRequired: '请完整填写宝宝的名字和生日',
           activateFailed: '激活虚拟设备失败',
+          tokenMissing: '登录已过期，请重新登录',
         },
       },
       FamilyGroupPage: {
@@ -944,6 +945,7 @@ export default {
           goalsTitle: '您希望孩子的发展方向：',
           goalsPlaceholder: '可以输入个性或者能力发展方向...',
           submit: '提交',
+          skip: '跳过',
         },
         traitTags: {
           trait_a: '开朗',

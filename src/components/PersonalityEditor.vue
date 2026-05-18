@@ -22,18 +22,23 @@ const props = withDefaults(
     traits?: string;
     goals?: string;
     submitLabel?: string;
+    showSkip?: boolean;
+    skipLabel?: string;
   }>(),
   {
     enabled: true,
     traits: '',
     goals: '',
     submitLabel: '',
+    showSkip: false,
+    skipLabel: '',
   },
 );
 
 const emit = defineEmits<{
   submit: [payload: { enabled: boolean; traits: string; goals: string }];
   disable: [];
+  skip: [];
 }>();
 
 const enabled = ref<boolean>(props.enabled);
@@ -55,12 +60,12 @@ const selectedGoalTags = ref<string[]>([]);
 // 从已保存的 traits/goals 中解析出已选中的标签
 function parseSelectedTags() {
   if (props.traits) {
-    const savedTraits = props.traits.split(/[,，;；\n]/).map(t => t.trim()).filter(Boolean);
-    selectedTraitTags.value = traitTagValues.filter(tag => savedTraits.includes(tag));
+    const savedTraits = props.traits.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
+    selectedTraitTags.value = traitTagValues.filter((tag: string) => savedTraits.includes(tag));
   }
   if (props.goals) {
-    const savedGoals = props.goals.split(/[,，;；\n]/).map(t => t.trim()).filter(Boolean);
-    selectedGoalTags.value = goalTagValues.filter(tag => savedGoals.includes(tag));
+    const savedGoals = props.goals.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
+    selectedGoalTags.value = goalTagValues.filter((tag: string) => savedGoals.includes(tag));
   }
 }
 
@@ -100,8 +105,8 @@ function updateTraitsFromTags() {
   // 合并标签和手动输入的内容
   const manualTraits = traits.value
     .split(/[,，;；\n]/)
-    .map(t => t.trim())
-    .filter(t => {
+    .map((t: string) => t.trim())
+    .filter((t: string) => {
       // 排除预设标签
       const isPreset = traitTagValues.includes(t) || selectedTraitTags.value.includes(t);
       return t.length > 0 && !isPreset;
@@ -112,8 +117,8 @@ function updateTraitsFromTags() {
 function updateGoalsFromTags() {
   const manualGoals = goals.value
     .split(/[,，;；\n]/)
-    .map(t => t.trim())
-    .filter(t => {
+    .map((t: string) => t.trim())
+    .filter((t: string) => {
       const isPreset = goalTagValues.includes(t) || selectedGoalTags.value.includes(t);
       return t.length > 0 && !isPreset;
     });
@@ -193,6 +198,14 @@ function onSubmit() {
   >
     {{ submitLabel || i18n('labels.submit') }}
   </button>
+  <button
+    v-if="props.showSkip"
+    type="button"
+    class="device-personality-skip"
+    @click="emit('skip')"
+  >
+    {{ props.skipLabel || i18n('labels.skip') }}
+  </button>
 </template>
 
 <style scoped lang="scss">
@@ -231,6 +244,26 @@ function onSubmit() {
     background: var(--clr-primary);
     color: var(--clr-white);
     border-color: var(--clr-primary);
+  }
+}
+
+.device-personality-skip {
+  width: 100%;
+  max-width: var(--device-card-max-w);
+  height: 44px;
+  margin-top: 8px;
+  border: 1.5px solid var(--clr-btn-weak-border-soft, #e0e0e0);
+  border-radius: 22px;
+  background: var(--clr-white, #fff);
+  color: var(--clr-text-secondary, #9398a9);
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
   }
 }
 </style>

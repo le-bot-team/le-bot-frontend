@@ -7,6 +7,8 @@ export interface UserProfile {
   avatar?: string | undefined;
   avatarHash?: string;
   region?: string;
+  birthday?: string;
+  relationship?: string;
   last_active: Date;
   last_login: Date;
 }

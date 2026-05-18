@@ -125,16 +125,23 @@ async function onVoiceprintRecorded(data: Blob) {
   try {
     const authStore = useAuthStore();
     const { accessToken } = storeToRefs(authStore);
-    if (!accessToken.value) return;
+    if (!accessToken.value) {
+      $q.notify({ type: 'warning', message: i18n('notifications.tokenMissing') });
+      isRegisteringVoiceprint.value = false;
+      return;
+    }
 
     const dataUrl = await blobToDataUrl(data);
     const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+    const childAge = childBirthday.value
+      ? Math.max(1, new Date().getFullYear() - new Date(childBirthday.value).getFullYear())
+      : 8;
     const result = (
       await register(
         accessToken.value,
         audioBase64,
         childName.value.trim(),
-        8, // child age default
+        childAge,
         'self' as const,
       )
     ).data;
@@ -344,16 +351,11 @@ function goToHome() {
         </div>
       </q-tab-panel>
 
-      <!-- Step 3: Voiceprint -->
-      <q-tab-panel :name="2" class="q-pa-none">
-        <div class="voiceprint-step-inner">
-          <RecordPanel
-            :name="0"
-            @next="onVoiceprintRecorded"
-          />
-          <q-inner-loading :showing="isRegisteringVoiceprint" />
-        </div>
-      </q-tab-panel>
+      <!-- Step 3: Voiceprint (RecordPanel renders its own q-tab-panel) -->
+      <RecordPanel
+        :name="2"
+        @next="onVoiceprintRecorded"
+      />
 
       <!-- Step 4: AI personality -->
       <q-tab-panel :name="3" class="q-pa-none">
@@ -384,6 +386,7 @@ function goToHome() {
         </div>
       </q-tab-panel>
     </q-tab-panels>
+    <q-inner-loading :showing="isRegisteringVoiceprint" />
   </q-page>
 </template>
 

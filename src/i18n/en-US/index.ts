@@ -738,6 +738,7 @@ export default {
         notifications: {
           fieldsRequired: "Please fill in your child's name and birthday",
           activateFailed: 'Failed to activate virtual device',
+          tokenMissing: 'Session expired, please log in again',
         },
       },
       FamilyGroupPage: {
@@ -950,6 +951,7 @@ export default {
           goalsTitle: 'Expected development directions:',
           goalsPlaceholder: 'Personality or capability development directions...',
           submit: 'Submit',
+          skip: 'Skip',
         },
         traitTags: {
           trait_a: 'Cheerful',
