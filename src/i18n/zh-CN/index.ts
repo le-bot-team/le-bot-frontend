@@ -267,6 +267,13 @@ export default {
         recording: '录音中...',
       },
     },
+    BirthdayPicker: {
+      labels: {
+        placeholder: '年/月/日',
+        cancel: '取消',
+        confirm: '确定',
+      },
+    },
     CropperDialog: {
       labels: {
         title: '裁剪图片',

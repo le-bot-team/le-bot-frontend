@@ -272,6 +272,13 @@ export default {
         recording: 'Recording...',
       },
     },
+    BirthdayPicker: {
+      labels: {
+        placeholder: 'YYYY/MM/DD',
+        cancel: 'Cancel',
+        confirm: 'OK',
+      },
+    },
     CropperDialog: {
       labels: {
         title: 'Crop Image',

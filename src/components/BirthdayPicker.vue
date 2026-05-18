@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
+import { i18nSubPath } from 'src/utils/common';
+
 const props = defineProps<{
   modelValue?: string;
   disabled?: boolean;
+  placeholder?: string;
 }>();
 
 const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
+
+const i18n = i18nSubPath('components.BirthdayPicker');
 
 const showPicker = ref(false);
 const internalValue = ref(props.modelValue ?? '');
@@ -19,6 +24,13 @@ watch(
     internalValue.value = v ?? '';
   },
 );
+
+// Reset internalValue when dialog opens to stay in sync with modelValue
+watch(showPicker, (open) => {
+  if (open) {
+    internalValue.value = props.modelValue ?? '';
+  }
+});
 
 const onConfirm = () => {
   emit('update:modelValue', internalValue.value);
@@ -34,7 +46,7 @@ const onConfirm = () => {
       readonly
       :value="modelValue"
       :disabled="disabled"
-      placeholder="YYYY/MM/DD"
+      :placeholder="placeholder || i18n('labels.placeholder')"
       @click="!disabled && (showPicker = true)"
     />
     <q-dialog v-model="showPicker">
@@ -47,8 +59,8 @@ const onConfirm = () => {
           />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn v-close-popup flat label="Cancel" />
-          <q-btn v-close-popup color="primary" flat label="OK" @click="onConfirm" />
+          <q-btn v-close-popup flat :label="i18n('labels.cancel')" />
+          <q-btn v-close-popup color="primary" flat :label="i18n('labels.confirm')" @click="onConfirm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
