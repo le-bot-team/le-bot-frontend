@@ -175,7 +175,7 @@ function formatDuration(totalSeconds: number): string {
       class="family-group-add-btn"
       type="button"
       @click="onShare"
-      :disabled="!inviteCode"
+      :disabled="!inviteCode || !familyGroupStore.isInviteCodeValid"
     >
       {{ i18n('labels.share') }}
     </button>
