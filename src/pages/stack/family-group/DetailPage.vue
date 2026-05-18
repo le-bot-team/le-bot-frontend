@@ -10,7 +10,7 @@
  * 数据源从 FamilyGroupStore.currentGroup 读取。
  */
 
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { i18nSubPath } from 'src/utils/common';
@@ -28,7 +28,9 @@ const profileStore = useProfileStore();
 
 // 从 URL query 同步 groupId 到 store
 const urlGroupId = computed(() => route.query.groupId as string | undefined);
-if (urlGroupId.value) familyGroupStore.setCurrentGroup(urlGroupId.value);
+watch(urlGroupId, (id) => {
+  if (id) familyGroupStore.setCurrentGroup(id);
+}, { immediate: true });
 
 /** 当前家庭组 */
 const group = computed(() => familyGroupStore.currentGroup);
@@ -62,6 +64,7 @@ function getAvatar(member: FamilyMember): string {
 function childAge(birthday?: string): number {
   if (!birthday) return 0;
   const birth = new Date(birthday);
+  if (isNaN(birth.getTime())) return 0;
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();
   if (

@@ -83,11 +83,18 @@ const group = computed(() => familyGroupStore.currentGroup);
  * 是否可以删除该成员：
  * - 当前用户必须是家庭组创建者
  * - 目标成员不能是创建者自己（不能删除自己）
+ * - 目标成员不能是当前登录用户
+ * - 不能对 placeholder 成员执行删除
  */
 const canRemove = computed(() => {
   if (!group.value) return false;
-  const isCurrentUserCreator = group.value.creatorId === profileStore.profile?.id;
-  return isCurrentUserCreator && !member.value.isCreator;
+  const currentUserId = profileStore.profile?.id;
+  const isCurrentUserCreator = group.value.creatorId === currentUserId;
+  // Block removal of self (by userId match) or creator
+  const isSelf = member.value.userId === currentUserId;
+  // Block removal of placeholder members (no real userId)
+  const isPlaceholder = !member.value.userId;
+  return isCurrentUserCreator && !member.value.isCreator && !isSelf && !isPlaceholder;
 });
 
 function onRemove() {

@@ -41,6 +41,8 @@ const emit = defineEmits<{
 // ── State ──
 const selectedRole = ref<FamilyUserRole>('father');
 const isJoining = ref(false);
+/** Track whether the close was due to a successful join */
+let joinSucceeded = false;
 
 function onConfirm() {
   if (!props.inviteCode) return;
@@ -62,6 +64,7 @@ function onConfirm() {
       if (res.data?.success && res.data.data?.group) {
         familyGroupStore.addGroup(res.data.data.group);
         $q.notify({ message: i18n('notifications.joinSuccess'), type: 'positive' });
+        joinSucceeded = true;
         emit('success', res.data.data.group.id);
       } else {
         const msg = res.data && !res.data.success ? res.data.message : undefined;
@@ -81,10 +84,18 @@ function onCancel() {
   emit('update:modelValue', false);
   emit('cancel');
 }
+
+function onDialogHide() {
+  // Only emit cancel if the close was NOT due to a successful join
+  if (!joinSucceeded) {
+    emit('cancel');
+  }
+  joinSucceeded = false;
+}
 </script>
 
 <template>
-  <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" @hide="onCancel">
+  <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" @hide="onDialogHide">
     <q-card class="join-confirm-card">
       <!-- 拖拽指示条 -->
       <div class="join-confirm-card__drag-handle" />

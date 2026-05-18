@@ -7,7 +7,7 @@
  * 后续接入后端生成的 QR 图片或前端本地生成。
  */
 
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useQuasar } from 'quasar';
@@ -25,7 +25,9 @@ const authStore = useAuthStore();
 
 // 同步当前 groupId
 const groupId = computed(() => route.query.groupId as string | undefined);
-if (groupId.value) familyGroupStore.setCurrentGroup(groupId.value);
+watch(groupId, (id) => {
+  if (id) familyGroupStore.setCurrentGroup(id);
+}, { immediate: true });
 
 const currentGroup = computed(() => familyGroupStore.currentGroup);
 const inviteCode = computed(() => currentGroup.value?.inviteCode);

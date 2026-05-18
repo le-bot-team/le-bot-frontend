@@ -91,6 +91,10 @@ export const useFamilyGroupStore = defineStore(
      */
     const addGroup = (group: FamilyGroup) => {
       groups.value.push(group);
+      // Auto-select the new group if none is currently selected
+      if (!currentGroupId.value) {
+        currentGroupId.value = group.id;
+      }
     };
 
     /**

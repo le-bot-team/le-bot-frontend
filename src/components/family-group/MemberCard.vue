@@ -34,8 +34,8 @@ function getMetaText(): string {
     const birthday = props.member.childInfo.birthday;
     let age = '';
     if (birthday) {
-      try {
-        const birth = new Date(birthday);
+      const birth = new Date(birthday);
+      if (!isNaN(birth.getTime())) {
         const now = new Date();
         let ageNum = now.getFullYear() - birth.getFullYear();
         if (
@@ -43,7 +43,7 @@ function getMetaText(): string {
           || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
         ) ageNum--;
         age = ` ${Math.max(0, ageNum)}岁`;
-      } catch { /* ignore */ }
+      }
     }
     return `${gender}${age}`;
   }

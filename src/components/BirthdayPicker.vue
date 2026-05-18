@@ -91,7 +91,13 @@ const selectedDay = ref<string>(initDay);
 watch(
   () => props.modelValue,
   (val) => {
-    if (val === '') return;
+    if (val === '') {
+      // Reset to defaults when parent clears the value
+      selectedYear.value = String(props.defaultYear);
+      selectedMonth.value = '01';
+      selectedDay.value = '01';
+      return;
+    }
     const { year, month, day } = parseDate(val);
     selectedYear.value = year;
     selectedMonth.value = month;
