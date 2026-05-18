@@ -87,6 +87,7 @@ function openSession(session: ChatSession) {
       v-model="searchQuery"
       class="chat-history-page__search"
       :placeholder="i18n('labels.searchPlaceholder')"
+      :aria-label="i18n('labels.searchPlaceholder')"
     />
 
     <template v-if="sessions.length">
@@ -101,7 +102,11 @@ function openSession(session: ChatSession) {
             v-for="session in group"
             :key="session.id"
             class="chat-history-page__item"
+            role="button"
+            tabindex="0"
             @click="openSession(session)"
+            @keydown.enter="openSession(session)"
+            @keydown.space.prevent="openSession(session)"
           >
             <div class="chat-history-page__item-main">
               <div class="chat-history-page__item-title">{{ session.title }}</div>

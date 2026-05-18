@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // ChatMessageItem — bubble rendered inside ChatMessageList.
-// Design a2096a64: AI bubble (white bg, dark text, left-aligned) / user
-// bubble (rgba(39,145,234,1), white text, right-aligned). Padding, radius
+// Design a2096a64: AI bubble (transparent bg, white text, left-aligned) / user
+// bubble (transparent bg, blue #2791EA text, right-aligned). Padding, radius
 // and shadow come from the `.chat-bubble*` classes in src/css/app.scss.
 
 import { computed } from 'vue';

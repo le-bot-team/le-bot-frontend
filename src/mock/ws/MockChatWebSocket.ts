@@ -9,6 +9,12 @@ interface MockMessageEvent {
 type EventHandler = (event?: MockMessageEvent) => void;
 
 export class MockChatWebSocket {
+  // Static constants matching the native WebSocket API
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
+
   readonly url: string;
   readonly CONNECTING = 0;
   readonly OPEN = 1;
@@ -21,14 +27,12 @@ export class MockChatWebSocket {
   onclose: ((event?: MockMessageEvent) => void) | null = null;
   onerror: ((event?: MockMessageEvent) => void) | null = null;
 
-  private _sessionId: string;
   private _conversationId: string;
   private _inputStarted = false;
   private _timers: ReturnType<typeof setTimeout>[] = [];
 
   constructor(url: string) {
     this.url = url;
-    this._sessionId = uid();
     this._conversationId = '';
 
     setTimeout(() => {
