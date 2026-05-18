@@ -116,9 +116,11 @@ const onSubmit = async () => {
           @focus="oldFocused = true"
           @blur="oldFocused = false"
         />
-        <span
+        <button
+          type="button"
           v-if="oldFocused || oldPassword.length"
           class="cpw-action-icon"
+          aria-label="Toggle old password visibility"
           @click="showOld = !showOld"
         >
           <svg v-if="showOld" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -137,7 +139,7 @@ const onSubmit = async () => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
 
       <!-- New password -->
@@ -152,9 +154,11 @@ const onSubmit = async () => {
           @focus="newFocused = true"
           @blur="newFocused = false"
         />
-        <span
+        <button
+          type="button"
           v-if="newFocused || newPassword.length"
           class="cpw-action-icon"
+          aria-label="Toggle new password visibility"
           @click="showNew = !showNew"
         >
           <svg v-if="showNew" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -173,7 +177,7 @@ const onSubmit = async () => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
 
       <!-- Confirm password -->
@@ -188,9 +192,11 @@ const onSubmit = async () => {
           @focus="confirmFocused = true"
           @blur="confirmFocused = false"
         />
-        <span
+        <button
+          type="button"
           v-if="confirmFocused || confirmPassword.length"
           class="cpw-action-icon"
+          aria-label="Toggle confirm password visibility"
           @click="showConfirm = !showConfirm"
         >
           <svg v-if="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -209,7 +215,7 @@ const onSubmit = async () => {
             />
             <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
           </svg>
-        </span>
+        </button>
       </div>
 
       <!-- Error message -->
@@ -236,6 +242,15 @@ const onSubmit = async () => {
 </template>
 
 <style scoped lang="scss">
+.cpw-action-icon {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
 .cpw-submit--disabled {
   opacity: 0.5;
   cursor: not-allowed;

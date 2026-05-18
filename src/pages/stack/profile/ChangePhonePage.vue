@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { i18nSubPath } from 'src/utils/common';
@@ -61,7 +61,7 @@ const oldSendCodeLabel = computed(() => {
 });
 
 const canVerifyOld = computed(
-  () => !isSubmitting.value && oldCode.value.length >= 4,
+  () => !isSubmitting.value && !!currentPhone.value && oldCode.value.length >= 4,
 );
 
 const startOldCountdown = () => {
@@ -232,6 +232,18 @@ const onSubmitNew = async () => {
 watch([oldCode, newPhone, newCode], () => {
   errorMsg.value = '';
 });
+
+// Cleanup timers on unmount
+onBeforeUnmount(() => {
+  if (oldCountdownTimer) {
+    clearInterval(oldCountdownTimer);
+    oldCountdownTimer = null;
+  }
+  if (newCountdownTimer) {
+    clearInterval(newCountdownTimer);
+    newCountdownTimer = null;
+  }
+});
 </script>
 
 <template>
@@ -262,13 +274,15 @@ watch([oldCode, newPhone, newCode], () => {
             />
           </div>
           <div class="cph-input-wrap cph-input-wrap--action">
-            <span
+            <button
+              type="button"
               class="cph-action-link"
               :class="{ 'cph-action-link--disabled': !canSendOldCode }"
+              :disabled="!canSendOldCode"
               @click="onSendOldCode"
             >
               {{ oldSendCodeLabel }}
-            </span>
+            </button>
           </div>
         </div>
 
@@ -314,13 +328,15 @@ watch([oldCode, newPhone, newCode], () => {
             />
           </div>
           <div class="cph-input-wrap cph-input-wrap--action">
-            <span
+            <button
+              type="button"
               class="cph-action-link"
               :class="{ 'cph-action-link--disabled': !canSendNewCode }"
+              :disabled="!canSendNewCode"
               @click="onSendNewCode"
             >
               {{ newSendCodeLabel }}
-            </span>
+            </button>
           </div>
         </div>
 
@@ -411,6 +427,9 @@ watch([oldCode, newPhone, newCode], () => {
 
 // Action link (Send Verification Code) — design: rgba(32,204,249,1), Regular 15px
 .cph-action-link {
+  background: none;
+  border: none;
+  padding: 0;
   font-family: var(--font-family);
   font-size: 15px;
   font-weight: 400;

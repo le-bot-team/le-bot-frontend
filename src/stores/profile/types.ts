@@ -1,4 +1,4 @@
-import type { FamilyUserRole } from 'stores/family-group/types';
+export type FamilyUserRole = 'father' | 'mother' | 'grandpa' | 'grandma' | 'friend' | 'other';
 
 export interface UserProfile {
   id: string;

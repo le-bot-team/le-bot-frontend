@@ -17,7 +17,7 @@ const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } = useDialogPluginC
 const { notify } = useQuasar();
 
 const image = ref(props.src);
-const imageFiles = ref<File>();
+const imageFiles = ref<File | null>(null);
 const cropper = ref<typeof Cropper>();
 
 const onConfirm = () => {
