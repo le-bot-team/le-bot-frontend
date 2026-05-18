@@ -49,7 +49,7 @@ const maskedPhone = computed(() => {
 });
 
 const canSendOldCode = computed(
-  () => !!currentPhone.value && !oldCodeSending.value && oldCountdown.value === 0,
+  () => !!accessToken.value && !!currentPhone.value && !oldCodeSending.value && oldCountdown.value === 0,
 );
 
 const oldSendCodeLabel = computed(() => {
@@ -139,7 +139,7 @@ const phoneRegex = /^1[3-9]\d{9}$/;
 const isValidNewPhone = computed(() => phoneRegex.test(newPhone.value));
 
 const canSendNewCode = computed(
-  () => isValidNewPhone.value && !newCodeSending.value && newCountdown.value === 0,
+  () => !!accessToken.value && isValidNewPhone.value && !newCodeSending.value && newCountdown.value === 0,
 );
 
 const newSendCodeLabel = computed(() => {
@@ -152,6 +152,7 @@ const newSendCodeLabel = computed(() => {
 
 const canSubmitNew = computed(
   () =>
+    !!accessToken.value &&
     !isSubmitting.value &&
     isValidNewPhone.value &&
     newCode.value.length >= 4,

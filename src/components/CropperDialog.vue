@@ -127,10 +127,10 @@ const onRejected = () => {
       </div>
 
       <div class="cropper-dialog__actions">
-        <button class="cropper-dialog__btn cropper-dialog__btn--cancel" @click="onDialogCancel">
+        <button type="button" class="cropper-dialog__btn cropper-dialog__btn--cancel" @click="onDialogCancel">
           {{ i18n('labels.cancel') }}
         </button>
-        <button class="cropper-dialog__btn cropper-dialog__btn--confirm" @click="onConfirm">
+        <button type="button" class="cropper-dialog__btn cropper-dialog__btn--confirm" @click="onConfirm">
           {{ i18n('labels.confirm') }}
         </button>
       </div>
