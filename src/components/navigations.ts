@@ -62,6 +62,24 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'profile',
   },
   {
+    label: i18n('stack.profileEdit'),
+    icon: 'account-edit',
+    available: true,
+    route: 'profile-edit',
+  },
+  {
+    label: i18n('stack.profileChangePassword'),
+    icon: 'lock-reset',
+    available: true,
+    route: 'profile-change-password',
+  },
+  {
+    label: i18n('stack.profileChangePhone'),
+    icon: 'cellphone',
+    available: true,
+    route: 'profile-change-phone',
+  },
+  {
     label: i18n('stack.deviceConfig'),
     icon: 'cog',
     available: true,

@@ -28,15 +28,15 @@ const { updateProfile } = profileStore;
 // ── Step management ──
 type Step = 'verifyOld' | 'bindNew';
 const step = ref<Step>(profile.value?.phone ? 'verifyOld' : 'bindNew');
+// Track whether user has manually progressed past step 1
+const userAdvanced = ref(false);
 
 // Keep step in sync with profile phone state (handles async profile load)
 watch(
   () => profile.value?.phone,
   (phone) => {
-    // Only auto-adjust if user hasn't already advanced to step 2
-    if (step.value === 'verifyOld' && !phone) {
-      step.value = 'bindNew';
-    }
+    if (userAdvanced.value) return;
+    step.value = phone ? 'verifyOld' : 'bindNew';
   },
 );
 
@@ -71,7 +71,7 @@ const oldSendCodeLabel = computed(() => {
 });
 
 const canVerifyOld = computed(
-  () => !isSubmitting.value && !!currentPhone.value && oldCode.value.length >= 4,
+  () => !!accessToken.value && !isSubmitting.value && !!currentPhone.value && oldCode.value.length >= 4,
 );
 
 const startOldCountdown = () => {
@@ -125,6 +125,7 @@ const onVerifyOld = async () => {
   try {
     const { data } = await verifyPhoneCode(token, currentPhone.value, oldCode.value);
     if (data.success) {
+      userAdvanced.value = true;
       step.value = 'bindNew';
     } else {
       errorMsg.value = i18n('errors.invalidCode');

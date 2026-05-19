@@ -146,6 +146,7 @@ export default {
         profile: '个人资料',
         profileEdit: '编辑资料',
         profileChangePassword: '修改密码',
+        profileChangePhone: '更换手机号',
         settings: '设置',
         settingsVoiceprint: '声纹设置',
         settingsVoiceprintDetail: '声纹设置',

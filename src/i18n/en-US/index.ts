@@ -146,6 +146,7 @@ export default {
         profile: 'Profile',
         profileEdit: 'Edit Profile',
         profileChangePassword: 'Change Password',
+        profileChangePhone: 'Change Phone',
         settings: 'Settings',
         settingsVoiceprint: 'Voiceprint Settings',
         settingsVoiceprintDetail: 'Voiceprint Settings',
