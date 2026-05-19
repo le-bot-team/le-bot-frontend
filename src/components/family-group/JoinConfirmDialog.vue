@@ -65,6 +65,7 @@ function onConfirm() {
         familyGroupStore.addGroup(res.data.data.group);
         $q.notify({ message: i18n('notifications.joinSuccess'), type: 'positive' });
         joinSucceeded = true;
+        emit('update:modelValue', false);
         emit('success', res.data.data.group.id);
       } else {
         const msg = res.data && !res.data.success ? res.data.message : undefined;
