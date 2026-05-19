@@ -34,13 +34,21 @@ const idAccountText = computed(() =>
 // 昵称, 生日, 手机号, 修改密码
 type FieldKey = 'nickname' | 'birthday';
 
-interface ProfileRow {
+interface EditableRow {
+  key: FieldKey;
+  label: string;
+  value?: string;
+  editable: true;
+}
+
+interface NavigationRow {
   key: string;
   label: string;
   value?: string;
-  to?: string;
-  editable?: boolean;
+  to: string;
 }
+
+type ProfileRow = EditableRow | NavigationRow;
 
 const profileRows = computed<ProfileRow[]>(() => [
   {
@@ -73,10 +81,10 @@ const goEditField = (key: FieldKey) => {
 };
 
 const onRowClick = (row: ProfileRow) => {
-  if (row.to) {
+  if ('to' in row) {
     void router.push(row.to);
-  } else if (row.editable) {
-    goEditField(row.key as FieldKey);
+  } else {
+    goEditField(row.key);
   }
 };
 

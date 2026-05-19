@@ -71,7 +71,7 @@ const oldSendCodeLabel = computed(() => {
 });
 
 const canVerifyOld = computed(
-  () => !!accessToken.value && !isSubmitting.value && !!currentPhone.value && oldCode.value.length >= 4,
+  () => !!accessToken.value && !isSubmitting.value && !!currentPhone.value && oldCode.value.length === 6,
 );
 
 const startOldCountdown = () => {
@@ -165,7 +165,7 @@ const canSubmitNew = computed(
     !!accessToken.value &&
     !isSubmitting.value &&
     isValidNewPhone.value &&
-    newCode.value.length >= 4,
+    newCode.value.length === 6,
 );
 
 const startNewCountdown = () => {
