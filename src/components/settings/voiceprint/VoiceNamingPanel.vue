@@ -86,7 +86,7 @@ const chooseRelationship = (): void => {
 
     <!-- Name block -->
     <template v-if="nameEditable">
-      <div id="voice-naming-question-label" class="voice-naming-question">{{ whoseVoiceLabel }}</div>
+      <div class="voice-naming-question">{{ whoseVoiceLabel }}</div>
       <div class="voice-naming-input-box">
         <input
           v-model="nameModel"
@@ -94,7 +94,7 @@ const chooseRelationship = (): void => {
           type="text"
           maxlength="20"
           :placeholder="namePlaceholder"
-          aria-labelledby="voice-naming-question-label"
+          :aria-label="whoseVoiceLabel"
         />
       </div>
     </template>

@@ -264,8 +264,8 @@ onBeforeUnmount(() => {
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel="stopRecording"
-          @keyup.enter.prevent="isRecording ? stopRecording() : startRecording()"
-          @keyup.space.prevent="isRecording ? stopRecording() : startRecording()"
+          @keyup.enter.prevent="!$event.repeat && (isRecording ? stopRecording() : startRecording())"
+          @keydown.space.prevent="!$event.repeat && (isRecording ? stopRecording() : startRecording())"
         >
           <div class="voiceprint-record-pulse-inner" />
         </div>

@@ -43,15 +43,12 @@ onMounted(async () => {
 <template>
   <q-page class="voiceprint-page">
     <div class="me-card voiceprint-card">
-      <div
+      <button
         v-for="person in persons"
         :key="person.person_id"
         class="voiceprint-row"
-        role="button"
-        tabindex="0"
+        type="button"
         @click="goDetail(person.person_id)"
-        @keydown.enter="goDetail(person.person_id)"
-        @keyup.space.prevent="goDetail(person.person_id)"
       >
         <div class="voiceprint-row__left">
           <span>{{ i18n('labels.personVoiceprint', { name: person.name || '' }) }}</span>
@@ -60,7 +57,7 @@ onMounted(async () => {
           </span>
         </div>
         <q-icon class="voiceprint-row__chevron" name="chevron_right" size="12px" />
-      </div>
+      </button>
     </div>
     <p v-if="hasTemporal" class="voiceprint-hint">
       {{ i18n('labels.temporalHint') }}
