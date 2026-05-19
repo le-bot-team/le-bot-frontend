@@ -2,7 +2,7 @@
 // SetupProfilePanel — lanhu designs ed71eb82 (完善个人信息) / fb8d01d5 (选择关系弹窗)
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onUnmounted } from 'vue';
 
 import CropperDialog from 'components/CropperDialog.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
@@ -44,6 +44,19 @@ const relationOptions = computed(() =>
 );
 
 const showRelationSheet = ref(false);
+
+// Close relationship sheet on Escape key (window-level since overlay may not have focus)
+const onEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') showRelationSheet.value = false;
+};
+watch(showRelationSheet, (open) => {
+  if (open) {
+    window.addEventListener('keydown', onEscape);
+  } else {
+    window.removeEventListener('keydown', onEscape);
+  }
+});
+onUnmounted(() => window.removeEventListener('keydown', onEscape));
 
 const editAvatar = () => {
   dialog({
@@ -180,7 +193,6 @@ const confirm = async () => {
           aria-modal="true"
           :aria-label="i18n('labels.selectRelationship')"
           @click.self="showRelationSheet = false"
-          @keydown.escape="showRelationSheet = false"
         >
           <div class="setup-profile-relation-sheet">
             <div class="setup-profile-relation-head">
