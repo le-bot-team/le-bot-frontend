@@ -1255,6 +1255,7 @@ export default {
             title: '聊天记录',
             searchPlaceholder: '搜索聊天记录',
             empty: '暂无聊天记录',
+            comingSoon: '聊天记录功能即将上线',
           },
         },
         MuteSettingsPage: {

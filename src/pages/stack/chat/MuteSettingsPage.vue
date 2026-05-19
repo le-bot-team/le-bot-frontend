@@ -1,18 +1,15 @@
 <script setup lang="ts">
 // MuteSettingsPage — mute settings for chat page, design inspired by Doubao.
 
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { i18nSubPath } from 'src/utils/common';
+import { useChatStore } from 'stores/chat';
 
 const i18n = i18nSubPath('pages.stack.chat.MuteSettingsPage');
 const { notify } = useQuasar();
-
-const muteMode = ref(false);
-const muteNotifications = ref(true);
-const autoMute = ref(false);
-const autoMuteStart = ref('22:00');
-const autoMuteEnd = ref('07:00');
+const chatStore = useChatStore();
+const { isMuted: muteMode, muteNotifications, autoMute, autoMuteStart, autoMuteEnd } = storeToRefs(chatStore);
 
 function toggleMuteMode(val: boolean) {
   notify({

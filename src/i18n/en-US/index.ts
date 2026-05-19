@@ -1276,6 +1276,7 @@ export default {
             title: 'Chat History',
             searchPlaceholder: 'Search chat history',
             empty: 'No chat history',
+            comingSoon: 'Chat history coming soon',
           },
         },
         MuteSettingsPage: {

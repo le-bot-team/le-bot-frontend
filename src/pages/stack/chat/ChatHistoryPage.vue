@@ -10,6 +10,7 @@ import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.chat.ChatHistoryPage');
 const router = useRouter();
+const isMockMode = process.env.NODE_ENV === 'development';
 
 const searchQuery = ref('');
 
@@ -22,9 +23,9 @@ interface ChatSession {
 }
 
 // Mock data — only shown in development; replace with store/API when available
+// Gate mock data to dev mode to avoid shipping fake entries in production
 const sessions = computed<ChatSession[]>(() => {
-  // Gate mock data to dev mode to avoid shipping fake entries in production
-  if (process.env.NODE_ENV !== 'development') return [];
+  if (!isMockMode) return [];
   const all: ChatSession[] = [
     {
       id: '1',
@@ -122,7 +123,7 @@ function openSession(session: ChatSession) {
     </template>
 
     <div v-else class="chat-history-page__empty">
-      {{ i18n('labels.empty') }}
+      {{ isMockMode ? i18n('labels.empty') : i18n('labels.comingSoon') }}
     </div>
   </q-page>
 </template>

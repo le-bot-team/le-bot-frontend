@@ -23,17 +23,19 @@ import { useTracker } from 'src/composables/useTracker';
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
+import { useChatStore } from 'stores/chat';
 
 const i18n = i18nSubPath('pages.stack.ChatPage');
 const route = useRoute();
 const { accessToken } = storeToRefs(useAuthStore());
+const chatStore = useChatStore();
+const { isMuted } = storeToRefs(chatStore);
 const { notify } = useQuasar();
 const { trackClick, trackConversion } = useTracker();
 
 const { messages, isConnected, isMediaReady, connect, wake, destroy } = useChatSession();
 
 const pressing = ref(false);
-const isMuted = ref(false);
 
 // --- Session bootstrap ---
 
