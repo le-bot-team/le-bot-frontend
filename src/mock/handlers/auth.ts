@@ -10,7 +10,7 @@ import {
 } from 'src/mock/data/auth';
 import { mockError, mockSuccess } from 'src/mock/utils';
 
-let lastCodeSentAt = 0;
+let lastCodeSentAt = new Map<string, number>();
 
 /** Safely parse JSON body, returning empty object on failure. */
 function safeParseBody<T = Record<string, unknown>>(data: unknown): Partial<T> {
@@ -41,10 +41,11 @@ export function setupAuthMock(mock: MockAdapter): void {
     }
 
     const now = Date.now();
-    if (now - lastCodeSentAt < MOCK_CODE_COOLDOWN_MS) {
+    const lastSent = lastCodeSentAt.get(email) ?? 0;
+    if (now - lastSent < MOCK_CODE_COOLDOWN_MS) {
       return [200, mockError('发送频率过高，请稍后再试')];
     }
-    lastCodeSentAt = now;
+    lastCodeSentAt.set(email, now);
 
     console.log(`[Mock Auth] Verification code sent to ${email} (use ${MOCK_VERIFICATION_CODE})`);
     return [200, mockSuccess(undefined)];

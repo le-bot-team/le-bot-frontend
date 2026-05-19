@@ -96,7 +96,7 @@ const confirm = async () => {
   } catch (err) {
     notify({
       type: 'negative',
-        message: (err as Error).message || i18n('notifications.unknownError'),
+      message: (err as Error).message || i18n('notifications.unknownError'),
     });
   }
   isSending.value = false;
@@ -176,7 +176,11 @@ const confirm = async () => {
         <div
           v-if="showRelationSheet"
           class="setup-profile-relation-overlay"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="i18n('labels.selectRelationship')"
           @click.self="showRelationSheet = false"
+          @keydown.escape="showRelationSheet = false"
         >
           <div class="setup-profile-relation-sheet">
             <div class="setup-profile-relation-head">

@@ -27,6 +27,7 @@ export default {
           sending: 'Sending...',
           sendCode: 'Send Code',
           resendCode: 'Resend',
+          resendCodeCooldown: 'Resend ({seconds}s)',
           strengthWeak: 'Weak',
           strengthMedium: 'Medium',
           strengthStrong: 'Strong',

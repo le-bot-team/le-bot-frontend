@@ -27,6 +27,7 @@ export default {
           sending: '发送中...',
           sendCode: '发送验证码',
           resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
           strengthWeak: '弱',
           strengthMedium: '中',
           strengthStrong: '强',

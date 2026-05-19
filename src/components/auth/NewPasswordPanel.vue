@@ -84,7 +84,7 @@ const sendCodeLabel = computed(() => {
   if (isSendingCode.value) return i18n('labels.sending');
   if (isNeverSendCode.value) return i18n('labels.sendCode');
   if (remainedSendCodeCooldownSeconds.value)
-    return `${i18n('labels.resendCode')}(${remainedSendCodeCooldownSeconds.value}s)`;
+    return i18n('labels.resendCodeCooldown', { seconds: remainedSendCodeCooldownSeconds.value });
   return i18n('labels.resendCode');
 });
 
