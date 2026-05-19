@@ -139,7 +139,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
     if (data.isTemporal !== undefined) person.is_temporal = data.isTemporal;
 
     console.log(`[Mock Voiceprint] Updated person: ${personId}`);
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Delete person
@@ -153,7 +153,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
 
     persons.splice(index, 1);
     console.log(`[Mock Voiceprint] Deleted person: ${personId}`);
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Add voice to person
@@ -175,7 +175,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
     person.voice_count = person.voices.length;
 
     console.log(`[Mock Voiceprint] Added voice to ${personId}`);
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Update voice
@@ -230,7 +230,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
       person.voice_count = person.voices.length;
 
       console.log(`[Mock Voiceprint] Deleted voice ${voiceId} from ${personId}`);
-      return [200, mockSuccess(undefined)];
+      return [200, { success: true as const }];
     });
 }
 

@@ -46,12 +46,14 @@ const submitUpdate = async () => {
     if (response.success) {
       notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
       setTimeout(() => router.go(-1), 1200);
+      // Keep submitting=true to prevent duplicate requests until navigation
     } else {
       notify({
         type: 'warning',
         message: i18n('notifications.updateFailed'),
         caption: response.message,
       });
+      submitting.value = false;
     }
   } catch (error) {
     notify({
@@ -59,7 +61,6 @@ const submitUpdate = async () => {
       message: i18n('notifications.updateError'),
       caption: (error as Error).message,
     });
-  } finally {
     submitting.value = false;
   }
 };

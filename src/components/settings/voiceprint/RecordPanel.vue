@@ -252,11 +252,10 @@ onBeforeUnmount(() => {
 
       <!-- Recording button (shown when no audio) -->
       <div v-else>
-        <div
+        <button
           class="voiceprint-record-pulse-ring"
           :class="{ 'voiceprint-record-pulse-ring--recording': isRecording }"
-          role="button"
-          tabindex="0"
+          type="button"
           :aria-label="isRecording ? i18n('labels.stopRecording') : i18n('labels.startRecording')"
           @mousedown.prevent="startRecording"
           @mouseup="stopRecording"
@@ -264,11 +263,9 @@ onBeforeUnmount(() => {
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel="stopRecording"
-          @keyup.enter.prevent="!$event.repeat && (isRecording ? stopRecording() : startRecording())"
-          @keydown.space.prevent="!$event.repeat && (isRecording ? stopRecording() : startRecording())"
         >
           <div class="voiceprint-record-pulse-inner" />
-        </div>
+        </button>
       </div>
 
       <button
