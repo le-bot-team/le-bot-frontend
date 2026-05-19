@@ -9,7 +9,7 @@ interface Navigation {
 
 const i18n = i18nSubPath('components.navigations');
 
-export const MAIN_NAVIGATIONS: Navigation[] = [
+export const getMainNavigations = (): Navigation[] => [
   {
     label: i18n('main.home'),
     icon: 'home',
@@ -36,7 +36,7 @@ export const MAIN_NAVIGATIONS: Navigation[] = [
   },
 ];
 
-export const STACK_NAVIGATIONS: Navigation[] = [
+export const getStackNavigations = (): Navigation[] => [
   {
     label: i18n('stack.about'),
     icon: 'information',
@@ -158,3 +158,7 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'device-config-about',
   },
 ];
+
+// Backward-compatible exports (evaluate once on import — use getters for reactive labels)
+export const MAIN_NAVIGATIONS = getMainNavigations();
+export const STACK_NAVIGATIONS = getStackNavigations();

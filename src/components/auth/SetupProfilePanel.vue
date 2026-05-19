@@ -75,8 +75,10 @@ const selectRelationship = (val: string) => {
   showRelationSheet.value = false;
 };
 
+const canSubmit = computed(() => !!nickname.value?.trim().length && !isSending.value);
+
 const confirm = async () => {
-  if (!accessToken.value || isSending.value) return;
+  if (!accessToken.value || !canSubmit.value) return;
   isSending.value = true;
   try {
     const { data } = await updateProfileInfo(accessToken.value, {
@@ -177,7 +179,7 @@ const confirm = async () => {
     <!-- Primary button -->
     <button
       class="auth-btn-primary setup-profile-btn-primary"
-      :disabled="isSending"
+      :disabled="!canSubmit"
       @click="confirm"
     >
       {{ i18n('labels.confirm') }}

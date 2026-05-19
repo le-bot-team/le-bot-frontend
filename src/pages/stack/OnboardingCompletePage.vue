@@ -32,7 +32,7 @@ const scanJoin = () => {
       <p class="onboarding-complete-desc">{{ i18n('labels.subtitle') }}</p>
 
       <div class="onboarding-complete-actions">
-        <button class="auth-btn-primary" @click="$router.replace('/main/home')">
+        <button class="auth-btn-primary" @click="$router.replace({ name: 'home' })">
           {{ i18n('options.addDevice.title') }}
         </button>
         <button class="auth-btn-weak" @click="scanJoin">

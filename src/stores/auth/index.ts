@@ -61,6 +61,7 @@ export const useAuthStore = defineStore(
 
     return {
       accessToken,
+      sendCodeTime,
       isNeverSendCode,
       markCodeSent,
       remainedSendCodeCooldownSeconds,

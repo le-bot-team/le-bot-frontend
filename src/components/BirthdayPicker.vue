@@ -57,7 +57,11 @@ watch(
     if (year.value && month.value && day.value) {
       const m = String(month.value).padStart(2, '0');
       const d = String(day.value).padStart(2, '0');
-      emit('update:modelValue', `${year.value}-${m}-${d}`);
+      const formatted = `${year.value}-${m}-${d}`;
+      // Guard against emit loop when parent syncs back the same value
+      if (formatted !== props.modelValue) {
+        emit('update:modelValue', formatted);
+      }
     }
   },
 );
@@ -90,15 +94,15 @@ watch(
 
 <template>
   <div class="birthday-picker">
-    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" :class="{ 'birthday-picker__select--placeholder': !year }" aria-label="Year">
+    <select v-model="year" class="birthday-picker__select birthday-picker__select--year" :class="{ 'birthday-picker__select--placeholder': !year }" aria-label="Year">
       <option :value="null" disabled hidden>YYYY</option>
       <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
     </select>
-    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" :class="{ 'birthday-picker__select--placeholder': !month }" aria-label="Month">
+    <select v-model="month" class="birthday-picker__select birthday-picker__select--month" :class="{ 'birthday-picker__select--placeholder': !month }" aria-label="Month">
       <option :value="null" disabled hidden>MM</option>
       <option v-for="m in months" :key="m" :value="m">{{ String(m).padStart(2, '0') }}</option>
     </select>
-    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day" :class="{ 'birthday-picker__select--placeholder': !day }" aria-label="Day">
+    <select v-model="day" class="birthday-picker__select birthday-picker__select--day" :class="{ 'birthday-picker__select--placeholder': !day }" aria-label="Day">
       <option :value="null" disabled hidden>DD</option>
       <option v-for="d in days" :key="d" :value="d">{{ String(d).padStart(2, '0') }}</option>
     </select>

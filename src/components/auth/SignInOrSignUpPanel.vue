@@ -83,7 +83,7 @@ const sendCode = async () => {
     notify({ type: 'positive', message: i18n('notifications.codeSent') });
     authStore.markCodeSent();
   } catch (err) {
-    errorMsg.value = (err as Error).message || i18n('notifications.sendCodeFailed');
+    errorMsg.value = i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;
 };
@@ -99,7 +99,7 @@ const processSignInOrSignUp = async () => {
     const p = codeOrPassword.value ?? '';
     const { data } = await processFunction(e, p);
     if (!data.success) {
-      errorMsg.value = data.message ?? i18n('notifications.unknownError');
+      errorMsg.value = i18n('notifications.unknownError');
       return;
     }
 

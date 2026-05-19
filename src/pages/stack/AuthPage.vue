@@ -107,7 +107,7 @@ function goBack() {
           @next="panelIndex = 2"
           @previous="panelIndex = 0"
         />
-        <setup-profile-panel :name="2" @finish="onProfileFinish" @previous="panelIndex = 1" />
+        <setup-profile-panel :name="2" @finish="onProfileFinish" @previous="goBack" />
       </q-tab-panels>
     </div>
   </q-page>

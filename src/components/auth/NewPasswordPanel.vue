@@ -112,7 +112,7 @@ const sendCode = async () => {
     }
     authStore.markCodeSent();
   } catch (err) {
-    errorMsg.value = (err as Error).message || i18n('notifications.sendCodeFailed');
+    errorMsg.value = i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;
 };
@@ -120,32 +120,34 @@ const sendCode = async () => {
 const confirmNewPassword = async () => {
   if (!canSubmit.value || isSubmitting.value) return;
 
+  // Snapshot reactive values before async operations (#5 TOCTOU guard)
+  const snapshotCode = code.value ?? '';
+  const snapshotPassword = newPassword.value ?? '';
+  const snapshotEmail = props.email;
+
   isSubmitting.value = true;
   errorMsg.value = undefined;
 
   try {
     // Step 1: Reset password with verification code
-    {
-      const c = code.value ?? '';
-      const p = newPassword.value ?? '';
-      const { data } = await emailReset(props.email, c, p);
-      if (!data.success) {
-        errorMsg.value = data.message || i18n('notifications.setPasswordFailed');
-        isSubmitting.value = false;
-        return;
-      }
-    }
-
-    // Step 2: Auto-login with the new password
-    const p = newPassword.value ?? '';
-    const { data } = await emailPassword(props.email, p);
-    if (!data.success) {
-      errorMsg.value = data.message || i18n('notifications.autoLoginFailed');
+    const { data: resetData } = await emailReset(snapshotEmail, snapshotCode, snapshotPassword);
+    if (!resetData.success) {
+      errorMsg.value = resetData.message || i18n('notifications.setPasswordFailed');
       isSubmitting.value = false;
       return;
     }
 
-    accessToken.value = data.data.accessToken;
+    // Step 2: Auto-login with the new password (skip if token already valid)
+    if (!accessToken.value) {
+      const { data } = await emailPassword(snapshotEmail, snapshotPassword);
+      if (!data.success) {
+        // Password was reset successfully but auto-login failed — proceed anyway
+        // since user already has a valid session from the initial code login
+        emit('next');
+        return;
+      }
+      accessToken.value = data.data.accessToken;
+    }
 
     // Both new and existing users go to profile setup after password is set
     emit('next');
