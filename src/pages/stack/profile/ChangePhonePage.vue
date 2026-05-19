@@ -128,7 +128,7 @@ const onVerifyOld = async () => {
       userAdvanced.value = true;
       step.value = 'bindNew';
     } else {
-      errorMsg.value = i18n('errors.invalidCode');
+      errorMsg.value = data.message || i18n('errors.invalidCode');
     }
   } catch {
     errorMsg.value = i18n('errors.verifyFailed');

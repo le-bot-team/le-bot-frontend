@@ -26,13 +26,25 @@ const profileStore = useProfileStore();
 const { profile } = storeToRefs(profileStore);
 const { updateProfile } = profileStore;
 
-const fieldKey = computed<FieldKey>(() => {
+const fieldKey = computed<FieldKey | null>(() => {
   const raw = Array.isArray(route.query.field) ? route.query.field[0] : route.query.field;
   if (raw === 'nickname' || raw === 'birthday' || raw === 'bio') return raw;
-  return 'nickname';
+  return null;
 });
 
-const fieldLabel = computed(() => i18n(`labels.${fieldKey.value}`));
+// Redirect back if field is invalid
+watch(
+  fieldKey,
+  (key) => {
+    if (!key) {
+      $q.notify({ type: 'negative', message: i18n('notifications.invalidField') });
+      router.back();
+    }
+  },
+  { immediate: true },
+);
+
+const fieldLabel = computed(() => fieldKey.value ? i18n(`labels.${fieldKey.value}`) : '');
 const placeholder = computed(() => {
   if (fieldKey.value === 'nickname') return i18n('labels.placeholderNickname');
   if (fieldKey.value === 'birthday') return i18n('labels.placeholderBirthday');
@@ -44,7 +56,7 @@ const isSubmitting = ref(false);
 
 const syncFromProfile = () => {
   const p = profile.value;
-  if (!p) {
+  if (!p || !fieldKey.value) {
     value.value = '';
     return;
   }
@@ -67,7 +79,7 @@ watch([fieldKey, profile], syncFromProfile);
 const canSubmit = computed(() => !isSubmitting.value);
 
 const onSave = async () => {
-  if (!canSubmit.value) return;
+  if (!canSubmit.value || !fieldKey.value) return;
   const token = accessToken.value;
   if (!token) {
     $q.notify({ type: 'negative', message: i18n('notifications.saveFailed') });

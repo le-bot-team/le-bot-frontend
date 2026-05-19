@@ -2,8 +2,8 @@ export type FamilyUserRole = 'father' | 'mother' | 'grandpa' | 'grandma' | 'frie
 
 export interface UserProfile {
   id: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   nickname?: string;
   bio?: string;
   avatar?: string | undefined;
@@ -14,6 +14,6 @@ export interface UserProfile {
   relationship?: string;
   role?: FamilyUserRole;
   gender?: 'male' | 'female';
-  last_active: Date;
-  last_login: Date;
+  last_active: string;
+  last_login: string;
 }

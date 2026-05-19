@@ -52,7 +52,7 @@ export function setupProfileMock(mock: MockAdapter): void {
     if (data.birthday !== undefined) profile.birthday = data.birthday;
     if (data.relationship !== undefined) profile.relationship = data.relationship;
 
-    profile.updated_at = new Date();
+    profile.updated_at = new Date().toISOString();
     console.log('[Mock Profile] Profile updated:', {
       nickname: profile.nickname,
       birthday: profile.birthday,
@@ -81,7 +81,7 @@ export function setupProfileMock(mock: MockAdapter): void {
       ];
     }
     mockPassword = data.newPassword;
-    profile.updated_at = new Date();
+    profile.updated_at = new Date().toISOString();
     console.log('[Mock Profile] Password changed');
     return [200, { success: true as const }];
   });
@@ -110,7 +110,7 @@ export function setupProfileMock(mock: MockAdapter): void {
     console.log(
       `[Mock Profile] Verification code sent to ${phone} (use ${MOCK_VERIFICATION_CODE})`,
     );
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Verify phone code
@@ -126,7 +126,7 @@ export function setupProfileMock(mock: MockAdapter): void {
     }
 
     console.log(`[Mock Profile] Phone code verified for ${phone}`);
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Change phone number
@@ -142,8 +142,8 @@ export function setupProfileMock(mock: MockAdapter): void {
     }
 
     profile.phone = phone;
-    profile.updated_at = new Date();
+    profile.updated_at = new Date().toISOString();
     console.log(`[Mock Profile] Phone changed to ${phone}`);
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 }

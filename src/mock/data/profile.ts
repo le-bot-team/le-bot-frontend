@@ -11,16 +11,16 @@ export const MOCK_AVATAR_BASE64 =
  */
 export const MOCK_PROFILE: UserProfile = {
   id: '1',
-  created_at: new Date('2024-06-01T08:00:00.000Z'),
-  updated_at: new Date('2024-12-15T10:30:00.000Z'),
+  created_at: '2024-06-01T08:00:00.000Z',
+  updated_at: '2024-12-15T10:30:00.000Z',
   nickname: '乐宝用户',
   bio: '一个热爱AI的可爱用户',
   avatar: MOCK_AVATAR_BASE64,
   avatarHash: 'mock-avatar-hash-00000000',
   region: '中国',
   phone: '18758326895',
-  last_active: new Date('2024-12-15T12:00:00.000Z'),
-  last_login: new Date('2024-12-15T08:00:00.000Z'),
+  last_active: '2024-12-15T12:00:00.000Z',
+  last_login: '2024-12-15T08:00:00.000Z',
 };
 
 /**

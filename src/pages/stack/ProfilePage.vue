@@ -6,6 +6,7 @@ import { useQuasar } from 'quasar';
 
 import { useProfileStore } from 'stores/profile';
 import { useAuthStore } from 'stores/auth';
+import { useDeviceStore } from 'stores/device';
 import { i18nSubPath } from 'src/utils/common';
 import { deactivateAccount } from 'src/utils/api/profile';
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
@@ -21,6 +22,8 @@ const { updateProfile } = profileStore;
 
 const authStore = useAuthStore();
 const { accessToken } = storeToRefs(authStore);
+
+const deviceStore = useDeviceStore();
 
 // ID account display text (e.g. "ID账号：LB55667788")
 const idAccountText = computed(() =>
@@ -98,6 +101,7 @@ const onDeactivate = () => {
           $q.notify({ type: 'positive', message: i18n('notifications.deactivateSuccess') });
           accessToken.value = '';
           updateProfile(undefined);
+          deviceStore.updateDevices([]);
           void router.replace('/main/home');
         } else {
           $q.notify({ type: 'negative', message: data.message });
