@@ -21,7 +21,7 @@ const imageFiles = ref<File | null>(null);
 const cropper = ref<typeof Cropper>();
 
 const onConfirm = () => {
-  const croppedImage = cropper.value?.getResult()?.canvas.toDataURL('image/jpeg', 0.85);
+  const croppedImage = cropper.value?.getResult()?.canvas?.toDataURL('image/jpeg', 0.85);
   if (croppedImage) {
     onDialogOK(croppedImage);
   } else {
