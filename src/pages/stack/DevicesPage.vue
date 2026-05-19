@@ -82,7 +82,8 @@ function goToDeviceConfig(deviceId: string) {
         :aria-label="device.name || i18n('labels.virtualDevice')"
         class="settings-menu-row"
         @click="goToDeviceConfig(device.id)"
-        @keydown.enter.space.prevent="goToDeviceConfig(device.id)"
+        @keydown.enter.prevent="goToDeviceConfig(device.id)"
+        @keydown.space.prevent="goToDeviceConfig(device.id)"
       >
         <div class="column">
           <span>{{ device.name || i18n('labels.virtualDevice') }}</span>

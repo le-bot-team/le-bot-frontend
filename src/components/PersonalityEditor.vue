@@ -64,6 +64,10 @@ const selectedGoalTags = ref<string[]>([]);
 
 // 从已保存的 traits/goals 中解析出已选中的标签
 function parseSelectedTags() {
+  // Reset first to handle cleared props
+  selectedTraitTags.value = [];
+  selectedGoalTags.value = [];
+
   if (props.traits) {
     const savedTraits = props.traits.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
     selectedTraitTags.value = traitTagValues.filter((tag: string) => savedTraits.includes(tag));

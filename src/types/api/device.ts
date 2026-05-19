@@ -54,4 +54,5 @@ export type UnbindDeviceResponse =
     }
   | {
       success: true;
+      data?: undefined;
     };
