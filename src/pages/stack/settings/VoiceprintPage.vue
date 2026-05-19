@@ -51,7 +51,7 @@ onMounted(async () => {
         tabindex="0"
         @click="goDetail(person.person_id)"
         @keydown.enter="goDetail(person.person_id)"
-        @keydown.space.prevent="goDetail(person.person_id)"
+        @keyup.space.prevent="goDetail(person.person_id)"
       >
         <div class="voiceprint-row__left">
           <span>{{ i18n('labels.personVoiceprint', { name: person.name || '' }) }}</span>

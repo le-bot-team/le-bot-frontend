@@ -88,6 +88,12 @@ const onAudioTimeUpdate = (): void => {
 };
 
 const resetRecording = (): void => {
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.currentTime = 0;
+  }
+  isPlaying.value = false;
+  playbackProgress.value = 0;
   audioData.value = undefined;
 };
 
@@ -258,8 +264,8 @@ onBeforeUnmount(() => {
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel="stopRecording"
-          @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
-          @keydown.space.prevent="isRecording ? stopRecording() : startRecording()"
+          @keyup.enter.prevent="isRecording ? stopRecording() : startRecording()"
+          @keyup.space.prevent="isRecording ? stopRecording() : startRecording()"
         >
           <div class="voiceprint-record-pulse-inner" />
         </div>
