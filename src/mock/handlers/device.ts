@@ -47,7 +47,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
     };
 
     devices.push(newDevice);
-    console.log(`[Mock Device] Virtual device activated: ${newDevice.id}`);
+    console.debug(`[Mock Device] Virtual device activated: ${newDevice.id}`);
     return [200, mockSuccess({ device: JSON.parse(JSON.stringify(newDevice)) })];
   });
 
@@ -71,7 +71,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
     };
 
     devices.push(newDevice);
-    console.log(`[Mock Device] Physical device bound: ${newDevice.id}`);
+    console.debug(`[Mock Device] Physical device bound: ${newDevice.id}`);
     return [200, mockSuccess({ device: JSON.parse(JSON.stringify(newDevice)) })];
   });
 
@@ -92,7 +92,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
     }
 
     devices.splice(index, 1);
-    console.log(`[Mock Device] Device removed: ${deviceId}`);
+    console.debug(`[Mock Device] Device removed: ${deviceId}`);
     return [200, mockSuccess(undefined)];
   });
 }
