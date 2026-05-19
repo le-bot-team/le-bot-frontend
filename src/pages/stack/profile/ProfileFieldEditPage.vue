@@ -82,7 +82,9 @@ watch(value, () => {
   dirty.value = true;
 });
 
-const canSubmit = computed(() => !isSubmitting.value && !!accessToken.value && !!fieldKey.value);
+const canSubmit = computed(
+  () => !isSubmitting.value && !!accessToken.value && !!fieldKey.value && dirty.value && value.value.trim().length > 0,
+);
 
 const onSave = async () => {
   if (!canSubmit.value || !fieldKey.value) return;

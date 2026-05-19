@@ -36,6 +36,10 @@ const onConfirm = () => {
   emit('update:modelValue', internalValue.value);
   showPicker.value = false;
 };
+
+const onCancel = () => {
+  showPicker.value = false;
+};
 </script>
 
 <template>
@@ -59,8 +63,8 @@ const onConfirm = () => {
           />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn v-close-popup flat :label="i18n('labels.cancel')" />
-          <q-btn v-close-popup color="primary" flat :label="i18n('labels.confirm')" @click="onConfirm" />
+          <q-btn flat :label="i18n('labels.cancel')" @click="onCancel" />
+          <q-btn color="primary" flat :label="i18n('labels.confirm')" @click="onConfirm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
