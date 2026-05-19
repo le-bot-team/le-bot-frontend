@@ -62,6 +62,10 @@ function onPress() {
     notify({ type: 'warning', message: i18n('notifications.notReady') });
     return;
   }
+  if (isMuted.value) {
+    notify({ type: 'info', message: i18n('notifications.muteModeEnabled') });
+    return;
+  }
   trackConversion('first_voice_input');
   pressing.value = true;
   wake().catch((err) => {

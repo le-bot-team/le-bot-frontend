@@ -261,6 +261,20 @@ export class MockChatWebSocket {
   private _addTimer(timer: ReturnType<typeof setTimeout>): void {
     this._timers.push(timer);
   }
+
+  private _removeTimer(timer: ReturnType<typeof setTimeout>): void {
+    const idx = this._timers.indexOf(timer);
+    if (idx !== -1) this._timers.splice(idx, 1);
+  }
+
+  private _addTrackedTimer(callback: () => void, delay: number): void {
+    let handle: ReturnType<typeof setTimeout>;
+    handle = setTimeout(() => {
+      this._removeTimer(handle);
+      callback();
+    }, delay);
+    this._addTimer(handle);
+  }
 }
 
 // ============================================================================

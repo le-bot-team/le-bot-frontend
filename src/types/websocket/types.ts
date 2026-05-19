@@ -98,7 +98,7 @@ export interface WsClearContextResponseSuccess extends WsBaseResponseSuccess {
   action: WsAction.clearContext;
 }
 
-export interface WsEstablishConnectionResponseSuccess extends WsBaseResponseError {
+export interface WsEstablishConnectionResponseSuccess extends WsBaseResponseSuccess {
   action: WsAction.establishConnection;
 }
 

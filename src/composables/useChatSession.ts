@@ -155,6 +155,7 @@ export function useChatSession(): UseChatSessionReturn {
     if (msg.audioChunks.length > 0) {
       const combinedBlob = await pcmToWav(new Blob(msg.audioChunks));
       msg.audioUrl = URL.createObjectURL(combinedBlob);
+      msg.audioChunks = []; // Release intermediate blobs to free memory
     }
 
     currentTurnPlayer.setAudioComplete(true);
@@ -377,14 +378,14 @@ export function useChatSession(): UseChatSessionReturn {
   // ==========================================================================
 
   async function connect(token: string, deviceId?: string, sessionId?: string): Promise<void> {
-    // Setup WS handlers before connecting
-    setupWsHandlers();
-
     // Connect WebSocket with optional deviceId for virtual device binding
     const deviceParam = deviceId ? `&deviceId=${encodeURIComponent(deviceId)}` : '';
     const sessionParam = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
     const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}${sessionParam}`;
     wsClient.connect(wsUrl);
+
+    // Setup WS handlers after connecting so they go directly to the new WsWrapper
+    setupWsHandlers();
 
     // Initialize microphone
     await recorder.initMedia();
