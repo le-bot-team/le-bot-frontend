@@ -130,7 +130,7 @@ const processSignInOrSignUp = async () => {
         class="auth-input"
         type="email"
         v-model="email"
-        placeholder="请输入邮箱"
+        :placeholder="i18n('labels.email')"
         autocomplete="email"
       />
     </div>
@@ -157,7 +157,7 @@ const processSignInOrSignUp = async () => {
           :disabled="!isValidEmail || (!isNeverSendCode && !!remainedSendCodeCooldownSeconds)"
           @click="sendCode"
         >
-          {{ isSendingCode ? '发送中...' : sendCodeLabel }}
+          {{ isSendingCode ? i18n('labels.sending') : sendCodeLabel }}
         </button>
       </div>
     </div>
@@ -211,7 +211,7 @@ const processSignInOrSignUp = async () => {
       :disabled="!canSubmit"
       @click="processSignInOrSignUp"
     >
-      {{ processMethod === 'code' ? '登录/注册' : '登录' }}
+      {{ processMethod === 'code' ? i18n('labels.signInOrSignUp') : i18n('labels.signIn') }}
     </button>
 
     <!-- Weak button - mode toggle -->
@@ -219,7 +219,7 @@ const processSignInOrSignUp = async () => {
       class="auth-btn-weak"
       @click="processMethod = processMethod === 'code' ? 'password' : 'code'"
     >
-      {{ processMethod === 'code' ? '密码登录' : '验证码登录' }}
+      {{ processMethod === 'code' ? i18n('labels.usePassword') : i18n('labels.useCode') }}
     </button>
 
     <!-- Terms agreement checkbox -->
@@ -245,11 +245,11 @@ const processSignInOrSignUp = async () => {
         </svg>
       </span>
       <span class="auth-terms-text">
-        我已阅读并同意<span class="link" @click.prevent="goToTermsOfService">《服务条款》</span>、<span
+        {{ i18n('labels.termsPrefix') }}<span class="link" @click.prevent="goToTermsOfService">{{ i18n('labels.termsOfService') }}</span>{{ i18n('labels.termsSeparator') }}<span
           class="link"
           @click.prevent="goToUserAgreement"
-          >《用户协议》</span
-        >和<span class="link" @click.prevent="goToPrivacyPolicy">《隐私政策》</span>
+          >{{ i18n('labels.userAgreement') }}</span
+        >{{ i18n('labels.termsAnd') }}<span class="link" @click.prevent="goToPrivacyPolicy">{{ i18n('labels.privacyPolicy') }}</span>
       </span>
     </label>
   </q-tab-panel>
