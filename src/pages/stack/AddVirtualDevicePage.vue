@@ -9,6 +9,7 @@
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, ref } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.svg';
 import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.svg';
@@ -33,31 +34,28 @@ const deviceStore = useDeviceStore();
 const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
 
-// Relationship string → FamilyUserRole mapping.
-// The relationship value comes from the user profile (set during onboarding or profile edit).
-// Keys are Chinese labels matching the profile relationship picker options.
+// Relationship role → FamilyUserRole mapping (identity for known roles, fallback for unknown)
 const relationshipRoleMap: Partial<Record<string, FamilyUserRole>> = {
-  '爸爸': 'father',
-  '妈妈': 'mother',
-  '爷爷': 'grandpa',
-  '奶奶': 'grandma',
-  '外公': 'maternal_grandfather',
-  '外婆': 'maternal_grandma',
-  '朋友': 'friend',
-  '其他亲属': 'other',
+  father: 'father',
+  mother: 'mother',
+  grandpa: 'grandpa',
+  grandma: 'grandma',
+  maternal_grandfather: 'maternal_grandfather',
+  maternal_grandma: 'maternal_grandma',
+  friend: 'friend',
+  other: 'other',
 };
 
-// Relationship string → gender mapping (for family member display)
+// Relationship role → gender mapping
 const relationshipGenderMap: Partial<Record<string, 'male' | 'female'>> = {
-  '爸爸': 'male',
-  '爷爷': 'male',
-  '外公': 'male',
-  '妈妈': 'female',
-  '奶奶': 'female',
-  '外婆': 'female',
+  father: 'male',
+  grandpa: 'male',
+  maternal_grandfather: 'male',
+  mother: 'female',
+  grandma: 'female',
+  maternal_grandma: 'female',
 };
 const { trackClick, trackConversion } = useTracker();
-useAuthStore();
 
 const step = ref(0);
 const autoAdvanceTimer = ref<number | null>(null);
@@ -67,6 +65,20 @@ onBeforeUnmount(() => {
     window.clearTimeout(autoAdvanceTimer.value);
     autoAdvanceTimer.value = null;
   }
+});
+
+onBeforeRouteLeave((_to, _from, next) => {
+  // If device was activated but flow not completed (step < 4 means not at "done" step)
+  if (activatedDeviceId.value && step.value > 0 && step.value < 4) {
+    const leave = window.confirm(
+      'Device setup is incomplete. Leaving now will create an orphaned device. Continue?',
+    );
+    if (!leave) {
+      next(false);
+      return;
+    }
+  }
+  next();
 });
 
 // --- Step 1: Child info ---
@@ -144,7 +156,16 @@ async function onVoiceprintRecorded(data: Blob) {
     const dataUrl = await blobToDataUrl(data);
     const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
     const childAge = childBirthday.value
-      ? Math.max(1, new Date().getFullYear() - new Date(childBirthday.value).getFullYear())
+      ? (() => {
+          const birth = new Date(childBirthday.value);
+          const now = new Date();
+          let age = now.getFullYear() - birth.getFullYear();
+          const monthDiff = now.getMonth() - birth.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+            age--;
+          }
+          return Math.max(1, age);
+        })()
       : 8;
     const result = (
       await register(

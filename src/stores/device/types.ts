@@ -21,6 +21,7 @@ export interface DeviceInfo {
   status: unknown;
   config: {
     voiceStyle?: string;
+    speechRate?: number;
     aiPersonality?: {
       enabled: boolean;
       traits?: string;

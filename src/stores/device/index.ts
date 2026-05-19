@@ -7,21 +7,26 @@ import { MAX_VIRTUAL_DEVICES } from 'stores/device/types';
 export const useDeviceStore = defineStore(
   'device',
   () => {
-    const currentDevice = ref<DeviceInfo>();
+    const currentDeviceId = ref<string | null>(null);
     const devices = ref<DeviceInfo[]>([]);
+
+    /** Derived current device — always references the canonical array entry */
+    const currentDevice = computed<DeviceInfo | undefined>(
+      () => devices.value.find((d) => d.id === currentDeviceId.value) ?? devices.value[0],
+    );
 
     /** All virtual devices (type === 'virtual') */
     const virtualDevices = computed(() => devices.value.filter((d) => d.type === 'virtual'));
 
     const updateDevices = (newDevices: DeviceInfo[] = []) => {
       devices.value = newDevices;
-      // Preserve current device selection if it still exists in the new list
-      const prevId = currentDevice.value?.id;
-      const preserved = prevId ? newDevices.find((d) => d.id === prevId) : undefined;
-      currentDevice.value = preserved ?? newDevices[0];
+      // Preserve selection if device still exists; otherwise auto-select first
+      if (currentDeviceId.value && !newDevices.some((d) => d.id === currentDeviceId.value)) {
+        currentDeviceId.value = newDevices[0]?.id ?? null;
+      }
     };
 
-    /** Add a virtual device to the store (validates MAX_VIRTUAL_DEVICES limit) */
+    /** Add a device to the store (validates MAX_VIRTUAL_DEVICES limit for virtual type) */
     const addDevice = (device: DeviceInfo) => {
       if (device.type === 'virtual' && virtualDevices.value.length >= MAX_VIRTUAL_DEVICES) {
         throw new Error(`Cannot add more than ${MAX_VIRTUAL_DEVICES} virtual devices`);
@@ -29,8 +34,8 @@ export const useDeviceStore = defineStore(
       // Avoid duplicates
       if (devices.value.some((d: DeviceInfo) => d.id === device.id)) return;
       devices.value.push(device);
-      if (!currentDevice.value) {
-        currentDevice.value = device;
+      if (!currentDeviceId.value) {
+        currentDeviceId.value = device.id;
       }
     };
 
@@ -39,29 +44,30 @@ export const useDeviceStore = defineStore(
       const index = devices.value.findIndex((d) => d.id === deviceId);
       if (index === -1) return;
       devices.value.splice(index, 1);
-      if (currentDevice.value?.id === deviceId) {
-        currentDevice.value = devices.value[0];
+      if (currentDeviceId.value === deviceId) {
+        currentDeviceId.value = devices.value[0]?.id ?? null;
       }
     };
 
     /** Switch the current device to one with the given id */
     const setCurrentDevice = (deviceId: string) => {
-      const device = devices.value.find((d) => d.id === deviceId);
-      if (device) {
-        currentDevice.value = device;
+      if (devices.value.some((d) => d.id === deviceId)) {
+        currentDeviceId.value = deviceId;
       }
     };
 
-    /** Merge a partial patch into currentDevice.config (persisted via pinia-plugin-persistedstate) */
+    /** Merge a partial patch into currentDevice.config */
     const updateCurrentDeviceConfig = (patch: Partial<NonNullable<DeviceInfo['config']>>) => {
-      if (!currentDevice.value) return;
-      currentDevice.value.config = {
-        ...(currentDevice.value.config ?? {}),
+      const device = devices.value.find((d) => d.id === currentDeviceId.value);
+      if (!device) return;
+      device.config = {
+        ...(device.config ?? {}),
         ...patch,
       };
     };
 
     return {
+      currentDeviceId,
       currentDevice,
       devices,
       virtualDevices,

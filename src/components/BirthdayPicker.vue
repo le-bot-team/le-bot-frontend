@@ -51,9 +51,11 @@ function onDateChange(event: Event) {
 }
 
 // Default max date: today (local timezone); default value hint for picker
-const now = new Date();
-const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-const defaultDate = `${props.defaultYear}-06-01`;
+const today = computed(() => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+});
+const defaultDate = computed(() => `${props.defaultYear}-06-01`);
 </script>
 
 <template>

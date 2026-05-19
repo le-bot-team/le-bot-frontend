@@ -94,7 +94,7 @@ const visibleMenuGroups = computed(() => {
 
 onBeforeMount(() => {
   if (!currentDevice.value) {
-    router.go(-1);
+    router.replace('/stack/devices').catch(console.error);
   }
 });
 </script>

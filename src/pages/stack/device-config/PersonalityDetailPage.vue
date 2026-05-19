@@ -39,6 +39,6 @@ function onDisable() {
   deviceStore.updateCurrentDeviceConfig({
     aiPersonality: { ...prev, enabled: false },
   });
-  router.replace('/stack/device-config/personality').catch(console.error);
+  router.back();
 }
 </script>

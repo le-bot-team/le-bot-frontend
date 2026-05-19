@@ -6,9 +6,6 @@ import { MAX_VIRTUAL_DEVICES } from 'stores/device/types';
 
 import type { DeviceInfo } from 'stores/device/types';
 
-/** Mutable copy of devices that mock endpoints operate on */
-const devices: DeviceInfo[] = [...MOCK_DEVICES];
-
 /**
  * Register mock handlers for the device module:
  *   GET    /devices/mine
@@ -17,6 +14,8 @@ const devices: DeviceInfo[] = [...MOCK_DEVICES];
  *   POST   /devices/bind (physical device binding)
  */
 export function setupDeviceMock(mock: MockAdapter): void {
+  /** Reset mutable device state on each setup (prevents HMR/test state leaks) */
+  const devices: DeviceInfo[] = [...MOCK_DEVICES];
   // Retrieve my devices
   mock.onGet('/devices/mine').reply(() => {
     return [200, mockSuccess({ devices: JSON.parse(JSON.stringify(devices)) })];

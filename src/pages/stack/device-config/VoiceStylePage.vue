@@ -30,12 +30,17 @@
     </div>
 
     <!-- Bottom card: selectable styles -->
-    <section class="voice-style-card">
+    <section class="voice-style-card" role="radiogroup" :aria-label="i18n('labels.sectionTitle')">
       <div
         v-for="s in styles"
         :key="s.key"
         class="voice-style-list-row"
+        role="radio"
+        tabindex="0"
+        :aria-checked="selectedKey === s.key"
         @click="selectStyle(s.key)"
+        @keydown.enter.prevent="selectStyle(s.key)"
+        @keydown.space.prevent="selectStyle(s.key)"
       >
         <span>{{ i18n(`styles.${s.key}`) }}</span>
         <img class="voice-style-mark" :src="selectedKey === s.key ? checkIcon : radioIcon" alt="" />
@@ -81,12 +86,18 @@ function resolveStyleKey(raw?: string): VoiceStyleKey {
 const selectedKey = ref<VoiceStyleKey>(
   resolveStyleKey(deviceStore.currentDevice?.config?.voiceStyle),
 );
-const rate = ref<number>(1.5);
+const rate = ref<number>(deviceStore.currentDevice?.config?.speechRate ?? 1.5);
 
 // Sync selection when currentDevice loads/changes (e.g. after refresh)
 const storeVoiceStyle = computed(() => deviceStore.currentDevice?.config?.voiceStyle);
 watch(storeVoiceStyle, (newVal) => {
   selectedKey.value = resolveStyleKey(newVal);
+});
+
+// Sync rate from store when currentDevice loads/changes
+const storeSpeechRate = computed(() => deviceStore.currentDevice?.config?.speechRate);
+watch(storeSpeechRate, (newVal) => {
+  if (newVal !== undefined) rate.value = newVal;
 });
 
 // Slider fill ratio: rate range 0.5..2.0 (span 1.5)
@@ -96,4 +107,9 @@ function selectStyle(key: VoiceStyleKey) {
   selectedKey.value = key;
   deviceStore.updateCurrentDeviceConfig({ voiceStyle: key });
 }
+
+// Persist rate changes to device config
+watch(rate, (newRate) => {
+  deviceStore.updateCurrentDeviceConfig({ speechRate: newRate });
+});
 </script>

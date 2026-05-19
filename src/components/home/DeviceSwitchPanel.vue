@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { i18nSubPath } from 'src/utils/common';
 import { useDeviceStore } from 'stores/device';
@@ -10,10 +11,6 @@ import girlDeviceUrl from 'src/assets/lanhu/home/img-lebot2-example.png';   // i
 import arrowRightUrl from 'src/assets/lanhu/home/icon-arrow-right-home.png'; // 路径 w7 h12
 import addIconUrl from 'src/assets/lanhu/home/btn-add-lebot-home.png';      // btn_add_lebot_home w12 h12
 
-defineProps<{
-  show: boolean;
-}>();
-
 const emit = defineEmits<{
   'update:show': [value: boolean];
   'add-device': [];
@@ -21,8 +18,25 @@ const emit = defineEmits<{
 
 const i18n = i18nSubPath('pages.main.HomePage');
 const deviceStore = useDeviceStore();
-const { devices, currentDevice } = storeToRefs(deviceStore);
+const { virtualDevices, currentDevice } = storeToRefs(deviceStore);
 const { trackClick, trackConversion } = useTracker();
+
+const panelRef = ref<HTMLElement | null>(null);
+
+const props = defineProps<{
+  show: boolean;
+}>();
+
+// Focus the panel when it opens for keyboard accessibility
+watch(
+  () => props.show,
+  (isOpen) => {
+    if (isOpen) {
+      // nextTick not needed — Transition renders synchronously for v-if
+      setTimeout(() => panelRef.value?.focus(), 50);
+    }
+  },
+);
 
 /** 根据设备性别返回对应头像 — 设计稿 img_lebot_example(男孩) / img_lebot2_example(女孩) */
 function getAvatarFor(device: { childInfo?: { gender?: string } | null }): string {
@@ -59,9 +73,14 @@ function handleAddDevice() {
 <template>
   <Teleport to="body">
     <Transition name="device-switch">
-      <div v-if="show" class="device-switch-overlay" @click.self="close">
+      <div v-if="show" class="device-switch-overlay" tabindex="-1" @click.self="close">
         <!-- 容器 2653: w375 h324, 白色面板 -->
-        <div class="device-switch-panel">
+        <div
+          ref="panelRef"
+          class="device-switch-panel"
+          tabindex="0"
+          @keydown.escape="close"
+        >
           <!-- 标题 "切换设备": font 17px Medium #151717 lh24 left20 top520 -->
           <div class="device-switch-header">
             <span class="device-switch-title">{{ i18n('deviceSwitch.title') }}</span>
@@ -70,7 +89,7 @@ function handleAddDevice() {
           <!-- 设备列表: 矩形2023/2024 w335 h64 圆角12 #F2F4F8 -->
           <div class="device-switch-list">
             <button
-              v-for="device in devices"
+              v-for="device in virtualDevices"
               :key="device.id"
               type="button"
               class="device-switch-item"

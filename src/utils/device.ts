@@ -16,6 +16,9 @@ export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
   if (!mineResponse.success) {
     throw new Error(mineResponse.message || 'Failed to retrieve devices');
   }
+  if (!mineResponse.data?.devices) {
+    throw new Error('Invalid response: missing devices data');
+  }
   return mineResponse.data.devices;
 };
 
@@ -41,7 +44,9 @@ const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
   if (!response.success) {
     throw new Error(response.message || 'Failed to activate virtual device');
   }
-
+  if (!response.data?.device) {
+    throw new Error('Invalid response: missing device data');
+  }
   return response.data.device;
 };
 

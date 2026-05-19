@@ -25,6 +25,7 @@ function checkUpdate() {
 }
 
 function startUpdate() {
+  if (isUpdating.value) return;
   isUpdating.value = true;
   updateProgress.value = 0;
   updateIntervalId.value = setInterval(() => {

@@ -17,6 +17,26 @@ declare module 'vue' {
 // for each client)
 const api = axios.create({ baseURL: `${process.env.LE_BOT_BACKEND_HTTP_BASE_URL}/api/v1` });
 
+// Response interceptor: handle token expiry signalled via business-level errors
+api.interceptors.response.use(
+  (response) => {
+    // Check for token expiry in business-level error responses
+    if (
+      response.data?.success === false &&
+      typeof response.data?.message === 'string' &&
+      response.data.message.toLowerCase().includes('token')
+    ) {
+      // Token expired/invalid — clear auth state and redirect to login
+      void import('stores/auth').then(({ useAuthStore }) => {
+        const authStore = useAuthStore();
+        authStore.accessToken = '';
+      });
+    }
+    return response;
+  },
+  (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+);
+
 // noinspection JSUnusedGlobalSymbols
 export default defineBoot(({ app }) => {
   app.config.globalProperties.$axios = axios;
