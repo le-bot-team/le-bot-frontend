@@ -91,4 +91,52 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'settings-voiceprint-new',
   },
+  {
+    label: i18n('stack.onboarding'),
+    icon: 'check-circle',
+    available: true,
+    route: 'onboarding-complete',
+  },
+  {
+    label: i18n('stack.deviceConfigVoice'),
+    icon: 'mdi-microphone',
+    available: true,
+    route: 'device-config-voice',
+  },
+  {
+    label: i18n('stack.deviceConfigLanguage'),
+    icon: 'mdi-translate',
+    available: true,
+    route: 'device-config-language',
+  },
+  {
+    label: i18n('stack.deviceConfigPersonality'),
+    icon: 'mdi-head-cog',
+    available: true,
+    route: 'device-config-personality',
+  },
+  {
+    label: i18n('stack.deviceConfigPersonalityDetail'),
+    icon: 'mdi-head-cog',
+    available: true,
+    route: 'device-config-personality-detail',
+  },
+  {
+    label: i18n('stack.settingsTermsOfService'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-terms-of-service',
+  },
+  {
+    label: i18n('stack.settingsUserAgreement'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-user-agreement',
+  },
+  {
+    label: i18n('stack.settingsPrivacyPolicy'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-privacy-policy',
+  },
 ];

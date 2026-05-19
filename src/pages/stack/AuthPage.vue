@@ -38,9 +38,11 @@ function goBack() {
   <q-page class="auth-page">
     <div class="auth-container" :class="{ 'auth-container--sub': panelIndex > 1 }">
       <!-- Back arrow: visible on sub-pages (password setup, profile setup) -->
-      <div
+      <button
         v-if="panelIndex === 1 || panelIndex === 2"
+        type="button"
         class="auth-back"
+        aria-label="Go back"
         @click="goBack"
       >
         <svg width="9" height="16" viewBox="0 0 9 16" fill="none">
@@ -52,7 +54,7 @@ function goBack() {
             stroke-linejoin="round"
           />
         </svg>
-      </div>
+      </button>
 
       <!-- Logo: shown on entry page and password setup page -->
       <div v-if="panelIndex <= 1" class="auth-logo">

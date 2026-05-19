@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 
@@ -8,15 +8,20 @@ const i18n = i18nSubPath('pages.stack.device-config.FirmwareUpdatePage');
 const currentVersion = ref('1.0.0');
 const latestVersion = ref<string | null>(null);
 const checking = ref(false);
+let checkTimer: ReturnType<typeof setTimeout> | undefined;
 
 function checkUpdate() {
   checking.value = true;
   // Placeholder — real implementation will call device API
-  setTimeout(() => {
+  checkTimer = setTimeout(() => {
     latestVersion.value = '1.0.0';
     checking.value = false;
   }, 1500);
 }
+
+onUnmounted(() => {
+  if (checkTimer !== undefined) clearTimeout(checkTimer);
+});
 </script>
 
 <template>

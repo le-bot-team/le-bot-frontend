@@ -12,6 +12,15 @@ import { mockError, mockSuccess } from 'src/mock/utils';
 
 let lastCodeSentAt = 0;
 
+/** Safely parse JSON body, returning empty object on failure. */
+function safeParseBody<T = Record<string, unknown>>(data: unknown): Partial<T> {
+  try {
+    return JSON.parse((data as string) ?? '{}') as Partial<T>;
+  } catch {
+    return {} as Partial<T>;
+  }
+}
+
 /**
  * Resolve which auth data to return based on the email.
  * `new@lebot.ai` triggers the full registration flow (isNew=true).
@@ -25,7 +34,7 @@ const resolveAuthData = (email: string) =>
 export function setupAuthMock(mock: MockAdapter): void {
   // Send verification code
   mock.onPost('/auth/email/challenge').reply((config) => {
-    const { email } = JSON.parse(config.data ?? '{}') as { email: string };
+    const { email } = safeParseBody<{ email: string }>(config.data);
 
     if (!email) {
       return [200, mockError('邮箱不能为空')];
@@ -43,7 +52,7 @@ export function setupAuthMock(mock: MockAdapter): void {
 
   // Login/Register with verification code
   mock.onPost('/auth/email/code').reply((config) => {
-    const { email, code } = JSON.parse(config.data ?? '{}') as { email: string; code: string };
+    const { email, code } = safeParseBody<{ email: string; code: string }>(config.data);
 
     if (!email || !code) {
       return [200, mockError('邮箱和验证码不能为空')];
@@ -63,10 +72,7 @@ export function setupAuthMock(mock: MockAdapter): void {
 
   // Login with password
   mock.onPost('/auth/email/password').reply((config) => {
-    const { email, password } = JSON.parse(config.data ?? '{}') as {
-      email: string;
-      password: string;
-    };
+    const { email, password } = safeParseBody<{ email: string; password: string }>(config.data);
 
     if (!email || !password) {
       return [200, mockError('邮箱和密码不能为空')];
@@ -86,11 +92,7 @@ export function setupAuthMock(mock: MockAdapter): void {
 
   // Reset password
   mock.onPost('/auth/email/reset').reply((config) => {
-    const { email, code, newPassword } = JSON.parse(config.data ?? '{}') as {
-      email: string;
-      code: string;
-      newPassword: string;
-    };
+    const { email, code, newPassword } = safeParseBody<{ email: string; code: string; newPassword: string }>(config.data);
 
     if (!email || !code || !newPassword) {
       return [200, mockError('参数不完整')];

@@ -117,7 +117,7 @@ const processSignInOrSignUp = async () => {
       emit('next', false, e, p, false);
     }
   } catch (err) {
-    errorMsg.value = (err as Error).message ?? '未知错误';
+    errorMsg.value = (err as Error).message ?? i18n('notifications.unknownError');
   }
 };
 </script>
@@ -154,7 +154,7 @@ const processSignInOrSignUp = async () => {
             'auth-action-link--disabled':
               !isValidEmail || (!isNeverSendCode && remainedSendCodeCooldownSeconds),
           }"
-          :disabled="!isValidEmail || (!isNeverSendCode && !!remainedSendCodeCooldownSeconds)"
+          :disabled="isSendingCode || !isValidEmail || (!isNeverSendCode && !!remainedSendCodeCooldownSeconds)"
           @click="sendCode"
         >
           {{ isSendingCode ? i18n('labels.sending') : sendCodeLabel }}
@@ -245,11 +245,11 @@ const processSignInOrSignUp = async () => {
         </svg>
       </span>
       <span class="auth-terms-text">
-        {{ i18n('labels.termsPrefix') }}<span class="link" @click.prevent="goToTermsOfService">{{ i18n('labels.termsOfService') }}</span>{{ i18n('labels.termsSeparator') }}<span
+        {{ i18n('labels.termsPrefix') }}<span class="link" @click.stop.prevent="goToTermsOfService">{{ i18n('labels.termsOfService') }}</span>{{ i18n('labels.termsSeparator') }}<span
           class="link"
-          @click.prevent="goToUserAgreement"
+          @click.stop.prevent="goToUserAgreement"
           >{{ i18n('labels.userAgreement') }}</span
-        >{{ i18n('labels.termsAnd') }}<span class="link" @click.prevent="goToPrivacyPolicy">{{ i18n('labels.privacyPolicy') }}</span>
+        >{{ i18n('labels.termsAnd') }}<span class="link" @click.stop.prevent="goToPrivacyPolicy">{{ i18n('labels.privacyPolicy') }}</span>
       </span>
     </label>
   </q-tab-panel>

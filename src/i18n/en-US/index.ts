@@ -14,6 +14,7 @@ export default {
       NewPasswordPanel: {
         errors: {
           passwordTooShort: 'Password must be at least 8 characters',
+          passwordMismatch: 'Passwords do not match',
         },
         labels: {
           welcome:
@@ -23,12 +24,26 @@ export default {
           welcomeNew: 'Welcome, {username}!\n' + 'Please set your password to continue.',
           newPassword: 'New Password',
           confirmNewPassword: 'Confirm New Password',
+          sending: 'Sending...',
+          sendCode: 'Send Code',
+          resendCode: 'Resend',
+          strengthWeak: 'Weak',
+          strengthMedium: 'Medium',
+          strengthStrong: 'Strong',
+          codePlaceholder: 'Enter verification code',
+          newPasswordPlaceholder: 'Set password',
+          confirmPasswordPlaceholder: 'Confirm password',
+          processing: 'Processing...',
+          completeRegistration: 'Complete Registration',
         },
         notifications: {
           invalidEmail: 'Invalid email address',
           passwordResetSuccess: 'Password reset successfully',
           loginSuccess: 'Login successfully',
           unknownError: 'Unknown error',
+          sendCodeFailed: 'Failed to send verification code',
+          setPasswordFailed: 'Failed to set password',
+          autoLoginFailed: 'Auto login failed',
         },
       },
       PasswordInput: {
@@ -111,6 +126,7 @@ export default {
           sending: 'Sending...',
           resendCode: 'Resend Code',
           resendCodeCooldown: 'Resend Code ({seconds}s)',
+          codePlaceholder: 'Enter verification code',
         },
         notifications: {
           sendCodeError: 'Error sending verification code',
@@ -211,6 +227,8 @@ export default {
         settingsNetwork: 'Network Diagnostics',
         settingsStorage: 'Storage Space',
         settingsPrivacyPolicy: 'Privacy Policy',
+        settingsTermsOfService: 'Terms of Service',
+        settingsUserAgreement: 'User Agreement',
         settingsInfoList: 'Personal Info List',
         addVirtualDevice: 'Add Virtual LeBot',
         onboarding: 'Onboarding',

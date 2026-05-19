@@ -7,6 +7,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 
 import { emailChallenge, emailPassword, emailReset } from 'src/utils/api/auth';
 import { useAuthStore } from 'stores/auth';
+import { i18nSubPath } from 'src/utils/common';
 
 const props = defineProps<{
   email: string;
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 const authStore = useAuthStore();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
   storeToRefs(authStore);
+const i18n = i18nSubPath('components.auth.NewPasswordPanel');
 
 const code = ref<string>();
 const newPassword = ref<string>();
@@ -39,7 +41,7 @@ const passwordError = computed(
 );
 const passwordErrorMsg = computed(() => {
   if (newPassword.value === undefined || newPassword.value.length === 0) return '';
-  if (newPassword.value.length < 8) return '密码至少 8 位';
+  if (newPassword.value.length < 8) return i18n('errors.passwordTooShort');
   return '';
 });
 
@@ -56,9 +58,9 @@ const passwordStrength = computed(() => {
   if (/[A-Z]/.test(pwd)) score++;
   if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) score++;
 
-  if (score <= 2) return { level: 1, label: '弱' };
-  if (score <= 4) return { level: 2, label: '中' };
-  return { level: 3, label: '强' };
+  if (score <= 2) return { level: 1, label: i18n('labels.strengthWeak') };
+  if (score <= 4) return { level: 2, label: i18n('labels.strengthMedium') };
+  return { level: 3, label: i18n('labels.strengthStrong') };
 });
 
 const confirmError = computed(
@@ -79,11 +81,11 @@ const canSubmit = computed(
 );
 
 const sendCodeLabel = computed(() => {
-  if (isSendingCode.value) return '发送中...';
-  if (isNeverSendCode.value) return '发送验证码';
+  if (isSendingCode.value) return i18n('labels.sending');
+  if (isNeverSendCode.value) return i18n('labels.sendCode');
   if (remainedSendCodeCooldownSeconds.value)
-    return `重新发送(${remainedSendCodeCooldownSeconds.value}s)`;
-  return '重新发送';
+    return `${i18n('labels.resendCode')}(${remainedSendCodeCooldownSeconds.value}s)`;
+  return i18n('labels.resendCode');
 });
 
 const canSendCode = computed(
@@ -104,13 +106,13 @@ const sendCode = async () => {
   try {
     const result = await emailChallenge(props.email);
     if (!result.data.success) {
-      errorMsg.value = '验证码发送失败';
+      errorMsg.value = i18n('notifications.sendCodeFailed');
       isSendingCode.value = false;
       return;
     }
     authStore.markCodeSent();
   } catch (err) {
-    errorMsg.value = (err as Error).message || '验证码发送失败';
+    errorMsg.value = (err as Error).message || i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;
 };
@@ -128,7 +130,7 @@ const confirmNewPassword = async () => {
       const p = newPassword.value ?? '';
       const { data } = await emailReset(props.email, c, p);
       if (!data.success) {
-        errorMsg.value = data.message || '设置密码失败';
+        errorMsg.value = data.message || i18n('notifications.setPasswordFailed');
         isSubmitting.value = false;
         return;
       }
@@ -138,7 +140,7 @@ const confirmNewPassword = async () => {
     const p = newPassword.value ?? '';
     const { data } = await emailPassword(props.email, p);
     if (!data.success) {
-      errorMsg.value = data.message || '自动登录失败';
+      errorMsg.value = data.message || i18n('notifications.autoLoginFailed');
       isSubmitting.value = false;
       return;
     }
@@ -148,7 +150,7 @@ const confirmNewPassword = async () => {
     // Both new and existing users go to profile setup after password is set
     emit('next');
   } catch (err) {
-    errorMsg.value = (err as Error).message || '操作失败，请稍后重试';
+    errorMsg.value = (err as Error).message || i18n('notifications.unknownError');
   } finally {
     isSubmitting.value = false;
   }
@@ -156,7 +158,7 @@ const confirmNewPassword = async () => {
 
 onMounted(() => {
   if (!props.email?.length) {
-    errorMsg.value = '邮箱地址无效，请返回重新输入';
+    errorMsg.value = i18n('notifications.invalidEmail');
     setTimeout(() => emit('previous'), 3000);
   }
 });
@@ -175,7 +177,7 @@ onMounted(() => {
         <input
           class="auth-input"
           v-model="code"
-          placeholder="请输入验证码"
+          :placeholder="i18n('labels.codePlaceholder')"
           maxlength="6"
           autocomplete="one-time-code"
           :disabled="isSubmitting"
@@ -201,7 +203,7 @@ onMounted(() => {
           class="auth-input auth-input--flex"
           :type="showPassword ? 'text' : 'password'"
           v-model="newPassword"
-          placeholder="请设置密码"
+          :placeholder="i18n('labels.newPasswordPlaceholder')"
           autocomplete="new-password"
           :disabled="isSubmitting"
           @focus="isNewPasswordFocused = true"
@@ -251,9 +253,9 @@ onMounted(() => {
         ></div>
       </div>
       <div class="password-strength__labels">
-        <span :class="{ 'active': passwordStrength.level >= 1 }">弱</span>
-        <span :class="{ 'active': passwordStrength.level >= 2 }">中</span>
-        <span :class="{ 'active': passwordStrength.level >= 3 }">强</span>
+        <span :class="{ 'active': passwordStrength.level >= 1 }">{{ i18n('labels.strengthWeak') }}</span>
+        <span :class="{ 'active': passwordStrength.level >= 2 }">{{ i18n('labels.strengthMedium') }}</span>
+        <span :class="{ 'active': passwordStrength.level >= 3 }">{{ i18n('labels.strengthStrong') }}</span>
       </div>
     </div>
 
@@ -264,7 +266,7 @@ onMounted(() => {
           class="auth-input auth-input--flex"
           :type="showConfirm ? 'text' : 'password'"
           v-model="confirmPassword"
-          placeholder="请再次输入设置的密码"
+          :placeholder="i18n('labels.confirmPasswordPlaceholder')"
           autocomplete="new-password"
           :disabled="isSubmitting"
           @focus="isConfirmFocused = true"
@@ -300,7 +302,7 @@ onMounted(() => {
     <!-- Combined error message -->
     <div v-if="errorMsg" class="auth-error-msg">{{ errorMsg }}</div>
     <div v-else-if="passwordErrorMsg" class="auth-error-msg">{{ passwordErrorMsg }}</div>
-    <div v-else-if="confirmError" class="auth-error-msg">输入的两次密码不同</div>
+    <div v-else-if="confirmError" class="auth-error-msg">{{ i18n('errors.passwordMismatch') }}</div>
 
     <!-- Primary button -->
     <button
@@ -309,7 +311,7 @@ onMounted(() => {
       :disabled="!canSubmit"
       @click="confirmNewPassword"
     >
-      {{ isSubmitting ? '处理中...' : isNew ? '完成注册并登录' : '确认新密码' }}
+      {{ isSubmitting ? i18n('labels.processing') : isNew ? i18n('labels.completeRegistration') : i18n('labels.confirmNewPassword') }}
     </button>
   </q-tab-panel>
 </template>

@@ -75,7 +75,7 @@ const sendCode = async () => {
       <input
         class="design-input"
         v-model="modelValue"
-        placeholder="请输入验证码"
+        :placeholder="i18n('labels.codePlaceholder')"
         maxlength="6"
         autocomplete="one-time-code"
       />

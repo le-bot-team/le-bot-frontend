@@ -169,7 +169,6 @@ const confirm = async () => {
     >
       {{ i18n('labels.confirm') }}
     </button>
-  </q-tab-panel>
 
     <!-- Relationship bottom sheet — teleported to body to avoid multi-root in q-tab-panels -->
     <Teleport to="body">
@@ -198,6 +197,7 @@ const confirm = async () => {
         </div>
       </transition>
     </Teleport>
+  </q-tab-panel>
 </template>
 
 <style scoped>

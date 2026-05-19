@@ -78,8 +78,14 @@ watch(
 
 <template>
   <div class="birthday-picker">
-    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" @change="hasValue = true">
-      <option v-for="y in years" :key="y" :value="y">{{ y }}年</option>
+    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" @change="hasValue = true" aria-label="Year">
+      <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+    </select>
+    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" @change="hasValue = true" aria-label="Month">
+      <option v-for="m in months" :key="m" :value="m">{{ String(m).padStart(2, '0') }}</option>
+    </select>
+    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day" @change="hasValue = true" aria-label="Day">
+      <option v-for="d in days" :key="d" :value="d">{{ String(d).padStart(2, '0') }}</option>
     </select>
     <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" @change="hasValue = true">
       <option v-for="m in months" :key="m" :value="m">{{ m }}月</option>

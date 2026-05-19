@@ -14,6 +14,7 @@ export default {
       NewPasswordPanel: {
         errors: {
           passwordTooShort: '密码至少 8 位',
+          passwordMismatch: '两次输入的密码不一致',
         },
         labels: {
           welcome:
@@ -23,12 +24,26 @@ export default {
           welcomeNew: '欢迎，{username}！\n请设置您的密码以继续。',
           newPassword: '新密码',
           confirmNewPassword: '确认新密码',
+          sending: '发送中...',
+          sendCode: '发送验证码',
+          resendCode: '重新发送',
+          strengthWeak: '弱',
+          strengthMedium: '中',
+          strengthStrong: '强',
+          codePlaceholder: '请输入验证码',
+          newPasswordPlaceholder: '请设置密码',
+          confirmPasswordPlaceholder: '请再次输入设置的密码',
+          processing: '处理中...',
+          completeRegistration: '完成注册并登录',
         },
         notifications: {
           invalidEmail: '邮箱地址无效',
           passwordResetSuccess: '密码重置成功',
           loginSuccess: '登录成功',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
+          setPasswordFailed: '设置密码失败',
+          autoLoginFailed: '自动登录失败',
         },
       },
       PasswordInput: {
@@ -111,6 +126,7 @@ export default {
           sending: '发送中...',
           resendCode: '重新发送',
           resendCodeCooldown: '重新发送 ({seconds}s)',
+          codePlaceholder: '请输入验证码',
         },
         notifications: {
           sendCodeError: '发送验证码出错',
@@ -211,6 +227,8 @@ export default {
         settingsNetwork: '网络检测',
         settingsStorage: '存储空间',
         settingsPrivacyPolicy: '隐私政策',
+        settingsTermsOfService: '服务条款',
+        settingsUserAgreement: '用户协议',
         settingsInfoList: '个人信息收集清单',
         addVirtualDevice: '添加虚拟乐宝',
         onboarding: '引导页',
