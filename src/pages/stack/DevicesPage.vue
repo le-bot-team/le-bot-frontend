@@ -74,9 +74,10 @@ function goToDeviceConfig(deviceId: string) {
 
     <!-- Device list with me-card styling -->
     <div v-else class="me-card">
-      <div
+      <button
         v-for="device in virtualDevices"
         :key="device.id"
+        type="button"
         class="settings-menu-row"
         @click="goToDeviceConfig(device.id)"
       >
@@ -99,7 +100,7 @@ function goToDeviceConfig(deviceId: string) {
           />
           <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
         </span>
-      </div>
+      </button>
     </div>
 
     <!-- Add button -->

@@ -19,12 +19,11 @@ export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
 };
 
 /**
- * Activate a new virtual device via the backend API and add it to the store.
- * @returns The newly created virtual device info.
+ * Internal helper: validate token and call activateVirtualDevice API.
+ * @returns The newly created device from the API response.
  */
-export const activateAndAddVirtualDevice = async (): Promise<DeviceInfo> => {
+const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
   const authStore = useAuthStore();
-  const deviceStore = useDeviceStore();
 
   if (!authStore.accessToken) {
     throw new Error('Failed to get access token');
@@ -35,8 +34,18 @@ export const activateAndAddVirtualDevice = async (): Promise<DeviceInfo> => {
     throw new Error(response.message || 'Failed to activate virtual device');
   }
 
-  deviceStore.addDevice(response.data.device);
   return response.data.device;
+};
+
+/**
+ * Activate a new virtual device via the backend API and add it to the store.
+ * @returns The newly created virtual device info.
+ */
+export const activateAndAddVirtualDevice = async (): Promise<DeviceInfo> => {
+  const deviceStore = useDeviceStore();
+  const device = await activateVirtualDeviceOrThrow();
+  deviceStore.addDevice(device);
+  return device;
 };
 
 /**
@@ -50,21 +59,16 @@ export const activateAndAddVirtualDeviceWithChild = async (
   childInfo: ChildInfo,
   deviceName: string,
 ): Promise<DeviceInfo> => {
-  const authStore = useAuthStore();
   const deviceStore = useDeviceStore();
+  const apiDevice = await activateVirtualDeviceOrThrow();
 
-  if (!authStore.accessToken) {
-    throw new Error('Failed to get access token');
-  }
+  // Create a new object with additional frontend-only fields instead of mutating the response
+  const device: DeviceInfo = {
+    ...apiDevice,
+    childInfo,
+    name: deviceName,
+  };
 
-  const { data: response } = await activateVirtualDevice(authStore.accessToken);
-  if (!response.success) {
-    throw new Error(response.message || 'Failed to activate virtual device');
-  }
-
-  const device = response.data.device;
-  device.childInfo = childInfo;
-  device.name = deviceName;
   deviceStore.addDevice(device);
   return device;
 };

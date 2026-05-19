@@ -101,9 +101,10 @@ onBeforeMount(() => {
 <template>
   <q-page class="settings-page column">
     <div v-for="(menuGroup, groupIndex) in visibleMenuGroups" :key="groupIndex" class="me-card">
-      <div
+      <button
         v-for="(menu, menuIndex) in menuGroup"
         :key="menuIndex"
+        type="button"
         class="settings-menu-row"
         @click="menu.to ? router.push(menu.to).catch(console.error) : undefined"
       >
@@ -114,7 +115,7 @@ onBeforeMount(() => {
           </span>
           <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
         </span>
-      </div>
+      </button>
     </div>
 
     <q-space />

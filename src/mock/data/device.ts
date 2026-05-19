@@ -16,7 +16,7 @@ export const MOCK_DEVICES: DeviceInfo[] = [
     name: '我的乐宝机器人',
     status: {},
     config: {
-      voiceStyle: 'xiaole',
+      voiceStyle: 'cuteChild',
     },
     boundPhysicalDeviceId: null,
     agentId: null,

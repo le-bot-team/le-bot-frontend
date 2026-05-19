@@ -63,7 +63,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
       model: 'leBot-v1',
       name: null,
       status: {},
-      config: { voiceStyle: 'xiaole' },
+      config: { voiceStyle: 'cuteChild' },
       boundPhysicalDeviceId: null,
       agentId: null,
       xiaozhiDeviceId: null,

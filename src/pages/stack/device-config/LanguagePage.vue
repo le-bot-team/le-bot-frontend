@@ -1,16 +1,17 @@
 <template>
   <q-page class="device-lang-page">
     <section class="device-lang-card">
-      <div
+      <button
         v-for="l in langs"
         :key="l.key"
+        type="button"
         class="device-lang-row"
-        :aria-disabled="l.locale === null ? 'true' : 'false'"
+        :disabled="l.locale === null"
         @click="selectLang(l)"
       >
         <span>{{ i18n(`languages.${l.key}`) }}</span>
         <img class="device-lang-mark" :src="isSelected(l) ? checkIcon : radioIcon" alt="" />
-      </div>
+      </button>
     </section>
   </q-page>
 </template>
