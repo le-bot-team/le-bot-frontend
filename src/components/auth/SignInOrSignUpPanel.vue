@@ -245,11 +245,12 @@ const processSignInOrSignUp = async () => {
         </svg>
       </span>
       <span class="auth-terms-text">
-        {{ i18n('labels.termsPrefix') }}<span class="link" @click.stop.prevent="goToTermsOfService">{{ i18n('labels.termsOfService') }}</span>{{ i18n('labels.termsSeparator') }}<span
+        {{ i18n('labels.termsPrefix') }}<a class="link" href="#" @click.stop.prevent="goToTermsOfService">{{ i18n('labels.termsOfService') }}</a>{{ i18n('labels.termsSeparator') }}<a
           class="link"
+          href="#"
           @click.stop.prevent="goToUserAgreement"
-          >{{ i18n('labels.userAgreement') }}</span
-        >{{ i18n('labels.termsAnd') }}<span class="link" @click.stop.prevent="goToPrivacyPolicy">{{ i18n('labels.privacyPolicy') }}</span>
+          >{{ i18n('labels.userAgreement') }}</a
+        >{{ i18n('labels.termsAnd') }}<a class="link" href="#" @click.stop.prevent="goToPrivacyPolicy">{{ i18n('labels.privacyPolicy') }}</a>
       </span>
     </label>
   </q-tab-panel>

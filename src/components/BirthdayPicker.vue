@@ -54,12 +54,14 @@ const hasValue = ref(!!props.modelValue);
 watch(
   [year, month, day],
   () => {
-    if (!hasValue.value) return;
+    if (!hasValue.value) {
+      // First change from user interaction — enable emitting
+      hasValue.value = true;
+    }
     const m = String(month.value).padStart(2, '0');
     const d = String(day.value).padStart(2, '0');
     emit('update:modelValue', `${year.value}-${m}-${d}`);
   },
-  { immediate: true },
 );
 
 // Sync from parent

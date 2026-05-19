@@ -3,7 +3,7 @@
 // Password setup step: email display (readonly), verification code, new password,
 // confirm password, and submit button.
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { emailChallenge, emailPassword, emailReset } from 'src/utils/api/auth';
 import { useAuthStore } from 'stores/auth';
@@ -156,11 +156,17 @@ const confirmNewPassword = async () => {
   }
 };
 
+let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+
 onMounted(() => {
   if (!props.email?.length) {
     errorMsg.value = i18n('notifications.invalidEmail');
-    setTimeout(() => emit('previous'), 3000);
+    fallbackTimer = setTimeout(() => emit('previous'), 3000);
   }
+});
+
+onUnmounted(() => {
+  if (fallbackTimer !== undefined) clearTimeout(fallbackTimer);
 });
 </script>
 

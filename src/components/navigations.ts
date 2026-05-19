@@ -139,4 +139,22 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'settings-privacy-policy',
   },
+  {
+    label: i18n('stack.deviceConfigWifi'),
+    icon: 'mdi-wifi',
+    available: true,
+    route: 'device-config-wifi',
+  },
+  {
+    label: i18n('stack.deviceConfigUpdate'),
+    icon: 'mdi-update',
+    available: true,
+    route: 'device-config-firmware',
+  },
+  {
+    label: i18n('stack.deviceConfigAbout'),
+    icon: 'mdi-information',
+    available: true,
+    route: 'device-config-about',
+  },
 ];
