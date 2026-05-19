@@ -70,6 +70,7 @@ const confirm = async (): Promise<void> => {
       const trimmedName = personName.value.trim();
       if (!trimmedName.length) {
         console.error('Person name is required for voiceprint registration.');
+        isLoading.value = false;
         return;
       }
       result = (

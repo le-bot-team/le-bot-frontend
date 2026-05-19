@@ -229,8 +229,12 @@ export default {
             readAloudPhrases: '朗读短语',
             readAloudPhrasesDescription: '可爱的乐宝是我的好朋友。',
             startRecording: '准备去录制',
+            stopRecording: '停止录制',
             rerecord: '重新录制',
             finish: '完成录制并提交',
+          },
+          notifications: {
+            recordingFailed: '录音启动失败，请检查麦克风权限。',
           },
         },
         SubmitPanel: {

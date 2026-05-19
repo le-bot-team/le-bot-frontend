@@ -108,7 +108,7 @@ const startRecording = async (): Promise<void> => {
   audioData.value = undefined;
   pendingStop = false;
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         sampleRate: 16000,
         sampleSize: 16,
@@ -120,19 +120,27 @@ const startRecording = async (): Promise<void> => {
     });
     // If user released before getUserMedia resolved, abort immediately
     if (pendingStop) {
-      cleanup();
+      stream.getTracks().forEach((track) => track.stop());
       return;
     }
-    mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/wav' });
-    mediaRecorder.ondataavailable = (event) => {
+    mediaStream = stream;
+    const recorder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+    mediaRecorder = recorder;
+    recorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         audioData.value = event.data;
       }
     };
-    mediaRecorder.onstop = () => {
-      cleanup();
+    recorder.onstop = () => {
+      // Only clean up if this recorder is still the active one
+      if (mediaRecorder === recorder) {
+        cleanup();
+      } else {
+        // Stale recorder — just stop its stream
+        stream.getTracks().forEach((track) => track.stop());
+      }
     };
-    mediaRecorder.start();
+    recorder.start();
     isRecording.value = true;
     // Handle race: user released during setup
     if (pendingStop) {

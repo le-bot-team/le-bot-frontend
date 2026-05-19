@@ -234,8 +234,12 @@ export default {
             readAloudPhrases: 'Read Aloud Phrases',
             readAloudPhrasesDescription: 'Lovely LeBot is my good friend.',
             startRecording: 'Get Ready to Record',
+            stopRecording: 'Stop Recording',
             rerecord: 'Rerecord',
             finish: 'Finish and Submit',
+          },
+          notifications: {
+            recordingFailed: 'Failed to start recording. Please check microphone permissions.',
           },
         },
         SubmitPanel: {
