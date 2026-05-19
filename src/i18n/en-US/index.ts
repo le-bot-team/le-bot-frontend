@@ -178,7 +178,6 @@ export default {
         help: 'Help & Feedback',
         helpFaq: 'FAQ',
         helpFeedback: 'Feedback',
-        chatHistory: 'Chat History',
         growthData: 'Growth Data',
         deviceConfigWifi: 'Wi-Fi Management',
         deviceConfigUpdate: 'Firmware Update',

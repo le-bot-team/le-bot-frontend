@@ -178,7 +178,6 @@ export default {
         help: '帮助与反馈',
         helpFaq: '常见问题',
         helpFeedback: '意见反馈',
-        chatHistory: '聊天记录',
         growthData: '成长数据',
         deviceConfigWifi: 'Wi-Fi 管理',
         deviceConfigUpdate: '固件升级',
