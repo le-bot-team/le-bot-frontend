@@ -73,8 +73,14 @@ const syncFromProfile = () => {
   }
 };
 
+const dirty = ref(false);
 syncFromProfile();
-watch([fieldKey, profile], syncFromProfile);
+watch([fieldKey, profile], () => {
+  if (!dirty.value) syncFromProfile();
+});
+watch(value, () => {
+  dirty.value = true;
+});
 
 const canSubmit = computed(() => !isSubmitting.value && !!accessToken.value && !!fieldKey.value);
 

@@ -27,16 +27,22 @@ const { updateProfile } = profileStore;
 
 // ── Step management ──
 type Step = 'verifyOld' | 'bindNew';
+const profileLoaded = ref(!!profile.value);
 const step = ref<Step>(profile.value?.phone ? 'verifyOld' : 'bindNew');
-// Track whether user has manually progressed past step 1
+// Track whether user has manually progressed or started interacting
 const userAdvanced = ref(false);
 
 // Keep step in sync with profile phone state (handles async profile load)
+// Only applies on first profile load; once user interacts, stop adjusting.
 watch(
   () => profile.value?.phone,
   (phone) => {
     if (userAdvanced.value) return;
-    step.value = phone ? 'verifyOld' : 'bindNew';
+    if (!profileLoaded.value && profile.value) {
+      // First load of profile data
+      profileLoaded.value = true;
+      step.value = phone ? 'verifyOld' : 'bindNew';
+    }
   },
 );
 
@@ -244,9 +250,10 @@ const onSubmitNew = async () => {
   }
 };
 
-// Clear error on input change
+// Clear error on input change and mark user as interacting
 watch([oldCode, newPhone, newCode], () => {
   errorMsg.value = '';
+  userAdvanced.value = true;
 });
 
 // Cleanup timers on unmount
