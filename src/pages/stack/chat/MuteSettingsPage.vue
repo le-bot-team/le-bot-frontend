@@ -88,12 +88,12 @@ function toggleAutoMute(val: boolean) {
       <!-- Time Settings -->
       <div v-if="autoMute" class="mute-settings-time">
         <div class="mute-settings-time__item">
-          <span class="mute-settings-time__label">{{ i18n('labels.startTime') }}</span>
-          <input type="time" v-model="autoMuteStart" class="mute-settings-time__input" />
+          <label class="mute-settings-time__label" for="mute-start-time">{{ i18n('labels.startTime') }}</label>
+          <input id="mute-start-time" type="time" v-model="autoMuteStart" class="mute-settings-time__input" :aria-label="i18n('labels.startTime')" />
         </div>
         <div class="mute-settings-time__item">
-          <span class="mute-settings-time__label">{{ i18n('labels.endTime') }}</span>
-          <input type="time" v-model="autoMuteEnd" class="mute-settings-time__input" />
+          <label class="mute-settings-time__label" for="mute-end-time">{{ i18n('labels.endTime') }}</label>
+          <input id="mute-end-time" type="time" v-model="autoMuteEnd" class="mute-settings-time__input" :aria-label="i18n('labels.endTime')" />
         </div>
       </div>
     </div>

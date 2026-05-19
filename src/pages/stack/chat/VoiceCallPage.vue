@@ -44,7 +44,9 @@ let connectTimer: ReturnType<typeof setTimeout> | null = null;
 function startCall() {
   callStatus.value = 'connecting';
 
-  // Simulate connection delay
+  // TODO: Wire to real voice call session via useChatSession or dedicated
+  // voice call composable. Current implementation is mock-only for UI layout
+  // verification during development.
   connectTimer = setTimeout(() => {
     callStatus.value = 'connected';
     startDotAnimation();

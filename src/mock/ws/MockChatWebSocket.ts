@@ -152,6 +152,23 @@ export class MockChatWebSocket {
     const chatId = uid();
     const conversationId = this._conversationId;
 
+    // Emit user message completion first so the user bubble is finalized
+    this._addTimer(
+      setTimeout(() => {
+        this._dispatch({
+          id: uid(),
+          action: WsAction.outputTextComplete,
+          success: true,
+          data: {
+            chatId,
+            conversationId,
+            role: 'user',
+            text: '(语音输入)',
+          },
+        });
+      }, 200),
+    );
+
     const chunks = [0, 1, 2];
     const assistantText = '你好！我是乐宝AI助手。今天有什么可以帮你的吗？';
 

@@ -2,8 +2,8 @@
 // ChatPage — design a2096a64 (聊天页, 375×812 artboard).
 //
 // Strict sync with the LanHu spec:
-//   * StackHeader owns the top bar (title "小新的乐宝" + mute / call icons
-//     wired through route meta headerActions and the global bus).
+//   * StackHeader renders the page title via STACK_NAVIGATIONS; mute / call
+//     actions are triggered through the global event bus (chat:mute, chat:call).
 //   * Canvas is a fixed 375×812 column; the hero decoration (组 385, opacity
 //     0.3) sits behind the scrollable bubble list.
 //   * Bottom single "按住说话" bar drives the session — pointerdown wakes,

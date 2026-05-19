@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // ChatHistoryPage — chat session history list.
 // Layout: search bar + date-grouped session summaries.
+// TODO: Replace mock data with real API integration (GET /api/v1/chat/sessions).
 
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -20,8 +21,10 @@ interface ChatSession {
   dateGroup: string;
 }
 
-// Mock data — replace with API when available
+// Mock data — only shown in development; replace with store/API when available
 const sessions = computed<ChatSession[]>(() => {
+  // Gate mock data to dev mode to avoid shipping fake entries in production
+  if (process.env.NODE_ENV !== 'development') return [];
   const all: ChatSession[] = [
     {
       id: '1',
