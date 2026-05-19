@@ -1070,7 +1070,12 @@ export default {
             addNewPerson: '添加新的声纹',
             testVoice: '测试声纹',
             temporalTag: '临时声纹',
-            temporalHint: '*临时声纹保存一段时间后会自动清除，点击声纹去保留*',
+            temporalHint: '临时声纹保存一段时间后会自动清除，点击声纹去保留',
+            emptyState: '暂无声纹记录，点击下方按钮添加',
+          },
+          notifications: {
+            fetchFailed: '获取声纹列表失败',
+            fetchError: '获取声纹列表时发生错误',
           },
         },
         // ===== Batch 4: Settings sub-pages =====

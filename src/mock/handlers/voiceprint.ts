@@ -6,13 +6,16 @@ import { mockError, mockId, mockSuccess } from 'src/mock/utils';
 import type { Person, PersonDetail, UpdatePersonRequest } from 'src/types/api/voiceprint';
 import type { VprRelationship } from 'components/vpr-relationships';
 
-/** Mutable deep copy of persons that mock endpoints operate on */
-const persons: PersonDetail[] = JSON.parse(JSON.stringify(MOCK_PERSONS)) as PersonDetail[];
+/** Mutable deep copy of persons that mock endpoints operate on.
+ * Re-initialized on each call to setupVoiceprintMock (supports HMR). */
+let persons: PersonDetail[];
 
 /**
  * Register mock handlers for the voiceprint module.
  */
 export function setupVoiceprintMock(mock: MockAdapter): void {
+  // Reset mutable state on each setup (HMR-safe)
+  persons = JSON.parse(JSON.stringify(MOCK_PERSONS)) as PersonDetail[];
   // Recognize voiceprint
   mock.onPost('/voiceprint/recognize').reply(() => {
     const personsWithVoices = persons.filter((p) => p.voices.length > 0);

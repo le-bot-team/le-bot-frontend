@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Dialog, useQuasar } from 'quasar';
-import { ref } from 'vue';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import DeletePersonDialog from 'components/settings/voiceprint/DeletePersonDialog.vue';
@@ -28,6 +27,10 @@ const editableName = ref('');
 const editableRelationship = ref<VprRelationship>('friend');
 const submitting = ref(false);
 
+const goBack = () => {
+  router.push('/stack/settings/voiceprint').catch(console.error);
+};
+
 const submitUpdate = async () => {
   if (!personId.value || !accessToken.value) {
     return;
@@ -45,11 +48,7 @@ const submitUpdate = async () => {
     });
     if (response.success) {
       notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
-      setTimeout(() => {
-        router.go(-1);
-        // Fallback: re-enable if navigation doesn't unmount the component
-        setTimeout(() => { submitting.value = false; }, 2000);
-      }, 1200);
+      setTimeout(() => goBack(), 1200);
       // Keep submitting=true to prevent duplicate requests until navigation
     } else {
       notify({
@@ -79,7 +78,7 @@ const promptDeletePerson = () => {
       personId: personId.value,
       personName: personDetail.value?.name,
     },
-  }).onOk(() => setTimeout(() => router.go(-1), 1200));
+  }).onOk(() => setTimeout(() => goBack(), 1200));
 };
 
 const updatePersonDetail = async (token: string) => {
@@ -117,13 +116,17 @@ onMounted(async () => {
     return;
   }
   if (route.params.personId && typeof route.params.personId === 'string') {
+    if (!/^[\w-]+$/.test(route.params.personId)) {
+      goBack();
+      return;
+    }
     personId.value = route.params.personId;
   } else {
-    router.go(-1);
+    goBack();
     return;
   }
   if (!(await updatePersonDetail(accessToken.value))) {
-    setTimeout(() => router.go(-1), 2000);
+    setTimeout(() => goBack(), 2000);
   }
 });
 </script>

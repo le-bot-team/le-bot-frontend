@@ -12,7 +12,7 @@ import { type VprRelationship } from 'components/vpr-relationships';
 import { addVoice, register } from 'src/utils/api/voiceprint';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
-import type { EmptyResponse } from 'src/types/api/voiceprint';
+import type { EmptyResponse, RegisterResponse } from 'src/types/api/voiceprint';
 
 const props = defineProps<{
   name: string | number;
@@ -35,7 +35,6 @@ const i18n = i18nSubPath('components.settings.voiceprint.SubmitPanel');
 
 const audioSrc = ref<string>();
 const isLoading = ref<boolean>(false);
-const personAge = ref<number>(30);
 const personName = ref<string>(props.defaultName ?? '');
 const relationship = ref<VprRelationship>(props.defaultRelationship ?? 'friend');
 
@@ -57,13 +56,14 @@ const confirm = async (): Promise<void> => {
 
   try {
     const dataUrl = await blobToDataUrl(props.data);
-    let result: EmptyResponse;
+    const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+    let result: EmptyResponse | RegisterResponse;
     if (props.personId?.length) {
       result = (
         await addVoice(
           accessToken.value,
           props.personId,
-          dataUrl.substring(dataUrl.indexOf(',') + 1),
+          audioBase64,
         )
       ).data;
     } else {
@@ -76,9 +76,9 @@ const confirm = async (): Promise<void> => {
       result = (
         await register(
           accessToken.value,
-          dataUrl.substring(dataUrl.indexOf(',') + 1),
+          audioBase64,
           trimmedName,
-          personAge.value,
+          0,
           relationship.value,
         )
       ).data;

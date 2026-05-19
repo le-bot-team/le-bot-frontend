@@ -8,7 +8,7 @@ import { computed } from 'vue';
 
 import {
   RELATIONSHIP_MAPPINGS,
-  RELATIONSHIP_OPTIONS,
+  getRelationshipOptions,
   type VprRelationship,
 } from 'components/vpr-relationships';
 
@@ -62,7 +62,7 @@ const chooseRelationship = (): void => {
   BottomSheet.create({
     title: props.relationshipSheetTitle,
     grid: false,
-    actions: RELATIONSHIP_OPTIONS.map((o) => ({
+    actions: getRelationshipOptions().map((o) => ({
       label: o.label,
       id: o.value,
     })),
@@ -115,7 +115,7 @@ const chooseRelationship = (): void => {
     </template>
 
     <!-- Audio preview (only rendered when audioSrc is available) -->
-    <audio v-if="audioSrc" class="voice-naming-audio" controls :src="audioSrc" />
+    <audio v-if="audioSrc" class="voice-naming-audio" controls :src="audioSrc" aria-label="Audio preview" />
 
     <div class="voice-naming-spacer" aria-hidden="true" />
 

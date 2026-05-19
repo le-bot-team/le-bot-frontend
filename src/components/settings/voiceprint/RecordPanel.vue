@@ -3,7 +3,7 @@
 import type { IMediaRecorder } from 'extendable-media-recorder';
 import { MediaRecorder } from 'extendable-media-recorder';
 import { useQuasar } from 'quasar';
-import { onBeforeUnmount, ref, watch } from 'vue';
+import { onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 
 import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
 import recordMicImg from 'src/assets/lanhu/voiceprint/record-mic.webp';
@@ -47,7 +47,7 @@ const audioSrc = ref<string>();
 const isRecording = ref(false);
 const isPlaying = ref(false);
 const playbackProgress = ref(0);
-let audioEl: HTMLAudioElement | null = null;
+const audioRef = shallowRef<HTMLAudioElement | null>(null);
 
 watch(audioData, (val) => {
   if (val) {
@@ -62,19 +62,23 @@ watch(audioData, (val) => {
 });
 
 const onAudioLoaded = (e: Event): void => {
-  audioEl = e.target as HTMLAudioElement;
+  audioRef.value = e.target as HTMLAudioElement;
 };
 
 const togglePlayback = (): void => {
-  if (!audioEl) return;
+  if (!audioRef.value) return;
   if (isPlaying.value) {
-    audioEl.pause();
+    audioRef.value.pause();
     isPlaying.value = false;
   } else {
-    void audioEl.play().catch(() => {
-      isPlaying.value = false;
-    });
-    isPlaying.value = true;
+    audioRef.value
+      .play()
+      .then(() => {
+        isPlaying.value = true;
+      })
+      .catch(() => {
+        isPlaying.value = false;
+      });
   }
 };
 
@@ -84,15 +88,15 @@ const onAudioEnded = (): void => {
 };
 
 const onAudioTimeUpdate = (): void => {
-  if (audioEl && audioEl.duration) {
-    playbackProgress.value = (audioEl.currentTime / audioEl.duration) * 100;
+  if (audioRef.value && audioRef.value.duration) {
+    playbackProgress.value = (audioRef.value.currentTime / audioRef.value.duration) * 100;
   }
 };
 
 const resetRecording = (): void => {
-  if (audioEl) {
-    audioEl.pause();
-    audioEl.currentTime = 0;
+  if (audioRef.value) {
+    audioRef.value.pause();
+    audioRef.value.currentTime = 0;
   }
   isPlaying.value = false;
   playbackProgress.value = 0;
@@ -102,6 +106,8 @@ const resetRecording = (): void => {
 let mediaRecorder: IMediaRecorder | null = null;
 let mediaStream: MediaStream | null = null;
 let pendingStop = false;
+let recordingStartTime = 0;
+const MIN_RECORDING_MS = 1000; // Minimum 1 second recording
 
 const startRecording = async (): Promise<void> => {
   if (isRecording.value) return;
@@ -142,6 +148,7 @@ const startRecording = async (): Promise<void> => {
     };
     recorder.start();
     isRecording.value = true;
+    recordingStartTime = Date.now();
     // Handle race: user released during setup
     if (pendingStop) {
       stopRecording();
@@ -159,8 +166,17 @@ const startRecording = async (): Promise<void> => {
 const stopRecording = (): void => {
   pendingStop = true;
   if (!isRecording.value) return;
-  mediaRecorder?.stop();
-  isRecording.value = false;
+  // Enforce minimum recording duration
+  const elapsed = Date.now() - recordingStartTime;
+  if (elapsed < MIN_RECORDING_MS) {
+    setTimeout(() => {
+      mediaRecorder?.stop();
+      isRecording.value = false;
+    }, MIN_RECORDING_MS - elapsed);
+  } else {
+    mediaRecorder?.stop();
+    isRecording.value = false;
+  }
 };
 
 const cleanup = (): void => {
@@ -174,9 +190,9 @@ onBeforeUnmount(() => {
     stopRecording();
   }
   cleanup();
-  if (audioEl) {
-    audioEl.pause();
-    audioEl = null;
+  if (audioRef.value) {
+    audioRef.value.pause();
+    audioRef.value = null;
   }
   if (audioSrc.value) {
     URL.revokeObjectURL(audioSrc.value);
@@ -238,6 +254,7 @@ onBeforeUnmount(() => {
       <div v-if="audioSrc" class="voiceprint-record-playback">
         <audio
           :src="audioSrc"
+          preload="auto"
           @loadedmetadata="onAudioLoaded"
           @ended="onAudioEnded"
           @timeupdate="onAudioTimeUpdate"
@@ -264,17 +281,19 @@ onBeforeUnmount(() => {
         </button>
       </div>
 
-      <!-- Recording button (shown when no audio) -->
+      <!-- Recording button (shown when no audio)
+           Pointer: press-and-hold (start on pointerdown, stop on pointerup)
+           Keyboard: toggle (Enter/Space toggles start/stop) for accessibility -->
       <div v-else>
         <button
           class="voiceprint-record-pulse-ring"
           :class="{ 'voiceprint-record-pulse-ring--recording': isRecording }"
           type="button"
           :aria-label="isRecording ? i18n('labels.stopRecording') : i18n('labels.startRecording')"
-          @pointerdown.prevent="startRecording"
+          @pointerdown.prevent="($event.currentTarget as HTMLElement).setPointerCapture($event.pointerId); startRecording()"
           @pointerup="stopRecording"
-          @pointerleave="stopRecording"
           @pointercancel="stopRecording"
+          @lostpointercapture="stopRecording"
           @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
           @keydown.space.prevent="isRecording ? stopRecording() : startRecording()"
         >
