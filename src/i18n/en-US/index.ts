@@ -1326,6 +1326,7 @@ export default {
             connected: 'Connected',
             notConnected: 'Not Connected',
             availableNetworks: 'Available Networks',
+            scanNetworks: 'Scan Networks',
             passwordPlaceholder: 'Enter Wi-Fi password',
             connect: 'Connect',
             cancel: 'Cancel',

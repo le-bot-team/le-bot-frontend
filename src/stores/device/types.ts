@@ -20,7 +20,7 @@ export interface DeviceInfo {
   name: string | null;
   status: unknown;
   config: {
-    voiceStyle: string;
+    voiceStyle?: string;
     aiPersonality?: {
       enabled: boolean;
       traits?: string;

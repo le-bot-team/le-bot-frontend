@@ -53,7 +53,7 @@ export const useDeviceStore = defineStore(
     const updateCurrentDeviceConfig = (patch: Partial<NonNullable<DeviceInfo['config']>>) => {
       if (!currentDevice.value) return;
       currentDevice.value.config = {
-        ...(currentDevice.value.config ?? { voiceStyle: '' }),
+        ...(currentDevice.value.config ?? {}),
         ...patch,
       };
     };

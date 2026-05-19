@@ -1,9 +1,11 @@
 <script setup lang="ts">
 // AboutDevicePage — device info list (SN, model, firmware, MAC, etc.).
 
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+
 import { i18nSubPath } from 'src/utils/common';
 import { useDeviceStore } from 'stores/device';
-import { storeToRefs } from 'pinia';
 
 const i18n = i18nSubPath('pages.stack.device-config.AboutDevicePage');
 
@@ -14,14 +16,14 @@ interface DeviceInfoRow {
   value: string;
 }
 
-const infoRows: DeviceInfoRow[] = [
+const infoRows = computed<DeviceInfoRow[]>(() => [
   { label: i18n('labels.serialNumber'), value: currentDevice.value?.identifier ?? '—' },
-  { label: i18n('labels.model'), value: 'LeBot-V1' },
+  { label: i18n('labels.model'), value: currentDevice.value?.model ?? 'LeBot-V1' },
   { label: i18n('labels.firmwareVersion'), value: 'v1.2.3' },
   { label: i18n('labels.macAddress'), value: 'AA:BB:CC:DD:EE:FF' },
   { label: i18n('labels.hardwareVersion'), value: 'HW-2.0' },
   { label: i18n('labels.manufactureDate'), value: '2025-01' },
-];
+]);
 </script>
 
 <template>

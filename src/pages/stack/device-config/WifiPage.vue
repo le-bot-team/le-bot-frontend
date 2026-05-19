@@ -72,9 +72,10 @@ function onConnectConfirm() {
     <!-- Available networks -->
     <div class="growth-section-title">{{ i18n('labels.availableNetworks') }}</div>
     <div class="settings-sub-page__card">
-      <div
+      <button
         v-for="network in availableNetworks"
         :key="network.ssid"
+        type="button"
         class="settings-sub-page__row"
         style="cursor: pointer"
         @click="selectNetwork(network)"
@@ -99,7 +100,7 @@ function onConnectConfirm() {
             style="color: var(--clr-caption)"
           />
         </span>
-      </div>
+      </button>
 
       <div v-if="isScanning" class="settings-sub-page__row" style="justify-content: center">
         <q-spinner size="24px" color="primary" />
@@ -116,7 +117,7 @@ function onConnectConfirm() {
     </div>
 
     <div class="q-mt-md">
-      <button class="btn-max" @click="scanNetworks">{{ i18n('labels.availableNetworks') }}</button>
+      <button class="btn-max" @click="scanNetworks">{{ i18n('labels.scanNetworks') }}</button>
     </div>
 
     <!-- Password dialog -->

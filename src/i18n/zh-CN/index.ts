@@ -1305,6 +1305,7 @@ export default {
             connected: '已连接',
             notConnected: '未连接',
             availableNetworks: '可用网络',
+            scanNetworks: '扫描网络',
             passwordPlaceholder: '请输入 Wi-Fi 密码',
             connect: '连接',
             cancel: '取消',

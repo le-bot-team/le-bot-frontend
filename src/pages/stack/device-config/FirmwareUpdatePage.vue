@@ -2,7 +2,7 @@
 // FirmwareUpdatePage — firmware version display and update control.
 
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 
 import { i18nSubPath } from 'src/utils/common';
 
@@ -14,6 +14,7 @@ const latestVersion = ref('v1.3.0');
 const isChecking = ref(false);
 const isUpdating = ref(false);
 const updateProgress = ref(0);
+const updateIntervalId = ref<ReturnType<typeof setInterval> | null>(null);
 
 function checkUpdate() {
   isChecking.value = true;
@@ -26,16 +27,27 @@ function checkUpdate() {
 function startUpdate() {
   isUpdating.value = true;
   updateProgress.value = 0;
-  const interval = setInterval(() => {
+  updateIntervalId.value = setInterval(() => {
     updateProgress.value += 5;
     if (updateProgress.value >= 100) {
-      clearInterval(interval);
+      clearUpdateInterval();
       isUpdating.value = false;
       currentVersion.value = latestVersion.value;
       $q.notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
     }
   }, 200);
 }
+
+function clearUpdateInterval() {
+  if (updateIntervalId.value !== null) {
+    clearInterval(updateIntervalId.value);
+    updateIntervalId.value = null;
+  }
+}
+
+onBeforeUnmount(() => {
+  clearUpdateInterval();
+});
 </script>
 
 <template>

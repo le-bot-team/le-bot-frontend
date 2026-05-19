@@ -20,13 +20,22 @@ export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
 
 /**
  * Internal helper: validate token and call activateVirtualDevice API.
+ * Pre-checks the local virtual device limit before calling the backend.
  * @returns The newly created device from the API response.
  */
 const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
   const authStore = useAuthStore();
+  const deviceStore = useDeviceStore();
 
   if (!authStore.accessToken) {
     throw new Error('Failed to get access token');
+  }
+
+  // Pre-check local limit before calling backend to avoid server/client state divergence
+  const virtualCount = deviceStore.virtualDevices.length;
+  const { MAX_VIRTUAL_DEVICES } = await import('stores/device/types');
+  if (virtualCount >= MAX_VIRTUAL_DEVICES) {
+    throw new Error(`Cannot add more than ${MAX_VIRTUAL_DEVICES} virtual devices`);
   }
 
   const { data: response } = await activateVirtualDevice(authStore.accessToken);
