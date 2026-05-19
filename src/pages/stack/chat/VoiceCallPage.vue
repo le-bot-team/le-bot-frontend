@@ -144,6 +144,7 @@ onBeforeUnmount(() => {
         <!-- Unmute button — btn_unmute_chat (shown when not muted) -->
         <button
           v-if="!isMuted"
+          type="button"
           class="voice-call__btn voice-call__btn--unmute"
           @click="toggleMute"
         >
@@ -157,6 +158,7 @@ onBeforeUnmount(() => {
         <!-- Mute button — btn_mute_mode_chat (shown when muted) -->
         <button
           v-else
+          type="button"
           class="voice-call__btn voice-call__btn--mute"
           @click="toggleMute"
         >
@@ -178,7 +180,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Close/Hangup button — btn_close_chat: red circle with X -->
-        <button class="voice-call__btn voice-call__btn--close" @click="endCall">
+        <button type="button" class="voice-call__btn voice-call__btn--close" @click="endCall">
           <img
             :src="imgBtnClose"
             alt="挂断"

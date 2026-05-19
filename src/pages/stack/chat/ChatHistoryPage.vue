@@ -77,7 +77,7 @@ const groupedSessions = computed(() => {
 });
 
 function openSession(session: ChatSession) {
-  router.push(`/stack/chat?session=${session.id}`).catch(console.error);
+  router.push({ name: 'chat', query: { session: session.id } }).catch(console.error);
 }
 </script>
 

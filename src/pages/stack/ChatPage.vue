@@ -13,6 +13,7 @@
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import ChatInputBar from 'src/components/chat/ChatInputBar.vue';
 import ChatMessageList from 'src/components/chat/ChatMessageList.vue';
@@ -24,6 +25,7 @@ import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 
 const i18n = i18nSubPath('pages.stack.ChatPage');
+const route = useRoute();
 const { accessToken } = storeToRefs(useAuthStore());
 const { notify } = useQuasar();
 const { trackClick, trackConversion } = useTracker();
@@ -42,7 +44,8 @@ async function bootstrap() {
     return;
   }
   try {
-    await connect(accessToken.value);
+    const sessionId = route.query.session as string | undefined;
+    await connect(accessToken.value, undefined, sessionId);
   } catch (err) {
     console.error('[ChatPage] connect failed', err);
     notify({ type: 'negative', message: i18n('notifications.connectFailed') });

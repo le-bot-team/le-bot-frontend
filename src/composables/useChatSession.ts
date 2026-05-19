@@ -376,13 +376,14 @@ export function useChatSession(): UseChatSessionReturn {
   // Public API
   // ==========================================================================
 
-  async function connect(token: string, deviceId?: string): Promise<void> {
+  async function connect(token: string, deviceId?: string, sessionId?: string): Promise<void> {
     // Setup WS handlers before connecting
     setupWsHandlers();
 
     // Connect WebSocket with optional deviceId for virtual device binding
     const deviceParam = deviceId ? `&deviceId=${encodeURIComponent(deviceId)}` : '';
-    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}`;
+    const sessionParam = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
+    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}${sessionParam}`;
     wsClient.connect(wsUrl);
 
     // Initialize microphone

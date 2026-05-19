@@ -82,6 +82,9 @@ export class MockChatWebSocket {
       case WsAction.clearContext:
         this._handleClearContext();
         break;
+      default:
+        console.warn('[MockChatWebSocket] Unhandled action:', action);
+        break;
     }
   }
 
