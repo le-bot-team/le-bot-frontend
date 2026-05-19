@@ -46,7 +46,8 @@ async function bootstrap() {
     return;
   }
   try {
-    const sessionId = route.query.session as string | undefined;
+    const q = route.query.session;
+    const sessionId = typeof q === 'string' ? q : undefined;
     await connect(accessToken.value, undefined, sessionId);
   } catch (err) {
     console.error('[ChatPage] connect failed', err);

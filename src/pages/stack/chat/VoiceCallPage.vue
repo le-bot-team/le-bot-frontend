@@ -3,7 +3,7 @@
 // Design: 蓝湖 64d5ecc8 (idle/standby) + 98751f24 (with chat messages)
 // Raw JSON verified:
 //   Page: 375 width
-//   Nav bar (容器2602): h=44, title "小新的乐宝" 17px Medium #151717, right icon "字" (icon_text_n_nav_chat)
+//   Nav bar: StackHeader renders title "语音通话" via STACK_NAVIGATIONS
 //   Robot avatar area (组385): w=374 h=367 opacity-60, inner robot image 230x334
 //   Bottom control bar: 3 circular buttons w=64 h=64 each:
 //     - btn_unmute_chat: microphone (unmuted state)

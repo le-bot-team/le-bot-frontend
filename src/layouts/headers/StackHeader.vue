@@ -34,8 +34,8 @@ const isChatRoute = computed(() => route.name === 'chat');
       </q-toolbar-title>
       <div v-if="isChatRoute" class="absolute-right column justify-center full-height q-pr-sm">
         <div class="row no-wrap">
-          <q-btn flat icon="volume_off" round size="sm" @click="bus.emit('chat:mute')" />
-          <q-btn flat icon="phone" round size="sm" @click="bus.emit('chat:call')" />
+          <q-btn flat icon="volume_off" round size="sm" aria-label="Mute" @click="bus.emit('chat:mute')" />
+          <q-btn flat icon="phone" round size="sm" aria-label="Call" @click="bus.emit('chat:call')" />
         </div>
       </div>
     </q-toolbar>
