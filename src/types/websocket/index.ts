@@ -23,6 +23,7 @@ export class WsWrapper {
     }
     if (this._ws) {
       this._ws.onclose = null;
+      this._ws.onerror = null;
       this._ws.close();
       this._ws = undefined;
     }

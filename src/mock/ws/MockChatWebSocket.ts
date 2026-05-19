@@ -35,19 +35,17 @@ export class MockChatWebSocket {
     this.url = url;
     this._conversationId = '';
 
-    this._addTimer(
-      setTimeout(() => {
-        this.readyState = 1;
-        this.onopen?.();
+    this._addTrackedTimer(() => {
+      this.readyState = 1;
+      this.onopen?.();
 
-        this._dispatch({
-          id: uid(),
-          action: WsAction.establishConnection,
-          success: true,
-          message: 'Connection established',
-        });
-      }, 100),
-    );
+      this._dispatch({
+        id: uid(),
+        action: WsAction.establishConnection,
+        success: true,
+        message: 'Connection established',
+      });
+    }, 100);
   }
 
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
@@ -110,11 +108,9 @@ export class MockChatWebSocket {
     if (this._inputStarted) return;
     this._inputStarted = true;
 
-    this._addTimer(
-      setTimeout(() => {
-        this._simulateChatTurn();
-      }, 1500),
-    );
+    this._addTrackedTimer(() => {
+      this._simulateChatTurn();
+    }, 1500);
   }
 
   private _handleInputAudioComplete(): void {
@@ -153,103 +149,93 @@ export class MockChatWebSocket {
     const conversationId = this._conversationId;
 
     // Emit user message completion first so the user bubble is finalized
-    this._addTimer(
-      setTimeout(() => {
-        this._dispatch({
-          id: uid(),
-          action: WsAction.outputTextComplete,
-          success: true,
-          data: {
-            chatId,
-            conversationId,
-            role: 'user',
-            text: '(语音输入)',
-          },
-        });
-      }, 200),
-    );
+    this._addTrackedTimer(() => {
+      this._dispatch({
+        id: uid(),
+        action: WsAction.outputTextComplete,
+        success: true,
+        data: {
+          chatId,
+          conversationId,
+          role: 'user',
+          text: '(语音输入)',
+        },
+      });
+    }, 200);
 
     const chunks = [0, 1, 2];
     const assistantText = '你好！我是乐宝AI助手。今天有什么可以帮你的吗？';
 
     for (let i = 0; i < chunks.length; i++) {
-      this._addTimer(
-        setTimeout(() => {
-          this._dispatch({
-            id: uid(),
-            action: WsAction.outputAudioStream,
-            success: true,
-            data: {
-              chatId,
-              conversationId,
-              buffer: generateMockAudioChunk(),
-            },
-          });
-
-          const partialText = assistantText.slice(
-            0,
-            Math.floor(((i + 1) / chunks.length) * assistantText.length),
-          );
-          this._dispatch({
-            id: uid(),
-            action: WsAction.outputTextStream,
-            success: true,
-            data: {
-              chatId,
-              conversationId,
-              role: 'assistant',
-              text: partialText,
-            },
-          });
-        }, i * 800),
-      );
-    }
-
-    const totalDelay = chunks.length * 800 + 300;
-
-    this._addTimer(
-      setTimeout(() => {
+      this._addTrackedTimer(() => {
         this._dispatch({
           id: uid(),
-          action: WsAction.outputAudioComplete,
+          action: WsAction.outputAudioStream,
           success: true,
-          data: { chatId, conversationId },
+          data: {
+            chatId,
+            conversationId,
+            buffer: generateMockAudioChunk(),
+          },
         });
-      }, totalDelay),
-    );
 
-    this._addTimer(
-      setTimeout(() => {
+        const partialText = assistantText.slice(
+          0,
+          Math.floor(((i + 1) / chunks.length) * assistantText.length),
+        );
         this._dispatch({
           id: uid(),
-          action: WsAction.outputTextComplete,
+          action: WsAction.outputTextStream,
           success: true,
           data: {
             chatId,
             conversationId,
             role: 'assistant',
-            text: assistantText,
+            text: partialText,
           },
         });
-      }, totalDelay),
-    );
+      }, i * 800);
+    }
 
-    this._addTimer(
-      setTimeout(() => {
-        this._inputStarted = false;
-        this._dispatch({
-          id: uid(),
-          action: WsAction.chatComplete,
-          success: true,
-          data: {
-            chatId,
-            conversationId,
-            createdAt: Date.now() - 5000,
-            completedAt: Date.now(),
-          },
-        });
-      }, totalDelay + 500),
-    );
+    const totalDelay = chunks.length * 800 + 300;
+
+    this._addTrackedTimer(() => {
+      this._dispatch({
+        id: uid(),
+        action: WsAction.outputAudioComplete,
+        success: true,
+        data: { chatId, conversationId },
+      });
+    }, totalDelay);
+
+    this._addTrackedTimer(() => {
+      this._dispatch({
+        id: uid(),
+        action: WsAction.outputTextComplete,
+        success: true,
+        data: {
+          chatId,
+          conversationId,
+          role: 'assistant',
+          text: assistantText,
+        },
+      });
+    }, totalDelay);
+
+    this._addTrackedTimer(() => {
+      this._inputStarted = false;
+      this._dispatch({
+        id: uid(),
+        action: WsAction.chatComplete,
+        success: true,
+        data: {
+          chatId,
+          conversationId,
+          createdAt: Date.now() - 5000,
+          completedAt: Date.now(),
+        },
+      });
+    }, totalDelay + 500);
   }
 
   private _dispatch(message: Record<string, unknown>): void {
