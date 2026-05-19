@@ -35,10 +35,10 @@ export const router = createRouter({
 });
 
 // Route guard: protect main app routes from users with incomplete onboarding
-const AUTH_ROUTES = new Set(['auth', 'onboarding-complete']);
+const AUTH_ROUTES = new Set(['auth']);
 
 router.beforeEach((to) => {
-  // Allow auth-related routes without restriction
+  // Allow auth page without restriction
   if (AUTH_ROUTES.has(to.name as string)) return true;
 
   const authStore = useAuthStore();
@@ -49,8 +49,9 @@ router.beforeEach((to) => {
     return { name: 'auth' };
   }
 
-  // Has token but profile incomplete (no nickname): redirect to auth to finish onboarding
+  // Has token but profile incomplete (no nickname): only allow onboarding-complete
   if (!profileStore.profile?.nickname) {
+    if (to.name === 'onboarding-complete') return true;
     return { name: 'auth' };
   }
 

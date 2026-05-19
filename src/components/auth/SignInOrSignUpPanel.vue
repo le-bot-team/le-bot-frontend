@@ -217,7 +217,7 @@ const processSignInOrSignUp = async () => {
     <!-- Weak button - mode toggle -->
     <button
       class="auth-btn-weak"
-      @click="processMethod = processMethod === 'code' ? 'password' : 'code'"
+      @click="codeOrPassword = undefined; processMethod = processMethod === 'code' ? 'password' : 'code'"
     >
       {{ processMethod === 'code' ? i18n('labels.usePassword') : i18n('labels.useCode') }}
     </button>

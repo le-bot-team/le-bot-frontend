@@ -138,20 +138,21 @@ const confirmNewPassword = async () => {
     }
 
     // Step 2: Auto-login with the new password (skip if token already valid)
+    // If this fails, proceed anyway — password was already reset successfully
     if (!accessToken.value) {
-      const { data } = await emailPassword(snapshotEmail, snapshotPassword);
-      if (!data.success) {
-        // Password was reset successfully but auto-login failed — proceed anyway
-        // since user already has a valid session from the initial code login
-        emit('next');
-        return;
+      try {
+        const { data } = await emailPassword(snapshotEmail, snapshotPassword);
+        if (data.success) {
+          accessToken.value = data.data.accessToken;
+        }
+      } catch {
+        // Auto-login failed but password reset succeeded — proceed
       }
-      accessToken.value = data.data.accessToken;
     }
 
-    // Both new and existing users go to profile setup after password is set
     emit('next');
   } catch (err) {
+    // Only reaches here if step 1 (emailReset) threw
     errorMsg.value = (err as Error).message || i18n('notifications.unknownError');
   } finally {
     isSubmitting.value = false;
