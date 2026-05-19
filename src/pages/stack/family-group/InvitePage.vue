@@ -112,6 +112,24 @@ onMounted(() => {
   }
 });
 
+// Re-initialize countdown/generation when the active group changes (e.g., query.groupId update)
+watch(currentGroup, (newGroup, oldGroup) => {
+  if (newGroup && newGroup.id !== oldGroup?.id) {
+    // Clear existing timer
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    countdownSeconds.value = 0;
+    // Re-check invite code for the new group
+    if (familyGroupStore.isInviteCodeValid && newGroup.inviteCode) {
+      startCountdown(newGroup.inviteCode.expiresAt);
+    } else {
+      void generateOrRefresh();
+    }
+  }
+});
+
 onBeforeUnmount(() => {
   if (countdownTimer) {
     clearInterval(countdownTimer);

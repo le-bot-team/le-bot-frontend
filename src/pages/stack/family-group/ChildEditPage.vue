@@ -74,8 +74,10 @@ function onSubmit() {
   };
 
   if (isCreateMode.value) {
-    // Create mode: collect child info and create family group
-    // Currently only does local navigation; will integrate createFamilyGroup API later
+    // TODO: integrate createFamilyGroup API — currently only stores child info locally
+    // and navigates to the list page. The actual group creation will be wired up
+    // once the backend endpoint is available.
+    familyGroupStore.updateChildInfo(childInfo);
     $q.notify({ message: i18n('notifications.createSuccess'), type: 'positive' });
     setTimeout(() => {
       void router.replace({ name: 'family-groups' });
