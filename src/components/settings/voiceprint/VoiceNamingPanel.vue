@@ -7,7 +7,7 @@ import { BottomSheet } from 'quasar';
 import { computed } from 'vue';
 
 import {
-  RELATIONSHIP_MAPPINGS,
+  getRelationshipLabel,
   getRelationshipOptions,
   type VprRelationship,
 } from 'components/vpr-relationships';
@@ -53,7 +53,7 @@ const nameModel = computed({
   set: (v: string) => emit('update:name', v),
 });
 
-const relationshipText = computed(() => RELATIONSHIP_MAPPINGS[props.relationship]);
+const relationshipText = computed(() => getRelationshipLabel(props.relationship));
 
 const chooseRelationship = (): void => {
   if (!props.relationshipEditable) {

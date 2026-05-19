@@ -107,6 +107,7 @@ let mediaRecorder: IMediaRecorder | null = null;
 let mediaStream: MediaStream | null = null;
 let pendingStop = false;
 let recordingStartTime = 0;
+let minDurationTimer: ReturnType<typeof setTimeout> | null = null;
 const MIN_RECORDING_MS = 1000; // Minimum 1 second recording
 
 const startRecording = async (): Promise<void> => {
@@ -168,12 +169,13 @@ const stopRecording = (): void => {
   if (!isRecording.value) return;
   // Enforce minimum recording duration
   const elapsed = Date.now() - recordingStartTime;
-  if (elapsed < MIN_RECORDING_MS) {
-    setTimeout(() => {
+  if (elapsed < MIN_RECORDING_MS && !minDurationTimer) {
+    minDurationTimer = setTimeout(() => {
+      minDurationTimer = null;
       mediaRecorder?.stop();
       isRecording.value = false;
     }, MIN_RECORDING_MS - elapsed);
-  } else {
+  } else if (!minDurationTimer) {
     mediaRecorder?.stop();
     isRecording.value = false;
   }
@@ -186,9 +188,14 @@ const cleanup = (): void => {
 };
 
 onBeforeUnmount(() => {
-  if (isRecording.value) {
-    stopRecording();
+  if (minDurationTimer) {
+    clearTimeout(minDurationTimer);
+    minDurationTimer = null;
   }
+  if (mediaRecorder?.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  isRecording.value = false;
   cleanup();
   if (audioRef.value) {
     audioRef.value.pause();
@@ -282,7 +289,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Recording button (shown when no audio)
-           Pointer: press-and-hold (start on pointerdown, stop on pointerup)
+           Pointer: press-and-hold (start on pointerdown, stop on lostpointercapture)
            Keyboard: toggle (Enter/Space toggles start/stop) for accessibility -->
       <div v-else>
         <button
@@ -291,7 +298,6 @@ onBeforeUnmount(() => {
           type="button"
           :aria-label="isRecording ? i18n('labels.stopRecording') : i18n('labels.startRecording')"
           @pointerdown.prevent="($event.currentTarget as HTMLElement).setPointerCapture($event.pointerId); startRecording()"
-          @pointerup="stopRecording"
           @pointercancel="stopRecording"
           @lostpointercapture="stopRecording"
           @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
