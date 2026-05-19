@@ -55,7 +55,6 @@ watch(
   [year, month, day],
   () => {
     if (!hasValue.value) {
-      // First change from user interaction — enable emitting
       hasValue.value = true;
     }
     const m = String(month.value).padStart(2, '0');
@@ -63,6 +62,13 @@ watch(
     emit('update:modelValue', `${year.value}-${m}-${d}`);
   },
 );
+
+// Emit immediately if modelValue was provided on mount
+if (props.modelValue) {
+  const m = String(month.value).padStart(2, '0');
+  const d = String(day.value).padStart(2, '0');
+  emit('update:modelValue', `${year.value}-${m}-${d}`);
+}
 
 // Sync from parent
 watch(

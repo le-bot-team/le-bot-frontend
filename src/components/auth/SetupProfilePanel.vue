@@ -69,7 +69,7 @@ const confirm = async () => {
     const { data } = await updateProfileInfo(accessToken.value, {
       avatar: avatar.value,
       nickname: nickname.value,
-      birthday: birthday.value,
+      birthday: birthday.value || undefined,
       relationship: relationship.value,
     });
     if (!data.success) {
