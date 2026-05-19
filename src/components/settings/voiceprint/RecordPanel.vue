@@ -5,7 +5,7 @@ import { MediaRecorder } from 'extendable-media-recorder';
 import { onBeforeUnmount, ref, watch } from 'vue';
 
 import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
-import robotImg from 'src/assets/lanhu/home/icon-robot-set-home.png';
+import recordMicImg from 'src/assets/lanhu/voiceprint/record-mic.webp';
 import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
@@ -201,7 +201,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="voiceprint-record-pet-stage">
-        <img :src="robotImg" alt="" aria-hidden="true" class="voiceprint-record-pet-img" />
+        <img :src="recordMicImg" alt="" aria-hidden="true" class="voiceprint-record-pet-img" />
       </div>
 
       <p class="voiceprint-record-phrase">
