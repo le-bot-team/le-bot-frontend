@@ -38,12 +38,10 @@ const displayValue = computed(() => {
 function openPicker() {
   const el = inputRef.value;
   if (!el) return;
-  // showPicker() not available on Safari 14; fallback to focus/click
+  // showPicker() not available on Safari 14; the input covers the full area
+  // so native click-to-open works as fallback without needing el.click()
   if (typeof el.showPicker === 'function') {
     el.showPicker();
-  } else {
-    el.focus();
-    el.click();
   }
 }
 

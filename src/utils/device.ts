@@ -1,4 +1,5 @@
 import type { ChildInfo, DeviceInfo } from 'stores/device/types';
+import { MAX_VIRTUAL_DEVICES } from 'stores/device/types';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
 import { useFamilyGroupStore } from 'stores/family-group';
@@ -13,7 +14,7 @@ export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
 
   const { data: mineResponse } = await retrieveMine(authStore.accessToken);
   if (!mineResponse.success) {
-    throw new Error('Failed to retrieve devices');
+    throw new Error(mineResponse.message || 'Failed to retrieve devices');
   }
   return mineResponse.data.devices;
 };
@@ -32,9 +33,7 @@ const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
   }
 
   // Pre-check local limit before calling backend to avoid server/client state divergence
-  const virtualCount = deviceStore.virtualDevices.length;
-  const { MAX_VIRTUAL_DEVICES } = await import('stores/device/types');
-  if (virtualCount >= MAX_VIRTUAL_DEVICES) {
+  if (deviceStore.virtualDevices.length >= MAX_VIRTUAL_DEVICES) {
     throw new Error(`Cannot add more than ${MAX_VIRTUAL_DEVICES} virtual devices`);
   }
 

@@ -73,13 +73,15 @@ function goToDeviceConfig(deviceId: string) {
     </div>
 
     <!-- Device list with me-card styling -->
-    <div v-else class="me-card">
-      <button
+    <div v-else class="me-card" role="list">
+      <div
         v-for="device in virtualDevices"
         :key="device.id"
-        type="button"
+        role="listitem"
+        tabindex="0"
         class="settings-menu-row"
         @click="goToDeviceConfig(device.id)"
+        @keydown.enter.space.prevent="goToDeviceConfig(device.id)"
       >
         <div class="column">
           <span>{{ device.name || i18n('labels.virtualDevice') }}</span>
@@ -100,7 +102,7 @@ function goToDeviceConfig(deviceId: string) {
           />
           <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
         </span>
-      </button>
+      </div>
     </div>
 
     <!-- Add button -->

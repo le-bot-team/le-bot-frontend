@@ -8,7 +8,7 @@
 
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 
 import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.svg';
 import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.svg';
@@ -33,7 +33,9 @@ const deviceStore = useDeviceStore();
 const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
 
-// 用户在 SetupProfilePanel 填写的中文"关系" → FamilyUserRole 枚举映射
+// Relationship string → FamilyUserRole mapping.
+// The relationship value comes from the user profile (set during onboarding or profile edit).
+// Keys are Chinese labels matching the profile relationship picker options.
 const relationshipRoleMap: Partial<Record<string, FamilyUserRole>> = {
   '爸爸': 'father',
   '妈妈': 'mother',
@@ -45,7 +47,7 @@ const relationshipRoleMap: Partial<Record<string, FamilyUserRole>> = {
   '其他亲属': 'other',
 };
 
-// 中文"关系" → 性别（用于成员信息展示）
+// Relationship string → gender mapping (for family member display)
 const relationshipGenderMap: Partial<Record<string, 'male' | 'female'>> = {
   '爸爸': 'male',
   '爷爷': 'male',
@@ -58,6 +60,14 @@ const { trackClick, trackConversion } = useTracker();
 useAuthStore();
 
 const step = ref(0);
+const autoAdvanceTimer = ref<number | null>(null);
+
+onBeforeUnmount(() => {
+  if (autoAdvanceTimer.value !== null) {
+    window.clearTimeout(autoAdvanceTimer.value);
+    autoAdvanceTimer.value = null;
+  }
+});
 
 // --- Step 1: Child info ---
 const childGender = ref<'boy' | 'girl'>('boy');
@@ -105,7 +115,7 @@ async function activateDevice() {
     activatedDeviceId.value = device.id;
     trackConversion('device_activated');
     // Auto advance after short delay
-    setTimeout(() => {
+    autoAdvanceTimer.value = window.setTimeout(() => {
       step.value = 2;
     }, 1000);
   } catch (err) {

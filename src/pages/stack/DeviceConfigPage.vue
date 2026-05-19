@@ -28,6 +28,7 @@ const HIDE_HARDWARE_MENUS = true;
 function handleUnbind() {
   if (!currentDevice.value) return;
 
+  const deviceId = currentDevice.value.id;
   trackClick('btn_click_unbind_device');
   $q.dialog({
     component: ConfirmDialog,
@@ -40,7 +41,7 @@ function handleUnbind() {
   }).onOk(() => {
     void (async () => {
       try {
-        await unbindAndRemoveDevice(currentDevice.value!.id);
+        await unbindAndRemoveDevice(deviceId);
         $q.notify({
           type: 'positive',
           message: i18n('notifications.unbindSuccess'),
