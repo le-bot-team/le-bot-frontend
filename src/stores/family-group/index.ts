@@ -154,8 +154,9 @@ export const useFamilyGroupStore = defineStore(
      * 更新当前家庭组的邀请码
      */
     const setInviteCode = (inviteCode: InviteCode) => {
-      if (currentGroup.value) {
-        currentGroup.value.inviteCode = inviteCode;
+      const group = groups.value.find((g) => g.id === currentGroupId.value);
+      if (group) {
+        group.inviteCode = inviteCode;
       }
     };
 
@@ -163,14 +164,15 @@ export const useFamilyGroupStore = defineStore(
      * 更新儿童信息 (编辑模式)
      */
     const updateChildInfo = (childInfo: ChildInfo) => {
-      if (!currentGroup.value) return;
-      const child = currentGroup.value.members.find((m) => m.memberType === 'child');
+      const group = groups.value.find((g) => g.id === currentGroupId.value);
+      if (!group) return;
+      const child = group.members.find((m) => m.memberType === 'child');
       if (child) {
         child.childInfo = childInfo;
       }
       // 同步更新家庭组名称
-      currentGroup.value.name = `${childInfo.name}的家庭组`;
-      currentGroup.value.childName = childInfo.name;
+      group.name = `${childInfo.name}的家庭组`;
+      group.childName = childInfo.name;
     };
 
     /**
@@ -214,16 +216,23 @@ export const useFamilyGroupStore = defineStore(
       afterHydrate: (ctx) => {
         // Strip large transient fields after hydration to keep localStorage lean
         const store = ctx.store;
+        let stripped = false;
         for (const group of store.groups) {
           if (group.inviteCode?.qrImageUrl) {
             group.inviteCode.qrImageUrl = undefined;
+            stripped = true;
           }
           for (const member of group.members) {
             if (member.avatar && member.avatar.length > 200) {
               // Clear base64 data URIs; keep short URL strings
               member.avatar = undefined;
+              stripped = true;
             }
           }
+        }
+        // Force write-back to persist the cleaned state
+        if (stripped && store.$persist) {
+          store.$persist();
         }
       },
     },

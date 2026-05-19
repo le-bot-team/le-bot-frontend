@@ -109,7 +109,7 @@ watch(
 
 const showPlaceholder = computed(() => !props.modelValue);
 
-// Days available for the selected year/month (handles leap years)
+// Days available for the selected year/month (handles leap years) — used for committed state
 const daysInMonth = computed(() => {
   const y = parseInt(selectedYear.value || '2000', 10);
   const m = parseInt(selectedMonth.value || '1', 10);
@@ -118,6 +118,17 @@ const daysInMonth = computed(() => {
 
 const availableDayOptions = computed(() => {
   return dayOptions.filter((d) => parseInt(d.value, 10) <= daysInMonth.value);
+});
+
+// Days available based on BUFFERED year/month (used while picker is open)
+const bufDaysInMonth = computed(() => {
+  const y = parseInt(bufYear.value || '2000', 10);
+  const m = parseInt(bufMonth.value || '1', 10);
+  return new Date(y, m, 0).getDate();
+});
+
+const bufAvailableDayOptions = computed(() => {
+  return dayOptions.filter((d) => parseInt(d.value, 10) <= bufDaysInMonth.value);
 });
 
 // Clamp selectedDay when month/year changes
@@ -157,7 +168,7 @@ const monthScrollIndex = computed(() => {
 });
 
 const dayScrollIndex = computed(() => {
-  const idx = availableDayOptions.value.findIndex((o) => o.value === bufDay.value);
+  const idx = bufAvailableDayOptions.value.findIndex((o) => o.value === bufDay.value);
   return idx >= 0 ? idx : 0;
 });
 
@@ -344,7 +355,7 @@ function onCancel() {
           >
             <div class="birthday-picker__options">
               <div
-                v-for="opt in availableDayOptions"
+                v-for="opt in bufAvailableDayOptions"
                 :key="opt.value"
                 class="birthday-picker__option"
                 :class="{ 'birthday-picker__option--active': bufDay === opt.value }"

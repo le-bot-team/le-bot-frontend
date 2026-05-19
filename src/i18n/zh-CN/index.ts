@@ -832,6 +832,7 @@ export default {
           errors: {
             generateFailed: '生成邀请码失败',
             notLoggedIn: '请先登录',
+            groupNotFound: '家庭组不存在或已被删除',
           },
         },
         ChildEditPage: {
@@ -864,6 +865,7 @@ export default {
       JoinPage: {
         errors: {
           noCode: '缺少邀请码',
+          notLoggedIn: '请先登录后再加入家庭组',
           invalidCode: '邀请码无效或已过期',
           resolveFailed: '解析邀请码失败，请重试',
         },

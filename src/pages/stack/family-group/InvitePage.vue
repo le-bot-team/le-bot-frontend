@@ -132,6 +132,17 @@ watch(currentGroup, (newGroup, oldGroup) => {
   }
 });
 
+// If groupId is set but currentGroup remains undefined (stale/invalid ID), show error
+watch(
+  () => familyGroupStore.currentGroupId,
+  (id) => {
+    if (id && !currentGroup.value) {
+      $q.notify({ message: i18n('errors.groupNotFound'), type: 'negative' });
+    }
+  },
+  { immediate: true },
+);
+
 onBeforeUnmount(() => {
   if (countdownTimer) {
     clearInterval(countdownTimer);

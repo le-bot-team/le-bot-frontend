@@ -837,6 +837,7 @@ export default {
           errors: {
             generateFailed: 'Failed to generate invite code',
             notLoggedIn: 'Please log in first',
+            groupNotFound: 'Family group not found or has been deleted',
           },
         },
         ChildEditPage: {
@@ -869,6 +870,7 @@ export default {
       JoinPage: {
         errors: {
           noCode: 'Missing invite code',
+          notLoggedIn: 'Please log in before joining a family group',
           invalidCode: 'Invite code is invalid or expired',
           resolveFailed: 'Failed to resolve invite code, please retry',
         },

@@ -24,7 +24,7 @@ const authStore = useAuthStore();
 
 // ── Props / Emits ──
 const props = defineProps<{
-  modelValue: boolean | null;
+  modelValue: boolean;
   inviteCode?: string;
   groupName?: string;
   childName?: string;

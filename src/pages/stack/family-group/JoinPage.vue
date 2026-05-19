@@ -30,8 +30,19 @@ const showDialog = ref(false);
 const resolvedInviterNickname = ref('');
 const resolvedInviterAvatar = ref<string | undefined>(undefined);
 const resolvedGroupName = ref('');
+const resolvedChildName = ref('');
 
 onMounted(async () => {
+  // Require authentication before proceeding
+  if (!authStore.accessToken) {
+    $q.notify({ message: i18n('errors.notLoggedIn'), type: 'negative' });
+    void router.replace({
+      name: 'auth',
+      query: { redirect: route.fullPath },
+    });
+    return;
+  }
+
   if (!inviteCode.value) {
     $q.notify({ message: i18n('errors.noCode'), type: 'negative' });
     void router.replace({ name: 'family-groups' });
@@ -39,11 +50,12 @@ onMounted(async () => {
   }
 
   try {
-    const res = await resolveInviteCode(inviteCode.value, authStore.accessToken || undefined);
+    const res = await resolveInviteCode(inviteCode.value, authStore.accessToken);
     if (res.data?.success && res.data.data) {
       resolvedInviterNickname.value = res.data.data.inviterNickname ?? '';
       resolvedInviterAvatar.value = res.data.data.inviterAvatar;
       resolvedGroupName.value = res.data.data.groupName ?? '';
+      resolvedChildName.value = res.data.data.childName ?? '';
       showDialog.value = true;
     } else {
       const msg = res.data && !res.data.success ? res.data.message : i18n('errors.invalidCode');
@@ -80,6 +92,8 @@ function onCancel() {
     <JoinConfirmDialog
       v-model="showDialog"
       :invite-code="inviteCode"
+      :group-name="resolvedGroupName"
+      :child-name="resolvedChildName"
       :inviter-nickname="resolvedInviterNickname"
       :inviter-avatar="resolvedInviterAvatar ?? ''"
       @success="onJoinSuccess"
