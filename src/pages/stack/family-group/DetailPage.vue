@@ -96,13 +96,13 @@ function onMemberClick(member: FamilyMember) {
   if (member.memberType === 'child') {
     void router.push({
       name: 'family-group-child-edit',
-      query: { childId: member.id },
+      query: { childId: member.id, groupId: group.value?.id },
     });
     return;
   }
   void router.push({
     name: 'family-group-member',
-    query: { memberId: member.id },
+    query: { memberId: member.id, groupId: group.value?.id },
   });
 }
 

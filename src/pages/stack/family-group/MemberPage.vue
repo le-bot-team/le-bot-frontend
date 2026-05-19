@@ -7,7 +7,7 @@
  * 数据从 FamilyGroupStore.currentMembers 读取。
  */
 
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useQuasar } from 'quasar';
@@ -26,6 +26,12 @@ const route = useRoute();
 const familyGroupStore = useFamilyGroupStore();
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
+
+// Sync groupId from route query to store (supports deep-link / refresh)
+const urlGroupId = computed(() => route.query.groupId as string | undefined);
+watch(urlGroupId, (id) => {
+  if (id) familyGroupStore.setCurrentGroup(id);
+}, { immediate: true });
 
 /** 当前查看的成员（找不到时为 undefined） */
 const member = computed<FamilyMember | undefined>(() => {
@@ -126,7 +132,7 @@ function onRemove() {
       <div class="family-member-info-card">
         <div class="family-member-info-row">
           <span class="family-member-info-label">{{ i18n('labels.nickname') }}</span>
-          <span class="family-member-info-value">{{ member!.nickname }}</span>
+          <span class="family-member-info-value">{{ member!.nickname ?? '-' }}</span>
         </div>
         <div class="family-member-info-row">
           <span class="family-member-info-label">{{ i18n('labels.gender') }}</span>

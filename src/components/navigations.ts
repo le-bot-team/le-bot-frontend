@@ -91,4 +91,46 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'settings-voiceprint-new',
   },
+  {
+    label: i18n('stack.familyGroups'),
+    icon: 'mdi-account-group',
+    available: true,
+    route: 'family-groups',
+  },
+  {
+    label: i18n('stack.familyGroupDetail'),
+    icon: 'mdi-account-group',
+    available: true,
+    route: 'family-group-detail',
+  },
+  {
+    label: i18n('stack.familyGroupMember'),
+    icon: 'mdi-account',
+    available: true,
+    route: 'family-group-member',
+  },
+  {
+    label: i18n('stack.familyGroupInvite'),
+    icon: 'mdi-account-plus',
+    available: true,
+    route: 'family-group-invite',
+  },
+  {
+    label: i18n('stack.familyGroupChildEdit'),
+    icon: 'mdi-baby-face',
+    available: true,
+    route: 'family-group-child-edit',
+  },
+  {
+    label: i18n('stack.familyGroupCreate'),
+    icon: 'mdi-plus-circle',
+    available: true,
+    route: 'family-group-create',
+  },
+  {
+    label: i18n('stack.familyGroupCreate'),
+    icon: 'mdi-plus-circle',
+    available: true,
+    route: 'add-virtual-device',
+  },
 ];

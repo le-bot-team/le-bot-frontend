@@ -24,7 +24,7 @@ const $q = useQuasar();
 const route = useRoute();
 const familyGroupStore = useFamilyGroupStore();
 
-const isCreateMode = computed(() => route.name === 'family-group-create');
+const isCreateMode = computed(() => route.name === 'family-group-create' || route.name === 'add-virtual-device');
 
 // ── 表单数据 ──
 const childGender = ref<'boy' | 'girl'>('boy');
