@@ -58,7 +58,7 @@ export function setupProfileMock(mock: MockAdapter): void {
       birthday: profile.birthday,
       relationship: profile.relationship,
     });
-    return [200, mockSuccess(undefined)];
+    return [200, { success: true as const }];
   });
 
   // Change password
@@ -97,13 +97,13 @@ export function setupProfileMock(mock: MockAdapter): void {
     const { phone } = JSON.parse(config.data ?? '{}') as { phone: string };
 
     if (!phone) {
-      return [200, mockError('手机号不能为空')];
+      return [200, mockError('Phone number is required')];
     }
 
     const now = Date.now();
     const lastSent = phoneCodeSentAt[phone] ?? 0;
     if (now - lastSent < MOCK_CODE_COOLDOWN_MS) {
-      return [200, mockError('发送频率过高，请稍后再试')];
+      return [200, mockError('Too many requests, please try again later')];
     }
     phoneCodeSentAt[phone] = now;
 
@@ -118,11 +118,11 @@ export function setupProfileMock(mock: MockAdapter): void {
     const { phone, code } = JSON.parse(config.data ?? '{}') as { phone: string; code: string };
 
     if (!phone || !code) {
-      return [200, mockError('手机号和验证码不能为空')];
+      return [200, mockError('Phone number and code are required')];
     }
 
     if (code !== MOCK_VERIFICATION_CODE) {
-      return [200, mockError('验证码输入错误')];
+      return [200, mockError('Invalid verification code')];
     }
 
     console.log(`[Mock Profile] Phone code verified for ${phone}`);
@@ -134,11 +134,11 @@ export function setupProfileMock(mock: MockAdapter): void {
     const { phone, code } = JSON.parse(config.data ?? '{}') as { phone: string; code: string };
 
     if (!phone || !code) {
-      return [200, mockError('手机号和验证码不能为空')];
+      return [200, mockError('Phone number and code are required')];
     }
 
     if (code !== MOCK_VERIFICATION_CODE) {
-      return [200, mockError('验证码输入错误')];
+      return [200, mockError('Invalid verification code')];
     }
 
     profile.phone = phone;
