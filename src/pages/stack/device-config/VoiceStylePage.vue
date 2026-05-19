@@ -108,8 +108,9 @@ function selectStyle(key: VoiceStyleKey) {
   deviceStore.updateCurrentDeviceConfig({ voiceStyle: key });
 }
 
-// Persist rate changes to device config
+// Persist rate changes to device config (guard against redundant writes)
 watch(rate, (newRate) => {
+  if (deviceStore.currentDevice?.config?.speechRate === newRate) return;
   deviceStore.updateCurrentDeviceConfig({ speechRate: newRate });
 });
 </script>

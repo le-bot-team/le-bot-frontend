@@ -739,6 +739,7 @@ export default {
           activateFailed: '激活虚拟设备失败',
           tokenMissing: '登录已过期，请重新登录',
           voiceprintFailed: '声纹注册失败',
+          leaveIncomplete: '设备设置尚未完成，离开将产生未配置的设备。确定离开吗？',
         },
       },
       FamilyGroupPage: {

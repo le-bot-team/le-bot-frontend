@@ -70,9 +70,7 @@ onBeforeUnmount(() => {
 onBeforeRouteLeave((_to, _from, next) => {
   // If device was activated but flow not completed (step < 4 means not at "done" step)
   if (activatedDeviceId.value && step.value > 0 && step.value < 4) {
-    const leave = window.confirm(
-      'Device setup is incomplete. Leaving now will create an orphaned device. Continue?',
-    );
+    const leave = window.confirm(i18n('notifications.leaveIncomplete'));
     if (!leave) {
       next(false);
       return;

@@ -744,6 +744,7 @@ export default {
           activateFailed: 'Failed to activate virtual device',
           tokenMissing: 'Session expired, please log in again',
           voiceprintFailed: 'Voiceprint registration failed',
+          leaveIncomplete: 'Device setup is incomplete. Leaving will create an orphaned device. Continue?',
         },
       },
       FamilyGroupPage: {

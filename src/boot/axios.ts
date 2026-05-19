@@ -24,9 +24,10 @@ api.interceptors.response.use(
     if (
       response.data?.success === false &&
       typeof response.data?.message === 'string' &&
-      response.data.message.toLowerCase().includes('token')
+      (response.data.message === 'Invalid or expired access token' ||
+        response.data.message === 'Token is invalid or expired')
     ) {
-      // Token expired/invalid — clear auth state and redirect to login
+      // Token expired/invalid — clear auth state
       void import('stores/auth').then(({ useAuthStore }) => {
         const authStore = useAuthStore();
         authStore.accessToken = '';
