@@ -128,20 +128,36 @@ watch([selectedYear, selectedMonth], () => {
   }
 });
 
-// --- Scroll position: index of the active item in each column ---
+// --- Buffered selection while picker is open (committed on confirm, discarded on cancel) ---
+
+const bufYear = ref(selectedYear.value);
+const bufMonth = ref(selectedMonth.value);
+const bufDay = ref(selectedDay.value);
+
+// Clamp buffered day when year/month changes
+watch([bufYear, bufMonth], () => {
+  const y = parseInt(bufYear.value || '2000', 10);
+  const m = parseInt(bufMonth.value || '1', 10);
+  const maxDay = new Date(y, m, 0).getDate();
+  if (parseInt(bufDay.value, 10) > maxDay) {
+    bufDay.value = String(maxDay).padStart(2, '0');
+  }
+});
+
+// --- Scroll position: index of the active item in each column (uses buffer refs) ---
 
 const yearScrollIndex = computed(() => {
-  const idx = yearOptions.value.findIndex((o) => o.value === selectedYear.value);
+  const idx = yearOptions.value.findIndex((o) => o.value === bufYear.value);
   return idx >= 0 ? idx : 0;
 });
 
 const monthScrollIndex = computed(() => {
-  const idx = monthOptions.findIndex((o) => o.value === selectedMonth.value);
+  const idx = monthOptions.findIndex((o) => o.value === bufMonth.value);
   return idx >= 0 ? idx : 0;
 });
 
 const dayScrollIndex = computed(() => {
-  const idx = availableDayOptions.value.findIndex((o) => o.value === selectedDay.value);
+  const idx = availableDayOptions.value.findIndex((o) => o.value === bufDay.value);
   return idx >= 0 ? idx : 0;
 });
 
@@ -153,8 +169,12 @@ const monthScrollRef = ref<any>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dayScrollRef = ref<any>();
 
-// After menu opens, scroll each column to show the selected item
+// After menu opens, initialize buffers and scroll each column to show the selected item
 const onMenuShow = () => {
+  // Initialize buffer from current selection
+  bufYear.value = selectedYear.value;
+  bufMonth.value = selectedMonth.value;
+  bufDay.value = selectedDay.value;
   const ITEM_HEIGHT = 37; // px, matches .birthday-picker__option height + padding
   setTimeout(() => {
     yearScrollRef.value?.setScrollPosition('vertical', yearScrollIndex.value * ITEM_HEIGHT, 0);
@@ -165,18 +185,43 @@ const onMenuShow = () => {
 
 // --- Emit & close ---
 
-const emitChange = () => {
-  if (!selectedYear.value || !selectedMonth.value || !selectedDay.value) return;
-  emit('update:modelValue', `${selectedYear.value}-${selectedMonth.value}-${selectedDay.value}`);
-};
-
-const onYearChange = () => emitChange();
-const onMonthChange = () => emitChange();
-const onDayChange = () => emitChange();
+const onYearChange = (val: string) => { bufYear.value = val; };
+const onMonthChange = (val: string) => { bufMonth.value = val; };
+const onDayChange = (val: string) => { bufDay.value = val; };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const menuRef = ref<any>();
-const closeMenu = () => menuRef.value?.hide();
+
+function onConfirm() {
+  selectedYear.value = bufYear.value;
+  selectedMonth.value = bufMonth.value;
+  selectedDay.value = bufDay.value;
+  // Validate: don't allow future dates
+  const composed = new Date(
+    parseInt(selectedYear.value, 10),
+    parseInt(selectedMonth.value, 10) - 1,
+    parseInt(selectedDay.value, 10),
+  );
+  if (composed.getTime() > Date.now()) {
+    // Clamp to today
+    const today = new Date();
+    selectedYear.value = String(today.getFullYear());
+    selectedMonth.value = String(today.getMonth() + 1).padStart(2, '0');
+    selectedDay.value = String(today.getDate()).padStart(2, '0');
+  }
+  if (selectedYear.value && selectedMonth.value && selectedDay.value) {
+    emit('update:modelValue', `${selectedYear.value}-${selectedMonth.value}-${selectedDay.value}`);
+  }
+  menuRef.value?.hide();
+}
+
+function onCancel() {
+  // Discard buffered changes
+  bufYear.value = selectedYear.value;
+  bufMonth.value = selectedMonth.value;
+  bufDay.value = selectedDay.value;
+  menuRef.value?.hide();
+}
 </script>
 
 <template>
@@ -231,11 +276,11 @@ const closeMenu = () => menuRef.value?.hide();
     >
       <!-- Header with cancel + title + confirm -->
       <div class="birthday-picker__picker-header">
-        <button class="birthday-picker__header-btn birthday-picker__header-btn--cancel" @click="closeMenu">
+        <button class="birthday-picker__header-btn birthday-picker__header-btn--cancel" @click="onCancel">
           取消
         </button>
         <span class="birthday-picker__picker-title">选择生日</span>
-        <button class="birthday-picker__header-btn birthday-picker__header-btn--confirm" @click="closeMenu">
+        <button class="birthday-picker__header-btn birthday-picker__header-btn--confirm" @click="onConfirm">
           确定
         </button>
       </div>
@@ -256,8 +301,8 @@ const closeMenu = () => menuRef.value?.hide();
                 v-for="opt in yearOptions"
                 :key="opt.value"
                 class="birthday-picker__option"
-                :class="{ 'birthday-picker__option--active': selectedYear === opt.value }"
-                @click="selectedYear = opt.value; onYearChange()"
+                :class="{ 'birthday-picker__option--active': bufYear === opt.value }"
+                @click="onYearChange(opt.value)"
               >
                 {{ opt.label }}
               </div>
@@ -279,8 +324,8 @@ const closeMenu = () => menuRef.value?.hide();
                 v-for="opt in monthOptions"
                 :key="opt.value"
                 class="birthday-picker__option"
-                :class="{ 'birthday-picker__option--active': selectedMonth === opt.value }"
-                @click="selectedMonth = opt.value; onMonthChange()"
+                :class="{ 'birthday-picker__option--active': bufMonth === opt.value }"
+                @click="onMonthChange(opt.value)"
               >
                 {{ opt.label }}
               </div>
@@ -302,8 +347,8 @@ const closeMenu = () => menuRef.value?.hide();
                 v-for="opt in availableDayOptions"
                 :key="opt.value"
                 class="birthday-picker__option"
-                :class="{ 'birthday-picker__option--active': selectedDay === opt.value }"
-                @click="selectedDay = opt.value; onDayChange()"
+                :class="{ 'birthday-picker__option--active': bufDay === opt.value }"
+                @click="onDayChange(opt.value)"
               >
                 {{ opt.label }}
               </div>

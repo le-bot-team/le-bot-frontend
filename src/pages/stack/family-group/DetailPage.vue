@@ -14,8 +14,9 @@ import { computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { i18nSubPath } from 'src/utils/common';
+import { createRoleLabel } from 'src/utils/family-group/role-labels';
 import { useFamilyGroupStore } from 'stores/family-group';
-import type { FamilyMember, FamilyMemberRole } from 'stores/family-group/types';
+import type { FamilyMember } from 'stores/family-group/types';
 import { useProfileStore } from 'stores/profile';
 import { router } from 'src/router';
 import boyAvatarUrl from 'src/assets/lanhu/child-edit/boy-avatar.png';
@@ -77,20 +78,7 @@ function childAge(birthday?: string): number {
 }
 
 /** 角色标签文本（role 未定义时显示 - 以保证卡片布局完整） */
-function roleLabel(role?: FamilyMemberRole): string {
-  const map: Record<string, string> = {
-    father: i18n('role.father'),
-    mother: i18n('role.mother'),
-    grandpa: i18n('role.grandpa'),
-    grandma: i18n('role.grandma'),
-    paternal_grandmother: i18n('role.paternalGrandmother'),
-    maternal_grandfather: i18n('role.maternalGrandfather'),
-    maternal_grandma: i18n('role.maternalGrandma'),
-    friend: i18n('role.friend'),
-    other: i18n('role.other'),
-  };
-  return role ? (map[role] ?? role) : '-';
-}
+const roleLabel = createRoleLabel(i18n);
 
 function onMemberClick(member: FamilyMember) {
   if (member.memberType === 'child') {

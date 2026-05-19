@@ -209,6 +209,23 @@ export const useFamilyGroupStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: {
+      pick: ['groups', 'currentGroupId'],
+      afterHydrate: (ctx) => {
+        // Strip large transient fields after hydration to keep localStorage lean
+        const store = ctx.store;
+        for (const group of store.groups) {
+          if (group.inviteCode?.qrImageUrl) {
+            group.inviteCode.qrImageUrl = undefined;
+          }
+          for (const member of group.members) {
+            if (member.avatar && member.avatar.length > 200) {
+              // Clear base64 data URIs; keep short URL strings
+              member.avatar = undefined;
+            }
+          }
+        }
+      },
+    },
   },
 );

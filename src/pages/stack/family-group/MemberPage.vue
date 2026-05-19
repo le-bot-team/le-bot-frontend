@@ -13,8 +13,9 @@ import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
+import { createRoleLabel } from 'src/utils/family-group/role-labels';
 import { useFamilyGroupStore } from 'stores/family-group';
-import type { FamilyMember, FamilyUserRole } from 'stores/family-group/types';
+import type { FamilyMember } from 'stores/family-group/types';
 import { removeMember as removeMemberApi } from 'src/utils/api/family-group';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
@@ -43,21 +44,7 @@ const member = computed<FamilyMember | undefined>(() => {
 const isMemberFound = computed(() => !!member.value);
 
 /** 角色映射 */
-function roleLabel(role?: FamilyUserRole): string {
-  if (!role) return '-';
-  const labels: Record<FamilyUserRole, string> = {
-    father: i18n('role.father'),
-    mother: i18n('role.mother'),
-    grandpa: i18n('role.grandpa'),
-    grandma: i18n('role.grandma'),
-    paternal_grandmother: i18n('role.paternalGrandmother'),
-    maternal_grandfather: i18n('role.maternalGrandfather'),
-    maternal_grandma: i18n('role.maternalGrandma'),
-    friend: i18n('role.friend'),
-    other: i18n('role.other'),
-  };
-  return labels[role] ?? role;
-}
+const roleLabel = createRoleLabel(i18n);
 
 /** 格式化日期（年 / 月 / 日） */
 function formatDate(isoString: string): string {
