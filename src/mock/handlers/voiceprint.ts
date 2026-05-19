@@ -42,7 +42,7 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
 
   // Register a new voiceprint person
   mock.onPost('/voiceprint/register').reply((config) => {
-    const data = JSON.parse(config.data ?? '{}') as {
+    let data: {
       audio: string;
       name: string;
       age: number;
@@ -50,6 +50,11 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
       address?: string;
       isTemporal?: boolean;
     };
+    try {
+      data = JSON.parse(config.data ?? '{}');
+    } catch {
+      return [200, mockError('请求数据格式错误')];
+    }
 
     if (!data.audio || !data.name) {
       return [200, mockError('音频数据和人名不能为空')];
@@ -123,7 +128,12 @@ export function setupVoiceprintMock(mock: MockAdapter): void {
       return [200, mockError('人物不存在')];
     }
 
-    const data = JSON.parse(config.data ?? '{}') as UpdatePersonRequest;
+    let data: UpdatePersonRequest;
+    try {
+      data = JSON.parse(config.data ?? '{}');
+    } catch {
+      return [200, mockError('请求数据格式错误')];
+    }
     if (data.name !== undefined) person.name = data.name;
     if (data.relationship !== undefined) person.relationship = data.relationship;
     if (data.isTemporal !== undefined) person.is_temporal = data.isTemporal;

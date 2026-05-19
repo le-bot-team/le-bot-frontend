@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
 
 import { router } from 'src/router';
 import type { Person } from 'src/types/api/voiceprint';
@@ -12,16 +11,15 @@ import { useAuthStore } from 'stores/auth';
 const i18n = i18nSubPath('pages.stack.settings.VoiceprintPage');
 const { accessToken } = storeToRefs(useAuthStore());
 const persons = ref<Person[]>([]);
-const routerInstance = useRouter();
 
 const hasTemporal = computed(() => persons.value.some((p) => p.is_temporal));
 
 const goDetail = (personId: string) => {
-  routerInstance.push(`/stack/settings/voiceprint/detail/${personId}`).catch(console.error);
+  router.push(`/stack/settings/voiceprint/detail/${personId}`).catch(console.error);
 };
 
 const goNew = () => {
-  routerInstance.push('/stack/settings/voiceprint/new').catch(console.error);
+  router.push('/stack/settings/voiceprint/new').catch(console.error);
 };
 
 onMounted(async () => {
