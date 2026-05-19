@@ -516,6 +516,8 @@ export default {
           searchComingSoon: '搜索功能即将上线',
           muteEnabled: '已关闭自动朗读',
           muteDisabled: '已开启自动朗读',
+          muteModeEnabled: '已开启静音模式',
+          muteModeDisabled: '已关闭静音模式',
           callComingSoon: '呼叫功能即将上线',
         },
       },
@@ -1298,6 +1300,7 @@ export default {
             // Design 64d5ecc8 raw JSON
             startSpeaking: '你可以开始说话', // raw: "你可以开始说话" 15px/22px #151717 at y=718
             aiGenerated: '内容由AI生成', // raw: "内容由AI生成" 12px/16px opacity-50 at y=748
+            comingSoon: '语音通话功能即将上线',
           },
           notifications: {
             callConnected: '通话已连接',

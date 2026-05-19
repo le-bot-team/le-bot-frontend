@@ -33,6 +33,7 @@ function toggleAudio() {
     el.currentTime = 0;
     isPlaying.value = false;
   } else {
+    el.currentTime = 0;
     el.play()
       .then(() => { isPlaying.value = true; })
       .catch((err) => {

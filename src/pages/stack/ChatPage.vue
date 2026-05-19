@@ -91,8 +91,8 @@ function onMute() {
     type: 'info',
     group: false,
     message: isMuted.value
-      ? i18n('notifications.muteEnabled')
-      : i18n('notifications.muteDisabled'),
+      ? i18n('notifications.muteModeEnabled')
+      : i18n('notifications.muteModeDisabled'),
   });
 }
 

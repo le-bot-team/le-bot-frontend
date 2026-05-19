@@ -31,10 +31,11 @@ import imgBtnClose from 'src/assets/lanhu/chat/btn-close-chat.png';
 const i18n = i18nSubPath('pages.stack.chat.VoiceCallPage');
 const router = useRouter();
 
-type CallStatus = 'connecting' | 'connected' | 'ended' | 'failed';
+type CallStatus = 'connecting' | 'connected' | 'ended' | 'failed' | 'coming-soon';
 
 const isMockMode = process.env.VITE_MOCK_WS_ENABLED === 'true';
-const callStatus = ref<CallStatus>('connecting');
+const isDevMode = process.env.NODE_ENV === 'development';
+const callStatus = ref<CallStatus>(isDevMode ? 'connecting' : 'coming-soon');
 const isMuted = ref(false);
 const showTextMode = ref(true);
 const currentDotIndex = ref(0);
@@ -99,6 +100,13 @@ onBeforeUnmount(() => {
 
 <template>
   <q-page class="voice-call-page">
+    <!-- Coming soon state for production -->
+    <div v-if="callStatus === 'coming-soon'" class="voice-call__coming-soon">
+      <img class="voice-call__robot-img" :src="imgRobot" alt="乐宝" />
+      <p class="voice-call__hint">{{ i18n('labels.comingSoon') }}</p>
+    </div>
+
+    <template v-else>
     <!-- Robot Avatar Area (组385) — design raw JSON: w=374 h=367 opacity-60, top=98 -->
     <!-- Contains: 圆形4 (yellow circle bg) + 乐宝正面 (robot 230x334) -->
     <div class="voice-call__robot-area">
@@ -197,6 +205,7 @@ onBeforeUnmount(() => {
       <!-- AI disclaimer — raw JSON: "内容由AI生成" 12px/16px #151717 opacity-50 at y=748 -->
       <p class="voice-call__disclaimer">{{ i18n('labels.aiGenerated') }}</p>
     </div>
+    </template>
   </q-page>
 </template>
 
@@ -212,6 +221,15 @@ onBeforeUnmount(() => {
   background: #f5f5f0;
   padding-bottom: env(safe-area-inset-bottom);
   overflow: hidden;
+}
+
+.voice-call__coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 20px;
 }
 
 /* === Robot Avatar Area (组385) === */
