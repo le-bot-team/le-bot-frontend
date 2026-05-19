@@ -68,8 +68,8 @@ function onSubmit() {
   };
 
   if (isCreateMode.value) {
-    // 创建模式: 数据已由 AddVirtualDevicePage 处理
-    // 这里仅做本地跳转，后续对接 createFamilyGroup API
+    // Create mode: collect child info and create family group
+    // Currently only does local navigation; will integrate createFamilyGroup API later
     $q.notify({ message: i18n('notifications.createSuccess'), type: 'positive' });
     setTimeout(() => {
       void router.replace({ name: 'family-groups' });
