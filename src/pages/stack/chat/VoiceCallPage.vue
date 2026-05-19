@@ -83,7 +83,9 @@ function toggleTextMode() {
 }
 
 onMounted(() => {
-  startCall();
+  if (callStatus.value !== 'coming-soon') {
+    startCall();
+  }
   bus.on('chat:text-toggle', toggleTextMode);
 });
 
