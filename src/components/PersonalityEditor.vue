@@ -11,7 +11,7 @@
  *   - submit({ enabled, traits, goals }): when the submit button is clicked
  *   - disable(): when the toggle is turned off
  */
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.PersonalityDetailPage');
@@ -44,6 +44,11 @@ const emit = defineEmits<{
 const enabled = ref<boolean>(props.enabled);
 const traits = ref<string>(props.traits);
 const goals = ref<string>(props.goals);
+
+// Sync internal state when props change (e.g. async-loaded values)
+watch(() => props.enabled, (v) => { enabled.value = v; });
+watch(() => props.traits, (v) => { traits.value = v; parseSelectedTags(); });
+watch(() => props.goals, (v) => { goals.value = v; parseSelectedTags(); });
 
 // 预设个性标签 (与 i18n 对应)
 const traitTagKeys = ['trait_a', 'trait_b', 'trait_c', 'trait_d', 'trait_e', 'trait_f'] as const;

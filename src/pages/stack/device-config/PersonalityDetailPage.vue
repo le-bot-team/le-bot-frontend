@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDeviceStore } from 'stores/device';
 
@@ -24,7 +25,7 @@ import PersonalityEditor from 'components/PersonalityEditor.vue';
 const router = useRouter();
 const deviceStore = useDeviceStore();
 
-const existing = deviceStore.currentDevice?.config?.aiPersonality;
+const existing = computed(() => deviceStore.currentDevice?.config?.aiPersonality);
 
 function onSubmit(payload: { enabled: boolean; traits: string; goals: string }) {
   deviceStore.updateCurrentDeviceConfig({

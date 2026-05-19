@@ -15,7 +15,10 @@ export const useDeviceStore = defineStore(
 
     const updateDevices = (newDevices: DeviceInfo[] = []) => {
       devices.value = newDevices;
-      currentDevice.value = newDevices[0];
+      // Preserve current device selection if it still exists in the new list
+      const prevId = currentDevice.value?.id;
+      const preserved = prevId ? newDevices.find((d) => d.id === prevId) : undefined;
+      currentDevice.value = preserved ?? newDevices[0];
     };
 
     /** Add a virtual device to the store (validates MAX_VIRTUAL_DEVICES limit) */

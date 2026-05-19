@@ -51,7 +51,7 @@
 // style presets. Slider track/thumb colors live as CSS variables in
 // app.scss (`--clr-voice-slider-*`); fill ratio is driven by the inline
 // `--voice-slider-pct` custom property updated from `rate`.
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import speakerIcon from 'src/assets/lanhu/device-config/voice/icon-speaker.png';
 import checkIcon from 'src/assets/lanhu/device-config/voice/icon-check.png';
@@ -74,12 +74,20 @@ const styles: ReadonlyArray<{ key: VoiceStyleKey }> = [
 
 const validKeys = styles.map((s) => s.key as string);
 
+function resolveStyleKey(raw?: string): VoiceStyleKey {
+  return validKeys.includes(raw ?? '') ? (raw as VoiceStyleKey) : 'cuteChild';
+}
+
 const selectedKey = ref<VoiceStyleKey>(
-  validKeys.includes(deviceStore.currentDevice?.config?.voiceStyle ?? '')
-    ? (deviceStore.currentDevice!.config!.voiceStyle as VoiceStyleKey)
-    : 'cuteChild',
+  resolveStyleKey(deviceStore.currentDevice?.config?.voiceStyle),
 );
 const rate = ref<number>(1.5);
+
+// Sync selection when currentDevice loads/changes (e.g. after refresh)
+const storeVoiceStyle = computed(() => deviceStore.currentDevice?.config?.voiceStyle);
+watch(storeVoiceStyle, (newVal) => {
+  selectedKey.value = resolveStyleKey(newVal);
+});
 
 // Slider fill ratio: rate range 0.5..2.0 (span 1.5)
 const ratePct = computed(() => `${((rate.value - 0.5) / 1.5) * 100}%`);

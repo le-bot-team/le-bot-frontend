@@ -77,8 +77,9 @@ function goToDeviceConfig(deviceId: string) {
       <div
         v-for="device in virtualDevices"
         :key="device.id"
-        role="listitem"
+        role="button"
         tabindex="0"
+        :aria-label="device.name || i18n('labels.virtualDevice')"
         class="settings-menu-row"
         @click="goToDeviceConfig(device.id)"
         @keydown.enter.space.prevent="goToDeviceConfig(device.id)"
