@@ -106,7 +106,7 @@ const confirm = async () => {
 <template>
   <q-tab-panel :name="name" class="auth-panel q-pa-none">
     <!-- Avatar: 87x87px circular, fill rgba(229,229,239,1), 3px white border -->
-    <div class="setup-profile-avatar-shell" @click="editAvatar">
+    <button type="button" class="setup-profile-avatar-shell" @click="editAvatar" :aria-label="i18n('labels.uploadAvatar')">
       <div class="setup-profile-avatar-circle">
         <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" :alt="i18n('labels.avatar')" />
         <div v-else class="setup-profile-avatar-placeholder">
@@ -121,7 +121,7 @@ const confirm = async () => {
           </svg>
         </div>
       </div>
-    </div>
+    </button>
 
     <!-- Nickname -->
     <div class="setup-profile-field-row">
@@ -140,7 +140,7 @@ const confirm = async () => {
     <!-- Relationship -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.relationship') }}</label>
-      <div class="auth-input-group auth-input-group--clickable" @click="showRelationSheet = true">
+      <button type="button" class="auth-input-group auth-input-group--clickable" @click="showRelationSheet = true" aria-haspopup="dialog" :aria-expanded="showRelationSheet">
         <span
           class="setup-profile-field-value"
           :class="{ 'setup-profile-field-value--placeholder': !relationship }"
@@ -158,7 +158,7 @@ const confirm = async () => {
             />
           </svg>
         </span>
-      </div>
+      </button>
     </div>
 
     <!-- Primary button -->

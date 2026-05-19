@@ -52,7 +52,7 @@ const sections = computed(() => {
           <p class="legal-section-body">{{ section.body }}</p>
         </template>
         <div v-if="!sections.length" class="legal-placeholder">
-          <p>Content unavailable</p>
+          <p>{{ i18n('labels.contentUnavailable') }}</p>
         </div>
       </div>
     </div>

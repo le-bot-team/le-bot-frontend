@@ -98,6 +98,7 @@ export default {
           sendCode: '发送验证码',
           sending: '发送中...',
           resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
           codePlaceholder: '请输入验证码',
           passwordPlaceholder: '请输入密码',
           termsPrefix: '我已阅读并同意',
@@ -406,6 +407,7 @@ export default {
           title: '乐宝',
           description: '您的智能宠物好伙伴',
           profileSetupTitle: '完善个人信息',
+          goBack: '返回',
         },
       },
       HomePage: {
@@ -1225,6 +1227,7 @@ export default {
         PrivacyPolicyPage: {
           labels: {
             title: '隐私政策',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、信息收集',
@@ -1240,6 +1243,7 @@ export default {
         TermsOfServicePage: {
           labels: {
             title: '服务条款',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、接受条款',
@@ -1259,6 +1263,7 @@ export default {
         UserAgreementPage: {
           labels: {
             title: '用户协议',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、协议范围',

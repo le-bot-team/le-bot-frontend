@@ -98,6 +98,7 @@ export default {
           sendCode: 'Send Code',
           sending: 'Sending...',
           resendCode: 'Resend',
+          resendCodeCooldown: 'Resend ({seconds}s)',
           codePlaceholder: 'Enter verification code',
           passwordPlaceholder: 'Enter password',
           termsPrefix: 'I have read and agree to the ',
@@ -411,6 +412,7 @@ export default {
           title: 'Le Bot',
           description: 'Your intelligent pet and good companion',
           profileSetupTitle: 'Complete Your Profile',
+          goBack: 'Go back',
         },
       },
       HomePage: {
@@ -1231,6 +1233,7 @@ export default {
         PrivacyPolicyPage: {
           labels: {
             title: 'Privacy Policy',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Information Collection',
@@ -1250,6 +1253,7 @@ export default {
         TermsOfServicePage: {
           labels: {
             title: 'Terms of Service',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Acceptance of Terms',
@@ -1275,6 +1279,7 @@ export default {
         UserAgreementPage: {
           labels: {
             title: 'User Agreement',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Scope of Agreement',

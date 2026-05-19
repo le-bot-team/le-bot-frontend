@@ -42,7 +42,7 @@ function goBack() {
         v-if="panelIndex === 1 || panelIndex === 2"
         type="button"
         class="auth-back"
-        aria-label="Go back"
+        :aria-label="i18n('labels.goBack')"
         @click="goBack"
       >
         <svg width="9" height="16" viewBox="0 0 9 16" fill="none">
