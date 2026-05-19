@@ -2,6 +2,7 @@
 // RecordPanel — lanhu designs 4e6ad306 (录制准备) / 1ed5ff10 (朗读短语) / 10d09505 (声纹录制4)
 import type { IMediaRecorder } from 'extendable-media-recorder';
 import { MediaRecorder } from 'extendable-media-recorder';
+import { useQuasar } from 'quasar';
 import { onBeforeUnmount, ref, watch } from 'vue';
 
 import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const i18n = i18nSubPath('components.settings.voiceprint.RecordPanel');
+const { notify } = useQuasar();
 
 // Two-step flow inside the panel mirroring design 4e6ad306 (tips) → 1ed5ff10 (reading).
 const stage = ref<'prepare' | 'recording'>('prepare');
@@ -138,6 +140,10 @@ const startRecording = async (): Promise<void> => {
     }
   } catch (err) {
     console.error('Failed to start recording:', err);
+    notify({
+      type: 'negative',
+      message: i18n('notifications.recordingFailed'),
+    });
     cleanup();
   }
 };
@@ -263,6 +269,7 @@ onBeforeUnmount(() => {
           @touchstart.prevent="startRecording"
           @touchend.prevent="stopRecording"
           @touchcancel="stopRecording"
+          @click.prevent="isRecording ? stopRecording() : startRecording()"
         >
           <div class="voiceprint-record-pulse-inner" />
         </button>
