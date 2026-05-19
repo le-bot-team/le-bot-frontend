@@ -18,11 +18,14 @@ import { i18nSubPath } from 'src/utils/common';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 import { useFamilyGroupStore } from 'stores/family-group';
 import type { ChildInfo } from 'stores/device/types';
+import type { FamilyGroup } from 'stores/family-group/types';
+import { useProfileStore } from 'stores/profile';
 
 const i18n = i18nSubPath('pages.stack.family-group.ChildEditPage');
 const $q = useQuasar();
 const route = useRoute();
 const familyGroupStore = useFamilyGroupStore();
+const profileStore = useProfileStore();
 
 const isCreateMode = computed(() => route.name === 'family-group-create' || route.name === 'add-virtual-device');
 
@@ -74,10 +77,27 @@ function onSubmit() {
   };
 
   if (isCreateMode.value) {
-    // TODO: integrate createFamilyGroup API — currently only stores child info locally
-    // and navigates to the list page. The actual group creation will be wired up
-    // once the backend endpoint is available.
-    familyGroupStore.updateChildInfo(childInfo);
+    // TODO: replace with createFamilyGroup API call once backend endpoint is available.
+    // For now, create a local placeholder group so the list reflects the new group.
+    const groupId = `local-${Date.now()}`;
+    const newGroup: FamilyGroup = {
+      id: groupId,
+      name: `${childInfo.name}的家庭组`,
+      childName: childInfo.name,
+      deviceId: '',
+      creatorId: profileStore.profile?.id ?? '',
+      createdAt: new Date().toISOString(),
+      members: [
+        {
+          id: `child-${Date.now()}`,
+          memberType: 'child',
+          childInfo,
+          isCreator: false,
+          joinedAt: new Date().toISOString(),
+        },
+      ],
+    };
+    familyGroupStore.addGroup(newGroup);
     $q.notify({ message: i18n('notifications.createSuccess'), type: 'positive' });
     setTimeout(() => {
       void router.replace({ name: 'family-groups' });
