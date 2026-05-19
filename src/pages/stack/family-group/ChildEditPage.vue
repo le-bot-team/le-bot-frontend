@@ -26,6 +26,12 @@ const familyGroupStore = useFamilyGroupStore();
 
 const isCreateMode = computed(() => route.name === 'family-group-create' || route.name === 'add-virtual-device');
 
+// Sync groupId from route query to store (supports deep-link / refresh)
+const urlGroupId = computed(() => route.query.groupId as string | undefined);
+watch(urlGroupId, (id) => {
+  if (id) familyGroupStore.setCurrentGroup(id);
+}, { immediate: true });
+
 // ── 表单数据 ──
 const childGender = ref<'boy' | 'girl'>('boy');
 const childName = ref('');
