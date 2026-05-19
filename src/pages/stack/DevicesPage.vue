@@ -73,37 +73,37 @@ function goToDeviceConfig(deviceId: string) {
     </div>
 
     <!-- Device list with me-card styling -->
-    <div v-else class="me-card" role="list">
+    <div v-else class="me-card">
       <div
         v-for="device in virtualDevices"
         :key="device.id"
-        role="button"
-        tabindex="0"
-        :aria-label="device.name || i18n('labels.virtualDevice')"
         class="settings-menu-row"
-        @click="goToDeviceConfig(device.id)"
-        @keydown.enter.prevent="goToDeviceConfig(device.id)"
-        @keydown.space.prevent="goToDeviceConfig(device.id)"
       >
-        <div class="column">
-          <span>{{ device.name || i18n('labels.virtualDevice') }}</span>
-          <span class="settings-menu-row__caption">{{
-            i18n('labels.serialNumber', { sn: device.identifier })
-          }}</span>
-        </div>
-        <span class="settings-menu-row__right">
-          <q-btn
-            dense
-            flat
-            style="color: var(--clr-danger-bg)"
-            icon="mdi-link-off"
-            :label="i18n('labels.unbind')"
-            no-caps
-            size="sm"
-            @click.stop="confirmUnbind(device.id)"
-          />
+        <button
+          type="button"
+          class="settings-menu-row__nav"
+          :aria-label="device.name || i18n('labels.virtualDevice')"
+          @click="goToDeviceConfig(device.id)"
+        >
+          <div class="column">
+            <span>{{ device.name || i18n('labels.virtualDevice') }}</span>
+            <span class="settings-menu-row__caption">{{
+              i18n('labels.serialNumber', { sn: device.identifier })
+            }}</span>
+          </div>
           <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
-        </span>
+        </button>
+        <q-btn
+          dense
+          flat
+          style="color: var(--clr-danger-bg)"
+          icon="mdi-link-off"
+          :label="i18n('labels.unbind')"
+          :aria-label="i18n('labels.unbind')"
+          no-caps
+          size="sm"
+          @click="confirmUnbind(device.id)"
+        />
       </div>
     </div>
 
@@ -148,5 +148,20 @@ function goToDeviceConfig(deviceId: string) {
   font-size: 12px;
   color: var(--clr-caption);
   margin-top: 2px;
+}
+
+.settings-menu-row__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
 }
 </style>

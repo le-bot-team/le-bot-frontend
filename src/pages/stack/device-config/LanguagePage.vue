@@ -6,7 +6,8 @@
         :key="l.key"
         type="button"
         class="device-lang-row"
-        :disabled="l.locale === null"
+        :class="{ 'device-lang-row--disabled': l.locale === null }"
+        :aria-disabled="l.locale === null ? 'true' : undefined"
         @click="selectLang(l)"
       >
         <span>{{ i18n(`languages.${l.key}`) }}</span>
