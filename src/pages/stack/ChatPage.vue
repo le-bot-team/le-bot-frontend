@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
 
     <!-- Bottom press-to-talk bar -->
     <ChatInputBar
-      :disabled="!isMediaReady"
+      :disabled="!isMediaReady || !isConnected"
       :pressing="pressing"
       :label="i18n('labels.pressToTalk')"
       @press="onPress"

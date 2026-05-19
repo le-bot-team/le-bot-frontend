@@ -47,7 +47,7 @@ export interface UseChatSessionReturn {
   /** Whether assistant audio is currently playing */
   isAudioPlaying: Ref<boolean>;
   /** Connect to the chat server */
-  connect: (token: string, deviceId?: string) => Promise<void>;
+  connect: (token: string, deviceId?: string, sessionId?: string) => Promise<void>;
   /** Disconnect from the chat server */
   disconnect: () => void;
   /** Manually trigger a wake (button press equivalent of GPIO) */

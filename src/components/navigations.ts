@@ -91,4 +91,22 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'settings-voiceprint-new',
   },
+  {
+    label: i18n('stack.chatVoiceCall'),
+    icon: 'phone',
+    available: true,
+    route: 'chat-voice-call',
+  },
+  {
+    label: i18n('stack.chatHistory'),
+    icon: 'history',
+    available: true,
+    route: 'chat-history',
+  },
+  {
+    label: i18n('stack.chatMuteSettings'),
+    icon: 'volume_off',
+    available: true,
+    route: 'chat-mute-settings',
+  },
 ];

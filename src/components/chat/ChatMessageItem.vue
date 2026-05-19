@@ -64,6 +64,7 @@ function onAudioError() {
       {{ message.text }}
       <button
         v-if="hasAudio && message.isFinished"
+        type="button"
         class="chat-bubble__audio-btn"
         :class="{ 'chat-bubble__audio-btn--playing': isPlaying }"
         :aria-label="isPlaying ? i18n('labels.stopAudio') : i18n('labels.playAudio')"
