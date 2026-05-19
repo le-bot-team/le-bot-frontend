@@ -32,13 +32,13 @@ const fieldKey = computed<FieldKey | null>(() => {
   return null;
 });
 
-// Redirect back if field is invalid
+// Redirect to profile if field is invalid
 watch(
   fieldKey,
   (key) => {
     if (!key) {
       $q.notify({ type: 'negative', message: i18n('notifications.invalidField') });
-      router.back();
+      void router.replace('/stack/profile');
     }
   },
   { immediate: true },
@@ -76,7 +76,7 @@ const syncFromProfile = () => {
 syncFromProfile();
 watch([fieldKey, profile], syncFromProfile);
 
-const canSubmit = computed(() => !isSubmitting.value);
+const canSubmit = computed(() => !isSubmitting.value && !!accessToken.value && !!fieldKey.value);
 
 const onSave = async () => {
   if (!canSubmit.value || !fieldKey.value) return;

@@ -93,8 +93,11 @@ const onSubmit = async () => {
       }
     }
   } catch (err) {
-    const msg = axios.isAxiosError(err) ? err.message : i18n('notifications.failed');
-    errorMsg.value = msg;
+    if (axios.isAxiosError(err) && err.response?.data?.message) {
+      errorMsg.value = err.response.data.message;
+    } else {
+      errorMsg.value = i18n('notifications.failed');
+    }
   } finally {
     isSubmitting.value = false;
   }
@@ -120,7 +123,7 @@ const onSubmit = async () => {
           type="button"
           v-if="oldFocused || oldPassword.length"
           class="cpw-action-icon"
-          aria-label="Toggle old password visibility"
+          :aria-label="i18n('labels.toggleOldPassword')"
           @click="showOld = !showOld"
         >
           <svg v-if="showOld" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -158,7 +161,7 @@ const onSubmit = async () => {
           type="button"
           v-if="newFocused || newPassword.length"
           class="cpw-action-icon"
-          aria-label="Toggle new password visibility"
+          :aria-label="i18n('labels.toggleNewPassword')"
           @click="showNew = !showNew"
         >
           <svg v-if="showNew" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -196,7 +199,7 @@ const onSubmit = async () => {
           type="button"
           v-if="confirmFocused || confirmPassword.length"
           class="cpw-action-icon"
-          aria-label="Toggle confirm password visibility"
+          :aria-label="i18n('labels.toggleConfirmPassword')"
           @click="showConfirm = !showConfirm"
         >
           <svg v-if="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -235,7 +238,7 @@ const onSubmit = async () => {
         :disabled="!canSubmit"
         @click="onSubmit"
       >
-        {{ isSubmitting ? '...' : i18n('labels.submit') }}
+        {{ isSubmitting ? i18n('labels.submitting') : i18n('labels.submit') }}
       </button>
     </div>
   </q-page>

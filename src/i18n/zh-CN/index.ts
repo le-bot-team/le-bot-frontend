@@ -911,8 +911,10 @@ export default {
           resendCooldown: '重发（{seconds}）',
           sending: '发送中...',
           verifyOld: '验证原手机号',
+          verifying: '验证中...',
           newPhonePlaceholder: '请输入新的手机号码',
           submitNew: '提交绑定新的手机号',
+          submitting: '提交中...',
         },
         errors: {
           invalidCode: '验证码输入错误',
@@ -992,6 +994,10 @@ export default {
           newPassword: '请设置密码',
           confirmPassword: '请再次输入设置的密码',
           submit: '提交修改并返回',
+          submitting: '提交中...',
+          toggleOldPassword: '切换旧密码可见性',
+          toggleNewPassword: '切换新密码可见性',
+          toggleConfirmPassword: '切换确认密码可见性',
         },
         errors: {
           wrongOldPassword: '原密码错误',

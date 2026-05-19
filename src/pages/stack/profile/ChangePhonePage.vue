@@ -307,7 +307,7 @@ onBeforeUnmount(() => {
           :disabled="!canVerifyOld"
           @click="onVerifyOld"
         >
-          {{ isSubmitting ? '...' : i18n('labels.verifyOld') }}
+          {{ isSubmitting ? i18n('labels.verifying') : i18n('labels.verifyOld') }}
         </button>
       </template>
 
@@ -361,7 +361,7 @@ onBeforeUnmount(() => {
           :disabled="!canSubmitNew"
           @click="onSubmitNew"
         >
-          {{ isSubmitting ? '...' : i18n('labels.submitNew') }}
+          {{ isSubmitting ? i18n('labels.submitting') : i18n('labels.submitNew') }}
         </button>
       </template>
     </div>
