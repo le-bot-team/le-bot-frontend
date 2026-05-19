@@ -87,11 +87,13 @@ const confirm = async (): Promise<void> => {
         type: 'negative',
         message: i18n('notifications.registrationFailed', { message: result.message }),
       });
+      isLoading.value = false;
     } else {
       notify({
         type: 'positive',
         message: i18n('notifications.registrationSuccess'),
       });
+      // Keep isLoading true to prevent duplicate submissions until finish emits
       setTimeout(() => emit('finish'), 1500);
     }
   } catch (error) {
@@ -100,7 +102,6 @@ const confirm = async (): Promise<void> => {
       type: 'negative',
       message: i18n('notifications.registrationError'),
     });
-  } finally {
     isLoading.value = false;
   }
 };

@@ -263,13 +263,12 @@ onBeforeUnmount(() => {
           :class="{ 'voiceprint-record-pulse-ring--recording': isRecording }"
           type="button"
           :aria-label="isRecording ? i18n('labels.stopRecording') : i18n('labels.startRecording')"
-          @mousedown.prevent="startRecording"
-          @mouseup="stopRecording"
-          @mouseleave="stopRecording"
-          @touchstart.prevent="startRecording"
-          @touchend.prevent="stopRecording"
-          @touchcancel="stopRecording"
-          @click.prevent="isRecording ? stopRecording() : startRecording()"
+          @pointerdown.prevent="startRecording"
+          @pointerup="stopRecording"
+          @pointerleave="stopRecording"
+          @pointercancel="stopRecording"
+          @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
+          @keydown.space.prevent="isRecording ? stopRecording() : startRecording()"
         >
           <div class="voiceprint-record-pulse-inner" />
         </button>

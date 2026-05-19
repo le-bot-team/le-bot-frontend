@@ -15,18 +15,19 @@ const persons: PersonDetail[] = JSON.parse(JSON.stringify(MOCK_PERSONS)) as Pers
 export function setupVoiceprintMock(mock: MockAdapter): void {
   // Recognize voiceprint
   mock.onPost('/voiceprint/recognize').reply(() => {
-    if (persons.length === 0) {
+    const personsWithVoices = persons.filter((p) => p.voices.length > 0);
+    if (personsWithVoices.length === 0) {
       return [200, mockError('未找到匹配的声纹')];
     }
 
-    const person = persons[Math.floor(Math.random() * persons.length)]!;
-    const voice = person.voices[0];
+    const person = personsWithVoices[Math.floor(Math.random() * personsWithVoices.length)]!;
+    const voice = person.voices[0]!;
 
     return [
       200,
       mockSuccess({
         person_id: person.person_id,
-        voice_id: voice?.voice_id ?? '',
+        voice_id: voice.voice_id,
         confidence: 0.85 + Math.random() * 0.14,
         similarity: 0.8 + Math.random() * 0.19,
         processing_time_ms: Math.floor(100 + Math.random() * 200),

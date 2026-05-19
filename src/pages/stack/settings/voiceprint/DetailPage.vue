@@ -45,7 +45,11 @@ const submitUpdate = async () => {
     });
     if (response.success) {
       notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
-      setTimeout(() => router.go(-1), 1200);
+      setTimeout(() => {
+        router.go(-1);
+        // Fallback: re-enable if navigation doesn't unmount the component
+        setTimeout(() => { submitting.value = false; }, 2000);
+      }, 1200);
       // Keep submitting=true to prevent duplicate requests until navigation
     } else {
       notify({
