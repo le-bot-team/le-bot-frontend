@@ -99,7 +99,7 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <q-page class="settings-page">
+  <q-page class="settings-page column">
     <div v-for="(menuGroup, groupIndex) in visibleMenuGroups" :key="groupIndex" class="me-card">
       <div
         v-for="(menu, menuIndex) in menuGroup"
@@ -117,6 +117,8 @@ onBeforeMount(() => {
       </div>
     </div>
 
+    <q-space />
+
     <button class="me-btn-danger delete-device-btn" type="button" @click="handleUnbind">
       {{ i18n('labels.unbindDevice') }}
     </button>
@@ -125,9 +127,6 @@ onBeforeMount(() => {
 
 <style scoped>
 .delete-device-btn {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin: 40px auto;
 }
 </style>

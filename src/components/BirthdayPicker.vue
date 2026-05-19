@@ -22,7 +22,6 @@ const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
-const showPicker = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
 
 const displayValue = computed(() => {
@@ -37,15 +36,20 @@ const displayValue = computed(() => {
 });
 
 function openPicker() {
-  showPicker.value = true;
-  // Trigger native date picker
-  inputRef.value?.showPicker?.();
+  const el = inputRef.value;
+  if (!el) return;
+  // showPicker() not available on Safari 14; fallback to focus/click
+  if (typeof el.showPicker === 'function') {
+    el.showPicker();
+  } else {
+    el.focus();
+    el.click();
+  }
 }
 
 function onDateChange(event: Event) {
   const target = event.target as HTMLInputElement;
   emit('update:modelValue', target.value);
-  showPicker.value = false;
 }
 
 // Default max date: today; default value hint for picker

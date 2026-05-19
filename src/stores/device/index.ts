@@ -20,9 +20,11 @@ export const useDeviceStore = defineStore(
 
     /** Add a virtual device to the store (validates MAX_VIRTUAL_DEVICES limit) */
     const addDevice = (device: DeviceInfo) => {
-      if (virtualDevices.value.length >= MAX_VIRTUAL_DEVICES) {
+      if (device.type === 'virtual' && virtualDevices.value.length >= MAX_VIRTUAL_DEVICES) {
         throw new Error(`Cannot add more than ${MAX_VIRTUAL_DEVICES} virtual devices`);
       }
+      // Avoid duplicates
+      if (devices.value.some((d: DeviceInfo) => d.id === device.id)) return;
       devices.value.push(device);
       if (!currentDevice.value) {
         currentDevice.value = device;

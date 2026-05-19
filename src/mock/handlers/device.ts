@@ -19,7 +19,7 @@ const devices: DeviceInfo[] = [...MOCK_DEVICES];
 export function setupDeviceMock(mock: MockAdapter): void {
   // Retrieve my devices
   mock.onGet('/devices/mine').reply(() => {
-    return [200, mockSuccess({ devices: devices.map((d) => structuredClone(d)) })];
+    return [200, mockSuccess({ devices: JSON.parse(JSON.stringify(devices)) })];
   });
 
   // Activate a virtual device
@@ -48,7 +48,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
 
     devices.push(newDevice);
     console.log(`[Mock Device] Virtual device activated: ${newDevice.id}`);
-    return [200, mockSuccess({ device: structuredClone(newDevice) })];
+    return [200, mockSuccess({ device: JSON.parse(JSON.stringify(newDevice)) })];
   });
 
   // Bind a physical device
@@ -72,7 +72,7 @@ export function setupDeviceMock(mock: MockAdapter): void {
 
     devices.push(newDevice);
     console.log(`[Mock Device] Physical device bound: ${newDevice.id}`);
-    return [200, mockSuccess({ device: structuredClone(newDevice) })];
+    return [200, mockSuccess({ device: JSON.parse(JSON.stringify(newDevice)) })];
   });
 
   // Unbind a device (POST /devices/unbind with { deviceId })

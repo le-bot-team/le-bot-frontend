@@ -34,7 +34,7 @@ const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
 
 // 用户在 SetupProfilePanel 填写的中文"关系" → FamilyUserRole 枚举映射
-const relationshipRoleMap: Record<string, FamilyUserRole> = {
+const relationshipRoleMap: Partial<Record<string, FamilyUserRole>> = {
   '爸爸': 'father',
   '妈妈': 'mother',
   '爷爷': 'grandpa',
@@ -46,7 +46,7 @@ const relationshipRoleMap: Record<string, FamilyUserRole> = {
 };
 
 // 中文"关系" → 性别（用于成员信息展示）
-const relationshipGenderMap: Record<string, 'male' | 'female'> = {
+const relationshipGenderMap: Partial<Record<string, 'male' | 'female'>> = {
   '爸爸': 'male',
   '爷爷': 'male',
   '外公': 'male',
@@ -390,7 +390,7 @@ function goToHome() {
   </q-page>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .add-virtual-device-page {
   background: var(--clr-page-bg-neutral);
 }

@@ -10,7 +10,7 @@ import { useDialogPluginComponent } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
 
-const i18n = i18nSubPath('components.ConfirmDialog');
+const i18n = i18nSubPath('components.dialogs.ConfirmDialog');
 
 const props = withDefaults(
   defineProps<{
