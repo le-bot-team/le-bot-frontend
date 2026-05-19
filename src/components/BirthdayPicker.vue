@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // BirthdayPicker — A simple year/month/day date picker for profile setup.
 // Emits ISO date string (YYYY-MM-DD) via v-model.
+// When modelValue is empty, shows placeholder options (no date selected).
 import { computed, ref, watch } from 'vue';
 
 const props = withDefaults(
@@ -18,81 +19,87 @@ const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
-// Parse initial value or use defaults
+// Parse initial value
 const parseDate = (val: string) => {
-  if (!val) return { y: props.defaultYear, m: 1, d: 1 };
+  if (!val) return null;
   const parts = val.split('-').map(Number);
-  return { y: parts[0] || props.defaultYear, m: parts[1] || 1, d: parts[2] || 1 };
+  if (!parts[0] || !parts[1] || !parts[2]) return null;
+  return { y: parts[0], m: parts[1], d: parts[2] };
 };
 
 const initial = parseDate(props.modelValue);
-const year = ref(initial.y);
-const month = ref(initial.m);
-const day = ref(initial.d);
+const year = ref<number | null>(initial?.y ?? null);
+const month = ref<number | null>(initial?.m ?? null);
+const day = ref<number | null>(initial?.d ?? null);
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => 1920 + i);
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const daysInMonth = computed(() => {
+  if (!year.value || !month.value) return 31;
   return new Date(year.value, month.value, 0).getDate();
 });
 
 const days = computed(() => Array.from({ length: daysInMonth.value }, (_, i) => i + 1));
 
-// Clamp day if month/year changes (immediate to handle invalid initial values)
+// Clamp day if month/year changes
 watch([year, month], () => {
-  if (day.value > daysInMonth.value) {
+  if (day.value && day.value > daysInMonth.value) {
     day.value = daysInMonth.value;
   }
-}, { immediate: true });
+});
 
-// Track whether user has interacted or a value was provided
-const hasValue = ref(!!props.modelValue);
-
-// Emit formatted date on any change (skip initial emit when no value provided)
+// Emit formatted date when all fields are selected
 watch(
   [year, month, day],
   () => {
-    if (!hasValue.value) {
-      hasValue.value = true;
+    if (year.value && month.value && day.value) {
+      const m = String(month.value).padStart(2, '0');
+      const d = String(day.value).padStart(2, '0');
+      emit('update:modelValue', `${year.value}-${m}-${d}`);
     }
-    const m = String(month.value).padStart(2, '0');
-    const d = String(day.value).padStart(2, '0');
-    emit('update:modelValue', `${year.value}-${m}-${d}`);
   },
 );
 
 // Emit immediately if modelValue was provided on mount
-if (props.modelValue) {
-  const m = String(month.value).padStart(2, '0');
-  const d = String(day.value).padStart(2, '0');
-  emit('update:modelValue', `${year.value}-${m}-${d}`);
+if (initial) {
+  const m = String(initial.m).padStart(2, '0');
+  const d = String(initial.d).padStart(2, '0');
+  emit('update:modelValue', `${initial.y}-${m}-${d}`);
 }
 
 // Sync from parent
 watch(
   () => props.modelValue,
   (val) => {
-    if (val) hasValue.value = true;
     const parsed = parseDate(val);
-    year.value = parsed.y;
-    month.value = parsed.m;
-    const maxDay = new Date(parsed.y, parsed.m, 0).getDate();
-    day.value = Math.min(parsed.d, maxDay);
+    if (parsed) {
+      year.value = parsed.y;
+      month.value = parsed.m;
+      const maxDay = new Date(parsed.y, parsed.m, 0).getDate();
+      day.value = Math.min(parsed.d, maxDay);
+    } else {
+      year.value = null;
+      month.value = null;
+      day.value = null;
+    }
   },
 );
 </script>
 
 <template>
   <div class="birthday-picker">
-    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" @change="hasValue = true" aria-label="Year">
+    <select v-model.number="year" class="birthday-picker__select birthday-picker__select--year" :class="{ 'birthday-picker__select--placeholder': !year }" aria-label="Year">
+      <option :value="null" disabled hidden>YYYY</option>
       <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
     </select>
-    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" @change="hasValue = true" aria-label="Month">
+    <select v-model.number="month" class="birthday-picker__select birthday-picker__select--month" :class="{ 'birthday-picker__select--placeholder': !month }" aria-label="Month">
+      <option :value="null" disabled hidden>MM</option>
       <option v-for="m in months" :key="m" :value="m">{{ String(m).padStart(2, '0') }}</option>
     </select>
-    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day" @change="hasValue = true" aria-label="Day">
+    <select v-model.number="day" class="birthday-picker__select birthday-picker__select--day" :class="{ 'birthday-picker__select--placeholder': !day }" aria-label="Day">
+      <option :value="null" disabled hidden>DD</option>
       <option v-for="d in days" :key="d" :value="d">{{ String(d).padStart(2, '0') }}</option>
     </select>
   </div>
@@ -122,6 +129,10 @@ watch(
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px;
+}
+
+.birthday-picker__select--placeholder {
+  color: var(--clr-text-secondary, #9398a9);
 }
 
 .birthday-picker__select--year {
