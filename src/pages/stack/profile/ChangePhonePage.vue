@@ -126,6 +126,12 @@ const onVerifyOld = async () => {
     const { data } = await verifyPhoneCode(token, currentPhone.value, oldCode.value);
     if (data.success) {
       userAdvanced.value = true;
+      // Clear old countdown timer since we're done with step 1
+      if (oldCountdownTimer) {
+        clearInterval(oldCountdownTimer);
+        oldCountdownTimer = null;
+      }
+      oldCountdown.value = 0;
       step.value = 'bindNew';
     } else {
       errorMsg.value = data.message || i18n('errors.invalidCode');

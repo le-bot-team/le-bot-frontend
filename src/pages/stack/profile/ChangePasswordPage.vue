@@ -46,6 +46,7 @@ const passwordMismatch = computed(
 
 const canSubmit = computed(
   () =>
+    !!accessToken.value &&
     !isSubmitting.value &&
     oldPassword.value.length > 0 &&
     newPassword.value.length >= 8 &&
