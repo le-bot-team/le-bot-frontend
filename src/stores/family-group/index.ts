@@ -78,6 +78,7 @@ export const useFamilyGroupStore = defineStore(
 
     /**
      * 设置家庭组列表 (从 API 响应批量写入)
+     * Replaces all groups including local drafts — real data takes precedence.
      */
     const setGroups = (newGroups: FamilyGroup[]) => {
       groups.value = newGroups;

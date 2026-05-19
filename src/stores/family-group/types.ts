@@ -102,6 +102,8 @@ export interface FamilyGroup {
   members: FamilyMember[];
   /** 当前有效的邀请码 (如有) */
   inviteCode?: InviteCode;
+  /** Local draft flag — group created locally before API integration */
+  isLocalDraft?: boolean;
 }
 
 // ─── 角色选项常量（UI 复用） ────────────────────────────────────

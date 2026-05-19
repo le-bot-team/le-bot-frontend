@@ -71,13 +71,14 @@ const group = computed(() => familyGroupStore.currentGroup);
 
 /**
  * 是否可以删除该成员：
- * - 成员必须存在
+ * - 成员必须存在且为 user 类型（child 不可删除）
  * - 当前用户必须是家庭组创建者
  * - 目标成员不能是创建者自己（不能删除自己）
  * - 目标成员不能是当前登录用户
  */
 const canRemove = computed(() => {
   if (!member.value || !group.value) return false;
+  if (member.value.memberType !== 'user') return false;
   const currentUserId = profileStore.profile?.id;
   const isCurrentUserCreator = group.value.creatorId === currentUserId;
   // Block removal of self (by userId match) or creator

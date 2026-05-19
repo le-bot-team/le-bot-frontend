@@ -78,7 +78,9 @@ function onSubmit() {
 
   if (isCreateMode.value) {
     // TODO: replace with createFamilyGroup API call once backend endpoint is available.
-    // For now, create a local placeholder group so the list reflects the new group.
+    // Creates a local draft group so the list reflects the new group immediately.
+    // Draft groups are marked with isLocalDraft and will be replaced by real groups
+    // once the API is integrated.
     const groupId = `local-${Date.now()}`;
     const newGroup: FamilyGroup = {
       id: groupId,
@@ -87,6 +89,7 @@ function onSubmit() {
       deviceId: '',
       creatorId: profileStore.profile?.id ?? '',
       createdAt: new Date().toISOString(),
+      isLocalDraft: true,
       members: [
         {
           id: `child-${Date.now()}`,
