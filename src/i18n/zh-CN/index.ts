@@ -854,10 +854,18 @@ export default {
           },
           notifications: {
             fieldsRequired: '请完整填写宝宝的名字和生日',
+            nameTooLong: '名字不能超过20个字符',
             createSuccess: '家庭组创建成功',
             updateSuccess: '儿童信息更新成功',
             updateFailed: '更新失败，请重试',
           },
+        },
+      },
+      JoinPage: {
+        errors: {
+          noCode: '缺少邀请码',
+          invalidCode: '邀请码无效或已过期',
+          resolveFailed: '解析邀请码失败，请重试',
         },
       },
       ProfilePage: {

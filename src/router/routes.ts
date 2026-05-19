@@ -206,6 +206,14 @@ const routes: RouteRecordRaw[] = [
           header: () => import('layouts/headers/StackHeader.vue'),
         },
       },
+      {
+        name: 'family-group-join',
+        path: 'family-group/join',
+        components: {
+          default: () => import('pages/stack/family-group/JoinPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
     ],
   },
 

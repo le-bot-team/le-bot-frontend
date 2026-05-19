@@ -42,7 +42,7 @@ const emit = defineEmits<{
 const selectedRole = ref<FamilyUserRole>('father');
 const isJoining = ref(false);
 /** Track whether the close was due to a successful join */
-let joinSucceeded = false;
+const joinSucceeded = ref(false);
 
 function onConfirm() {
   if (!props.inviteCode) return;
@@ -64,7 +64,7 @@ function onConfirm() {
       if (res.data?.success && res.data.data?.group) {
         familyGroupStore.addGroup(res.data.data.group);
         $q.notify({ message: i18n('notifications.joinSuccess'), type: 'positive' });
-        joinSucceeded = true;
+        joinSucceeded.value = true;
         emit('update:modelValue', false);
         emit('success', res.data.data.group.id);
       } else {
@@ -87,10 +87,10 @@ function onCancel() {
 
 function onDialogHide() {
   // Only emit cancel if the close was NOT due to a successful join
-  if (!joinSucceeded) {
+  if (!joinSucceeded.value) {
     emit('cancel');
   }
-  joinSucceeded = false;
+  joinSucceeded.value = false;
 }
 </script>
 

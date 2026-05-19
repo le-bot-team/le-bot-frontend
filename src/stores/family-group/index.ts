@@ -134,18 +134,20 @@ export const useFamilyGroupStore = defineStore(
      * 向当前家庭组添加一个成员
      */
     const addMember = (member: FamilyMember) => {
-      if (!currentGroup.value || currentMembers.value.length >= MAX_FAMILY_MEMBERS) return;
-      currentGroup.value.members.push(member);
+      const group = groups.value.find((g) => g.id === currentGroupId.value);
+      if (!group || group.members.length >= MAX_FAMILY_MEMBERS) return;
+      group.members.push(member);
     };
 
     /**
      * 从当前家庭组移除一个成员
      */
     const removeMember = (memberId: string) => {
-      if (!currentGroup.value) return;
-      const index = currentGroup.value.members.findIndex((m) => m.id === memberId);
+      const group = groups.value.find((g) => g.id === currentGroupId.value);
+      if (!group) return;
+      const index = group.members.findIndex((m) => m.id === memberId);
       if (index === -1) return;
-      currentGroup.value.members.splice(index, 1);
+      group.members.splice(index, 1);
     };
 
     /**

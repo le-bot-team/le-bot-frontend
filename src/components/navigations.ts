@@ -133,4 +133,10 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'add-virtual-device',
   },
+  {
+    label: i18n('stack.familyGroupCreate'),
+    icon: 'mdi-account-plus',
+    available: true,
+    route: 'family-group-join',
+  },
 ];

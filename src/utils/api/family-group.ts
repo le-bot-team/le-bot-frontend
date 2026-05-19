@@ -47,12 +47,13 @@ export const acceptInvite = async (accessToken: string, data: AcceptInviteReques
 
 /** 解析邀请码信息（扫码后预览） */
 export const resolveInviteCode = async (code: string, accessToken?: string) => {
+  const encodedCode = encodeURIComponent(code);
   if (accessToken) {
-    return await api.get<ResolveInviteCodeResponse>(`/family-groups/invite/${code}`, {
+    return await api.get<ResolveInviteCodeResponse>(`/family-groups/invite/${encodedCode}`, {
       headers: { 'x-access-token': accessToken },
     });
   }
-  return await api.get<ResolveInviteCodeResponse>(`/family-groups/invite/${code}`);
+  return await api.get<ResolveInviteCodeResponse>(`/family-groups/invite/${encodedCode}`);
 };
 
 /** 移除成员 (Creator 操作) */

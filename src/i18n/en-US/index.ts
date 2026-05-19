@@ -859,10 +859,18 @@ export default {
           },
           notifications: {
             fieldsRequired: "Please fill in your child's name and birthday",
+            nameTooLong: 'Name cannot exceed 20 characters',
             createSuccess: 'Family group created successfully',
             updateSuccess: 'Child info updated successfully',
             updateFailed: 'Update failed, please retry',
           },
+        },
+      },
+      JoinPage: {
+        errors: {
+          noCode: 'Missing invite code',
+          invalidCode: 'Invite code is invalid or expired',
+          resolveFailed: 'Failed to resolve invite code, please retry',
         },
       },
       ProfilePage: {

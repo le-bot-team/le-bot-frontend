@@ -104,7 +104,9 @@ function onShare() {
 }
 
 onMounted(() => {
-  // 如果已有有效邀请码则启动倒计时；否则自动生成
+  // Skip if the watch(currentGroup) will handle initialization
+  // (it fires immediately when currentGroup is already set via watch(groupId, immediate))
+  if (!currentGroup.value) return;
   if (familyGroupStore.isInviteCodeValid && inviteCode.value) {
     startCountdown(inviteCode.value.expiresAt);
   } else {
@@ -114,19 +116,19 @@ onMounted(() => {
 
 // Re-initialize countdown/generation when the active group changes (e.g., query.groupId update)
 watch(currentGroup, (newGroup, oldGroup) => {
-  if (newGroup && newGroup.id !== oldGroup?.id) {
-    // Clear existing timer
-    if (countdownTimer) {
-      clearInterval(countdownTimer);
-      countdownTimer = null;
-    }
-    countdownSeconds.value = 0;
-    // Re-check invite code for the new group
-    if (familyGroupStore.isInviteCodeValid && newGroup.inviteCode) {
-      startCountdown(newGroup.inviteCode.expiresAt);
-    } else {
-      void generateOrRefresh();
-    }
+  if (!newGroup) return;
+  if (newGroup.id === oldGroup?.id) return;
+  // Clear existing timer
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  countdownSeconds.value = 0;
+  // Re-check invite code for the new group
+  if (familyGroupStore.isInviteCodeValid && newGroup.inviteCode) {
+    startCountdown(newGroup.inviteCode.expiresAt);
+  } else {
+    void generateOrRefresh();
   }
 });
 

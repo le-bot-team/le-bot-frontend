@@ -8,7 +8,7 @@
  */
 
 import { useQuasar } from 'quasar';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.png';
@@ -28,6 +28,9 @@ const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
 
 const isCreateMode = computed(() => route.name === 'family-group-create' || route.name === 'add-virtual-device');
+
+// Navigation timer (cleared on unmount to prevent stale navigation)
+let navTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Sync groupId from route query to store (supports deep-link / refresh)
 const urlGroupId = computed(() => route.query.groupId as string | undefined);
@@ -63,10 +66,17 @@ function selectGender(gender: 'boy' | 'girl') {
   childGender.value = gender;
 }
 
+/** Maximum allowed length for child name */
+const MAX_NAME_LENGTH = 20;
+
 /** 提交表单 */
 function onSubmit() {
   if (!childName.value.trim() || !childBirthday.value.trim()) {
     $q.notify({ message: i18n('notifications.fieldsRequired'), type: 'warning' });
+    return;
+  }
+  if (childName.value.trim().length > MAX_NAME_LENGTH) {
+    $q.notify({ message: i18n('notifications.nameTooLong'), type: 'warning' });
     return;
   }
 
@@ -81,7 +91,7 @@ function onSubmit() {
     // Creates a local draft group so the list reflects the new group immediately.
     // Draft groups are marked with isLocalDraft and will be replaced by real groups
     // once the API is integrated.
-    const groupId = `local-${Date.now()}`;
+    const groupId = crypto.randomUUID();
     const newGroup: FamilyGroup = {
       id: groupId,
       name: `${childInfo.name}的家庭组`,
@@ -92,7 +102,7 @@ function onSubmit() {
       isLocalDraft: true,
       members: [
         {
-          id: `child-${Date.now()}`,
+          id: crypto.randomUUID(),
           memberType: 'child',
           childInfo,
           isCreator: false,
@@ -102,7 +112,7 @@ function onSubmit() {
     };
     familyGroupStore.addGroup(newGroup);
     $q.notify({ message: i18n('notifications.createSuccess'), type: 'positive' });
-    setTimeout(() => {
+    navTimer = setTimeout(() => {
       void router.replace({ name: 'family-groups' });
     }, 600);
     return;
@@ -120,7 +130,7 @@ function onSubmit() {
     // }
 
     $q.notify({ message: i18n('notifications.updateSuccess'), type: 'positive' });
-    setTimeout(() => {
+    navTimer = setTimeout(() => {
       router.go(-1);
     }, 600);
   } catch (err) {
@@ -132,6 +142,13 @@ function onSubmit() {
 function onSkip() {
   void router.replace({ name: 'family-groups' });
 }
+
+onBeforeUnmount(() => {
+  if (navTimer) {
+    clearTimeout(navTimer);
+    navTimer = null;
+  }
+});
 </script>
 
 <template>
@@ -171,6 +188,7 @@ function onSkip() {
       v-model="childName"
       class="child-edit-input"
       type="text"
+      :maxlength="MAX_NAME_LENGTH"
       :placeholder="i18n('placeholders.name')"
     />
 
