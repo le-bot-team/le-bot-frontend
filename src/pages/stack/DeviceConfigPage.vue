@@ -13,6 +13,7 @@ import { useDeviceStore } from 'stores/device';
 import { useTracker } from 'src/composables/useTracker';
 
 const i18n = i18nSubPath('pages.stack.DeviceConfigPage');
+const voiceI18n = i18nSubPath('pages.stack.VoiceStylePage');
 const $q = useQuasar();
 const { trackClick } = useTracker();
 
@@ -63,7 +64,9 @@ const visibleMenuGroups = computed(() => {
     [
       {
         label: i18n('labels.voiceStyle'),
-        sideLabel: currentDevice.value?.config?.voiceStyle ?? i18n('labels.defaultStyle'),
+        sideLabel: currentDevice.value?.config?.voiceStyle
+          ? voiceI18n(`styles.${currentDevice.value.config.voiceStyle}`)
+          : i18n('labels.defaultStyle'),
         to: '/stack/device-config/voice',
       },
       {

@@ -10,8 +10,8 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 
-import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.png';
-import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.png';
+import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.svg';
+import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.svg';
 import RecordPanel from 'components/settings/voiceprint/RecordPanel.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 import PersonalityEditor from 'components/PersonalityEditor.vue';

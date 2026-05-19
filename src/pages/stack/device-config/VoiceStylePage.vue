@@ -72,8 +72,12 @@ const styles: ReadonlyArray<{ key: VoiceStyleKey }> = [
   { key: 'sweetLady' },
 ];
 
+const validKeys = styles.map((s) => s.key as string);
+
 const selectedKey = ref<VoiceStyleKey>(
-  (deviceStore.currentDevice?.config?.voiceStyle as VoiceStyleKey) || 'cuteChild',
+  validKeys.includes(deviceStore.currentDevice?.config?.voiceStyle ?? '')
+    ? (deviceStore.currentDevice!.config!.voiceStyle as VoiceStyleKey)
+    : 'cuteChild',
 );
 const rate = ref<number>(1.5);
 
