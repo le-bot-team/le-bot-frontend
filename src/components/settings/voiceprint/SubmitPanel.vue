@@ -94,7 +94,6 @@ const confirm = async (): Promise<void> => {
       });
       setTimeout(() => emit('finish'), 1500);
     }
-    emit('finish');
   } catch (error) {
     console.error('Error during voiceprint registration:', error);
     notify({

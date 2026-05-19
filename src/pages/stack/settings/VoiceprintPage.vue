@@ -69,6 +69,14 @@ onMounted(async () => {
       <q-icon name="add" size="14px" />
       {{ i18n('labels.addNewPerson') }}
     </button>
+    <button
+      class="voiceprint-add-btn"
+      type="button"
+      @click="router.push('/stack/settings/voiceprint/test').catch(console.error)"
+    >
+      <q-icon name="mic" size="14px" />
+      {{ i18n('labels.testVoice') }}
+    </button>
   </q-page>
 </template>
 
