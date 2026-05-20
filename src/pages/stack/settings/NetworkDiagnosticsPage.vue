@@ -1,47 +1,69 @@
 <script setup lang="ts">
 // NetworkDiagnosticsPage — step-by-step network diagnosis (Template A).
 
-import { ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.settings.NetworkDiagnosticsPage');
 
 interface DiagStep {
   key: string;
-  label: string;
   status: 'pending' | 'running' | 'success' | 'fail';
 }
 
 const steps = ref<DiagStep[]>([
-  { key: 'dns', label: i18n('labels.dns'), status: 'pending' },
-  { key: 'tcp', label: i18n('labels.tcp'), status: 'pending' },
-  { key: 'ws', label: i18n('labels.ws'), status: 'pending' },
+  { key: 'dns', status: 'pending' },
+  { key: 'tcp', status: 'pending' },
+  { key: 'ws', status: 'pending' },
 ]);
 
 const isRunning = ref(false);
 const result = ref<'good' | 'bad' | null>(null);
 
+let intervalId: ReturnType<typeof setInterval> | null = null;
+const timeoutIds = new Set<ReturnType<typeof setTimeout>>();
+
+function cleanup() {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+  for (const id of timeoutIds) {
+    clearTimeout(id);
+  }
+  timeoutIds.clear();
+}
+
+onBeforeUnmount(cleanup);
+
 function startDiagnosis() {
+  if (isRunning.value) return;
+  cleanup();
   isRunning.value = true;
   result.value = null;
   steps.value.forEach((s) => (s.status = 'pending'));
 
   let i = 0;
-  const interval = setInterval(() => {
+  intervalId = setInterval(() => {
     if (i < steps.value.length) {
       steps.value[i]!.status = 'running';
       const idx = i;
-      setTimeout(() => {
+      const tid = setTimeout(() => {
+        timeoutIds.delete(tid);
         steps.value[idx]!.status = Math.random() > 0.2 ? 'success' : 'fail';
       }, 800);
+      timeoutIds.add(tid);
       i++;
     } else {
-      clearInterval(interval);
-      setTimeout(() => {
+      clearInterval(intervalId!);
+      intervalId = null;
+      const tid = setTimeout(() => {
+        timeoutIds.delete(tid);
         isRunning.value = false;
         const allSuccess = steps.value.every((s) => s.status === 'success');
         result.value = allSuccess ? 'good' : 'bad';
       }, 1000);
+      timeoutIds.add(tid);
     }
   }, 1200);
 }
@@ -51,7 +73,7 @@ function startDiagnosis() {
   <q-page class="settings-sub-page">
     <div class="settings-sub-page__card">
       <div v-for="step in steps" :key="step.key" class="settings-sub-page__row">
-        <span class="settings-sub-page__row-label">{{ step.label }}</span>
+        <span class="settings-sub-page__row-label">{{ i18n('labels.' + step.key) }}</span>
         <span>
           <q-spinner v-if="step.status === 'running'" size="20px" color="cyan" />
           <q-icon

@@ -6,10 +6,10 @@ import { i18nSubPath } from 'src/utils/common';
 const i18n = i18nSubPath('pages.stack.settings.PersonalInfoListPage');
 
 const infoCategories = [
-  { key: 'account', label: i18n('labels.accountInfo'), purpose: '账号管理与服务提供' },
-  { key: 'device', label: i18n('labels.deviceInfo'), purpose: '设备连接与功能支持' },
-  { key: 'voiceprint', label: i18n('labels.voiceprintInfo'), purpose: '声纹识别与个性化' },
-  { key: 'usage', label: i18n('labels.usageInfo'), purpose: '服务优化与体验提升' },
+  { key: 'account', labelKey: 'accountInfo', purposeKey: 'account' },
+  { key: 'device', labelKey: 'deviceInfo', purposeKey: 'device' },
+  { key: 'voiceprint', labelKey: 'voiceprintInfo', purposeKey: 'voiceprint' },
+  { key: 'usage', labelKey: 'usageInfo', purposeKey: 'usage' },
 ];
 </script>
 
@@ -22,9 +22,9 @@ const infoCategories = [
         class="settings-sub-page__row"
         style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px"
       >
-        <span style="font-weight: 500; color: var(--clr-text)">{{ cat.label }}</span>
+        <span style="font-weight: 500; color: var(--clr-text)">{{ i18n('labels.' + cat.labelKey) }}</span>
         <span style="font-size: 13px; color: var(--clr-weak)"
-          >{{ i18n('labels.purpose') }}: {{ cat.purpose }}</span
+          >{{ i18n('labels.purpose') }}: {{ i18n('purposes.' + cat.purposeKey) }}</span
         >
       </div>
     </div>

@@ -1,15 +1,18 @@
 <script setup lang="ts">
 // AppLanguagePage — app UI language selection (Template C: RadioList).
 
-import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+
 import { i18nSubPath } from 'src/utils/common';
+import { useSettingsStore } from 'stores/settings';
+import type { Locales } from 'stores/settings/types';
 
 const i18n = i18nSubPath('pages.stack.settings.AppLanguagePage');
+const { locale } = storeToRefs(useSettingsStore());
 
-const selectedLang = ref('zh-CN');
-const languages = [
-  { value: 'zh-CN', label: i18n('languages.zhCN') },
-  { value: 'en-US', label: i18n('languages.enUS') },
+const languages: { value: Locales; labelKey: string }[] = [
+  { value: 'zh-CN', labelKey: 'zhCN' },
+  { value: 'en-US', labelKey: 'enUS' },
 ];
 </script>
 
@@ -21,10 +24,10 @@ const languages = [
         :key="lang.value"
         class="settings-sub-page__row"
         style="cursor: pointer"
-        @click="selectedLang = lang.value"
+        @click="locale = lang.value"
       >
-        <span class="settings-sub-page__row-label">{{ lang.label }}</span>
-        <q-radio v-model="selectedLang" :val="lang.value" color="cyan" dense />
+        <span class="settings-sub-page__row-label">{{ i18n('languages.' + lang.labelKey) }}</span>
+        <q-radio v-model="locale" :val="lang.value" color="cyan" dense />
       </div>
     </div>
   </q-page>

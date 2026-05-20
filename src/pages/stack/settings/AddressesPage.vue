@@ -23,6 +23,10 @@ const addresses = ref<Address[]>([
     isDefault: true,
   },
 ]);
+
+function addAddress() {
+  // TODO: implement add address
+}
 </script>
 
 <template>
@@ -42,7 +46,7 @@ const addresses = ref<Address[]>([
             dense
             size="sm"
             style="background: var(--clr-dialog-btn-link-bg); color: white"
-            >默认</q-chip
+            >{{ i18n('labels.default') }}</q-chip
           >
         </div>
         <div style="font-size: 13px; color: var(--clr-weak); line-height: 18px">
@@ -60,11 +64,7 @@ const addresses = ref<Address[]>([
     <div class="q-mt-md">
       <button
         class="btn-max"
-        @click="
-          () => {
-            /* add address */
-          }
-        "
+        @click="addAddress"
       >
         {{ i18n('labels.addAddress') }}
       </button>

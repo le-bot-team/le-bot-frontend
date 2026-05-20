@@ -1201,6 +1201,7 @@ export default {
             setDefault: 'Set as Default',
             delete: 'Delete',
             edit: 'Edit',
+            default: 'Default',
           },
         },
         AppLanguagePage: {
@@ -1371,6 +1372,12 @@ export default {
             voiceprintInfo: 'Voiceprint Information',
             usageInfo: 'Usage Information',
             purpose: 'Purpose',
+          },
+          purposes: {
+            account: 'Account management and service provision',
+            device: 'Device connection and feature support',
+            voiceprint: 'Voiceprint recognition and personalization',
+            usage: 'Service optimization and experience improvement',
           },
         },
       },

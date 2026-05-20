@@ -264,6 +264,94 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            name: 'settings-addresses',
+            path: 'addresses',
+            components: {
+              default: () => import('pages/stack/settings/AddressesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-language',
+            path: 'language',
+            components: {
+              default: () => import('pages/stack/settings/AppLanguagePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-notifications',
+            path: 'notifications',
+            components: {
+              default: () => import('pages/stack/settings/NotificationSettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-general',
+            path: 'general',
+            components: {
+              default: () => import('pages/stack/settings/GeneralSettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-privacy',
+            path: 'privacy',
+            components: {
+              default: () => import('pages/stack/settings/PrivacySettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-permissions',
+            path: 'permissions',
+            components: {
+              default: () => import('pages/stack/settings/PermissionManagementPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-word-filter',
+            path: 'word-filter',
+            components: {
+              default: () => import('pages/stack/settings/WordFilterPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-clear-cache',
+            path: 'clear-cache',
+            components: {
+              default: () => import('pages/stack/settings/ClearCachePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-network',
+            path: 'network',
+            components: {
+              default: () => import('pages/stack/settings/NetworkDiagnosticsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-storage',
+            path: 'storage',
+            components: {
+              default: () => import('pages/stack/settings/StorageSpacePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-info-list',
+            path: 'info-list',
+            components: {
+              default: () => import('pages/stack/settings/PersonalInfoListPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
             path: 'voiceprint',
             children: [
               {
