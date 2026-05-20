@@ -59,7 +59,7 @@ const menuGroups = computed<MenuItem[][]>(() => [
     { label: i18n('labels.personalInfoList'), to: '/stack/settings/info-list' },
     {
       label: i18n('labels.icpFilingNumber'),
-      caption: i18n('labels.internetICPCode', { code: import.meta.env.VITE_ICP_CODE || '沪ICP备00000000号-1' }),
+      caption: i18n('labels.internetICPCode', { code: process.env.VITE_ICP_CODE || '沪ICP备00000000号-1' }),
       disabled: true,
     },
   ],

@@ -8,6 +8,7 @@ declare namespace NodeJS {
     NODE_ENV: string;
     VITE_MOCK_ENABLED: string;
     VITE_MOCK_WS_ENABLED: string;
+    VITE_ICP_CODE: string | undefined;
     VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
     VUE_ROUTER_BASE: string | undefined;
   }

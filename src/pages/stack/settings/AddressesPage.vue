@@ -87,4 +87,9 @@ function addAddress() {
   font-weight: 500;
   cursor: pointer;
 }
+
+.btn-max:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>

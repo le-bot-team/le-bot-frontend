@@ -7,7 +7,7 @@ import { i18nSubPath } from 'src/utils/common';
 const i18n = i18nSubPath('pages.stack.settings.WordFilterPage');
 
 const enabled = ref(true);
-const words = ref<string[]>(['暴力', '色情']);
+const words = ref<string[]>([]);
 const newWord = ref('');
 
 function addWord() {

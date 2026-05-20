@@ -108,7 +108,7 @@ function startDiagnosis() {
     </div>
 
     <div class="q-mt-md">
-      <button class="btn-max" :disabled="isRunning" @click="startDiagnosis">
+      <button type="button" class="btn-max" :disabled="isRunning" @click="startDiagnosis">
         <q-spinner v-if="isRunning" size="20px" color="white" />
         <template v-else>{{ i18n('labels.startDiagnosis') }}</template>
       </button>
