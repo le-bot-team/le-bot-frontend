@@ -19,19 +19,26 @@ import type { Directive, DirectiveBinding } from 'vue';
 import type { VTrackBinding } from 'src/types/api/telemetry';
 
 import { getTelemetryEngine } from 'src/utils/telemetry/engine';
+import { useTelemetryStore } from 'stores/telemetry';
 
 // ---------------------------------------------------------------------------
-// 指令实现
+// Constants
 // ---------------------------------------------------------------------------
 
-/** 事件类型到 DOM 事件名的映射 */
-const EVENT_TYPE_MAP: Record<string, string> = {
+/** Long-press detection threshold (ms) */
+const LONGPRESS_THRESHOLD = 500;
+
+/** Event type to DOM event name mapping (excluding longpress which needs special handling) */
+const SIMPLE_EVENT_MAP: Record<string, string> = {
   click: 'click',
-  longpress: 'pointerdown',
   tap: 'click',
 };
 
-/** 获取指令绑定值（支持简写） */
+// ---------------------------------------------------------------------------
+// Directive implementation
+// ---------------------------------------------------------------------------
+
+/** Resolve binding value (supports shorthand string form) */
 function resolveBinding(binding: DirectiveBinding<VTrackBinding | string>): VTrackBinding {
   if (typeof binding.value === 'string') {
     return { event: binding.value };
@@ -39,18 +46,151 @@ function resolveBinding(binding: DirectiveBinding<VTrackBinding | string>): VTra
   return binding.value;
 }
 
-/** 处理 DOM 事件并上报 */
-function handleTrackEvent(event: Event, binding: VTrackBinding): void {
-  const engine = getTelemetryEngine();
-  const target = event.currentTarget as HTMLElement;
-
-  void engine.trackClick(binding.event, {
-    elementId: target.id || undefined,
-    elementClass: target.className?.toString().slice(0, 100) || undefined,
-    elementTag: target.tagName?.toLowerCase() || undefined,
-    ...binding.data,
-  });
+/** Determine the directive arg (defaults to 'click') */
+function resolveArg(binding: DirectiveBinding<VTrackBinding | string>): string {
+  return binding.arg || 'click';
 }
+
+/** Fire the tracking event */
+function fireTrackEvent(target: HTMLElement, trackBinding: VTrackBinding): void {
+  const engine = getTelemetryEngine();
+
+  // Refresh session activity on user interaction
+  try {
+    const telemetryStore = useTelemetryStore();
+    telemetryStore.refreshActivity();
+  } catch {
+    // Store may not be available yet
+  }
+
+  const doTrack = () => {
+    void engine.trackClick(trackBinding.event, {
+      elementId: target.id || undefined,
+      elementClass: target.className?.toString().slice(0, 100) || undefined,
+      elementTag: target.tagName?.toLowerCase() || undefined,
+      ...trackBinding.data,
+    });
+  };
+
+  // Support debounce: defer to next microtask to avoid duplicate events from bubbling
+  if (trackBinding.debounce) {
+    queueMicrotask(doTrack);
+  } else {
+    doTrack();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Long-press gesture handler
+// ---------------------------------------------------------------------------
+
+interface LongpressState {
+  timer: ReturnType<typeof setTimeout> | null;
+  fired: boolean;
+  startX: number;
+  startY: number;
+}
+
+function setupLongpress(
+  el: HTMLElement,
+  trackBinding: VTrackBinding,
+): { cleanup: () => void } {
+  const state: LongpressState = { timer: null, fired: false, startX: 0, startY: 0 };
+  const MOVE_TOLERANCE = 10; // px
+
+  const onPointerDown = (e: PointerEvent) => {
+    state.fired = false;
+    state.startX = e.clientX;
+    state.startY = e.clientY;
+    state.timer = setTimeout(() => {
+      state.fired = true;
+      fireTrackEvent(el, trackBinding);
+    }, LONGPRESS_THRESHOLD);
+  };
+
+  const cancel = () => {
+    if (state.timer) {
+      clearTimeout(state.timer);
+      state.timer = null;
+    }
+  };
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (state.timer) {
+      const dx = Math.abs(e.clientX - state.startX);
+      const dy = Math.abs(e.clientY - state.startY);
+      if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) {
+        cancel();
+      }
+    }
+  };
+
+  const onPointerUp = () => cancel();
+  const onPointerCancel = () => cancel();
+
+  el.addEventListener('pointerdown', onPointerDown);
+  el.addEventListener('pointermove', onPointerMove);
+  el.addEventListener('pointerup', onPointerUp);
+  el.addEventListener('pointercancel', onPointerCancel);
+
+  return {
+    cleanup: () => {
+      cancel();
+      el.removeEventListener('pointerdown', onPointerDown);
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerup', onPointerUp);
+      el.removeEventListener('pointercancel', onPointerCancel);
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Bind/unbind helpers
+// ---------------------------------------------------------------------------
+
+interface TrackMeta {
+  cleanup: () => void;
+  arg: string;
+}
+
+function bindDirective(el: HTMLElement, binding: DirectiveBinding<VTrackBinding | string>): void {
+  const resolved = resolveBinding(binding);
+  const arg = resolveArg(binding);
+
+  let cleanup: () => void;
+
+  if (arg === 'longpress') {
+    // Long-press gesture
+    const lp = setupLongpress(el, resolved);
+    cleanup = lp.cleanup;
+  } else {
+    // Simple event (click, tap, or custom DOM event)
+    const domEvent = SIMPLE_EVENT_MAP[arg] || arg;
+    const handler = (event: Event) => {
+      fireTrackEvent(event.currentTarget as HTMLElement, resolved);
+    };
+    el.addEventListener(domEvent, handler);
+    cleanup = () => el.removeEventListener(domEvent, handler);
+  }
+
+  // Store metadata for update/unmount
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (el as any).__vTrackMeta = { cleanup, arg } satisfies TrackMeta;
+}
+
+function unbindDirective(el: HTMLElement): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const meta = (el as any).__vTrackMeta as TrackMeta | undefined;
+  if (meta) {
+    meta.cleanup();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete (el as any).__vTrackMeta;
+}
+
+// ---------------------------------------------------------------------------
+// Exported directive
+// ---------------------------------------------------------------------------
 
 /**
  * v-track 指令
@@ -58,59 +198,22 @@ function handleTrackEvent(event: Event, binding: VTrackBinding): void {
  * 支持：
  * - `v-track="{ event: 'xxx' }"` — 点击事件
  * - `v-track:click="{ event: 'xxx' }"` — 显式指定 click
+ * - `v-track:longpress="{ event: 'xxx' }"` — 长按事件 (500ms threshold)
  * - `v-track="'xxx'"` — 简写形式
  */
 export const vTrackDirective: Directive<HTMLElement> = {
   mounted(el: HTMLElement, binding: DirectiveBinding<VTrackBinding | string>) {
-    const resolved = resolveBinding(binding);
-
-    // 确定监听的 DOM 事件类型
-    const arg = binding.arg || 'click';
-    const domEvent = EVENT_TYPE_MAP[arg] || arg;
-
-    // 创建处理函数并绑定
-    const handler = (event: Event) => handleTrackEvent(event, resolved);
-
-    // 将 handler 存储在元素上，以便 unmounted 时移除
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).__vTrackHandler = handler;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).__vTrackDomEvent = domEvent;
-
-    el.addEventListener(domEvent, handler);
+    bindDirective(el, binding);
   },
 
   updated(el: HTMLElement, binding: DirectiveBinding<VTrackBinding | string>) {
-    // 值变化时重新绑定
-    const resolved = resolveBinding(binding);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const oldHandler = (el as any).__vTrackHandler;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const domEvent = (el as any).__vTrackDomEvent;
-
-    if (oldHandler && domEvent) {
-      el.removeEventListener(domEvent, oldHandler);
-    }
-
-    const newHandler = (event: Event) => handleTrackEvent(event, resolved);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).__vTrackHandler = newHandler;
-    el.addEventListener(domEvent, newHandler);
+    // Fully rebind: remove old listener(s), attach new ones
+    // This handles both value changes and arg changes (e.g. click → tap)
+    unbindDirective(el);
+    bindDirective(el, binding);
   },
 
   unmounted(el: HTMLElement) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handler = (el as any).__vTrackHandler;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const domEvent = (el as any).__vTrackDomEvent;
-
-    if (handler && domEvent) {
-      el.removeEventListener(domEvent, handler);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (el as any).__vTrackHandler;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (el as any).__vTrackDomEvent;
+    unbindDirective(el);
   },
 };

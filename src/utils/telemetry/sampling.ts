@@ -26,9 +26,9 @@ const CORE_PAGES: SamplingRateMap = {
   devices: 1.0,
   'add-virtual-device': 1.0,
   'family-groups': 1.0,
-  'family-groups-detail': 1.0,
-  'family-groups-member': 1.0,
-  'family-groups-invite': 1.0,
+  'family-group-detail': 1.0,
+  'family-group-member': 1.0,
+  'family-group-invite': 1.0,
   auth: 1.0,
   profile: 1.0,
   'onboarding-complete': 1.0,
@@ -74,7 +74,7 @@ const SECONDARY_PAGES: SamplingRateMap = {
   'device-config-wifi': 0.3,
   'device-config-update': 0.3,
   'device-config-about': 0.3,
-  'family-groups-child-edit': 0.3,
+  'family-group-child-edit': 0.3,
 };
 
 /** 默认采样配置 */

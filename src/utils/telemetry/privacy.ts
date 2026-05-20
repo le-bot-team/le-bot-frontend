@@ -56,8 +56,9 @@ const DEFAULT_DATA_WHITELIST: string[] = [
   'orientation',
 ];
 
-/** 全局白名单实例 */
-let _whitelist: DataKeyWhitelist = new Set(DEFAULT_DATA_WHITELIST);
+/** 全局白名单实例 (internal mutable, exposed as ReadonlySet) */
+const _whitelistInternal: Set<string> = new Set(DEFAULT_DATA_WHITELIST);
+let _whitelist: DataKeyWhitelist = _whitelistInternal;
 
 // ---------------------------------------------------------------------------
 // 白名单管理
@@ -71,8 +72,9 @@ export function getWhitelist(): DataKeyWhitelist {
 /** 添加额外白名单 key（用于业务层扩展） */
 export function addWhitelistKeys(keys: string[]): void {
   for (const key of keys) {
-    _whitelist = new Set([..._whitelist, key]);
+    _whitelistInternal.add(key);
   }
+  _whitelist = _whitelistInternal;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,7 +88,7 @@ const PII_PATTERNS = [
   /password/i,
   /token/i,
   /secret/i,
-  /name$/i,        // 匹配 childName, firstName 等
+  /^(first|last|middle|child|user|full|display|real|given|family)[-_]?name$/i,  // 匹配 childName, firstName 等
   /address/i,
   /birthday/i,
   /birth_date/i,
@@ -101,11 +103,17 @@ function isPIIKey(key: string): boolean {
   return PII_PATTERNS.some((pattern) => pattern.test(key));
 }
 
+/** Keys that are allowed to pass through as objects without recursive filtering (with size limit) */
+const PASSTHROUGH_OBJECT_KEYS = new Set(['routeQuery', 'routeParams']);
+
+/** Maximum JSON size for passthrough object values (bytes) */
+const PASSTHROUGH_MAX_SIZE = 1024;
+
 /**
  * 过滤事件 data 字段：
  * 1. 只保留白名单中的 key
  * 2. 即使在白名单中，也排除匹配 PII 模式的 key
- * 3. 递归过滤嵌套对象（只过滤一层）
+ * 3. 对象类型的值：若 key 在 PASSTHROUGH_OBJECT_KEYS 中则直接保留（受大小限制），否则丢弃
  */
 export function filterEventData(
   data: Record<string, unknown> | undefined,
@@ -114,16 +122,24 @@ export function filterEventData(
 
   const filtered: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
-    // 先检查 PII，再检查白名单
+    // Check PII first, then whitelist
     if (isPIIKey(key)) continue;
     if (!_whitelist.has(key)) continue;
 
-    // 嵌套对象只保留一层
+    // Handle object values
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      const nested = filterEventData(value as Record<string, unknown>);
-      if (nested && Object.keys(nested).length > 0) {
-        filtered[key] = nested;
+      if (PASSTHROUGH_OBJECT_KEYS.has(key)) {
+        // Allow passthrough with size limit
+        try {
+          const serialized = JSON.stringify(value);
+          if (serialized.length <= PASSTHROUGH_MAX_SIZE) {
+            filtered[key] = value;
+          }
+        } catch {
+          // Skip non-serializable values
+        }
       }
+      // Non-passthrough objects are dropped (inner keys unlikely to be whitelisted)
     } else {
       filtered[key] = value;
     }
@@ -154,12 +170,36 @@ export async function hashUserId(
   if (_hashCache.has(cacheKey)) return _hashCache.get(cacheKey)!;
 
   const input = `${salt}:${rawId}`;
-  const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
-  const hashArray = Array.from(new Uint8Array(buffer));
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
-  // 取前 16 位 (64 bit) 作为用户标识，足够去重且缩短传输
-  const result = hashHex.slice(0, 16);
+  let result: string;
+  try {
+    if (!crypto?.subtle?.digest) {
+      throw new Error('crypto.subtle not available');
+    }
+    const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    const hashArray = Array.from(new Uint8Array(buffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    // Take first 16 hex chars (64 bit) as user identifier
+    result = hashHex.slice(0, 16);
+  } catch {
+    // Fallback: simple non-cryptographic hash for non-secure contexts
+    result = simpleHash(input);
+  }
+
   _hashCache.set(cacheKey, result);
   return result;
+}
+
+/** Simple non-cryptographic hash fallback (FNV-1a inspired, 64-bit as hex) */
+function simpleHash(str: string): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 ^= ch;
+    h1 = Math.imul(h1, 0x01000193);
+    h2 ^= ch;
+    h2 = Math.imul(h2, 0x811c9dc5);
+  }
+  return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
 }

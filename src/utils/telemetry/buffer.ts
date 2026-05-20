@@ -104,6 +104,14 @@ export class BufferQueue {
     return this.buffer.length;
   }
 
+  /**
+   * Synchronously drain all buffered events and clear the buffer.
+   * Used for unload-safe flushing via sendBeacon.
+   */
+  drain(): TelemetryEvent[] {
+    return this.buffer.splice(0, this.buffer.length);
+  }
+
   /** 销毁队列 */
   destroy(): void {
     this.stop();

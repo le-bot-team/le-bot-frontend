@@ -76,11 +76,32 @@ export const useTelemetryStore = defineStore(
 
     /** 刷新 session（每次用户活动时调用） */
     function refreshActivity(): void {
+      // Check expiration based on the PREVIOUS lastActivity before updating
+      const expired = Date.now() - lastActivity.value > SESSION_TIMEOUT_MS;
+
+      // Update activity timestamp
       lastActivity.value = Date.now();
 
-      // 检查 session 是否过期，过期则创建新 session
-      if (isSessionExpired.value) {
+      // Persist updated lastActivity to sessionStorage
+      persistLastActivity();
+
+      // If session was expired, create a new one
+      if (expired) {
         createNewSession();
+      }
+    }
+
+    /** Persist lastActivity to sessionStorage */
+    function persistLastActivity(): void {
+      try {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.lastActivity = lastActivity.value;
+          sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(parsed));
+        }
+      } catch {
+        // sessionStorage not available, ignore
       }
     }
 

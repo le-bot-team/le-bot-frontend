@@ -127,10 +127,10 @@ export class TelemetryEngine {
     // 注册页面卸载前 flush
     this.registerUnload();
 
+    this._initialized = true;
+
     // 记录会话开始事件
     await this.trackEvent('session_start', 'session_start', '/', '', {});
-
-    this._initialized = true;
 
     if (process.env.DEV) {
       console.debug('[Telemetry] Engine initialized');
@@ -147,6 +147,7 @@ export class TelemetryEngine {
    * @param page    当前页面路径
    * @param referrer 来源页面路径
    * @param data    事件自定义数据
+   * @param duration 事件持续时长（ms），用于 page_leave 等事件
    */
   async trackEvent(
     type: TelemetryEventType,
@@ -154,18 +155,18 @@ export class TelemetryEngine {
     page: string,
     referrer: string,
     data?: Record<string, unknown>,
+    duration?: number,
   ): Promise<void> {
     if (!this.config.enabled || !this._initialized) return;
 
     const state = this._getState();
 
-    // 采样判定
-    const pageName = name.replace(/[/_]/g, '-');
+    // 采样判定：使用当前路由名称（而非事件名称）作为采样配置的 key
+    const pageName = (this.currentPageEnter?.name || page.split('/').filter(Boolean).pop() || 'unknown').replace(/[/_]/g, '-');
     const sampled = shouldSample(type, pageName, this.config.sampling);
 
-    // 即使未命中采样也记录（标记 sampled=false），便于后端统计采样率
+    // Unsampled non-conversion events are dropped (not sent to backend)
     if (!sampled && type !== 'conversion') {
-      // 非转化事件未命中采样，直接丢弃（不上报）
       return;
     }
 
@@ -188,6 +189,7 @@ export class TelemetryEngine {
       timestamp: Date.now(),
       data: filteredData,
       sampled: true,
+      ...(duration !== undefined && { duration }),
     };
 
     this.buffer.push(event);
@@ -228,7 +230,8 @@ export class TelemetryEngine {
       this.currentPageEnter.name || this.currentPageEnter.path,
       fromPath,
       '',
-      { duration },
+      undefined,
+      duration,
     );
 
     // 清除
@@ -334,26 +337,68 @@ export class TelemetryEngine {
     }
   }
 
-  /** 注册页面卸载前的最后 flush */
+  /** Unload handler reference for cleanup */
+  private _unloadHandler: (() => void) | null = null;
+  private _visibilityHandler: (() => void) | null = null;
+
+  /** Register page unload flush using sendBeacon for reliability */
   private registerUnload(): void {
-    const handler = () => {
-      // 同步 flush 缓冲区（使用 sendBeacon 作为 fallback）
-      if (this.buffer.size > 0) {
-        // 尝试同步 flush
-        void this.buffer.flush();
+    this._unloadHandler = () => {
+      this.flushWithBeacon();
+    };
+
+    this._visibilityHandler = () => {
+      if (document.visibilityState === 'hidden') {
+        this.flushWithBeacon();
       }
     };
 
-    window.addEventListener('beforeunload', handler);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        handler();
-      }
+    window.addEventListener('beforeunload', this._unloadHandler);
+    document.addEventListener('visibilitychange', this._visibilityHandler);
+  }
+
+  /** Flush buffered events synchronously using sendBeacon (unload-safe) */
+  private flushWithBeacon(): void {
+    const events = this.buffer.drain();
+    if (events.length === 0) return;
+
+    const state = this._getState();
+    const payload = JSON.stringify({
+      events,
+      clientTime: Date.now(),
+      batchSeq: ++this.batchSeq,
+      sessionId: state.sessionId,
     });
+
+    // Try sendBeacon first (most reliable during unload)
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      const sent = navigator.sendBeacon('/api/telemetry/batch', blob);
+      if (sent) return;
+    }
+
+    // Fallback: fetch with keepalive
+    try {
+      void fetch('/api/telemetry/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      });
+    } catch {
+      // Last resort: re-enqueue to offline (may not complete during unload)
+      void this.offline.enqueue(events);
+    }
   }
 
   /** 销毁引擎 */
   async destroy(): Promise<void> {
+    if (this._unloadHandler) {
+      window.removeEventListener('beforeunload', this._unloadHandler);
+    }
+    if (this._visibilityHandler) {
+      document.removeEventListener('visibilitychange', this._visibilityHandler);
+    }
     this.buffer.stop();
     await this.buffer.flush();
     this.offline.destroy();

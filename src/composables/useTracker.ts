@@ -57,9 +57,14 @@ export function useTracker() {
 
   /**
    * 上报 App 恢复前台事件
+   * Only creates a new session if the current one has expired.
    */
   function trackAppResume(): void {
-    telemetryStore.createNewSession(); // 恢复前台创建新 session
+    if (telemetryStore.isSessionExpired) {
+      telemetryStore.createNewSession();
+    } else {
+      telemetryStore.refreshActivity();
+    }
     void engine.trackAppResume();
   }
 

@@ -71,7 +71,8 @@ export default defineBoot(async ({ app }) => {
         from.name?.toString() || from.path,
         from.path,
         '',
-        { duration },
+        undefined,
+        duration,
       );
     }
 
@@ -92,12 +93,15 @@ export default defineBoot(async ({ app }) => {
   // 5. 监听 App 可见性变化
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      // App 从后台恢复
+      // Check session expiration BEFORE refreshing activity
+      const wasExpired = telemetryStore.isSessionExpired;
+
+      // Refresh activity (updates lastActivity + persists)
       telemetryStore.refreshActivity();
 
-      // 如果 session 过期，创建新 session 并上报恢复事件
-      if (telemetryStore.isSessionExpired) {
-        telemetryStore.createNewSession();
+      // If session was expired, the refreshActivity already created a new session.
+      // Emit app_resume event for the new session.
+      if (wasExpired) {
         void engine.trackAppResume();
       }
     }
