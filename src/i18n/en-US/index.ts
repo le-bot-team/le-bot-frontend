@@ -151,6 +151,7 @@ export default {
           hotTopic: 'Hot Topic',
           hours: '{hours} Hours',
           hoursUnit: 'hrs',
+          hoursValue: '{hours} hrs',
         },
       },
     },
@@ -208,6 +209,7 @@ export default {
         settingsVoiceprint: 'Voiceprint Settings',
         settingsVoiceprintDetail: 'Voiceprint Settings',
         settingsVoiceprintNew: 'Add Voiceprint',
+        settingsVoiceprintTest: 'Voiceprint Test',
         chatVoiceCall: 'Voice Call',
         chatHistory: 'Chat History',
         chatMuteSettings: 'Mute Settings',
@@ -224,11 +226,14 @@ export default {
         familyGroupJoin: 'Join Family Group',
         messages: 'Messages',
         messageDetail: 'Message Detail',
+        messagesActivity: 'Activity Messages',
         orders: 'My Orders',
         help: 'Help & Feedback',
         helpFaq: 'FAQ',
         helpFeedback: 'Feedback',
         growthData: 'Growth Data',
+        growthDataCapabilityDetail: 'Capability Detail',
+        growthDataWeeklyReport: 'Weekly Report',
         deviceConfigWifi: 'Wi-Fi Management',
         deviceConfigUpdate: 'Firmware Update',
         deviceConfigAbout: 'About This Device',
@@ -404,6 +409,7 @@ export default {
           linkCopied: 'Link copied',
           linkCopyFailed: 'Failed to copy link',
           qrCodeSaved: 'QR code saved',
+          comingSoon: 'This feature is coming soon',
         },
       },
     },
@@ -486,6 +492,7 @@ export default {
           helpAndFeedback: 'Help & Feedback',
           aboutUs: 'About Us',
           settings: 'Settings',
+          notifications: 'Notifications',
         },
       },
     },
@@ -553,6 +560,8 @@ export default {
         },
         notifications: {
           comingSoon: 'This feature is coming soon',
+          copied: 'Copied to clipboard',
+          copyFailed: 'Copy failed, please copy manually',
         },
       },
       ChatPage: {
@@ -577,6 +586,9 @@ export default {
           waitingResponse: 'Waiting for response...',
           clearContext: 'Clear context',
           contextCleared: 'Context cleared',
+          toggleMute: 'Toggle mute',
+          voiceCall: 'Voice call',
+          toggleTextMode: 'Toggle text mode',
         },
         notifications: {
           copiedAccessToken: 'Access token copied to clipboard',
@@ -1201,6 +1213,7 @@ export default {
             setDefault: 'Set as Default',
             delete: 'Delete',
             edit: 'Edit',
+            default: 'Default',
           },
         },
         AppLanguagePage: {
@@ -1372,6 +1385,12 @@ export default {
             usageInfo: 'Usage Information',
             purpose: 'Purpose',
           },
+          purposes: {
+            account: 'Account management and service provision',
+            device: 'Device connection and feature support',
+            voiceprint: 'Voiceprint recognition and personalization',
+            usage: 'Service optimization and experience improvement',
+          },
         },
       },
       // ===== Batch 1: Chat history =====
@@ -1525,6 +1544,17 @@ export default {
         MessageDetailPage: {
           labels: {
             title: 'Message Detail',
+            noContent: 'No content available',
+          },
+          items: {
+            m1Title: 'New Notification',
+            m1Content: 'You have a new notification. This is a reminder about your device update, please check it promptly.',
+            m2Title: 'Low Mood Detected',
+            m2Content: 'Long-term low mood detected. We suggest more interaction with LeBot to improve your mood.',
+            m3Title: 'Notification',
+            m3Content: 'This is the notification content describing the specific details of the notice.',
+            m4Title: 'New Member Benefits Issued',
+            m4Content: 'Check it in the Member Center! Welcome to the LeBot family.',
           },
         },
         ActivityMessagesPage: {
@@ -1532,6 +1562,7 @@ export default {
             title: 'Activity Messages',
             empty: 'No activity messages',
             viewDetail: 'View details',
+            comingSoon: 'Activity details coming soon',
           },
           items: {
             a1Title: 'Member Day - Limited Time Offer',

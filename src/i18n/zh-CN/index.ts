@@ -151,6 +151,7 @@ export default {
           hotTopic: '高频话题',
           hours: '{hours} 小时',
           hoursUnit: '小时',
+          hoursValue: '{hours}小时',
         },
       },
     },
@@ -208,6 +209,7 @@ export default {
         settingsVoiceprint: '声纹设置',
         settingsVoiceprintDetail: '声纹设置',
         settingsVoiceprintNew: '添加声纹',
+        settingsVoiceprintTest: '声纹测试',
         chatVoiceCall: '语音通话',
         chatHistory: '聊天记录',
         chatMuteSettings: '静音设置',
@@ -224,11 +226,14 @@ export default {
         familyGroupJoin: '加入家庭组',
         messages: '消息',
         messageDetail: '消息详情',
+        messagesActivity: '活动消息',
         orders: '我的订单',
         help: '帮助与反馈',
         helpFaq: '常见问题',
         helpFeedback: '意见反馈',
         growthData: '成长数据',
+        growthDataCapabilityDetail: '能力详情',
+        growthDataWeeklyReport: '周报',
         deviceConfigWifi: 'Wi-Fi 管理',
         deviceConfigUpdate: '固件升级',
         deviceConfigAbout: '关于本设备',
@@ -399,6 +404,7 @@ export default {
           linkCopied: '链接已复制',
           linkCopyFailed: '复制链接失败',
           qrCodeSaved: '二维码已保存',
+          comingSoon: '该功能即将上线',
         },
       },
     },
@@ -481,6 +487,7 @@ export default {
           helpAndFeedback: '帮助与反馈',
           aboutUs: '关于我们',
           settings: '设置',
+          notifications: '通知',
         },
       },
     },
@@ -548,6 +555,8 @@ export default {
         },
         notifications: {
           comingSoon: '该功能即将上线',
+          copied: '已复制到剪贴板',
+          copyFailed: '复制失败，请手动复制',
         },
       },
       ChatPage: {
@@ -572,6 +581,9 @@ export default {
           waitingResponse: '等待回复...',
           clearContext: '清除上下文',
           contextCleared: '上下文已清除',
+          toggleMute: '切换静音',
+          voiceCall: '语音通话',
+          toggleTextMode: '切换文字模式',
         },
         notifications: {
           copiedAccessToken: '访问令牌已复制到剪贴板',
@@ -1195,6 +1207,7 @@ export default {
             setDefault: '设为默认地址',
             delete: '删除',
             edit: '编辑',
+            default: '默认',
           },
         },
         AppLanguagePage: {
@@ -1351,6 +1364,12 @@ export default {
             usageInfo: '使用信息',
             purpose: '用途',
           },
+          purposes: {
+            account: '账号管理与服务提供',
+            device: '设备连接与功能支持',
+            voiceprint: '声纹识别与个性化',
+            usage: '服务优化与体验提升',
+          },
         },
       },
       // ===== Batch 1: Chat history =====
@@ -1504,6 +1523,17 @@ export default {
         MessageDetailPage: {
           labels: {
             title: '消息详情',
+            noContent: '暂无内容',
+          },
+          items: {
+            m1Title: '新的通知',
+            m1Content: '您有一条新的通知，请前往查看。这条通知是关于您设备更新的提醒，请及时查看。',
+            m2Title: '情绪不佳',
+            m2Content: '监测到长期情绪不佳，建议与乐宝进行更多互动以改善心情。',
+            m3Title: '通知标题',
+            m3Content: '这里是通知的内容说明，详细描述了通知的具体事项。',
+            m4Title: '新用户会员已发放',
+            m4Content: '可在会员中心查看哦！欢迎加入乐宝大家庭。',
           },
         },
         ActivityMessagesPage: {
@@ -1511,6 +1541,7 @@ export default {
             title: '活动消息',
             empty: '暂无活动消息',
             viewDetail: '查看详情',
+            comingSoon: '活动详情即将上线',
           },
           items: {
             a1Title: '会员日，优惠限今日',

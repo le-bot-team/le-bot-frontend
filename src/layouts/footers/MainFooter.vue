@@ -9,7 +9,7 @@ const { dark } = useQuasar();
 <template>
   <q-footer class="bg-transparent">
     <q-toolbar :class="{ 'text-dark': !dark.isActive}">
-      <q-tabs class="full-width" active-color="primary" dense indicator-color="transparent" no-caps>
+      <q-tabs class="full-width" align="justify" active-color="primary" dense indicator-color="transparent" no-caps>
         <q-route-tab
           v-for="(navigation, index) in MAIN_NAVIGATIONS"
           :key="index"
