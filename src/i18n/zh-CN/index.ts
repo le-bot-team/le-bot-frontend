@@ -151,6 +151,7 @@ export default {
           hotTopic: '高频话题',
           hours: '{hours} 小时',
           hoursUnit: '小时',
+          hoursValue: '{hours}小时',
         },
       },
     },

@@ -49,7 +49,7 @@ const i18n = i18nSubPath('components.growthData.OverviewCard');
     <!-- Stats row (矩形 2055) -->
     <div class="growth-stats-row">
       <div class="growth-stat-col">
-        <div class="growth-stats-value">{{ weeklyInteract }}{{ i18n('labels.hoursUnit') }}</div>
+        <div class="growth-stats-value">{{ i18n('labels.hoursValue', { hours: weeklyInteract }) }}</div>
         <div class="growth-section-caption">{{ i18n('labels.weeklyInteract') }}</div>
       </div>
       <div class="growth-stat-divider" />

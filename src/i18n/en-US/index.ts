@@ -151,6 +151,7 @@ export default {
           hotTopic: 'Hot Topic',
           hours: '{hours} Hours',
           hoursUnit: 'hrs',
+          hoursValue: '{hours} hrs',
         },
       },
     },
