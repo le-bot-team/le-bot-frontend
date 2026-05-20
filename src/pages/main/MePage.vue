@@ -26,7 +26,8 @@ const menuList: MenuEntry[] = [
   {
     iconSrc: iconOrder,
     label: i18n('labels.myOrders'),
-    to: '/stack/orders',
+    // TODO: Replace with '/stack/orders' once OrdersPage is implemented.
+    to: '/stack/devices',
   },
   {
     iconSrc: iconChildInfor,
@@ -36,7 +37,8 @@ const menuList: MenuEntry[] = [
   {
     iconSrc: iconFeedback,
     label: i18n('labels.helpAndFeedback'),
-    to: '/stack/help',
+    // TODO: Replace with '/stack/help' once HelpPage is implemented.
+    to: '/stack/about',
   },
   {
     iconSrc: iconAboutUs,
@@ -63,7 +65,7 @@ const onNotificationClick = () => {
     <div class="me-container column q-pa-lg q-gutter-y-lg">
       <div class="row items-center justify-end me-topbar">
         <q-btn
-          aria-label="Notifications"
+          :aria-label="i18n('labels.notifications')"
           class="me-notify-btn"
           flat
           round

@@ -22,6 +22,7 @@ interface HeaderActionMeta {
   icon: string;
   event: 'chat:mute' | 'chat:call' | 'chat:text-toggle';
   ariaLabel?: string;
+  ariaLabelKey?: string;
 }
 
 const { dark } = useQuasar();
@@ -42,6 +43,8 @@ const isTextMode = ref(true);
 const title = computed(() => {
   // Chat page: dynamic device name
   if (route.name === 'chat' || route.name === 'chat-voice-call') {
+    const childName = currentDevice.value?.childInfo?.name;
+    if (childName) return `${childName}的乐宝`;
     const deviceName = currentDevice.value?.name;
     if (deviceName) return deviceName;
   }
@@ -118,7 +121,7 @@ function goBack() {
               action.icon === 'chat-mute' && isMuted ? 'stack-header-action--chat-mute-muted' : '',
               action.icon === 'chat-text-toggle' && !isTextMode ? 'stack-header-action--chat-text-toggle-off' : ''
             ]"
-            :aria-label="action.ariaLabel ?? action.icon"
+            :aria-label="action.ariaLabelKey && i18n.te(action.ariaLabelKey) ? i18n.t(action.ariaLabelKey) : (action.ariaLabel ?? action.icon)"
             @click="onActionTap(action)"
           />
         </div>

@@ -188,6 +188,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'family-group-create',
   },
   {
+    label: i18n('stack.familyGroupJoin'),
+    icon: 'mdi-account-plus',
+    available: true,
+    route: 'family-group-join',
+  },
+  {
     label: i18n('stack.addVirtualDevice'),
     icon: 'mdi-plus-circle',
     available: true,

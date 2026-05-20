@@ -71,8 +71,8 @@ const routes: RouteRecordRaw[] = [
         path: 'chat',
         meta: {
           headerActions: [
-            { icon: 'chat-mute', event: 'chat:mute', ariaLabel: 'Toggle mute' },
-            { icon: 'chat-call', event: 'chat:call', ariaLabel: 'Voice call' },
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute' },
+            { icon: 'chat-call', event: 'chat:call', ariaLabelKey: 'pages.stack.ChatPage.labels.voiceCall' },
           ],
         },
         components: {
@@ -85,8 +85,8 @@ const routes: RouteRecordRaw[] = [
         path: 'chat/voice-call',
         meta: {
           headerActions: [
-            { icon: 'chat-mute', event: 'chat:mute', ariaLabel: 'Toggle mute' },
-            { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabel: 'Toggle text mode' },
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute' },
+            { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode' },
           ],
         },
         components: {

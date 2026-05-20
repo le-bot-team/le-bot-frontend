@@ -128,37 +128,37 @@ function handleAddDevice() {
         <!-- 左上：标题 + 设备切换 -->
         <div class="home-title-row">
           <div class="home-robot-name">{{ currentDeviceName }}</div>
-          <div
+          <button
+            type="button"
             class="home-device-change"
-            role="button"
             :aria-label="i18n('labels.deviceChange')"
             @click="goDeviceSwitch"
           >
             <img :src="iconDeviceChangeUrl" alt="device" class="home-icon-img" />
-          </div>
+          </button>
         </div>
 
         <!-- 右上：设置图标 -->
-        <div
+        <button
+          type="button"
           class="home-icon-robot-set"
-          role="button"
           :aria-label="i18n('labels.robotSettings')"
           @click="goRobotSettings"
         >
           <img :src="iconRobotSetUrl" alt="robot-set" class="home-icon-img" />
-        </div>
+        </button>
 
         <!-- 右上：消息图标（最右侧） -->
-        <div
+        <button
+          type="button"
           class="home-icon-msg"
-          role="button"
           :aria-label="i18n('labels.messages')"
           @click="goMessages"
         >
           <img :src="iconMsgHomeUrl" alt="msg" class="home-icon-img" />
           <!-- 未读红点：有未读消息时显示 -->
           <span v-if="hasUnreadMessages" class="home-icon-msg-dot" aria-hidden="true" />
-        </div>
+        </button>
 
         <!-- 陪伴天数 - 导航栏下方 -->
         <div class="home-companion-days">
@@ -167,9 +167,9 @@ function handleAddDevice() {
       </div>
 
       <!-- Mascot (3D 乐宝机器人形象) — 占位：待设计师提供透明背景PNG -->
-      <div
+      <button
+        type="button"
         class="home-hero-mascot"
-        role="button"
         :aria-label="i18n('labels.mascotPlaceholder')"
         @click="goChat"
       >
@@ -177,7 +177,7 @@ function handleAddDevice() {
           <span class="home-mascot-placeholder-text">乐宝</span>
         </div>
         <img v-else :src="iconMascotUrl" alt="乐宝" class="home-mascot-img" />
-      </div>
+      </button>
       <!-- 设计稿气泡文案 -->
       <div class="home-hero-bubble">
         <p class="home-bubble-line1">{{ i18n('labels.bubbleLine1') }}</p>
@@ -188,26 +188,26 @@ function handleAddDevice() {
       <section class="home-topics">
         <header class="home-topics-head">
           <div class="home-topics-title">{{ i18n('labels.hotTopicsTitle') }}</div>
-          <div class="home-topics-history" role="button" @click="goChatHistory">
+          <button type="button" class="home-topics-history" @click="goChatHistory">
             <span>{{ i18n('labels.chatHistory') }}</span>
             <span class="home-topics-history-icon">
               <img :src="iconArrowRightUrl" alt="next" class="home-icon-img" />
             </span>
-          </div>
+          </button>
         </header>
         <div class="home-topics-chips">
-          <div
+          <button
             v-for="topic in topics"
             :key="topic"
+            type="button"
             class="home-topic-chip"
-            role="button"
             @click="pickTopic(topic)"
           >
             <span class="home-topic-chip-icon">
               <img :src="iconTopicUrl" alt="" class="home-icon-img" />
             </span>
             {{ topic }}
-          </div>
+          </button>
           <!-- More indicator matching design ... -->
           <button type="button" class="home-topics-more" @click="goChatHistory" :aria-label="i18n('labels.chatHistory')">...</button>
         </div>
