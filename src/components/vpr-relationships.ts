@@ -2,17 +2,14 @@ import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('components.vprRelationships');
 
-export const RELATIONSHIP_MAPPINGS = {
-  self: i18n('self'),
-  family: i18n('family'),
-  friend: i18n('friend'),
-  colleague: i18n('colleague'),
-  other: i18n('other'),
-} as const;
+/** All supported relationship keys */
+export type VprRelationship = 'self' | 'family' | 'friend' | 'colleague' | 'other';
 
-export type VprRelationship = keyof typeof RELATIONSHIP_MAPPINGS;
+/** Get localized display text for a relationship key. Evaluated lazily on each call. */
+export const getRelationshipLabel = (key: VprRelationship): string => i18n(key);
 
-export const RELATIONSHIP_OPTIONS = Object.entries(RELATIONSHIP_MAPPINGS).map(([k, v]) => ({
-  label: v,
-  value: k as VprRelationship,
-}));
+/** Options list for relationship selectors. Evaluated fresh on each call. */
+export const getRelationshipOptions = (): { label: string; value: VprRelationship }[] => {
+  const keys: VprRelationship[] = ['self', 'family', 'friend', 'colleague', 'other'];
+  return keys.map((k) => ({ label: i18n(k), value: k }));
+};

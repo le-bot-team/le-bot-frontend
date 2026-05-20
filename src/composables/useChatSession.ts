@@ -1,5 +1,5 @@
 import { uid } from 'quasar';
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref, shallowRef, type Ref } from 'vue';
 
 import { useChatPlayer } from 'src/composables/useChatPlayer';
 import { useChatRecorder } from 'src/composables/useChatRecorder';
@@ -47,7 +47,7 @@ export interface UseChatSessionReturn {
   /** Whether assistant audio is currently playing */
   isAudioPlaying: Ref<boolean>;
   /** Connect to the chat server */
-  connect: (token: string) => Promise<void>;
+  connect: (token: string, deviceId?: string, sessionId?: string) => Promise<void>;
   /** Disconnect from the chat server */
   disconnect: () => void;
   /** Manually trigger a wake (button press equivalent of GPIO) */
@@ -91,7 +91,11 @@ export function useChatSession(): UseChatSessionReturn {
 
   // --- Per-turn player instance management ---
   // Each assistant response turn gets its own player instance
+  const currentTurnPlayerRef = shallowRef(player);
   let currentTurnPlayer = player;
+
+  // Reactive isAudioPlaying that tracks the current player
+  const isAudioPlaying = computed(() => currentTurnPlayerRef.value.isPlaying.value);
 
   // ==========================================================================
   // WebSocket event handlers — mirrors Go's websocket.MessageHandler interface
@@ -155,6 +159,7 @@ export function useChatSession(): UseChatSessionReturn {
     if (msg.audioChunks.length > 0) {
       const combinedBlob = await pcmToWav(new Blob(msg.audioChunks));
       msg.audioUrl = URL.createObjectURL(combinedBlob);
+      msg.audioChunks = []; // Release intermediate blobs to free memory
     }
 
     currentTurnPlayer.setAudioComplete(true);
@@ -203,6 +208,7 @@ export function useChatSession(): UseChatSessionReturn {
         // Create a new player for the upcoming assistant turn
         currentTurnPlayer.destroy();
         currentTurnPlayer = useChatPlayer();
+        currentTurnPlayerRef.value = currentTurnPlayer;
         setupPlayerCallbacks();
       }
     }
@@ -267,6 +273,7 @@ export function useChatSession(): UseChatSessionReturn {
     // Prepare a new player for next response
     currentTurnPlayer.destroy();
     currentTurnPlayer = useChatPlayer();
+    currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
     console.log('[useChatSession] State → WaitingResponse (silence detected)');
@@ -286,6 +293,7 @@ export function useChatSession(): UseChatSessionReturn {
     // Clean up player
     currentTurnPlayer.destroy();
     currentTurnPlayer = useChatPlayer();
+    currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
     // Restart wake word listener
@@ -376,12 +384,15 @@ export function useChatSession(): UseChatSessionReturn {
   // Public API
   // ==========================================================================
 
-  async function connect(token: string): Promise<void> {
-    // Setup WS handlers before connecting
+  async function connect(token: string, deviceId?: string, sessionId?: string): Promise<void> {
+    // Setup WS handlers before connecting — useWsClient queues them as
+    // pendingHandlers and applies them inside connect() to the new WsWrapper
     setupWsHandlers();
 
-    // Connect WebSocket
-    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${token}`;
+    // Connect WebSocket with optional deviceId for virtual device binding
+    const deviceParam = deviceId ? `&deviceId=${encodeURIComponent(deviceId)}` : '';
+    const sessionParam = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
+    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}${sessionParam}`;
     wsClient.connect(wsUrl);
 
     // Initialize microphone
@@ -560,7 +571,7 @@ export function useChatSession(): UseChatSessionReturn {
     isWakeWordSupported: wakeWord.isSupported,
     isWakeWordListening: wakeWord.isListening,
     isRecording: recorder.isRecording,
-    isAudioPlaying: currentTurnPlayer.isPlaying,
+    isAudioPlaying,
     connect,
     disconnect,
     wake,

@@ -1,72 +1,89 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+// ChatMessageItem — bubble rendered inside ChatMessageList.
+// Design a2096a64: AI bubble (transparent bg, white text, left-aligned) / user
+// bubble (transparent bg, blue #2791EA text, right-aligned). Padding, radius
+// and shadow come from the `.chat-bubble*` classes in src/css/app.scss.
+
+import { computed, ref } from 'vue';
 
 import type { ChatMessage } from 'src/types/chat/types';
+import { i18nSubPath } from 'src/utils/common';
+
+const i18n = i18nSubPath('components.chat.ChatMessageItem');
 
 const props = defineProps<{
   message: ChatMessage;
 }>();
 
 const isUser = computed(() => props.message.role === 'user');
-const hasAudio = computed(() => !!props.message.audioUrl);
 const hasText = computed(() => props.message.text.length > 0);
-const timeLabel = computed(() => {
-  const date = new Date(props.message.timestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-});
+const isTyping = computed(
+  () => !isUser.value && !props.message.isFinished && props.message.isStreaming && !hasText.value,
+);
+const hasAudio = computed(() => !!props.message.audioUrl);
+
+const audioRef = ref<HTMLAudioElement | null>(null);
+const isPlaying = ref(false);
+
+function toggleAudio() {
+  const el = audioRef.value;
+  if (!el) return;
+  if (isPlaying.value) {
+    el.pause();
+    el.currentTime = 0;
+    isPlaying.value = false;
+  } else {
+    el.currentTime = 0;
+    el.play()
+      .then(() => { isPlaying.value = true; })
+      .catch((err) => {
+        console.error('[ChatMessageItem] audio play failed:', err);
+        isPlaying.value = false;
+      });
+  }
+}
+
+function onAudioEnded() {
+  isPlaying.value = false;
+}
+
+function onAudioError() {
+  isPlaying.value = false;
+}
 </script>
 
 <template>
-  <q-chat-message :sent="isUser" :stamp="timeLabel">
-    <template #avatar>
-      <q-avatar :color="isUser ? 'primary' : 'deep-orange'" size="36px" text-color="white">
-        <q-icon :name="isUser ? 'person' : 'smart_toy'" size="20px" />
-      </q-avatar>
+  <div class="chat-bubble" :class="isUser ? 'chat-bubble--user' : 'chat-bubble--ai'">
+    <template v-if="isTyping">
+      <span class="chat-bubble__typing" :aria-label="i18n('labels.typing')">
+        <span class="chat-bubble__typing-dot" />
+        <span class="chat-bubble__typing-dot" />
+        <span class="chat-bubble__typing-dot" />
+      </span>
     </template>
-
-    <div class="chat-message-content">
-      <!-- Streaming / processing indicator -->
-      <div v-if="!message.isFinished && message.isStreaming" class="row items-center q-gutter-x-sm">
-        <q-spinner-dots color="grey-6" size="20px" />
-        <span v-if="!hasText" class="text-grey-6 text-caption">
-          {{ isUser ? 'Listening...' : 'Thinking...' }}
-        </span>
-      </div>
-
-      <!-- Text content -->
-      <div v-if="hasText" class="chat-text">
-        {{ message.text }}
-      </div>
-
-      <!-- Audio player (shown when audio URL is available) -->
-      <div v-if="hasAudio" class="chat-audio q-mt-xs">
-        <audio controls :src="message.audioUrl" preload="metadata" class="chat-audio-player" />
-      </div>
-
-      <!-- Finished indicator -->
-      <div v-if="message.isFinished && !hasText && !hasAudio" class="text-grey-5 text-caption">
-        (empty)
-      </div>
-    </div>
-  </q-chat-message>
+    <template v-else>
+      {{ message.text }}
+      <button
+        v-if="hasAudio && message.isFinished"
+        type="button"
+        class="chat-bubble__audio-btn"
+        :class="{ 'chat-bubble__audio-btn--playing': isPlaying }"
+        :aria-label="isPlaying ? i18n('labels.stopAudio') : i18n('labels.playAudio')"
+        @click.stop="toggleAudio"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path v-if="!isPlaying" d="M4 3l10 5-10 5V3z" />
+          <path v-else d="M3 2h4v12H3V2zm6 0h4v12H9V2z" />
+        </svg>
+      </button>
+      <audio
+        v-if="hasAudio"
+        ref="audioRef"
+        :src="message.audioUrl"
+        preload="none"
+        @ended="onAudioEnded"
+        @error="onAudioError"
+      />
+    </template>
+  </div>
 </template>
-
-<style lang="scss" scoped>
-.chat-message-content {
-  max-width: 100%;
-  min-width: 80px;
-}
-
-.chat-text {
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 1.5;
-}
-
-.chat-audio-player {
-  width: 100%;
-  min-width: 200px;
-  max-width: 300px;
-  height: 36px;
-}
-</style>

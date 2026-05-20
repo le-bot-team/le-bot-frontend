@@ -1,30 +1,35 @@
 <script setup lang="ts">
+// DeviceCard — placeholder component for the home page device display.
+// Will be replaced with a full implementation when device switching UI is finalized.
+import { storeToRefs } from 'pinia';
+
 import { i18nSubPath } from 'src/utils/common';
+import { useDeviceStore } from 'stores/device';
 
 const i18n = i18nSubPath('components.home.DeviceCard');
+const { currentDevice } = storeToRefs(useDeviceStore());
 </script>
 
 <template>
-  <q-card bordered flat>
-    <q-card-section class="row justify-between">
-      <div class="column justify-center items-start">
-        <div class="text-h6">
-          {{ i18n('labels.noDevice') }}
+  <q-card bordered flat class="device-card">
+    <q-card-section>
+      <div class="row items-center q-gutter-x-sm">
+        <q-icon name="smart_toy" size="32px" color="primary" />
+        <div class="column">
+          <div class="text-subtitle1 text-weight-medium">
+            {{ currentDevice?.name ?? i18n('labels.defaultName') }}
+          </div>
+          <div class="text-caption text-grey">
+            {{ currentDevice?.model ?? i18n('labels.noDevice') }}
+          </div>
         </div>
-        <div v-if="false" class="text-grey">Chatting</div>
-      </div>
-      <div class="column justify-center items-end">
-        <q-btn
-          dense
-          flat
-          icon-right="mdi-chevron-right"
-          :label="i18n('labels.addNewDevice')"
-          no-caps
-          to="/stack/devices?action=add"
-        />
       </div>
     </q-card-section>
   </q-card>
 </template>
 
-<style scoped></style>
+<style scoped>
+.device-card {
+  border-radius: 12px;
+}
+</style>

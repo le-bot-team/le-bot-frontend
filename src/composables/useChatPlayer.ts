@@ -1,5 +1,7 @@
 import { ref, type Ref } from 'vue';
 
+import { pcmToWav } from 'src/utils/audio';
+
 export interface UseChatPlayerReturn {
   /** Whether audio is currently playing */
   isPlaying: Ref<boolean>;
@@ -53,19 +55,28 @@ export function useChatPlayer(): UseChatPlayerReturn {
   async function playChunk(base64Audio: string): Promise<void> {
     const ctx = ensureContext();
 
-    // Decode base64 to ArrayBuffer
+    // Resume AudioContext if suspended (required on mobile after user gesture)
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+
+    // Decode base64 to ArrayBuffer (raw PCM)
     const binary = atob(base64Audio);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
       bytes[i] = binary.charCodeAt(i);
     }
-    const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const pcmBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 
     // Store raw chunk for later combined blob
-    rawChunks.push(arrayBuffer.slice(0));
+    rawChunks.push(pcmBuffer.slice(0));
+
+    // Wrap raw PCM in WAV header so decodeAudioData can parse it
+    const wavBlob = await pcmToWav(new Blob([pcmBuffer]));
+    const wavBuffer = await wavBlob.arrayBuffer();
 
     try {
-      const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+      const audioBuffer = await ctx.decodeAudioData(wavBuffer);
       const source = ctx.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(ctx.destination);
