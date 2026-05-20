@@ -67,17 +67,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'message-detail',
-        path: 'messages/:id',
-        components: {
-          default: () => import('pages/stack/messages/MessageDetailPage.vue'),
-          header: () => import('layouts/headers/StackHeader.vue'),
-        },
-        meta: {
-          title: 'pages.stack.messages.MessageDetailPage.labels.title',
-        },
-      },
-      {
         name: 'activity-messages',
         path: 'messages/activity',
         components: {
@@ -86,6 +75,17 @@ const routes: RouteRecordRaw[] = [
         },
         meta: {
           title: 'pages.stack.messages.ActivityMessagesPage.labels.title',
+        },
+      },
+      {
+        name: 'message-detail',
+        path: 'messages/:id',
+        components: {
+          default: () => import('pages/stack/messages/MessageDetailPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.messages.MessageDetailPage.labels.title',
         },
       },
       {
@@ -248,6 +248,9 @@ const routes: RouteRecordRaw[] = [
           default: () => import('pages/stack/profile/ProfileFieldEditPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
+        meta: {
+          title: 'pages.stack.profile.ProfileFieldEditPage.labels.title',
+        },
       },
       {
         name: 'profile-change-password',
@@ -281,6 +284,9 @@ const routes: RouteRecordRaw[] = [
               default: () => import('pages/stack/DeviceConfigPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
+            meta: {
+              title: 'pages.stack.DeviceConfigPage.labels.title',
+            },
           },
           {
             name: 'device-config-voice',
@@ -288,6 +294,9 @@ const routes: RouteRecordRaw[] = [
             components: {
               default: () => import('pages/stack/device-config/VoiceStylePage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.device-config.VoiceStylePage.labels.title',
             },
           },
           {
@@ -297,6 +306,9 @@ const routes: RouteRecordRaw[] = [
               default: () => import('pages/stack/device-config/LanguagePage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
+            meta: {
+              title: 'pages.stack.device-config.LanguagePage.labels.title',
+            },
           },
           {
             name: 'device-config-personality',
@@ -305,6 +317,9 @@ const routes: RouteRecordRaw[] = [
               default: () => import('pages/stack/device-config/PersonalityPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
+            meta: {
+              title: 'pages.stack.device-config.PersonalityPage.labels.title',
+            },
           },
           {
             name: 'device-config-personality-detail',
@@ -312,6 +327,9 @@ const routes: RouteRecordRaw[] = [
             components: {
               default: () => import('pages/stack/device-config/PersonalityDetailPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
+            },
+            meta: {
+              title: 'pages.stack.device-config.PersonalityDetailPage.labels.title',
             },
           },
           {

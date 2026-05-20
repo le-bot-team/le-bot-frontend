@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // SplashPage — brand splash / loading screen.
-// Displays logo + slogan + progress bar, auto-redirects to /main/home after 3s.
+// Displays logo + slogan + progress bar, auto-redirects after 3s.
+// Navigates to /main/home (guard will redirect to auth if needed).
 
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
@@ -18,7 +19,8 @@ onMounted(() => {
     if (progress.value >= 100) {
       clearInterval(interval!);
       interval = null;
-      router.replace('/main/home').catch(console.error);
+      // Navigate to /main/home; the route guard will redirect to auth if no token
+      void router.replace('/main/home');
     }
   }, 60);
 });

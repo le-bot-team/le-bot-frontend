@@ -49,10 +49,11 @@ router.beforeEach((to) => {
     return { name: 'auth' };
   }
 
-  // Has token but profile incomplete (no nickname): only allow onboarding-complete
+  // Has token but profile incomplete (no nickname): allow onboarding flow
   if (!profileStore.profile?.nickname) {
-    if (to.name === 'onboarding-complete') return true;
-    return { name: 'auth' };
+    const onboardingRoutes = ['onboarding-complete', 'onboarding', 'add-virtual-device'];
+    if (typeof to.name === 'string' && onboardingRoutes.includes(to.name)) return true;
+    return { name: 'onboarding-complete' };
   }
 
   return true;
