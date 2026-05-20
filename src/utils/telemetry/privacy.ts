@@ -106,7 +106,7 @@ function isPIIKey(key: string): boolean {
 /** Keys that are allowed to pass through as objects without recursive filtering (with size limit) */
 const PASSTHROUGH_OBJECT_KEYS = new Set(['routeQuery', 'routeParams']);
 
-/** Maximum JSON size for passthrough object values (bytes) */
+/** Maximum JSON byte size for passthrough object values */
 const PASSTHROUGH_MAX_SIZE = 1024;
 
 /**
@@ -129,11 +129,20 @@ export function filterEventData(
     // Handle object values
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       if (PASSTHROUGH_OBJECT_KEYS.has(key)) {
-        // Allow passthrough with size limit
+        // Allow passthrough with size limit, but still filter inner keys for PII
         try {
-          const serialized = JSON.stringify(value);
-          if (serialized.length <= PASSTHROUGH_MAX_SIZE) {
-            filtered[key] = value;
+          const innerObj = value as Record<string, unknown>;
+          const sanitized: Record<string, unknown> = {};
+          for (const [innerKey, innerValue] of Object.entries(innerObj)) {
+            if (!isPIIKey(innerKey)) {
+              sanitized[innerKey] = innerValue;
+            }
+          }
+          if (Object.keys(sanitized).length > 0) {
+            const serialized = JSON.stringify(sanitized);
+            if (new TextEncoder().encode(serialized).byteLength <= PASSTHROUGH_MAX_SIZE) {
+              filtered[key] = sanitized;
+            }
           }
         } catch {
           // Skip non-serializable values

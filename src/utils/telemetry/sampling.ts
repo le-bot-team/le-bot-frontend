@@ -72,7 +72,7 @@ const SECONDARY_PAGES: SamplingRateMap = {
   'profile-change-password': 0.3,
   'profile-change-phone': 0.3,
   'device-config-wifi': 0.3,
-  'device-config-update': 0.3,
+  'device-config-firmware': 0.3,
   'device-config-about': 0.3,
   'family-group-child-edit': 0.3,
 };
@@ -121,6 +121,9 @@ export function shouldSample(
   } else if (eventType === 'custom') {
     finalRate = pageRate * config.customRate;
   }
+
+  // Clamp to [0, 1] to handle misconfiguration gracefully
+  finalRate = Math.max(0, Math.min(1, finalRate));
 
   // 随机判定
   return Math.random() < finalRate;

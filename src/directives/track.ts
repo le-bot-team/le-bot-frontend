@@ -39,7 +39,13 @@ const SIMPLE_EVENT_MAP: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 /** Resolve binding value (supports shorthand string form) */
-function resolveBinding(binding: DirectiveBinding<VTrackBinding | string>): VTrackBinding {
+function resolveBinding(binding: DirectiveBinding<VTrackBinding | string>): VTrackBinding | null {
+  if (!binding.value) {
+    if (process.env.DEV) {
+      console.warn('[v-track] Directive used without a value, skipping.');
+    }
+    return null;
+  }
   if (typeof binding.value === 'string') {
     return { event: binding.value };
   }
@@ -155,6 +161,8 @@ interface TrackMeta {
 
 function bindDirective(el: HTMLElement, binding: DirectiveBinding<VTrackBinding | string>): void {
   const resolved = resolveBinding(binding);
+  if (!resolved) return; // No-op if binding value is missing
+
   const arg = resolveArg(binding);
 
   let cleanup: () => void;

@@ -188,7 +188,7 @@ export class TelemetryEngine {
       deviceId: state.deviceId,
       timestamp: Date.now(),
       data: filteredData,
-      sampled: true,
+      sampled: true, // Always true for sent events (unsampled events are dropped above)
       ...(duration !== undefined && { duration }),
     };
 
@@ -362,24 +362,23 @@ export class TelemetryEngine {
     const events = this.buffer.drain();
     if (events.length === 0) return;
 
-    const state = this._getState();
+    const beaconUrl = `${process.env.LE_BOT_BACKEND_HTTP_BASE_URL}/api/v1/telemetry/batch`;
     const payload = JSON.stringify({
       events,
       clientTime: Date.now(),
       batchSeq: ++this.batchSeq,
-      sessionId: state.sessionId,
     });
 
     // Try sendBeacon first (most reliable during unload)
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: 'application/json' });
-      const sent = navigator.sendBeacon('/api/telemetry/batch', blob);
+      const sent = navigator.sendBeacon(beaconUrl, blob);
       if (sent) return;
     }
 
     // Fallback: fetch with keepalive
     try {
-      void fetch('/api/telemetry/batch', {
+      void fetch(beaconUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: payload,

@@ -79,15 +79,13 @@ export class BufferQueue {
 
   /** 手动触发 flush（将缓冲区所有事件发送到回调） */
   async flush(): Promise<void> {
-    if (this.flushing || this.buffer.length === 0) return;
+    if (this.flushing || this.buffer.length === 0 || !this.flushCallback) return;
 
     this.flushing = true;
     const events = this.buffer.splice(0, this.buffer.length);
 
     try {
-      if (this.flushCallback) {
-        await this.flushCallback(events);
-      }
+      await this.flushCallback(events);
     } catch (err) {
       // flush 失败，将事件放回缓冲区头部（下次重试）
       this.buffer.unshift(...events);

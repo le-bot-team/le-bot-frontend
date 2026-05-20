@@ -99,10 +99,12 @@ export default defineBoot(async ({ app }) => {
       // Refresh activity (updates lastActivity + persists)
       telemetryStore.refreshActivity();
 
-      // If session was expired, the refreshActivity already created a new session.
-      // Emit app_resume event for the new session.
-      if (wasExpired) {
-        void engine.trackAppResume();
+      // Always emit app_resume when returning to foreground
+      void engine.trackAppResume();
+
+      // If session was expired, refreshActivity already created a new session
+      if (wasExpired && process.env.DEV) {
+        console.debug('[Telemetry] Session expired on resume, new session created');
       }
     }
   });

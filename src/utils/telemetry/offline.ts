@@ -48,6 +48,7 @@ export class OfflineQueue {
   private onlineHandler: (() => void) | null = null;
   private visibilityHandler: (() => void) | null = null;
   private initialized = false;
+  private _flushing = false;
 
   constructor(config: Partial<OfflineQueueConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -66,7 +67,7 @@ export class OfflineQueue {
       this.initialized = true;
     } catch (err) {
       if (process.env.DEV) {
-        console.warn('[Telemetry] OfflineQueue init failed, falling back to memory-only:', err);
+        console.warn('[Telemetry] OfflineQueue init failed, offline persistence disabled:', err);
       }
     }
   }
@@ -120,8 +121,9 @@ export class OfflineQueue {
 
   /** 补发所有离线事件（按批次） */
   async flush(): Promise<void> {
-    if (!this.db || !this.flushCallback) return;
+    if (!this.db || !this.flushCallback || this._flushing) return;
 
+    this._flushing = true;
     try {
       let continueFlush = true;
       while (continueFlush) {
@@ -141,6 +143,8 @@ export class OfflineQueue {
       if (process.env.DEV) {
         console.warn('[Telemetry] OfflineQueue flush failed:', err);
       }
+    } finally {
+      this._flushing = false;
     }
   }
 
@@ -228,7 +232,7 @@ export class OfflineQueue {
     const index = store.index('timestamp');
 
     let deleted = 0;
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const request = index.openCursor();
       request.onsuccess = () => {
         const cursor = request.result;
@@ -237,11 +241,15 @@ export class OfflineQueue {
           deleted++;
           cursor.continue();
         } else {
+          // Cursor iteration done, now wait for transaction to complete
           resolve();
         }
       };
       request.onerror = () => reject(new Error(request.error?.message ?? 'IDB evict failed'));
     });
+
+    // Wait for the transaction to fully commit
+    await this.completeTransaction(tx);
   }
 
   /** 等待事务完成 */
