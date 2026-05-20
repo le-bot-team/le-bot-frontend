@@ -69,6 +69,7 @@ export function useWakeWord(): UseWakeWordReturn {
   let recognition: SpeechRecognitionLike | undefined;
   let wakeCallback: (() => void) | undefined;
   let shouldBeListening = false;
+  let restartTimerId: ReturnType<typeof setTimeout> | undefined;
 
   function matchesWakePhrase(transcript: string): boolean {
     const normalized = transcript.toLowerCase().replace(/[,，。.!！?\s]/g, '');
@@ -107,7 +108,8 @@ export function useWakeWord(): UseWakeWordReturn {
       isListening.value = false;
       if (shouldBeListening) {
         // Re-start after a brief delay to avoid rapid cycling
-        setTimeout(() => {
+        restartTimerId = setTimeout(() => {
+          restartTimerId = undefined;
           if (shouldBeListening) {
             try {
               recognition?.start();
@@ -137,6 +139,10 @@ export function useWakeWord(): UseWakeWordReturn {
 
   function stop(): void {
     shouldBeListening = false;
+    if (restartTimerId !== undefined) {
+      clearTimeout(restartTimerId);
+      restartTimerId = undefined;
+    }
     if (recognition) {
       try {
         recognition.stop();
