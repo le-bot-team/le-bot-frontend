@@ -42,7 +42,7 @@ const { trackClick, trackConversion } = useTracker();
 /** 当前设备名称（如"小新的乐宝"） */
 const currentDeviceName = computed(() => {
   const childName = currentDevice.value?.childInfo?.name;
-  return childName ? `${childName}的乐宝` : i18n('labels.robotName');
+  return childName ? i18n('labels.deviceNameFormat', { name: childName }) : i18n('labels.robotName');
 });
 
 // 未读消息状态（mock数据，后续接入后端替换为真实数据）
@@ -72,29 +72,29 @@ const topics = computed<string[]>(() => [
 
 onBeforeMount(() => {
   if (!accessToken.value?.length) {
-    router.push('/stack/auth?from=/main/home').catch((err) => console.error(err));
+    void router.push('/stack/auth?from=/main/home');
   }
 });
 
 function goChat() {
   trackConversion('first_chat');
-  router.push('/stack/chat').catch((err) => console.error(err));
+  void router.push('/stack/chat');
 }
 
 function goChatHistory() {
   trackClick('btn_click_chat_history');
-  router.push('/stack/chat/history').catch((err) => console.error(err));
+  void router.push('/stack/chat/history');
 }
 
 function pickTopic(topic: string) {
   trackClick('btn_click_topic_chip', { routeQuery: topic });
-  router.push({ path: '/stack/chat', query: { topic } }).catch((err) => console.error(err));
+  void router.push({ path: '/stack/chat', query: { topic } });
 }
 
 function goMessages() {
   trackClick('btn_click_messages');
   // TODO: Replace with '/stack/messages' once MessagesPage is implemented.
-  router.push('/stack/chat/history').catch((err) => console.error(err));
+  void router.push('/stack/chat/history');
 }
 
 function goDeviceSwitch() {
@@ -104,12 +104,12 @@ function goDeviceSwitch() {
 
 function goRobotSettings() {
   trackClick('btn_click_robot_settings');
-  router.push('/stack/device-config').catch((err) => console.error(err));
+  void router.push('/stack/device-config');
 }
 
 function handleAddDevice() {
   trackConversion('device_activated');
-  router.push('/stack/add-virtual-device').catch((err) => console.error(err));
+  void router.push('/stack/add-virtual-device');
 }
 </script>
 

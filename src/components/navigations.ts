@@ -56,6 +56,18 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'chat',
   },
   {
+    label: i18n('stack.chatVoiceCall'),
+    icon: 'mdi-phone',
+    available: true,
+    route: 'chat-voice-call',
+  },
+  {
+    label: i18n('stack.chatMuteSettings'),
+    icon: 'mdi-volume-off',
+    available: true,
+    route: 'chat-mute-settings',
+  },
+  {
     label: i18n('stack.profile'),
     icon: 'account-circle',
     available: true,
@@ -72,6 +84,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     icon: 'lock',
     available: true,
     route: 'profile-change-password',
+  },
+  {
+    label: i18n('stack.profileChangePhone'),
+    icon: 'mdi-phone',
+    available: true,
+    route: 'profile-change-phone',
   },
   {
     label: i18n('stack.deviceConfig'),
@@ -150,6 +168,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     icon: 'mdi-microphone-plus',
     available: true,
     route: 'settings-voiceprint-new',
+  },
+  {
+    label: i18n('stack.settingsVoiceprintTest'),
+    icon: 'mdi-microphone',
+    available: true,
+    route: 'settings-voiceprint-test',
   },
   {
     label: i18n('stack.familyGroups'),
@@ -312,6 +336,18 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     icon: 'mdi-file-document',
     available: true,
     route: 'settings-privacy-policy',
+  },
+  {
+    label: i18n('stack.settingsTermsOfService'),
+    icon: 'mdi-file-document',
+    available: true,
+    route: 'settings-terms-of-service',
+  },
+  {
+    label: i18n('stack.settingsUserAgreement'),
+    icon: 'mdi-file-document',
+    available: true,
+    route: 'settings-user-agreement',
   },
   {
     label: i18n('stack.settingsInfoList'),

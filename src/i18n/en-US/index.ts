@@ -208,6 +208,7 @@ export default {
         settingsVoiceprint: 'Voiceprint Settings',
         settingsVoiceprintDetail: 'Voiceprint Settings',
         settingsVoiceprintNew: 'Add Voiceprint',
+        settingsVoiceprintTest: 'Voiceprint Test',
         chatVoiceCall: 'Voice Call',
         chatHistory: 'Chat History',
         chatMuteSettings: 'Mute Settings',

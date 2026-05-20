@@ -208,6 +208,7 @@ export default {
         settingsVoiceprint: '声纹设置',
         settingsVoiceprintDetail: '声纹设置',
         settingsVoiceprintNew: '添加声纹',
+        settingsVoiceprintTest: '声纹测试',
         chatVoiceCall: '语音通话',
         chatHistory: '聊天记录',
         chatMuteSettings: '静音设置',

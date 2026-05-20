@@ -84,6 +84,7 @@ const routes: RouteRecordRaw[] = [
         name: 'chat-voice-call',
         path: 'chat/voice-call',
         meta: {
+          hideBackButton: true,
           headerActions: [
             { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode' },
           ],

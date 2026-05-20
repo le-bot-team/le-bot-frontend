@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { STACK_NAVIGATIONS } from 'components/navigations';
@@ -38,6 +38,16 @@ const isMuted = ref(chatStore.isMuted);
 // Text mode toggle state synced from VoiceCallPage via bus
 const isTextMode = ref(true);
 
+// Reset header action states when navigating away from relevant routes.
+watch(() => route.name, (newName, oldName) => {
+  if (oldName === 'chat-voice-call' && newName !== 'chat-voice-call') {
+    isTextMode.value = true;
+  }
+  if (oldName === 'chat' && newName !== 'chat') {
+    isMuted.value = chatStore.isMuted;
+  }
+});
+
 // Title resolution priority:
 //   1. Chat page: show current device name (e.g. "xx的乐宝"), fallback to i18n default
 //   2. `route.meta.title` as an i18n key (e.g. "pages.stack.ChatPage.labels.pageTitle")
@@ -46,7 +56,7 @@ const title = computed(() => {
   // Chat page: dynamic device name
   if (route.name === 'chat' || route.name === 'chat-voice-call') {
     const childName = currentDevice.value?.childInfo?.name;
-    if (childName) return `${childName}的乐宝`;
+    if (childName) return i18n.t('pages.main.HomePage.labels.deviceNameFormat', { name: childName });
     const deviceName = currentDevice.value?.name;
     if (deviceName) return deviceName;
   }

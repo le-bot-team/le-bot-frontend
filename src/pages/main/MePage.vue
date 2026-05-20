@@ -56,7 +56,7 @@ const menuList: MenuEntry[] = [
 const onNotificationClick = () => {
   trackClick('btn_click_me_notifications');
   // TODO: Replace with '/stack/messages' once MessagesPage is implemented.
-  router.push('/stack/chat/history').catch((err) => console.error(err));
+  void router.push('/stack/chat/history');
 };
 </script>
 
