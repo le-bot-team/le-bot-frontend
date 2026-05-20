@@ -19,16 +19,16 @@ const languages: { value: Locales; labelKey: string }[] = [
 <template>
   <q-page class="settings-sub-page">
     <div class="settings-sub-page__card">
-      <div
+      <button
         v-for="lang in languages"
         :key="lang.value"
+        type="button"
         class="settings-sub-page__row"
-        style="cursor: pointer"
         @click="locale = lang.value"
       >
         <span class="settings-sub-page__row-label">{{ i18n('languages.' + lang.labelKey) }}</span>
         <q-radio v-model="locale" :val="lang.value" color="cyan" dense />
-      </div>
+      </button>
     </div>
   </q-page>
 </template>

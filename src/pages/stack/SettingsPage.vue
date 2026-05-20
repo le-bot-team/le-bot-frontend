@@ -85,7 +85,7 @@ const onBottomAction = () => {
         :key="mi"
         type="button"
         class="settings-menu-row"
-        :aria-disabled="item.disabled ? 'true' : undefined"
+        :disabled="item.disabled || !item.to"
         @click="onMenuClick(item)"
       >
         <span>{{ item.label }}</span>
