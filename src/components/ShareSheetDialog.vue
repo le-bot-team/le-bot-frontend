@@ -41,26 +41,26 @@ function shareWechat() {
     <q-card class="share-sheet">
       <div class="share-sheet__title">{{ i18n('labels.title') }}</div>
       <div class="share-sheet__options">
-        <button class="share-sheet__option" @click="shareWechat">
+        <button type="button" class="share-sheet__option" @click="shareWechat">
           <div class="share-sheet__option-icon" style="background: #07c160">
             <q-icon name="mdi-wechat" size="24px" />
           </div>
           <span class="share-sheet__option-label">{{ i18n('labels.wechat') }}</span>
         </button>
-        <button class="share-sheet__option" @click="copyLink">
+        <button type="button" class="share-sheet__option" @click="copyLink">
           <div class="share-sheet__option-icon" style="background: var(--clr-dialog-btn-link-bg)">
             <q-icon name="mdi-link-variant" size="24px" />
           </div>
           <span class="share-sheet__option-label">{{ i18n('labels.copyLink') }}</span>
         </button>
-        <button class="share-sheet__option" @click="saveQrCode">
+        <button type="button" class="share-sheet__option" @click="saveQrCode">
           <div class="share-sheet__option-icon" style="background: var(--clr-btn-primary-bg)">
             <q-icon name="mdi-qrcode" size="24px" />
           </div>
           <span class="share-sheet__option-label">{{ i18n('labels.saveQrCode') }}</span>
         </button>
       </div>
-      <button class="share-sheet__cancel" @click="onDialogCancel">
+      <button type="button" class="share-sheet__cancel" @click="onDialogCancel">
         {{ i18n('labels.cancel') }}
       </button>
     </q-card>

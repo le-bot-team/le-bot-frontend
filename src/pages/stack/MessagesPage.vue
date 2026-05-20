@@ -15,6 +15,7 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
+import ConfirmDialog from 'src/components/ConfirmDialog.vue';
 import iconDeleteNav from 'src/assets/lanhu/slices/icon-delete-nav.png';
 import iconNotification from 'src/assets/lanhu/messages/icon-2.webp';
 import iconMood from 'src/assets/lanhu/messages/icon-3.webp';
@@ -117,11 +118,13 @@ function onItemClick(item: MessageItem) {
 
 function onDeleteClick(item: MessageItem) {
   $q.dialog({
-    title: '',
-    message: i18n('labels.deleteConfirm'),
-    cancel: { label: i18n('labels.cancel') ?? 'Cancel', flat: true },
-    ok: { label: i18n('labels.confirm') ?? 'OK', flat: true, color: 'negative' },
-    persistent: true,
+    component: ConfirmDialog,
+    componentProps: {
+      title: i18n('labels.deleteConfirm'),
+      confirmLabel: i18n('labels.confirm'),
+      cancelLabel: i18n('labels.cancel'),
+      confirmType: 'danger',
+    },
   }).onOk(() => {
     const idx = messages.value.findIndex((m) => m.id === item.id);
     if (idx !== -1) {
