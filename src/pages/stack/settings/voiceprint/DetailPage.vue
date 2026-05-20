@@ -5,12 +5,13 @@ import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import DeletePersonDialog from 'components/settings/voiceprint/DeletePersonDialog.vue';
-import DeleteVoiceDialog from 'components/settings/voiceprint/DeleteVoiceDialog.vue';
-import { RELATIONSHIP_MAPPINGS } from 'components/vpr-relationships';
+import VoiceNamingPanel from 'components/settings/voiceprint/VoiceNamingPanel.vue';
+import { type VprRelationship } from 'components/vpr-relationships';
 
+import avatarImg from 'src/assets/lanhu/voiceprint/avatar.webp';
 import { router } from 'src/router';
 import type { PersonDetail } from 'src/types/api/voiceprint';
-import { getPerson } from 'src/utils/api/voiceprint';
+import { getPerson, updatePerson } from 'src/utils/api/voiceprint';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 
@@ -22,6 +23,50 @@ const i18n = i18nSubPath('pages.stack.settings.voiceprint.DetailPage');
 
 const personId = ref<string>();
 const personDetail = ref<PersonDetail>();
+const editableName = ref('');
+const editableRelationship = ref<VprRelationship>('friend');
+const submitting = ref(false);
+
+const goBack = () => {
+  router.push('/stack/settings/voiceprint').catch(console.error);
+};
+
+const submitUpdate = async () => {
+  if (!personId.value || !accessToken.value) {
+    return;
+  }
+  const name = editableName.value.trim();
+  if (!name) {
+    notify({ type: 'warning', message: i18n('notifications.nameRequired') });
+    return;
+  }
+  submitting.value = true;
+  try {
+    const { data: response } = await updatePerson(accessToken.value, personId.value, {
+      name,
+      relationship: editableRelationship.value,
+    });
+    if (response.success) {
+      notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
+      setTimeout(() => goBack(), 1200);
+      // Keep submitting=true to prevent duplicate requests until navigation
+    } else {
+      notify({
+        type: 'warning',
+        message: i18n('notifications.updateFailed'),
+        caption: response.message,
+      });
+      submitting.value = false;
+    }
+  } catch (error) {
+    notify({
+      type: 'negative',
+      message: i18n('notifications.updateError'),
+      caption: (error as Error).message,
+    });
+    submitting.value = false;
+  }
+};
 
 const promptDeletePerson = () => {
   if (!personId.value) {
@@ -33,36 +78,19 @@ const promptDeletePerson = () => {
       personId: personId.value,
       personName: personDetail.value?.name,
     },
-  }).onOk(() => setTimeout(() => router.go(-1), 2000));
+  }).onOk(() => setTimeout(() => goBack(), 1200));
 };
 
-const promptDeleteVoice = (voiceId: string, createdAt: string) => {
-  if (!personId.value) {
-    return;
-  }
-  Dialog.create({
-    component: DeleteVoiceDialog,
-    componentProps: {
-      personId: personId.value,
-      personName: personDetail.value?.name,
-      voiceId,
-      createdAt,
-    },
-  }).onOk(() => {
-    if (accessToken.value) {
-      void updatePersonDetail(accessToken.value).catch();
-    }
-  });
-};
-
-const updatePersonDetail = async (accessToken: string) => {
+const updatePersonDetail = async (token: string) => {
   if (!personId.value?.length) {
     return false;
   }
   try {
-    const { data: response } = await getPerson(accessToken, personId.value);
+    const { data: response } = await getPerson(token, personId.value);
     if (response.success) {
       personDetail.value = response.data;
+      editableName.value = response.data.name ?? '';
+      editableRelationship.value = response.data.relationship;
       return true;
     } else {
       notify({
@@ -88,90 +116,38 @@ onMounted(async () => {
     return;
   }
   if (route.params.personId && typeof route.params.personId === 'string') {
+    if (!/^[\w-]+$/.test(route.params.personId)) {
+      goBack();
+      return;
+    }
     personId.value = route.params.personId;
   } else {
-    router.go(-1);
+    goBack();
     return;
   }
   if (!(await updatePersonDetail(accessToken.value))) {
-    setTimeout(() => router.go(-1), 2000);
+    setTimeout(() => goBack(), 2000);
   }
 });
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-md q-pa-md">
-    <q-card bordered flat>
-      <q-card-section>
-        <div class="row justify-between items-center">
-          <div class="column q-gutter-y-md">
-            <div v-if="personDetail" class="text-body1">
-              {{ i18n('labels.name', { name: personDetail.name }) }}
-            </div>
-            <q-skeleton v-else type="text" />
-            <div v-if="personDetail" class="text-caption text-grey">
-              {{ i18n('labels.id', { id: personDetail.person_id }) }}
-            </div>
-            <q-skeleton v-else type="text" />
-          </div>
-          <q-chip
-            v-if="personDetail"
-            color="primary"
-            :label="RELATIONSHIP_MAPPINGS[personDetail.relationship]"
-          />
-          <q-skeleton v-else type="QChip" />
-        </div>
-      </q-card-section>
-      <div
-        v-if="personDetail?.is_temporal"
-        class="absolute-top-right bg-orange text-caption q-px-xs"
-      >
-        {{ i18n('labels.temporary') }}
-      </div>
-    </q-card>
-    <q-card bordered flat>
-      <q-card-section>
-        <div class="text-body1">
-          {{ i18n('labels.voiceprints') }}
-        </div>
-      </q-card-section>
-      <q-card-section v-if="personDetail">
-        <q-list bordered separator>
-          <q-item v-for="voiceprint in personDetail.voices" :key="voiceprint.voice_id">
-            <q-item-section>
-              <q-item-label>
-                {{ new Date(voiceprint.created_at).toLocaleString() }}
-              </q-item-label>
-              <q-item-label caption>
-                {{ voiceprint.voice_id }}
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-btn
-                color="negative"
-                dense
-                icon="delete"
-                @click="promptDeleteVoice(voiceprint.voice_id, voiceprint.created_at)"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-      <q-card-section>
-        <q-btn
-          class="full-width"
-          color="primary"
-          :label="i18n('labels.addVoiceprint')"
-          no-caps
-          :to="`/stack/settings/voiceprint/new?personId=${personId}`"
-        />
-      </q-card-section>
-    </q-card>
-    <q-btn
-      color="negative"
-      :label="i18n('labels.deletePerson')"
-      no-caps
-      @click="promptDeletePerson"
+  <q-page class="voiceprint-detail-page">
+    <voice-naming-panel
+      v-model:name="editableName"
+      v-model:relationship="editableRelationship"
+      :avatar-src="avatarImg"
+      :whose-voice-label="i18n('labels.whoseVoice')"
+      :name-placeholder="i18n('labels.namePlaceholder')"
+      :relationship-label="i18n('labels.relationshipToChild')"
+      :relationship-sheet-title="i18n('labels.selectRelationship')"
+      :primary-label="i18n('labels.submitUpdate')"
+      :primary-disabled="!personDetail || submitting"
+      :loading="submitting"
+      :secondary-label="i18n('labels.deletePerson')"
+      secondary-variant="danger"
+      @primary="submitUpdate"
+      @secondary="promptDeletePerson"
     />
   </q-page>
 </template>

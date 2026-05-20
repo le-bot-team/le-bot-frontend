@@ -1,17 +1,26 @@
 <script setup lang="ts">
+// ChatMessageList — scrollable list of bubbles. Design a2096a64 uses a plain
+// overflow-y container (no q-scroll-area) so the bubble list blends visually
+// with the hero decoration sitting behind it.
+
 import { nextTick, ref, watch } from 'vue';
-import type { QScrollArea } from 'quasar';
 
 import ChatMessageItem from 'src/components/chat/ChatMessageItem.vue';
 import type { ChatMessage } from 'src/types/chat/types';
 
 const props = defineProps<{
   messages: ChatMessage[];
+  emptyHint?: string;
 }>();
 
-const scrollAreaRef = ref<InstanceType<typeof QScrollArea>>();
+const scrollRef = ref<HTMLDivElement | null>(null);
 
-// Auto-scroll to bottom when new messages arrive or existing messages update
+function scrollToBottom() {
+  const el = scrollRef.value;
+  if (!el) return;
+  el.scrollTop = el.scrollHeight;
+}
+
 watch(
   () => props.messages.length,
   async () => {
@@ -20,7 +29,6 @@ watch(
   },
 );
 
-// Also watch for text updates on the last message (streaming text)
 watch(
   () => {
     const last = props.messages[props.messages.length - 1];
@@ -31,37 +39,13 @@ watch(
     scrollToBottom();
   },
 );
-
-function scrollToBottom() {
-  const scrollArea = scrollAreaRef.value;
-  if (scrollArea) {
-    const scrollTarget = scrollArea.getScrollTarget();
-    scrollTarget.scrollTop = scrollTarget.scrollHeight;
-  }
-}
 </script>
 
 <template>
-  <q-scroll-area ref="scrollAreaRef" class="col-grow full-width">
-    <!-- Empty state -->
-    <div
-      v-if="messages.length === 0"
-      class="fit column items-center justify-center text-grey-5 q-pa-xl"
-    >
-      <q-icon name="chat_bubble_outline" size="64px" class="q-mb-md" />
-      <div class="text-subtitle1">Ready to chat</div>
-      <div class="text-caption">
-        Press the wake button or say "Hi LeBot" to start
-      </div>
+  <div ref="scrollRef" class="chat-page__list">
+    <div v-if="messages.length === 0" class="chat-page__empty">
+      {{ emptyHint }}
     </div>
-
-    <!-- Message list -->
-    <div v-else class="q-pa-md">
-      <ChatMessageItem
-        v-for="msg in messages"
-        :key="msg.id"
-        :message="msg"
-      />
-    </div>
-  </q-scroll-area>
+    <ChatMessageItem v-for="msg in messages" :key="msg.id" :message="msg" />
+  </div>
 </template>
