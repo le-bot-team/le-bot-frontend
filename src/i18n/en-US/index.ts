@@ -224,6 +224,7 @@ export default {
         familyGroupJoin: 'Join Family Group',
         messages: 'Messages',
         messageDetail: 'Message Detail',
+        messagesActivity: 'Activity Messages',
         orders: 'My Orders',
         help: 'Help & Feedback',
         helpFaq: 'FAQ',
@@ -554,6 +555,7 @@ export default {
         notifications: {
           comingSoon: 'This feature is coming soon',
           copied: 'Copied to clipboard',
+          copyFailed: 'Copy failed, please copy manually',
         },
       },
       ChatPage: {

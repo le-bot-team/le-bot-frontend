@@ -224,6 +224,7 @@ export default {
         familyGroupJoin: '加入家庭组',
         messages: '消息',
         messageDetail: '消息详情',
+        messagesActivity: '活动消息',
         orders: '我的订单',
         help: '帮助与反馈',
         helpFaq: '常见问题',
@@ -549,6 +550,7 @@ export default {
         notifications: {
           comingSoon: '该功能即将上线',
           copied: '已复制到剪贴板',
+          copyFailed: '复制失败，请手动复制',
         },
       },
       ChatPage: {
