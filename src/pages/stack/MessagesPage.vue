@@ -137,10 +137,8 @@ function onDeleteClick(item: MessageItem) {
 
 <template>
   <q-page class="messages-page">
-    <!-- ===== Nav Bar (容器2602, h=44) ===== -->
+    <!-- ===== Edit action bar ===== -->
     <div class="messages-nav">
-      <div class="messages-nav__title">{{ i18n('labels.title') }}</div>
-
       <!-- Default state (5f6208e5): show delete icon -->
       <button
         v-if="!isEditing"

@@ -59,8 +59,8 @@ const faqItems = computed(() =>
     <div class="settings-sub-page__card">
       <q-list separator>
         <q-expansion-item
-          v-for="(item, index) in faqItems"
-          :key="index"
+          v-for="item in faqItems"
+          :key="item.question"
           :label="item.question"
           dense
           header-style="font-family: var(--font-family); font-size: 15px; font-weight: 400; color: var(--clr-text)"

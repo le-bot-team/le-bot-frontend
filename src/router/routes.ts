@@ -308,7 +308,10 @@ const routes: RouteRecordRaw[] = [
           {
             name: 'messages',
             path: '',
-            component: () => import('pages/stack/MessagesPage.vue'),
+            components: {
+              default: () => import('pages/stack/MessagesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
           },
           {
             name: 'message-detail',

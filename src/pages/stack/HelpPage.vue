@@ -43,7 +43,12 @@ function onFaq() {
 
 function onRowClick(row: HelpRow) {
   if (row.kind === 'link') {
-    window.open(`tel:${row.value}`, '_self');
+    const dialable = row.value?.replace(/[^\d+]/g, '');
+    if (dialable && dialable.length >= 3) {
+      window.open(`tel:${dialable}`, '_self');
+    } else {
+      $q.notify({ message: row.value ?? '', type: 'info' });
+    }
   } else if (row.kind === 'value') {
     try {
       navigator.clipboard?.writeText(row.value ?? '').then(
