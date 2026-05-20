@@ -303,6 +303,72 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
+        path: 'messages',
+        children: [
+          {
+            name: 'messages',
+            path: '',
+            components: {
+              default: () => import('pages/stack/MessagesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'message-detail',
+            path: ':id',
+            components: {
+              default: () => import('pages/stack/messages/MessageDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'messages-activity',
+            path: 'activity',
+            components: {
+              default: () => import('pages/stack/messages/ActivityMessagesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
+      },
+      {
+        name: 'orders',
+        path: 'orders',
+        components: {
+          default: () => import('pages/stack/OrdersPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        path: 'help',
+        children: [
+          {
+            name: 'help',
+            path: '',
+            components: {
+              default: () => import('pages/stack/HelpPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'help-faq',
+            path: 'faq',
+            components: {
+              default: () => import('pages/stack/help/FaqPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'help-feedback',
+            path: 'feedback',
+            components: {
+              default: () => import('pages/stack/help/FeedbackPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
+      },
+      {
         path: 'family-group',
         children: [
           {

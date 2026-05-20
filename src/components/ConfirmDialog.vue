@@ -45,10 +45,10 @@ const confirmBtnClass: Record<ConfirmType, string> = {
       <div class="confirm-dialog__title">{{ title }}</div>
       <div v-if="body" class="confirm-dialog__body">{{ body }}</div>
       <div class="confirm-dialog__actions">
-        <button class="confirm-dialog__btn confirm-dialog__btn--cancel" @click="onDialogCancel">
+        <button type="button" class="confirm-dialog__btn confirm-dialog__btn--cancel" @click="onDialogCancel">
           {{ cancelLabel || i18n('labels.cancel') }}
         </button>
-        <button :class="confirmBtnClass[confirmType]" @click="onDialogOK">
+        <button type="button" :class="confirmBtnClass[confirmType]" @click="onDialogOK()">
           {{ confirmLabel || i18n('labels.confirm') }}
         </button>
       </div>

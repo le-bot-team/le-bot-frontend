@@ -553,6 +553,7 @@ export default {
         },
         notifications: {
           comingSoon: 'This feature is coming soon',
+          copied: 'Copied to clipboard',
         },
       },
       ChatPage: {
@@ -1525,6 +1526,17 @@ export default {
         MessageDetailPage: {
           labels: {
             title: 'Message Detail',
+            noContent: 'No content available',
+          },
+          items: {
+            m1Title: 'New Notification',
+            m1Content: 'You have a new notification. This is a reminder about your device update, please check it promptly.',
+            m2Title: 'Low Mood Detected',
+            m2Content: 'Long-term low mood detected. We suggest more interaction with LeBot to improve your mood.',
+            m3Title: 'Notification',
+            m3Content: 'This is the notification content describing the specific details of the notice.',
+            m4Title: 'New Member Benefits Issued',
+            m4Content: 'Check it in the Member Center! Welcome to the LeBot family.',
           },
         },
         ActivityMessagesPage: {

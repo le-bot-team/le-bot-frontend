@@ -48,7 +48,7 @@ async function handleSubmit() {
         dense
         class="q-mb-md"
       />
-      <div class="row items-center q-mb-md" style="color: var(--clr-caption); cursor: pointer">
+      <div class="row items-center q-mb-md" style="color: var(--clr-caption)">
         <q-icon name="mdi-image-plus" size="24px" class="q-mr-sm" />
         <span style="font-size: 14px">{{ i18n('labels.uploadImage') }}</span>
       </div>

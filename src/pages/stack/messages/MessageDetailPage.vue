@@ -9,40 +9,43 @@ import { i18nSubPath } from 'src/utils/common';
 const i18n = i18nSubPath('pages.stack.messages.MessageDetailPage');
 const route = useRoute();
 
-const messageId = computed(() => route.params.id as string);
+const messageId = computed(() => {
+  const id = route.params.id;
+  return Array.isArray(id) ? id[0] ?? '' : id ?? '';
+});
 
 // Mock message detail — replace with API
 const message = computed(() => {
   const details: Record<string, { title: string; content: string; date: string; icon: string }> = {
     '1': {
-      title: '新的通知',
-      content: '您有一条新的通知，请前往查看。这条通知是关于您设备更新的提醒，请及时查看。',
+      title: i18n('items.m1Title'),
+      content: i18n('items.m1Content'),
       date: '2025-5-12',
       icon: 'mdi-bell',
     },
     '2': {
-      title: '情绪不佳',
-      content: '监测到长期情绪不佳，建议与乐宝进行更多互动以改善心情。',
+      title: i18n('items.m2Title'),
+      content: i18n('items.m2Content'),
       date: '2025-5-12',
       icon: 'mdi-emoticon-sad',
     },
     '3': {
-      title: '通知标题',
-      content: '这里是通知的内容说明，详细描述了通知的具体事项。',
+      title: i18n('items.m3Title'),
+      content: i18n('items.m3Content'),
       date: '2025-5-12',
       icon: 'mdi-information',
     },
     '4': {
-      title: '新用户会员已发放',
-      content: '可在会员中心查看哦！欢迎加入乐宝大家庭。',
+      title: i18n('items.m4Title'),
+      content: i18n('items.m4Content'),
       date: '2025-5-12',
       icon: 'mdi-gift',
     },
   };
   return (
     details[messageId.value] ?? {
-      title: '消息详情',
-      content: '暂无内容',
+      title: i18n('labels.title'),
+      content: i18n('labels.noContent'),
       date: '',
       icon: 'mdi-email',
     }

@@ -43,8 +43,8 @@ const activities = computed<ActivityItem[]>(() => [
 ]);
 
 function onItemClick(item: ActivityItem) {
-  console.log('Activity clicked:', item.id);
-  // TODO: 跳转到活动详情页（待设计稿）
+  // TODO: navigate to activity detail page when design is ready
+  void item;
 }
 </script>
 
@@ -56,7 +56,10 @@ function onItemClick(item: ActivityItem) {
         :key="item.id"
         class="activity-card"
         role="button"
+        tabindex="0"
         @click="onItemClick(item)"
+        @keydown.enter="onItemClick(item)"
+        @keydown.space.prevent="onItemClick(item)"
       >
         <div class="activity-card__image">
           <img

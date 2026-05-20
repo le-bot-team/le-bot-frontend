@@ -84,17 +84,19 @@ function onActionClick(order: Order, action: OrderAction) {
 
 <template>
   <q-page class="orders-page">
-    <div class="orders-tabs">
-      <div
+    <div class="orders-tabs" role="tablist">
+      <button
         v-for="tab in tabs"
         :key="tab.key"
+        type="button"
         class="orders-tab"
         :class="{ 'orders-tab--active': activeTab === tab.key }"
         role="tab"
+        :aria-selected="activeTab === tab.key"
         @click="onTabClick(tab.key)"
       >
         {{ tab.label }}
-      </div>
+      </button>
     </div>
 
     <div v-if="visibleOrders.length" class="orders-list">

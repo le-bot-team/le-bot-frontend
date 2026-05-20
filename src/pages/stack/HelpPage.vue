@@ -42,7 +42,12 @@ function onFaq() {
 }
 
 function onRowClick(row: HelpRow) {
-  if (row.kind === 'chevron') {
+  if (row.kind === 'link') {
+    window.open(`tel:${row.value}`, '_self');
+  } else if (row.kind === 'value') {
+    void navigator.clipboard.writeText(row.value ?? '');
+    $q.notify({ message: i18n('notifications.copied'), type: 'positive' });
+  } else if (row.kind === 'chevron') {
     if (row.key === 'feedback') {
       router.push('/stack/help/feedback').catch(console.error);
     } else {
@@ -54,10 +59,10 @@ function onRowClick(row: HelpRow) {
 
 <template>
   <q-page class="help-page">
-    <div class="help-card-head" role="button" @click="onFaq">
+    <button type="button" class="help-card-head" @click="onFaq">
       <span class="help-row__label">{{ i18n('labels.faq') }}</span>
       <q-icon class="help-row__chevron" name="chevron_right" size="12px" />
-    </div>
+    </button>
 
     <div class="help-card-body">
       <div
@@ -65,7 +70,10 @@ function onRowClick(row: HelpRow) {
         :key="row.key"
         class="help-row"
         role="button"
+        tabindex="0"
         @click="onRowClick(row)"
+        @keydown.enter="onRowClick(row)"
+        @keydown.space.prevent="onRowClick(row)"
       >
         <span class="help-row__label">{{ row.label }}</span>
         <span v-if="row.kind === 'link'" class="help-row__value help-row__value--link">

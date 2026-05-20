@@ -17,16 +17,21 @@ const categories = computed(() => [
 ]);
 
 interface FaqItem {
+  category: string;
   question: string;
   answer: string;
 }
 
-const faqItems = computed<FaqItem[]>(() => [
-  { question: i18n('items.q1'), answer: i18n('items.a1') },
-  { question: i18n('items.q2'), answer: i18n('items.a2') },
-  { question: i18n('items.q3'), answer: i18n('items.a3') },
-  { question: i18n('items.q4'), answer: i18n('items.a4') },
+const allFaqItems = computed<FaqItem[]>(() => [
+  { category: 'usage', question: i18n('items.q1'), answer: i18n('items.a1') },
+  { category: 'usage', question: i18n('items.q2'), answer: i18n('items.a2') },
+  { category: 'account', question: i18n('items.q3'), answer: i18n('items.a3') },
+  { category: 'device', question: i18n('items.q4'), answer: i18n('items.a4') },
 ]);
+
+const faqItems = computed(() =>
+  allFaqItems.value.filter((item) => item.category === activeTab.value),
+);
 </script>
 
 <template>

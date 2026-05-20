@@ -15,22 +15,21 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
+import iconDeleteNav from 'src/assets/lanhu/slices/icon-delete-nav.png';
+import iconNotification from 'src/assets/lanhu/messages/icon-2.webp';
+import iconMood from 'src/assets/lanhu/messages/icon-3.webp';
+import iconMember from 'src/assets/lanhu/messages/icon-4.webp';
 
 const i18n = i18nSubPath('pages.stack.MessagesPage');
 const router = useRouter();
 const $q = useQuasar();
 
 // Nav bar delete icon — design 5f6208e5: icon_delete_nav (24×24px) in msg_icon_set container
-const iconDeleteNav = new URL('src/assets/lanhu/slices/icon-delete-nav.png', import.meta.url).href;
-
 // Message type icons — design 5f6208e5 切图 (src/assets/lanhu/messages/)
 // 共3种消息图标:
 //   icon-2.webp → 绿色铃铛 — 通知/新消息类
 //   icon-3.webp → 蓝色悲伤  — 情绪类
 //   icon-4.webp → 黄色星星  — 用户/会员类
-const iconNotification = new URL('src/assets/lanhu/messages/icon-2.webp', import.meta.url).href;
-const iconMood = new URL('src/assets/lanhu/messages/icon-3.webp', import.meta.url).href;
-const iconMember = new URL('src/assets/lanhu/messages/icon-4.webp', import.meta.url).href;
 
 type MessageType = 'notification' | 'mood' | 'member';
 
@@ -117,8 +116,6 @@ function onItemClick(item: MessageItem) {
 }
 
 function onDeleteClick(item: MessageItem, evt: MouseEvent) {
-  evt.stopPropagation();
-
   $q.dialog({
     title: '',
     message: i18n('labels.deleteConfirm'),
@@ -173,6 +170,8 @@ function onDeleteClick(item: MessageItem, evt: MouseEvent) {
         role="button"
         tabindex="0"
         @click="onItemClick(item)"
+        @keydown.enter="onItemClick(item)"
+        @keydown.space.prevent="onItemClick(item)"
       >
         <img :src="item.iconSrc" alt="" class="messages-row__icon" />
         <div class="messages-row__main">
@@ -188,7 +187,7 @@ function onDeleteClick(item: MessageItem, evt: MouseEvent) {
             v-if="isEditing"
             class="messages-row__delete"
             :aria-label="i18n('labels.delete') ?? 'Delete'"
-            @click="(e: MouseEvent) => onDeleteClick(item, e)"
+            @click.stop="onDeleteClick(item, $event)"
           >
             <svg width="12" height="2" viewBox="0 0 12 2" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="12" height="2" rx="1" fill="currentColor" />
