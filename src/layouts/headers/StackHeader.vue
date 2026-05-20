@@ -56,7 +56,7 @@ const title = computed(() => {
   // Chat page: dynamic device name
   if (route.name === 'chat' || route.name === 'chat-voice-call') {
     const childName = currentDevice.value?.childInfo?.name;
-    if (childName) return i18n.t('pages.main.HomePage.labels.deviceNameFormat', { name: childName });
+    if (childName) return i18n.t('pages.main.HomePage.deviceSwitch.deviceNameFormat', { name: childName });
     const deviceName = currentDevice.value?.name;
     if (deviceName) return deviceName;
   }

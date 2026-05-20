@@ -42,7 +42,7 @@ const { trackClick, trackConversion } = useTracker();
 /** 当前设备名称（如"小新的乐宝"） */
 const currentDeviceName = computed(() => {
   const childName = currentDevice.value?.childInfo?.name;
-  return childName ? i18n('labels.deviceNameFormat', { name: childName }) : i18n('labels.robotName');
+  return childName ? i18n('deviceSwitch.deviceNameFormat', { name: childName }) : i18n('labels.robotName');
 });
 
 // 未读消息状态（mock数据，后续接入后端替换为真实数据）
