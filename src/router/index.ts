@@ -35,7 +35,7 @@ export const router = createRouter({
 });
 
 // Route guard: protect main app routes from users with incomplete onboarding
-const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding']);
+const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding', 'onboarding-guide']);
 
 router.beforeEach((to) => {
   // Allow public pages without restriction
@@ -51,7 +51,7 @@ router.beforeEach((to) => {
 
   // Has token but profile incomplete (no nickname): allow onboarding flow
   if (!profileStore.profile?.nickname) {
-    const onboardingRoutes = ['onboarding-complete', 'onboarding', 'add-virtual-device'];
+    const onboardingRoutes = ['onboarding-complete', 'onboarding-guide', 'add-virtual-device'];
     if (typeof to.name === 'string' && onboardingRoutes.includes(to.name)) return true;
     return { name: 'onboarding-complete' };
   }
