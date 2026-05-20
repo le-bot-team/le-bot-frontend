@@ -9,7 +9,7 @@ interface Navigation {
 
 const i18n = i18nSubPath('components.navigations');
 
-export const MAIN_NAVIGATIONS: Navigation[] = [
+export const getMainNavigations = (): Navigation[] => [
   {
     label: i18n('main.home'),
     icon: 'home',
@@ -36,7 +36,7 @@ export const MAIN_NAVIGATIONS: Navigation[] = [
   },
 ];
 
-export const STACK_NAVIGATIONS: Navigation[] = [
+export const getStackNavigations = (): Navigation[] => [
   {
     label: i18n('stack.about'),
     icon: 'information',
@@ -145,4 +145,74 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'settings-voiceprint-new',
   },
+  {
+    label: i18n('stack.onboarding'),
+    icon: 'check-circle',
+    available: true,
+    route: 'onboarding-complete',
+  },
+  {
+    label: i18n('stack.deviceConfigVoice'),
+    icon: 'mdi-microphone',
+    available: true,
+    route: 'device-config-voice',
+  },
+  {
+    label: i18n('stack.deviceConfigLanguage'),
+    icon: 'mdi-translate',
+    available: true,
+    route: 'device-config-language',
+  },
+  {
+    label: i18n('stack.deviceConfigPersonality'),
+    icon: 'mdi-head-cog',
+    available: true,
+    route: 'device-config-personality',
+  },
+  {
+    label: i18n('stack.deviceConfigPersonalityDetail'),
+    icon: 'mdi-head-cog',
+    available: true,
+    route: 'device-config-personality-detail',
+  },
+  {
+    label: i18n('stack.settingsTermsOfService'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-terms-of-service',
+  },
+  {
+    label: i18n('stack.settingsUserAgreement'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-user-agreement',
+  },
+  {
+    label: i18n('stack.settingsPrivacyPolicy'),
+    icon: 'mdi-shield-lock',
+    available: true,
+    route: 'settings-privacy-policy',
+  },
+  {
+    label: i18n('stack.deviceConfigWifi'),
+    icon: 'mdi-wifi',
+    available: true,
+    route: 'device-config-wifi',
+  },
+  {
+    label: i18n('stack.deviceConfigUpdate'),
+    icon: 'mdi-update',
+    available: true,
+    route: 'device-config-firmware',
+  },
+  {
+    label: i18n('stack.deviceConfigAbout'),
+    icon: 'mdi-information',
+    available: true,
+    route: 'device-config-about',
+  },
 ];
+
+// Backward-compatible exports (evaluate once on import — use getters for reactive labels)
+export const MAIN_NAVIGATIONS = getMainNavigations();
+export const STACK_NAVIGATIONS = getStackNavigations();

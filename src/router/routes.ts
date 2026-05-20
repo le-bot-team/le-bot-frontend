@@ -59,6 +59,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'onboarding-complete',
+        path: 'onboarding-complete',
+        components: {
+          default: () => import('pages/stack/OnboardingCompletePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'chat',
         path: 'chat',
         components: {
@@ -175,6 +183,30 @@ const routes: RouteRecordRaw[] = [
             path: '',
             components: {
               default: () => import('pages/stack/SettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-terms-of-service',
+            path: 'terms-of-service',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-user-agreement',
+            path: 'user-agreement',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-privacy-policy',
+            path: 'privacy-policy',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },
