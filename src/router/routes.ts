@@ -85,7 +85,6 @@ const routes: RouteRecordRaw[] = [
         path: 'chat/voice-call',
         meta: {
           headerActions: [
-            { icon: 'chat-mute', event: 'chat:mute', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute' },
             { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode' },
           ],
         },

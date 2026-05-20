@@ -481,6 +481,7 @@ export default {
           helpAndFeedback: '帮助与反馈',
           aboutUs: '关于我们',
           settings: '设置',
+          notifications: '通知',
         },
       },
     },
@@ -572,6 +573,9 @@ export default {
           waitingResponse: '等待回复...',
           clearContext: '清除上下文',
           contextCleared: '上下文已清除',
+          toggleMute: '切换静音',
+          voiceCall: '语音通话',
+          toggleTextMode: '切换文字模式',
         },
         notifications: {
           copiedAccessToken: '访问令牌已复制到剪贴板',

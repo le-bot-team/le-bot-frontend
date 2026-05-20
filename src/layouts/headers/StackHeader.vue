@@ -10,6 +10,7 @@ import { STACK_NAVIGATIONS } from 'components/navigations';
 import { bus } from 'src/boot/bus';
 import { router } from 'src/router';
 import { useDeviceStore } from 'stores/device';
+import { useChatStore } from 'stores/chat';
 
 /**
  * Optional action button declared on a route via `meta.headerActions`.
@@ -29,9 +30,10 @@ const { dark } = useQuasar();
 const i18n = useI18n();
 const route = useRoute();
 const { currentDevice } = storeToRefs(useDeviceStore());
+const chatStore = useChatStore();
 
-// Mute state synced from ChatPage via bus
-const isMuted = ref(false);
+// Mute state synced from ChatPage via bus (initialized from persisted store)
+const isMuted = ref(chatStore.isMuted);
 
 // Text mode toggle state synced from VoiceCallPage via bus
 const isTextMode = ref(true);

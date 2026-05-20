@@ -486,6 +486,7 @@ export default {
           helpAndFeedback: 'Help & Feedback',
           aboutUs: 'About Us',
           settings: 'Settings',
+          notifications: 'Notifications',
         },
       },
     },
@@ -577,6 +578,9 @@ export default {
           waitingResponse: 'Waiting for response...',
           clearContext: 'Clear context',
           contextCleared: 'Context cleared',
+          toggleMute: 'Toggle mute',
+          voiceCall: 'Voice call',
+          toggleTextMode: 'Toggle text mode',
         },
         notifications: {
           copiedAccessToken: 'Access token copied to clipboard',

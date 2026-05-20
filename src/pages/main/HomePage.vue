@@ -13,9 +13,8 @@
 // Tab-icon strategy (user decision D6-a): the bottom tab icons are Sketch
 // symbolInstence without extractable path/imageRef; mdi icons are retained.
 
-import { ref } from 'vue';
+import { ref, computed, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount } from 'vue';
 
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
@@ -24,15 +23,15 @@ import { useDeviceStore } from 'stores/device';
 import { useTracker } from 'src/composables/useTracker';
 import DeviceSwitchPanel from 'components/home/DeviceSwitchPanel.vue';
 
-// Mascot placeholder: 设计稿中"乐宝正面"为shape占位符，暂无透明背景PNG切图。
-// 待设计师提供后替换 iconMascotUrl 为真实图片路径。
-const iconMascotUrl = ''; // 占位：无可用透明背景mascot图片
-
 import iconMsgHomeUrl from 'src/assets/lanhu/home/icon-msg-home.png';
 import iconDeviceChangeUrl from 'src/assets/lanhu/home/icon-device-change.png';
 import iconRobotSetUrl from 'src/assets/lanhu/home/icon-device-change-home.png';
 import iconTopicUrl from 'src/assets/lanhu/home/icon-topic.png';
 import iconArrowRightUrl from 'src/assets/lanhu/home/icon-arrow-right-home.png';
+
+// Mascot placeholder: 设计稿中"乐宝正面"为shape占位符，暂无透明背景PNG切图。
+// 待设计师提供后替换 iconMascotUrl 为真实图片路径。
+const iconMascotUrl = ''; // 占位：无可用透明背景mascot图片
 
 const i18n = i18nSubPath('pages.main.HomePage');
 const { accessToken } = storeToRefs(useAuthStore());
@@ -134,7 +133,7 @@ function handleAddDevice() {
             :aria-label="i18n('labels.deviceChange')"
             @click="goDeviceSwitch"
           >
-            <img :src="iconDeviceChangeUrl" alt="device" class="home-icon-img" />
+            <img :src="iconDeviceChangeUrl" alt="" class="home-icon-img" />
           </button>
         </div>
 
@@ -145,7 +144,7 @@ function handleAddDevice() {
           :aria-label="i18n('labels.robotSettings')"
           @click="goRobotSettings"
         >
-          <img :src="iconRobotSetUrl" alt="robot-set" class="home-icon-img" />
+          <img :src="iconRobotSetUrl" alt="" class="home-icon-img" />
         </button>
 
         <!-- 右上：消息图标（最右侧） -->
@@ -155,7 +154,7 @@ function handleAddDevice() {
           :aria-label="i18n('labels.messages')"
           @click="goMessages"
         >
-          <img :src="iconMsgHomeUrl" alt="msg" class="home-icon-img" />
+          <img :src="iconMsgHomeUrl" alt="" class="home-icon-img" />
           <!-- 未读红点：有未读消息时显示 -->
           <span v-if="hasUnreadMessages" class="home-icon-msg-dot" aria-hidden="true" />
         </button>
@@ -176,7 +175,7 @@ function handleAddDevice() {
         <div v-if="!iconMascotUrl" class="home-mascot-placeholder">
           <span class="home-mascot-placeholder-text">乐宝</span>
         </div>
-        <img v-else :src="iconMascotUrl" alt="乐宝" class="home-mascot-img" />
+        <img v-else :src="iconMascotUrl" alt="" class="home-mascot-img" />
       </button>
       <!-- 设计稿气泡文案 -->
       <div class="home-hero-bubble">
@@ -191,7 +190,7 @@ function handleAddDevice() {
           <button type="button" class="home-topics-history" @click="goChatHistory">
             <span>{{ i18n('labels.chatHistory') }}</span>
             <span class="home-topics-history-icon">
-              <img :src="iconArrowRightUrl" alt="next" class="home-icon-img" />
+              <img :src="iconArrowRightUrl" alt="" class="home-icon-img" />
             </span>
           </button>
         </header>
