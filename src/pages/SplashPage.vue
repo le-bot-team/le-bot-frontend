@@ -2,7 +2,7 @@
 // SplashPage — brand splash / loading screen.
 // Displays logo + slogan + progress bar, auto-redirects to /main/home after 3s.
 
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
@@ -10,15 +10,24 @@ import { i18nSubPath } from 'src/utils/common';
 const i18n = i18nSubPath('pages.SplashPage');
 
 const progress = ref(0);
+let interval: ReturnType<typeof setInterval> | null = null;
 
 onMounted(() => {
-  const interval = setInterval(() => {
+  interval = setInterval(() => {
     progress.value += 2;
     if (progress.value >= 100) {
-      clearInterval(interval);
+      clearInterval(interval!);
+      interval = null;
       router.replace('/main/home').catch(console.error);
     }
   }, 60);
+});
+
+onBeforeUnmount(() => {
+  if (interval !== null) {
+    clearInterval(interval);
+    interval = null;
+  }
 });
 </script>
 

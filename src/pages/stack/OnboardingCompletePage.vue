@@ -51,7 +51,7 @@ function goScanJoin() {
           <span class="option-title">{{ i18n('options.addDevice.title') }}</span>
           <span class="option-desc">{{ i18n('options.addDevice.description') }}</span>
         </div>
-        <q-icon name="chevron_right" size="20px" color="#C4C4CC" />
+        <q-icon name="chevron_right" size="20px" style="color: #C4C4CC" />
       </button>
 
       <!-- 选项 B: 扫码加入家庭组 -->
@@ -71,7 +71,7 @@ function goScanJoin() {
           <span class="option-title">{{ i18n('options.scanJoin.title') }}</span>
           <span class="option-desc">{{ i18n('options.scanJoin.description') }}</span>
         </div>
-        <q-icon name="chevron_right" size="20px" color="#C4C4CC" />
+        <q-icon name="chevron_right" size="20px" style="color: #C4C4CC" />
       </button>
     </div>
 

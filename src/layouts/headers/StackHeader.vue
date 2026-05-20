@@ -10,25 +10,29 @@ import { router } from 'src/router';
 
 const { dark } = useQuasar();
 const route = useRoute();
-const { t, te } = useI18n();
+const i18n = useI18n();
 
 const title = computed(() => {
   // Priority 1: route.meta.title (i18n key)
   const metaTitle = route.meta?.title as string | undefined;
-  if (metaTitle && te(metaTitle)) {
-    return t(metaTitle);
+  if (metaTitle && i18n.te(metaTitle)) {
+    return i18n.t(metaTitle);
   }
   // Priority 2: STACK_NAVIGATIONS lookup
   return STACK_NAVIGATIONS.find((navigation) => navigation.route === route.name?.toString())?.label;
 });
 
-const isChatRoute = computed(() => route.name === 'chat');
+const hideBackButton = computed(() => !!route.meta?.hideBackButton);
+
+const headerActions = computed(
+  () => (route.meta?.headerActions as Array<{ icon: string; event: string; ariaLabel: string }>) || [],
+);
 
 function goBack() {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push('/main/home');
+    void router.push('/main/home');
   }
 }
 </script>
@@ -42,16 +46,24 @@ function goBack() {
     }"
   >
     <q-toolbar>
-      <div class="absolute-left column justify-center full-height q-pl-sm">
+      <div v-if="!hideBackButton" class="absolute-left column justify-center full-height q-pl-sm">
         <q-btn flat icon="arrow_back_ios_new" round @click="goBack" />
       </div>
       <q-toolbar-title class="text-center">
         {{ title }}
       </q-toolbar-title>
-      <div v-if="isChatRoute" class="absolute-right column justify-center full-height q-pr-sm">
+      <div v-if="headerActions.length" class="absolute-right column justify-center full-height q-pr-sm">
         <div class="row no-wrap">
-          <q-btn flat icon="volume_off" round size="sm" aria-label="Mute" @click="bus.emit('chat:mute')" />
-          <q-btn flat icon="phone" round size="sm" aria-label="Call" @click="bus.emit('chat:call')" />
+          <q-btn
+            v-for="action in headerActions"
+            :key="action.event"
+            flat
+            :icon="action.icon"
+            round
+            size="sm"
+            :aria-label="action.ariaLabel"
+            @click="bus.emit(action.event as any)"
+          />
         </div>
       </div>
     </q-toolbar>

@@ -35,11 +35,11 @@ export const router = createRouter({
 });
 
 // Route guard: protect main app routes from users with incomplete onboarding
-const AUTH_ROUTES = new Set(['auth']);
+const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding']);
 
 router.beforeEach((to) => {
-  // Allow auth page without restriction
-  if (AUTH_ROUTES.has(to.name as string)) return true;
+  // Allow public pages without restriction
+  if (PUBLIC_ROUTES.has(to.name as string)) return true;
 
   const authStore = useAuthStore();
   const profileStore = useProfileStore();

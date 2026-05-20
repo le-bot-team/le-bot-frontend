@@ -7,6 +7,7 @@ const routes: RouteRecordRaw[] = [
     redirect: '/main/home',
   },
   {
+    name: 'splash',
     path: '/splash',
     component: () => import('pages/SplashPage.vue'),
   },
@@ -376,6 +377,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'onboarding',
+        path: 'onboarding',
+        components: {
+          default: () => import('pages/stack/OnboardingGuidePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         path: 'family-groups',
         children: [
           {
@@ -423,6 +432,14 @@ const routes: RouteRecordRaw[] = [
             path: 'create',
             components: {
               default: () => import('pages/stack/family-group/ChildEditPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-join',
+            path: 'join',
+            components: {
+              default: () => import('pages/stack/family-group/JoinPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },
@@ -633,14 +650,6 @@ const routes: RouteRecordRaw[] = [
         ],
       },
     ],
-  },
-  {
-    name: 'onboarding',
-    path: '/stack/onboarding',
-    components: {
-      default: () => import('pages/stack/OnboardingGuidePage.vue'),
-      header: () => import('layouts/headers/StackHeader.vue'),
-    },
   },
 
   // Always leave this as the last one,
