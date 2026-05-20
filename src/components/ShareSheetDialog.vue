@@ -13,12 +13,12 @@ const $q = useQuasar();
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 function copyLink() {
-  try {
-    navigator.clipboard?.writeText(window.location.href).then(
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href).then(
       () => $q.notify({ type: 'positive', message: i18n('notifications.linkCopied') }),
       () => $q.notify({ type: 'negative', message: i18n('notifications.linkCopyFailed') }),
     );
-  } catch {
+  } else {
     $q.notify({ type: 'negative', message: i18n('notifications.linkCopyFailed') });
   }
   onDialogCancel();
@@ -31,6 +31,7 @@ function saveQrCode() {
 
 function shareWechat() {
   // TODO: integrate WeChat share SDK
+  $q.notify({ type: 'info', message: i18n('notifications.comingSoon') });
   onDialogCancel();
 }
 </script>

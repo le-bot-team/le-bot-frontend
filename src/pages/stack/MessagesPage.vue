@@ -142,6 +142,7 @@ function onDeleteClick(item: MessageItem) {
       <!-- Default state (5f6208e5): show delete icon -->
       <button
         v-if="!isEditing"
+        type="button"
         class="messages-nav__action messages-nav__delete-icon"
         :aria-label="i18n('labels.delete') ?? 'Delete'"
         @click="enterEditMode"
@@ -152,6 +153,7 @@ function onDeleteClick(item: MessageItem) {
       <!-- Editing state (a75fd4bb): show "完成" text button -->
       <button
         v-else
+        type="button"
         class="messages-nav__action messages-nav__done"
         @click="toggleEdit"
       >
@@ -165,8 +167,9 @@ function onDeleteClick(item: MessageItem) {
         v-for="item in messages"
         :key="item.id"
         class="messages-row"
-        role="button"
-        tabindex="0"
+        :role="isEditing ? undefined : 'button'"
+        :tabindex="isEditing ? undefined : 0"
+        :aria-disabled="isEditing ? true : undefined"
         @click="onItemClick(item)"
         @keydown.enter="onItemClick(item)"
         @keydown.space.prevent="onItemClick(item)"
@@ -183,6 +186,7 @@ function onDeleteClick(item: MessageItem) {
           <!-- Delete button per row (a75fd4bb 组394: 20×20 circle + minus icon) -->
           <button
             v-if="isEditing"
+            type="button"
             class="messages-row__delete"
             :aria-label="i18n('labels.delete') ?? 'Delete'"
             @click.stop="onDeleteClick(item)"

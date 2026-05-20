@@ -50,12 +50,12 @@ function onRowClick(row: HelpRow) {
       $q.notify({ message: row.value ?? '', type: 'info' });
     }
   } else if (row.kind === 'value') {
-    try {
-      navigator.clipboard?.writeText(row.value ?? '').then(
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(row.value ?? '').then(
         () => $q.notify({ message: i18n('notifications.copied'), type: 'positive' }),
         () => $q.notify({ message: i18n('notifications.copyFailed'), type: 'negative' }),
       );
-    } catch {
+    } else {
       $q.notify({ message: i18n('notifications.copyFailed'), type: 'negative' });
     }
   } else if (row.kind === 'chevron') {

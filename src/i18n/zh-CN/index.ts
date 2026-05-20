@@ -400,6 +400,7 @@ export default {
           linkCopied: '链接已复制',
           linkCopyFailed: '复制链接失败',
           qrCodeSaved: '二维码已保存',
+          comingSoon: '该功能即将上线',
         },
       },
     },
@@ -1525,6 +1526,7 @@ export default {
             title: '活动消息',
             empty: '暂无活动消息',
             viewDetail: '查看详情',
+            comingSoon: '活动详情即将上线',
           },
           items: {
             a1Title: '会员日，优惠限今日',

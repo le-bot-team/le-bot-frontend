@@ -20,13 +20,17 @@ async function handleSubmit() {
   }
 
   isSubmitting.value = true;
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  isSubmitting.value = false;
-
-  $q.notify({ type: 'positive', message: i18n('notifications.submitSuccess') });
-  content.value = '';
-  contact.value = '';
+  try {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    $q.notify({ type: 'positive', message: i18n('notifications.submitSuccess') });
+    content.value = '';
+    contact.value = '';
+  } catch {
+    $q.notify({ type: 'negative', message: i18n('notifications.submitFailed') });
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
 
@@ -52,7 +56,7 @@ async function handleSubmit() {
         <q-icon name="mdi-image-plus" size="24px" class="q-mr-sm" />
         <span style="font-size: 14px">{{ i18n('labels.uploadImage') }}</span>
       </div>
-      <button class="btn-max" :disabled="isSubmitting" @click="handleSubmit">
+      <button type="button" class="btn-max" :disabled="isSubmitting" @click="handleSubmit">
         <q-spinner v-if="isSubmitting" size="20px" color="white" />
         <template v-else>{{ i18n('labels.submit') }}</template>
       </button>

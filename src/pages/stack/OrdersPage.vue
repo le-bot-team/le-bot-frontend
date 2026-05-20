@@ -8,10 +8,12 @@
 // app.scss (`.orders-*`).
 
 import { computed, ref } from 'vue';
+import { useQuasar } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.OrdersPage');
+const $q = useQuasar();
 
 type OrderTab = 'all' | 'toPay' | 'toShip' | 'toReceive' | 'afterSale';
 
@@ -76,23 +78,21 @@ function onTabClick(tab: OrderTab) {
 }
 
 function onActionClick(order: Order, action: OrderAction) {
-  // noop — real handlers hook up when the order API ships.
   void order;
-  void action;
+  $q.notify({ message: action.label, type: 'info' });
 }
 </script>
 
 <template>
   <q-page class="orders-page">
-    <div class="orders-tabs" role="tablist">
+    <div class="orders-tabs">
       <button
         v-for="tab in tabs"
         :key="tab.key"
         type="button"
         class="orders-tab"
         :class="{ 'orders-tab--active': activeTab === tab.key }"
-        role="tab"
-        :aria-selected="activeTab === tab.key"
+        :aria-pressed="activeTab === tab.key"
         @click="onTabClick(tab.key)"
       >
         {{ tab.label }}

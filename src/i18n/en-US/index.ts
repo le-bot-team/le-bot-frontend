@@ -405,6 +405,7 @@ export default {
           linkCopied: 'Link copied',
           linkCopyFailed: 'Failed to copy link',
           qrCodeSaved: 'QR code saved',
+          comingSoon: 'This feature is coming soon',
         },
       },
     },
@@ -1546,6 +1547,7 @@ export default {
             title: 'Activity Messages',
             empty: 'No activity messages',
             viewDetail: 'View details',
+            comingSoon: 'Activity details coming soon',
           },
           items: {
             a1Title: 'Member Day - Limited Time Offer',

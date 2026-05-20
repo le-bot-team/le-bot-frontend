@@ -9,9 +9,11 @@
 
 import { computed } from 'vue';
 
+import { useQuasar } from 'quasar';
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.messages.ActivityMessagesPage');
+const $q = useQuasar();
 
 interface ActivityItem {
   id: string;
@@ -45,6 +47,7 @@ const activities = computed<ActivityItem[]>(() => [
 function onItemClick(item: ActivityItem) {
   // TODO: navigate to activity detail page when design is ready
   void item;
+  $q.notify({ message: i18n('labels.comingSoon'), type: 'info' });
 }
 </script>
 
