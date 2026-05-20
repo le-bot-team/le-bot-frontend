@@ -37,3 +37,10 @@ export interface DeviceInfo {
   /** Child info associated with this device (front-end family group association) */
   childInfo?: ChildInfo | null;
 }
+
+/** Child information associated with a family group */
+export interface ChildInfo {
+  name: string;
+  gender: 'boy' | 'girl';
+  birthday: string;
+}

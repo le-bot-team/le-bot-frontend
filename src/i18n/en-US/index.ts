@@ -850,6 +850,9 @@ export default {
             mother: 'Mother',
             grandpa: 'Grandpa',
             grandma: 'Grandma',
+            paternalGrandmother: 'Paternal Grandmother',
+            maternalGrandfather: 'Maternal Grandfather',
+            maternalGrandma: 'Maternal Grandma',
             friend: 'Friend',
             other: 'Other',
           },
@@ -886,15 +889,16 @@ export default {
           },
           errors: {
             removeFailed: 'Removal failed',
+            memberNotFound: 'Member not found',
           },
           role: {
             father: 'Father',
             mother: 'Mother',
             grandpa: 'Grandpa',
             grandma: 'Grandma',
-            paternalGrandmother: 'Paternal Grandma',
-            maternalGrandfather: 'Maternal Grandpa',
-            maternalGrandma: 'Other Relative',
+            paternalGrandmother: 'Paternal Grandmother',
+            maternalGrandfather: 'Maternal Grandfather',
+            maternalGrandma: 'Maternal Grandma',
             friend: 'Friend',
             other: 'Other',
           },
@@ -912,6 +916,7 @@ export default {
           errors: {
             generateFailed: 'Failed to generate invite code',
             notLoggedIn: 'Please log in first',
+            groupNotFound: 'Family group not found or has been deleted',
           },
         },
         ChildEditPage: {
@@ -934,9 +939,19 @@ export default {
           },
           notifications: {
             fieldsRequired: "Please fill in your child's name and birthday",
+            nameTooLong: 'Name cannot exceed 20 characters',
             createSuccess: 'Family group created successfully',
             updateSuccess: 'Child info updated successfully',
+            updateFailed: 'Update failed, please retry',
           },
+        },
+      },
+      JoinPage: {
+        errors: {
+          noCode: 'Missing invite code',
+          notLoggedIn: 'Please log in before joining a family group',
+          invalidCode: 'Invite code is invalid or expired',
+          resolveFailed: 'Failed to resolve invite code, please retry',
         },
       },
       ProfilePage: {

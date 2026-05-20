@@ -845,6 +845,9 @@ export default {
             mother: '妈妈',
             grandpa: '爷爷',
             grandma: '奶奶',
+            paternalGrandmother: '奶奶(祖母)',
+            maternalGrandfather: '外公',
+            maternalGrandma: '外婆',
             friend: '朋友',
             other: '其他',
           },
@@ -881,15 +884,16 @@ export default {
           },
           errors: {
             removeFailed: '移除失败',
+            memberNotFound: '成员信息未找到',
           },
           role: {
             father: '爸爸',
             mother: '妈妈',
             grandpa: '爷爷',
             grandma: '奶奶',
-            paternalGrandmother: '外婆',
+            paternalGrandmother: '奶奶(祖母)',
             maternalGrandfather: '外公',
-            maternalGrandma: '其他亲属',
+            maternalGrandma: '外婆',
             friend: '朋友',
             other: '其他',
           },
@@ -907,6 +911,7 @@ export default {
           errors: {
             generateFailed: '生成邀请码失败',
             notLoggedIn: '请先登录',
+            groupNotFound: '家庭组不存在或已被删除',
           },
         },
         ChildEditPage: {
@@ -929,9 +934,19 @@ export default {
           },
           notifications: {
             fieldsRequired: '请完整填写宝宝的名字和生日',
+            nameTooLong: '名字不能超过20个字符',
             createSuccess: '家庭组创建成功',
             updateSuccess: '儿童信息更新成功',
+            updateFailed: '更新失败，请重试',
           },
+        },
+      },
+      JoinPage: {
+        errors: {
+          noCode: '缺少邀请码',
+          notLoggedIn: '请先登录后再加入家庭组',
+          invalidCode: '邀请码无效或已过期',
+          resolveFailed: '解析邀请码失败，请重试',
         },
       },
       ProfilePage: {

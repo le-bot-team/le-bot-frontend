@@ -302,6 +302,75 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'family-group',
+        children: [
+          {
+            name: 'family-groups',
+            path: '',
+            components: {
+              default: () => import('pages/stack/FamilyGroupPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-detail',
+            path: 'detail',
+            components: {
+              default: () => import('pages/stack/family-group/DetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-child-edit',
+            path: 'child-edit',
+            components: {
+              default: () => import('pages/stack/family-group/ChildEditPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-member',
+            path: 'member',
+            components: {
+              default: () => import('pages/stack/family-group/MemberPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-invite',
+            path: 'invite',
+            components: {
+              default: () => import('pages/stack/family-group/InvitePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-create',
+            path: 'create',
+            components: {
+              default: () => import('pages/stack/family-group/ChildEditPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'family-group-join',
+            path: 'join',
+            components: {
+              default: () => import('pages/stack/family-group/JoinPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
+      },
+      {
+        name: 'add-virtual-device',
+        path: 'add-virtual-device',
+        components: {
+          default: () => import('pages/stack/family-group/ChildEditPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
     ],
   },
 
