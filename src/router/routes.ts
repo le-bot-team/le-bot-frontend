@@ -69,6 +69,12 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'chat',
         path: 'chat',
+        meta: {
+          headerActions: [
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute' },
+            { icon: 'chat-call', event: 'chat:call', ariaLabelKey: 'pages.stack.ChatPage.labels.voiceCall' },
+          ],
+        },
         components: {
           default: () => import('pages/stack/ChatPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
@@ -77,6 +83,12 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'chat-voice-call',
         path: 'chat/voice-call',
+        meta: {
+          hideBackButton: true,
+          headerActions: [
+            { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode' },
+          ],
+        },
         components: {
           default: () => import('pages/stack/chat/VoiceCallPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
