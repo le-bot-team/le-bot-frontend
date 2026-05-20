@@ -1207,6 +1207,7 @@ export default {
             setDefault: '设为默认地址',
             delete: '删除',
             edit: '编辑',
+            default: '默认',
           },
         },
         AppLanguagePage: {
@@ -1362,6 +1363,12 @@ export default {
             voiceprintInfo: '声纹信息',
             usageInfo: '使用信息',
             purpose: '用途',
+          },
+          purposes: {
+            account: '账号管理与服务提供',
+            device: '设备连接与功能支持',
+            voiceprint: '声纹识别与个性化',
+            usage: '服务优化与体验提升',
           },
         },
       },
