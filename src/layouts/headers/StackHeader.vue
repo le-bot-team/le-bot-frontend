@@ -77,6 +77,15 @@ onBeforeUnmount(() => {
   bus.off('chat:mute-state', onMuteStateChange);
   bus.off('chat:text-mode-state', onTextModeChange);
 });
+
+function goBack() {
+  // If there's no in-app history (deep link / fresh tab), fall back to home.
+  if (window.history.length <= 1) {
+    router.replace('/main/home');
+  } else {
+    router.go(-1);
+  }
+}
 </script>
 
 <template>
@@ -89,7 +98,7 @@ onBeforeUnmount(() => {
   >
     <q-toolbar>
       <div v-if="!route.meta?.hideBackButton" class="absolute-left column justify-center full-height q-pl-sm">
-        <q-btn flat icon="arrow_back_ios_new" round @click="router.go(-1)" />
+        <q-btn flat icon="arrow_back_ios_new" round @click="goBack" />
       </div>
       <q-toolbar-title class="text-center">
         {{ title }}

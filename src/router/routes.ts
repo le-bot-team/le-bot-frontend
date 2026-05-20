@@ -69,6 +69,12 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'chat',
         path: 'chat',
+        meta: {
+          headerActions: [
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabel: 'Toggle mute' },
+            { icon: 'chat-call', event: 'chat:call', ariaLabel: 'Voice call' },
+          ],
+        },
         components: {
           default: () => import('pages/stack/ChatPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
@@ -77,6 +83,12 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'chat-voice-call',
         path: 'chat/voice-call',
+        meta: {
+          headerActions: [
+            { icon: 'chat-mute', event: 'chat:mute', ariaLabel: 'Toggle mute' },
+            { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabel: 'Toggle text mode' },
+          ],
+        },
         components: {
           default: () => import('pages/stack/chat/VoiceCallPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),

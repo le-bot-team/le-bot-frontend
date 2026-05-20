@@ -4,9 +4,9 @@
 // Viewport strategy (user decision 2026-05 revised): the 375×812 canvas is
 // fixed size and centered horizontally via `margin: 0 auto`. Any viewport
 // wider than 375px shows the page-background gradient on both sides;
-// narrower viewports scroll horizontally (acceptable edge case for iPhone SE
-// and legacy devices). Supersedes the earlier B3 proportional-scale strategy
-// which caused desktop spacer bloat.
+// narrower viewports are clipped horizontally (acceptable edge case for
+// iPhone SE and legacy devices). Supersedes the earlier B3 proportional-scale
+// strategy which caused desktop spacer bloat.
 //
 // Mascot strategy: the 3D 乐宝机器人形象 uses icon-robot-set-home.png.
 //
@@ -84,7 +84,7 @@ function goChat() {
 
 function goChatHistory() {
   trackClick('btn_click_chat_history');
-  router.push('/stack/chat').catch((err) => console.error(err));
+  router.push('/stack/chat/history').catch((err) => console.error(err));
 }
 
 function pickTopic(topic: string) {
@@ -94,7 +94,8 @@ function pickTopic(topic: string) {
 
 function goMessages() {
   trackClick('btn_click_messages');
-  router.push('/stack/messages').catch((err) => console.error(err));
+  // TODO: Replace with '/stack/messages' once MessagesPage is implemented.
+  router.push('/stack/chat/history').catch((err) => console.error(err));
 }
 
 function goDeviceSwitch() {
@@ -208,7 +209,7 @@ function handleAddDevice() {
             {{ topic }}
           </div>
           <!-- More indicator matching design ... -->
-          <span class="home-topics-more" role="button" @click="goChatHistory">...</span>
+          <button type="button" class="home-topics-more" @click="goChatHistory" :aria-label="i18n('labels.chatHistory')">...</button>
         </div>
       </section>
     </div>

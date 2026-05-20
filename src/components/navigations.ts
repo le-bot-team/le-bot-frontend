@@ -19,8 +19,8 @@ export const MAIN_NAVIGATIONS: Navigation[] = [
   {
     label: i18n('main.growth'),
     icon: 'mdi-sprout',
-    available: true,
-    route: '/stack/growth-data',
+    available: false,
+    route: 'growth',
   },
   {
     label: i18n('main.mall'),
@@ -63,7 +63,7 @@ export const STACK_NAVIGATIONS: Navigation[] = [
   },
   {
     label: i18n('stack.profileEdit'),
-    icon: 'account-edit',
+    icon: 'mdi-account-edit',
     available: true,
     route: 'profile-edit',
   },
@@ -118,19 +118,19 @@ export const STACK_NAVIGATIONS: Navigation[] = [
   {
     label: i18n('stack.messages'),
     icon: 'email',
-    available: true,
+    available: false,
     route: 'messages',
   },
   {
     label: i18n('stack.orders'),
     icon: 'receipt',
-    available: true,
+    available: false,
     route: 'orders',
   },
   {
     label: i18n('stack.help'),
     icon: 'help',
-    available: true,
+    available: false,
     route: 'help',
   },
   {
@@ -188,9 +188,15 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'family-group-create',
   },
   {
+    label: i18n('stack.addVirtualDevice'),
+    icon: 'mdi-plus-circle',
+    available: true,
+    route: 'add-virtual-device',
+  },
+  {
     label: i18n('stack.messageDetail'),
     icon: 'email',
-    available: true,
+    available: false,
     route: 'message-detail',
   },
   {
@@ -227,7 +233,7 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     label: i18n('stack.deviceConfigUpdate'),
     icon: 'mdi-update',
     available: true,
-    route: 'device-config-update',
+    route: 'device-config-firmware',
   },
   {
     label: i18n('stack.deviceConfigAbout'),
@@ -311,6 +317,6 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     label: i18n('stack.onboarding'),
     icon: 'mdi-rocket-launch',
     available: true,
-    route: 'onboarding',
+    route: 'onboarding-complete',
   },
 ];
