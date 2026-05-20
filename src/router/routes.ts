@@ -75,6 +75,30 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'chat-voice-call',
+        path: 'chat/voice-call',
+        components: {
+          default: () => import('pages/stack/chat/VoiceCallPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'chat-history',
+        path: 'chat/history',
+        components: {
+          default: () => import('pages/stack/chat/ChatHistoryPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'chat-mute-settings',
+        path: 'chat/mute-settings',
+        components: {
+          default: () => import('pages/stack/chat/MuteSettingsPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'growth-data',
         path: 'growth-data',
         components: {

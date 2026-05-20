@@ -154,6 +154,15 @@ export default {
         },
       },
     },
+    chat: {
+      ChatMessageItem: {
+        labels: {
+          typing: '正在输入',
+          playAudio: '播放语音',
+          stopAudio: '停止播放',
+        },
+      },
+    },
     home: {
       DeviceCard: {
         labels: {
@@ -198,6 +207,9 @@ export default {
         settingsVoiceprint: '声纹设置',
         settingsVoiceprintDetail: '声纹设置',
         settingsVoiceprintNew: '添加声纹',
+        chatVoiceCall: '语音通话',
+        chatHistory: '聊天记录',
+        chatMuteSettings: '静音设置',
         deviceConfigVoice: '语音风格',
         deviceConfigLanguage: '多语言',
         deviceConfigPersonality: 'AI个性调节',
@@ -214,7 +226,6 @@ export default {
         help: '帮助与反馈',
         helpFaq: '常见问题',
         helpFeedback: '意见反馈',
-        chatHistory: '聊天记录',
         growthData: '成长数据',
         deviceConfigWifi: 'Wi-Fi 管理',
         deviceConfigUpdate: '固件升级',
@@ -559,6 +570,8 @@ export default {
           searchComingSoon: '搜索功能即将上线',
           muteEnabled: '已关闭自动朗读',
           muteDisabled: '已开启自动朗读',
+          muteModeEnabled: '已开启静音模式',
+          muteModeDisabled: '已关闭静音模式',
           callComingSoon: '呼叫功能即将上线',
         },
       },
@@ -1305,6 +1318,7 @@ export default {
             title: '聊天记录',
             searchPlaceholder: '搜索聊天记录',
             empty: '暂无聊天记录',
+            comingSoon: '聊天记录功能即将上线',
           },
         },
         MuteSettingsPage: {
@@ -1320,10 +1334,15 @@ export default {
             endTime: '结束时间',
             enabled: '已开启',
             disabled: '已关闭',
+            tip: '开启静音模式后，乐宝将不再主动说话，但您仍可随时唤醒对话。',
           },
           notifications: {
             muteEnabled: '已开启静音模式',
             muteDisabled: '已关闭静音模式',
+            notificationsEnabled: '已开启静音通知',
+            notificationsDisabled: '已关闭静音通知',
+            autoMuteEnabled: '已开启定时静音',
+            autoMuteDisabled: '已关闭定时静音',
           },
         },
         VoiceCallPage: {
@@ -1343,6 +1362,7 @@ export default {
             // Design 64d5ecc8 raw JSON
             startSpeaking: '你可以开始说话', // raw: "你可以开始说话" 15px/22px #151717 at y=718
             aiGenerated: '内容由AI生成', // raw: "内容由AI生成" 12px/16px opacity-50 at y=748
+            comingSoon: '语音通话功能即将上线',
           },
           notifications: {
             callConnected: '通话已连接',

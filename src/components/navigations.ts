@@ -9,7 +9,7 @@ interface Navigation {
 
 const i18n = i18nSubPath('components.navigations');
 
-export const getMainNavigations = (): Navigation[] => [
+export const MAIN_NAVIGATIONS: Navigation[] = [
   {
     label: i18n('main.home'),
     icon: 'home',
@@ -36,7 +36,7 @@ export const getMainNavigations = (): Navigation[] => [
   },
 ];
 
-export const getStackNavigations = (): Navigation[] => [
+export const STACK_NAVIGATIONS: Navigation[] = [
   {
     label: i18n('stack.about'),
     icon: 'information',
@@ -62,64 +62,10 @@ export const getStackNavigations = (): Navigation[] => [
     route: 'profile',
   },
   {
-    label: i18n('stack.devices'),
-    icon: 'mdi-devices',
-    available: true,
-    route: 'devices',
-  },
-  {
-    label: i18n('stack.addVirtualDevice'),
-    icon: 'mdi-plus-circle',
-    available: true,
-    route: 'add-virtual-device',
-  },
-  {
     label: i18n('stack.deviceConfig'),
     icon: 'cog',
     available: true,
     route: 'device-config',
-  },
-  {
-    label: i18n('stack.deviceConfigVoice'),
-    icon: 'mdi-account-voice',
-    available: true,
-    route: 'device-config-voice',
-  },
-  {
-    label: i18n('stack.deviceConfigLanguage'),
-    icon: 'mdi-translate',
-    available: true,
-    route: 'device-config-language',
-  },
-  {
-    label: i18n('stack.deviceConfigPersonality'),
-    icon: 'mdi-robot',
-    available: true,
-    route: 'device-config-personality',
-  },
-  {
-    label: i18n('stack.deviceConfigPersonalityDetail'),
-    icon: 'mdi-robot',
-    available: true,
-    route: 'device-config-personality-detail',
-  },
-  {
-    label: i18n('stack.deviceConfigWifi'),
-    icon: 'mdi-wifi',
-    available: true,
-    route: 'device-config-wifi',
-  },
-  {
-    label: i18n('stack.deviceConfigUpdate'),
-    icon: 'mdi-update',
-    available: true,
-    route: 'device-config-firmware',
-  },
-  {
-    label: i18n('stack.deviceConfigAbout'),
-    icon: 'mdi-information',
-    available: true,
-    route: 'device-config-about',
   },
   {
     label: i18n('stack.settings'),
@@ -146,73 +92,21 @@ export const getStackNavigations = (): Navigation[] => [
     route: 'settings-voiceprint-new',
   },
   {
-    label: i18n('stack.onboarding'),
-    icon: 'check-circle',
+    label: i18n('stack.chatVoiceCall'),
+    icon: 'phone',
     available: true,
-    route: 'onboarding-complete',
+    route: 'chat-voice-call',
   },
   {
-    label: i18n('stack.deviceConfigVoice'),
-    icon: 'mdi-microphone',
+    label: i18n('stack.chatHistory'),
+    icon: 'history',
     available: true,
-    route: 'device-config-voice',
+    route: 'chat-history',
   },
   {
-    label: i18n('stack.deviceConfigLanguage'),
-    icon: 'mdi-translate',
+    label: i18n('stack.chatMuteSettings'),
+    icon: 'volume_off',
     available: true,
-    route: 'device-config-language',
-  },
-  {
-    label: i18n('stack.deviceConfigPersonality'),
-    icon: 'mdi-head-cog',
-    available: true,
-    route: 'device-config-personality',
-  },
-  {
-    label: i18n('stack.deviceConfigPersonalityDetail'),
-    icon: 'mdi-head-cog',
-    available: true,
-    route: 'device-config-personality-detail',
-  },
-  {
-    label: i18n('stack.settingsTermsOfService'),
-    icon: 'mdi-shield-lock',
-    available: true,
-    route: 'settings-terms-of-service',
-  },
-  {
-    label: i18n('stack.settingsUserAgreement'),
-    icon: 'mdi-shield-lock',
-    available: true,
-    route: 'settings-user-agreement',
-  },
-  {
-    label: i18n('stack.settingsPrivacyPolicy'),
-    icon: 'mdi-shield-lock',
-    available: true,
-    route: 'settings-privacy-policy',
-  },
-  {
-    label: i18n('stack.deviceConfigWifi'),
-    icon: 'mdi-wifi',
-    available: true,
-    route: 'device-config-wifi',
-  },
-  {
-    label: i18n('stack.deviceConfigUpdate'),
-    icon: 'mdi-update',
-    available: true,
-    route: 'device-config-firmware',
-  },
-  {
-    label: i18n('stack.deviceConfigAbout'),
-    icon: 'mdi-information',
-    available: true,
-    route: 'device-config-about',
+    route: 'chat-mute-settings',
   },
 ];
-
-// Backward-compatible exports (evaluate once on import — use getters for reactive labels)
-export const MAIN_NAVIGATIONS = getMainNavigations();
-export const STACK_NAVIGATIONS = getStackNavigations();
