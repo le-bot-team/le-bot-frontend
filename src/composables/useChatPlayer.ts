@@ -55,6 +55,11 @@ export function useChatPlayer(): UseChatPlayerReturn {
   async function playChunk(base64Audio: string): Promise<void> {
     const ctx = ensureContext();
 
+    // Resume AudioContext if suspended (required on mobile after user gesture)
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+
     // Decode base64 to ArrayBuffer (raw PCM)
     const binary = atob(base64Audio);
     const bytes = new Uint8Array(binary.length);

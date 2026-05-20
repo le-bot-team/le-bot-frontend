@@ -3,14 +3,16 @@ import { useDialogPluginComponent } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
 
+interface Props {
+  title?: string | undefined;
+  body?: string | undefined;
+  confirmLabel?: string | undefined;
+  cancelLabel?: string | undefined;
+  confirmType?: 'primary' | 'danger';
+}
+
 const props = withDefaults(
-  defineProps<{
-    title?: string;
-    body?: string;
-    confirmLabel?: string;
-    cancelLabel?: string;
-    confirmType?: 'primary' | 'danger';
-  }>(),
+  defineProps<Props>(),
   {
     title: undefined,
     body: undefined,

@@ -93,7 +93,7 @@ const onAvatarClick = () => {
   $q.dialog({
     component: CropperDialog,
     componentProps: {
-      currentImage: profile.value?.avatar,
+      src: profile.value?.avatar,
     },
   }).onOk((croppedBase64: string) => {
     if (profile.value) {
