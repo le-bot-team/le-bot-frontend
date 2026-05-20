@@ -226,6 +226,7 @@ export default {
         familyGroupJoin: '加入家庭组',
         messages: '消息',
         messageDetail: '消息详情',
+        messagesActivity: '活动消息',
         orders: '我的订单',
         help: '帮助与反馈',
         helpFaq: '常见问题',
@@ -403,6 +404,7 @@ export default {
           linkCopied: '链接已复制',
           linkCopyFailed: '复制链接失败',
           qrCodeSaved: '二维码已保存',
+          comingSoon: '该功能即将上线',
         },
       },
     },
@@ -553,6 +555,8 @@ export default {
         },
         notifications: {
           comingSoon: '该功能即将上线',
+          copied: '已复制到剪贴板',
+          copyFailed: '复制失败，请手动复制',
         },
       },
       ChatPage: {
@@ -1512,6 +1516,17 @@ export default {
         MessageDetailPage: {
           labels: {
             title: '消息详情',
+            noContent: '暂无内容',
+          },
+          items: {
+            m1Title: '新的通知',
+            m1Content: '您有一条新的通知，请前往查看。这条通知是关于您设备更新的提醒，请及时查看。',
+            m2Title: '情绪不佳',
+            m2Content: '监测到长期情绪不佳，建议与乐宝进行更多互动以改善心情。',
+            m3Title: '通知标题',
+            m3Content: '这里是通知的内容说明，详细描述了通知的具体事项。',
+            m4Title: '新用户会员已发放',
+            m4Content: '可在会员中心查看哦！欢迎加入乐宝大家庭。',
           },
         },
         ActivityMessagesPage: {
@@ -1519,6 +1534,7 @@ export default {
             title: '活动消息',
             empty: '暂无活动消息',
             viewDetail: '查看详情',
+            comingSoon: '活动详情即将上线',
           },
           items: {
             a1Title: '会员日，优惠限今日',

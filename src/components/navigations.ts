@@ -361,4 +361,46 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     available: true,
     route: 'onboarding-complete',
   },
+  {
+    label: i18n('stack.messages'),
+    icon: 'mdi-message-text',
+    available: true,
+    route: 'messages',
+  },
+  {
+    label: i18n('stack.messageDetail'),
+    icon: 'mdi-message-text',
+    available: true,
+    route: 'message-detail',
+  },
+  {
+    label: i18n('stack.messagesActivity'),
+    icon: 'mdi-message-text',
+    available: true,
+    route: 'messages-activity',
+  },
+  {
+    label: i18n('stack.orders'),
+    icon: 'mdi-shopping',
+    available: true,
+    route: 'orders',
+  },
+  {
+    label: i18n('stack.help'),
+    icon: 'mdi-help-circle',
+    available: true,
+    route: 'help',
+  },
+  {
+    label: i18n('stack.helpFaq'),
+    icon: 'mdi-frequently-asked-questions',
+    available: true,
+    route: 'help-faq',
+  },
+  {
+    label: i18n('stack.helpFeedback'),
+    icon: 'mdi-message-alert',
+    available: true,
+    route: 'help-feedback',
+  },
 ];

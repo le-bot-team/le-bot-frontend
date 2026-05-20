@@ -226,6 +226,7 @@ export default {
         familyGroupJoin: 'Join Family Group',
         messages: 'Messages',
         messageDetail: 'Message Detail',
+        messagesActivity: 'Activity Messages',
         orders: 'My Orders',
         help: 'Help & Feedback',
         helpFaq: 'FAQ',
@@ -408,6 +409,7 @@ export default {
           linkCopied: 'Link copied',
           linkCopyFailed: 'Failed to copy link',
           qrCodeSaved: 'QR code saved',
+          comingSoon: 'This feature is coming soon',
         },
       },
     },
@@ -558,6 +560,8 @@ export default {
         },
         notifications: {
           comingSoon: 'This feature is coming soon',
+          copied: 'Copied to clipboard',
+          copyFailed: 'Copy failed, please copy manually',
         },
       },
       ChatPage: {
@@ -1533,6 +1537,17 @@ export default {
         MessageDetailPage: {
           labels: {
             title: 'Message Detail',
+            noContent: 'No content available',
+          },
+          items: {
+            m1Title: 'New Notification',
+            m1Content: 'You have a new notification. This is a reminder about your device update, please check it promptly.',
+            m2Title: 'Low Mood Detected',
+            m2Content: 'Long-term low mood detected. We suggest more interaction with LeBot to improve your mood.',
+            m3Title: 'Notification',
+            m3Content: 'This is the notification content describing the specific details of the notice.',
+            m4Title: 'New Member Benefits Issued',
+            m4Content: 'Check it in the Member Center! Welcome to the LeBot family.',
           },
         },
         ActivityMessagesPage: {
@@ -1540,6 +1555,7 @@ export default {
             title: 'Activity Messages',
             empty: 'No activity messages',
             viewDetail: 'View details',
+            comingSoon: 'Activity details coming soon',
           },
           items: {
             a1Title: 'Member Day - Limited Time Offer',
