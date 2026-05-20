@@ -1,15 +1,18 @@
 import { router } from 'src/router';
 import { retrieveProfileAvatar, retrieveProfileInfo } from 'src/utils/api/profile';
 import { useAuthStore } from 'stores/auth';
+import { useFamilyGroupStore } from 'stores/family-group';
 import { useProfileStore } from 'stores/profile';
 import type { UserProfile } from 'stores/profile/types';
 
 export const logoutAccount = () => {
   const authStore = useAuthStore();
   const { updateProfile } = useProfileStore();
+  const familyGroupStore = useFamilyGroupStore();
 
   authStore.accessToken = '';
   updateProfile();
+  familyGroupStore.reset();
   router.replace('/').catch(console.error);
   setTimeout(() => location.reload(), 100);
 };
