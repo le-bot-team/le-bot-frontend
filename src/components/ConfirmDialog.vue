@@ -1,16 +1,7 @@
 <script setup lang="ts">
-/**
- * ConfirmDialog — reusable confirmation dialog component for Quasar Dialog plugin.
- *
- * Usage:
- *   $q.dialog({ component: ConfirmDialog, componentProps: { title, body, confirmLabel, confirmType } })
- *     .onOk(() => { ... })
- */
 import { useDialogPluginComponent } from 'quasar';
 
 import { i18nSubPath } from 'src/utils/common';
-
-const i18n = i18nSubPath('components.dialogs.ConfirmDialog');
 
 const props = withDefaults(
   defineProps<{
@@ -21,43 +12,48 @@ const props = withDefaults(
     confirmType?: 'primary' | 'danger';
   }>(),
   {
-    title: '',
-    body: '',
-    confirmLabel: '',
-    cancelLabel: '',
+    title: undefined,
+    body: undefined,
+    confirmLabel: undefined,
+    cancelLabel: undefined,
     confirmType: 'primary',
   },
 );
+defineEmits(useDialogPluginComponent.emitsObject);
 
-defineEmits([...useDialogPluginComponent.emits]);
+const i18n = i18nSubPath('components.dialogs.ConfirmDialog');
 
-const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } = useDialogPluginComponent();
 </script>
 
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="confirm-dialog-card">
-      <q-card-section v-if="props.title" class="text-h6">
+    <div class="confirm-dialog">
+      <div v-if="props.title" class="confirm-dialog__title">
         {{ props.title }}
-      </q-card-section>
-      <q-card-section v-if="props.body" class="q-pt-none">
+      </div>
+      <div v-if="props.body" class="confirm-dialog__body">
         {{ props.body }}
-      </q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat :label="props.cancelLabel || i18n('labels.cancel')" color="grey" @click="onDialogCancel" />
-        <q-btn
-          flat
-          :label="props.confirmLabel || i18n('labels.confirm')"
-          :color="props.confirmType === 'danger' ? 'negative' : 'primary'"
-          @click="onDialogOK"
-        />
-      </q-card-actions>
-    </q-card>
+      </div>
+      <div class="confirm-dialog__actions">
+        <button
+          class="confirm-dialog__btn confirm-dialog__btn--cancel"
+          type="button"
+          @click="onDialogCancel"
+        >
+          {{ props.cancelLabel || i18n('labels.cancel') }}
+        </button>
+        <button
+          class="confirm-dialog__btn"
+          :class="`confirm-dialog__btn--${props.confirmType}`"
+          type="button"
+          @click="onDialogOK()"
+        >
+          {{ props.confirmLabel || i18n('labels.confirm') }}
+        </button>
+      </div>
+    </div>
   </q-dialog>
 </template>
 
-<style scoped>
-.confirm-dialog-card {
-  min-width: 280px;
-}
-</style>
+<style scoped></style>

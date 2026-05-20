@@ -203,6 +203,7 @@ export default {
         profile: 'Profile',
         profileEdit: 'Edit Profile',
         profileChangePassword: 'Change Password',
+        profileChangePhone: 'Change Phone',
         settings: 'Settings',
         settingsVoiceprint: 'Voiceprint Settings',
         settingsVoiceprintDetail: 'Voiceprint Settings',
@@ -331,6 +332,13 @@ export default {
         error: 'Error',
         hint: 'Click to start recording',
         recording: 'Recording...',
+      },
+    },
+    BirthdayPicker: {
+      labels: {
+        placeholder: 'YYYY/MM/DD',
+        cancel: 'Cancel',
+        confirm: 'OK',
       },
     },
     CropperDialog: {
@@ -980,8 +988,10 @@ export default {
           resendCooldown: 'Resend ({seconds})',
           sending: 'Sending...',
           verifyOld: 'Verify Old Phone',
+          verifying: 'Verifying...',
           newPhonePlaceholder: 'Enter new phone number',
           submitNew: 'Bind New Phone Number',
+          submitting: 'Submitting...',
         },
         errors: {
           invalidCode: 'Incorrect verification code',
@@ -1062,6 +1072,10 @@ export default {
           newPassword: 'Please set password',
           confirmPassword: 'Please re-enter the password',
           submit: 'Submit and Go Back',
+          submitting: 'Submitting...',
+          toggleOldPassword: 'Toggle old password visibility',
+          toggleNewPassword: 'Toggle new password visibility',
+          toggleConfirmPassword: 'Toggle confirm password visibility',
         },
         errors: {
           wrongOldPassword: 'Old password is incorrect',

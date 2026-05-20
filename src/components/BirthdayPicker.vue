@@ -1,110 +1,105 @@
 <script setup lang="ts">
-/**
- * BirthdayPicker — date picker for selecting a child's birthday.
- * Renders a native-style date input with optional placeholder and default year.
- */
-import { computed, ref } from 'vue';
+import { ref, watch } from 'vue';
 
-const props = withDefaults(
-  defineProps<{
-    modelValue?: string;
-    placeholder?: string;
-    defaultYear?: number;
-  }>(),
-  {
-    modelValue: '',
-    placeholder: '',
-    defaultYear: 2020,
-  },
-);
+import { i18nSubPath } from 'src/utils/common';
+
+const props = defineProps<{
+  modelValue?: string;
+  disabled?: boolean;
+  placeholder?: string;
+}>();
 
 const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
-const inputRef = ref<HTMLInputElement | null>(null);
+const i18n = i18nSubPath('components.BirthdayPicker');
 
-const displayValue = computed(() => {
-  if (props.modelValue) {
-    const parts = props.modelValue.split('-');
-    const y = parts[0] ?? '';
-    const m = parts[1] ?? '';
-    const d = parts[2] ?? '';
-    return `${y}年${parseInt(m)}月${parseInt(d)}日`;
+const showPicker = ref(false);
+const internalValue = ref(props.modelValue ?? '');
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    internalValue.value = v ?? '';
+  },
+);
+
+// Reset internalValue when dialog opens to stay in sync with modelValue
+watch(showPicker, (open) => {
+  if (open) {
+    internalValue.value = props.modelValue ?? '';
   }
-  return '';
 });
 
-function openPicker() {
-  const el = inputRef.value;
-  if (!el) return;
-  // showPicker() not available on Safari 14; the input covers the full area
-  // so native click-to-open works as fallback without needing el.click()
-  if (typeof el.showPicker === 'function') {
-    el.showPicker();
-  }
-}
+const onConfirm = () => {
+  emit('update:modelValue', internalValue.value);
+  showPicker.value = false;
+};
 
-function onDateChange(event: Event) {
-  const target = event.target as HTMLInputElement;
-  emit('update:modelValue', target.value);
-}
-
-// Default max date: today (local timezone); default value hint for picker
-const today = computed(() => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-});
-const defaultDate = computed(() => `${props.defaultYear}-06-01`);
+const onCancel = () => {
+  showPicker.value = false;
+};
 </script>
 
 <template>
-  <div class="birthday-picker" @click="openPicker">
-    <span v-if="displayValue" class="birthday-picker__value">{{ displayValue }}</span>
-    <span v-else class="birthday-picker__placeholder">{{ placeholder }}</span>
+  <div class="birthday-picker">
     <input
-      ref="inputRef"
-      type="date"
       class="birthday-picker__input"
-      :value="modelValue || defaultDate"
-      :max="today"
-      min="2000-01-01"
-      @change="onDateChange"
+      type="text"
+      readonly
+      :value="modelValue"
+      :disabled="disabled"
+      :placeholder="placeholder || i18n('labels.placeholder')"
+      @click="!disabled && (showPicker = true)"
     />
+    <q-dialog v-model="showPicker">
+      <q-card style="min-width: 280px">
+        <q-card-section>
+          <q-date
+            v-model="internalValue"
+            mask="YYYY/MM/DD"
+            minimal
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat :label="i18n('labels.cancel')" @click="onCancel" />
+          <q-btn color="primary" flat :label="i18n('labels.confirm')" @click="onConfirm" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <style scoped>
 .birthday-picker {
-  position: relative;
-  display: flex;
-  align-items: center;
   width: 100%;
-  height: 48px;
-  padding: 0 16px;
-  border: 1px solid var(--clr-input-border, #e0e0e0);
-  border-radius: 12px;
-  background: var(--clr-white, #fff);
-  cursor: pointer;
-}
-
-.birthday-picker__value {
-  font-size: 15px;
-  color: var(--clr-text-primary, #151717);
-}
-
-.birthday-picker__placeholder {
-  font-size: 15px;
-  color: var(--clr-text-placeholder, #9398a9);
+  height: 100%;
 }
 
 .birthday-picker__input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
   width: 100%;
   height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--clr-text);
+  padding: 13px 16px;
+  box-sizing: border-box;
   cursor: pointer;
-  /* Allow click-through to trigger native picker */
+}
+
+.birthday-picker__input::placeholder {
+  font-weight: 400;
+  color: var(--clr-caption);
+}
+
+.birthday-picker__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>
