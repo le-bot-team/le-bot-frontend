@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { bus } from 'boot/bus';
-import { MAIN_NAVIGATIONS } from 'components/navigations';
+import { getMainNavigations } from 'components/navigations';
+
+const navigations = computed(() => getMainNavigations());
 </script>
 
 <template>
@@ -17,7 +20,7 @@ import { MAIN_NAVIGATIONS } from 'components/navigations';
     @hide="bus.emit('drawer', 'close', 'left')"
   >
     <q-list separator>
-      <template v-for="navigation in MAIN_NAVIGATIONS" :key="navigation.route">
+      <template v-for="navigation in navigations" :key="navigation.route">
         <q-item :disable="!navigation.available" exact :to="navigation.route">
           <q-item-section avatar>
             <q-icon :name="navigation.icon" :color="navigation.available ? '' : 'grey'" />

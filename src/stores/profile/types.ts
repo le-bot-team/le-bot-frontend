@@ -1,12 +1,19 @@
+export type FamilyUserRole = 'father' | 'mother' | 'grandpa' | 'grandma' | 'friend' | 'other';
+
 export interface UserProfile {
   id: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   nickname?: string;
   bio?: string;
   avatar?: string | undefined;
   avatarHash?: string;
   region?: string;
-  last_active: Date;
-  last_login: Date;
+  birthday?: string;
+  phone?: string;
+  relationship?: string;
+  role?: FamilyUserRole;
+  gender?: 'male' | 'female';
+  last_active: string;
+  last_login: string;
 }

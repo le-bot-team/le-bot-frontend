@@ -14,7 +14,7 @@ const menuGroups = reactive<{ disabled?: boolean; icon: string; label: string; t
     {
       icon: profile ? 'mdi-account-circle-outline' : 'mdi-login',
       label: profile ? i18n('labels.profileSettings') : i18n('labels.signInOrSignUp'),
-      to: profile ? '/stack/profile?edit=true' : '/stack/auth?from=/stack/settings',
+      to: profile ? '/stack/profile' : '/stack/auth?from=/stack/settings',
     },
     {
       disabled: !profile,

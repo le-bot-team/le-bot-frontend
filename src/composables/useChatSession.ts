@@ -47,7 +47,7 @@ export interface UseChatSessionReturn {
   /** Whether assistant audio is currently playing */
   isAudioPlaying: Ref<boolean>;
   /** Connect to the chat server */
-  connect: (token: string) => Promise<void>;
+  connect: (token: string, deviceId?: string, sessionId?: string) => Promise<void>;
   /** Disconnect from the chat server */
   disconnect: () => void;
   /** Manually trigger a wake (button press equivalent of GPIO) */
@@ -155,6 +155,7 @@ export function useChatSession(): UseChatSessionReturn {
     if (msg.audioChunks.length > 0) {
       const combinedBlob = await pcmToWav(new Blob(msg.audioChunks));
       msg.audioUrl = URL.createObjectURL(combinedBlob);
+      msg.audioChunks = []; // Release intermediate blobs to free memory
     }
 
     currentTurnPlayer.setAudioComplete(true);
@@ -376,12 +377,15 @@ export function useChatSession(): UseChatSessionReturn {
   // Public API
   // ==========================================================================
 
-  async function connect(token: string): Promise<void> {
-    // Setup WS handlers before connecting
+  async function connect(token: string, deviceId?: string, sessionId?: string): Promise<void> {
+    // Setup WS handlers before connecting — useWsClient queues them as
+    // pendingHandlers and applies them inside connect() to the new WsWrapper
     setupWsHandlers();
 
-    // Connect WebSocket
-    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${token}`;
+    // Connect WebSocket with optional deviceId for virtual device binding
+    const deviceParam = deviceId ? `&deviceId=${encodeURIComponent(deviceId)}` : '';
+    const sessionParam = sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : '';
+    const wsUrl = `${process.env.LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token=${encodeURIComponent(token)}${deviceParam}${sessionParam}`;
     wsClient.connect(wsUrl);
 
     // Initialize microphone
