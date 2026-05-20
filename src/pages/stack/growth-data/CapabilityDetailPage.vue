@@ -25,7 +25,7 @@ use([CanvasRenderer, RadarChart, TooltipComponent, RadarComponent]);
 const route = useRoute();
 const capabilityKey = computed(() => (route.params.capabilityKey as string) || 'emotionalExpression');
 
-const i18n = i18nSubPath(`pages.stack.growth-data.CapabilityDetailPage`);
+const i18n = i18nSubPath('pages.stack.growth-data.CapabilityDetailPage');
 
 /** Split comparison text on '——' (zh) or ' — ' (en) delimiter, preserving original delimiter */
 function splitComparison(text: string): { key: string; desc: string; delimiter: string } {

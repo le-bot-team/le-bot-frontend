@@ -27,20 +27,12 @@ const i18n = i18nSubPath('pages.stack.growth-data.ChatWeeklyReportPage');
 
 // --- Hot topics mock data (same as GrowthDataPage) ---
 const hotTopicsData = computed(() => [
-  { name: i18n('hotTopics.draw'), value: 11 },
-  { name: i18n('hotTopics.playhouse'), value: 37 },
-  { name: i18n('hotTopics.ultraman'), value: 19 },
-  { name: i18n('hotTopics.plantsVsZombies'), value: 20 },
-  { name: i18n('hotTopics.other'), value: 13 },
+  { name: i18n('hotTopics.draw'), value: 11, color: 'rgba(117,221,255,1)' },
+  { name: i18n('hotTopics.playhouse'), value: 37, color: 'rgba(131,224,210,1)' },
+  { name: i18n('hotTopics.ultraman'), value: 19, color: 'rgba(225,255,118,1)' },
+  { name: i18n('hotTopics.plantsVsZombies'), value: 20, color: 'rgba(255,221,127,1)' },
+  { name: i18n('hotTopics.other'), value: 13, color: 'rgba(245,255,219,1)' },
 ]);
-
-const pieColors = [
-  'rgba(117,221,255,1)', // Section 1 — 画画
-  'rgba(131,224,210,1)', // Section 2 — 过家家
-  'rgba(225,255,118,1)', // Section 3 — 奥特曼
-  'rgba(255,221,127,1)', // Section 4 — 植物大战僵尸
-  'rgba(245,255,219,1)', // Section 5 — 其他
-];
 
 // --- ECharts Pie option ---
 const pieOption = computed(() => ({
@@ -50,10 +42,10 @@ const pieOption = computed(() => ({
       type: 'pie' as const,
       radius: ['0%', '70%'],
       center: ['50%', '50%'],
-      data: hotTopicsData.value.map((d, i) => ({
+      data: hotTopicsData.value.map((d) => ({
         name: d.name,
         value: d.value,
-        itemStyle: { color: pieColors[i] },
+        itemStyle: { color: d.color },
       })),
       label: {
         show: true,

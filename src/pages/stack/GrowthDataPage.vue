@@ -144,7 +144,16 @@ const hotTopic = computed<string>(() => i18n('mock.hotTopic'));
 
 // Emotion multiline chart mock (5 emotions × 7 days)
 const emotionDays = ['5.12', '5.13', '5.14', '5.15', '5.16', '5.17', '5.18'];
-const emotionSeries = computed(() => [
+
+interface EmotionEntry {
+  key: string;
+  label: string;
+  color: string;
+  data: number[];
+  dashed?: boolean;
+}
+
+const emotionSeries = computed<EmotionEntry[]>(() => [
   { key: 'happy', label: i18n('emotions.happy'), color: 'rgba(32,204,249,1)', data: [80, 75, 82, 78, 85, 88, 90] },
   { key: 'delighted', label: i18n('emotions.delighted'), color: 'rgba(129,236,223,1)', data: [65, 60, 68, 72, 70, 75, 78] },
   { key: 'calm', label: i18n('emotions.calm'), color: 'rgba(200,200,200,1)', data: [40, 45, 42, 38, 40, 35, 32], dashed: true },
@@ -252,20 +261,12 @@ const radarOption = computed(() => ({
 
 // Hot topics pie mock
 const hotTopicsData = computed(() => [
-  { name: i18n('hotTopics.draw'), value: 11 },
-  { name: i18n('hotTopics.playhouse'), value: 37 },
-  { name: i18n('hotTopics.ultraman'), value: 19 },
-  { name: i18n('hotTopics.plantsVsZombies'), value: 20 },
-  { name: i18n('hotTopics.other'), value: 13 },
+  { name: i18n('hotTopics.draw'), value: 11, color: 'rgba(117,221,255,1)' },
+  { name: i18n('hotTopics.playhouse'), value: 37, color: 'rgba(131,224,210,1)' },
+  { name: i18n('hotTopics.ultraman'), value: 19, color: 'rgba(225,255,118,1)' },
+  { name: i18n('hotTopics.plantsVsZombies'), value: 20, color: 'rgba(255,221,127,1)' },
+  { name: i18n('hotTopics.other'), value: 13, color: 'rgba(245,255,219,1)' },
 ]);
-
-const pieColors = [
-  'rgba(117,221,255,1)',
-  'rgba(131,224,210,1)',
-  'rgba(225,255,118,1)',
-  'rgba(255,221,127,1)',
-  'rgba(245,255,219,1)',
-];
 
 const pieOption = computed(() => ({
   tooltip: { trigger: 'item' as const },
@@ -275,10 +276,10 @@ const pieOption = computed(() => ({
       type: 'pie' as const,
       radius: ['0%', '70%'],
       center: ['50%', '50%'],
-      data: hotTopicsData.value.map((d, i) => ({
+      data: hotTopicsData.value.map((d) => ({
         name: d.name,
         value: d.value,
-        itemStyle: { color: pieColors[i] },
+        itemStyle: { color: d.color },
       })),
       label: {
         show: true,
