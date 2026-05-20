@@ -14,6 +14,7 @@ export default {
       NewPasswordPanel: {
         errors: {
           passwordTooShort: '密码至少 8 位',
+          passwordMismatch: '两次输入的密码不一致',
         },
         labels: {
           welcome:
@@ -23,12 +24,27 @@ export default {
           welcomeNew: '欢迎，{username}！\n请设置您的密码以继续。',
           newPassword: '新密码',
           confirmNewPassword: '确认新密码',
+          sending: '发送中...',
+          sendCode: '发送验证码',
+          resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
+          strengthWeak: '弱',
+          strengthMedium: '中',
+          strengthStrong: '强',
+          codePlaceholder: '请输入验证码',
+          newPasswordPlaceholder: '请设置密码',
+          confirmPasswordPlaceholder: '请再次输入设置的密码',
+          processing: '处理中...',
+          completeRegistration: '完成注册并登录',
         },
         notifications: {
           invalidEmail: '邮箱地址无效',
           passwordResetSuccess: '密码重置成功',
           loginSuccess: '登录成功',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
+          setPasswordFailed: '设置密码失败',
+          autoLoginFailed: '自动登录失败',
         },
       },
       PasswordInput: {
@@ -50,9 +66,26 @@ export default {
           nickname: '昵称',
           bio: '个人简介',
           confirm: '确认',
+          nicknamePlaceholder: '请输入昵称',
+          birthday: '生日',
+          relationship: '您与孩子的关系',
+          selectRelationship: '选择关系',
+          selectPlaceholder: '请选择',
+          relations: {
+            mother: '妈妈',
+            father: '爸爸',
+            grandma: '奶奶',
+            grandpa: '爷爷',
+            maternalGrandma: '外婆',
+            maternalGrandpa: '外公',
+            friend: '朋友',
+            otherRelative: '其他亲属',
+          },
         },
         notifications: {
           unknownError: '未知错误',
+          saveFailed: '保存失败',
+          fetchFailed: '获取资料失败',
         },
       },
       SignInOrSignUpPanel: {
@@ -61,8 +94,20 @@ export default {
           password: '密码',
           signInOrSignUp: '登录 / 注册',
           signIn: '登录',
-          usePassword: '使用密码',
-          useCode: '使用验证码',
+          usePassword: '密码登录',
+          useCode: '验证码登录',
+          sendCode: '发送验证码',
+          sending: '发送中...',
+          resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
+          codePlaceholder: '请输入验证码',
+          passwordPlaceholder: '请输入密码',
+          termsPrefix: '我已阅读并同意',
+          termsOfService: '《服务条款》',
+          termsSeparator: '、',
+          userAgreement: '《用户协议》',
+          termsAnd: '和',
+          privacyPolicy: '《隐私政策》',
         },
         errors: {
           invalidEmail: '邮箱地址无效',
@@ -70,6 +115,7 @@ export default {
         notifications: {
           codeSent: '验证码已发送',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
         },
       },
       VerificationCodeInput: {
@@ -82,6 +128,7 @@ export default {
           sending: '发送中...',
           resendCode: '重新发送',
           resendCodeCooldown: '重新发送 ({seconds}s)',
+          codePlaceholder: '请输入验证码',
         },
         notifications: {
           sendCodeError: '发送验证码出错',
@@ -182,6 +229,8 @@ export default {
         settingsNetwork: '网络检测',
         settingsStorage: '存储空间',
         settingsPrivacyPolicy: '隐私政策',
+        settingsTermsOfService: '服务条款',
+        settingsUserAgreement: '用户协议',
         settingsInfoList: '个人信息收集清单',
         addVirtualDevice: '添加虚拟乐宝',
         onboarding: '引导页',
@@ -358,6 +407,8 @@ export default {
         labels: {
           title: '乐宝',
           description: '您的智能宠物好伙伴',
+          profileSetupTitle: '完善个人信息',
+          goBack: '返回',
         },
       },
       HomePage: {
@@ -1177,6 +1228,7 @@ export default {
         PrivacyPolicyPage: {
           labels: {
             title: '隐私政策',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、信息收集',
@@ -1192,6 +1244,7 @@ export default {
         TermsOfServicePage: {
           labels: {
             title: '服务条款',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、接受条款',
@@ -1211,6 +1264,7 @@ export default {
         UserAgreementPage: {
           labels: {
             title: '用户协议',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、协议范围',

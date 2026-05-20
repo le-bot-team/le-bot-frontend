@@ -1,5 +1,16 @@
 export type DeviceType = 'robot';
 
+export interface DeviceConfig {
+  voiceStyle?: string;
+  language?: string;
+  personality?: {
+    traits: string;
+    goals: string;
+    selectedTraits: string[];
+    selectedGoals: string[];
+  };
+}
+
 export interface DeviceInfo {
   id: string;
   createdAt: string | null;
@@ -10,7 +21,5 @@ export interface DeviceInfo {
   model: string;
   name: string | null;
   status: unknown;
-  config: {
-    voiceStyle: string;
-  } | null;
+  config: DeviceConfig | null;
 }
