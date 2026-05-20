@@ -159,6 +159,7 @@ export default {
         labels: {
           noDevice: 'No device connected',
           addNewDevice: 'Add Device',
+          defaultName: 'My LeBot',
         },
       },
       TopicCard: {
@@ -444,6 +445,8 @@ export default {
         deviceSwitch: {
           title: 'Switch Device',
           addDevice: 'Add Lebot',
+          deviceNameFormat: "{name}'s LeBot",
+          unnamedDevice: 'Unnamed Device',
         },
         notifications: {},
       },
@@ -785,10 +788,14 @@ export default {
             startChat: 'Start Chat',
             backToHome: 'Back to Home',
           },
+          familyGroupName: "{name}'s Family Group",
         },
         notifications: {
           fieldsRequired: "Please fill in your child's name and birthday",
           activateFailed: 'Failed to activate virtual device',
+          tokenMissing: 'Session expired, please log in again',
+          voiceprintFailed: 'Voiceprint registration failed',
+          leaveIncomplete: 'Device setup is incomplete. Leaving will create an orphaned device. Continue?',
         },
       },
       FamilyGroupPage: {
@@ -1001,6 +1008,7 @@ export default {
           goalsTitle: 'Expected development directions:',
           goalsPlaceholder: 'Personality or capability development directions...',
           submit: 'Submit',
+          skip: 'Skip',
         },
         traitTags: {
           trait_a: 'Cheerful',
@@ -1373,6 +1381,7 @@ export default {
             connected: 'Connected',
             notConnected: 'Not Connected',
             availableNetworks: 'Available Networks',
+            scanNetworks: 'Scan Networks',
             passwordPlaceholder: 'Enter Wi-Fi password',
             connect: 'Connect',
             cancel: 'Cancel',

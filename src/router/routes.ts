@@ -91,6 +91,22 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'devices',
+        path: 'devices',
+        components: {
+          default: () => import('pages/stack/DevicesPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'add-virtual-device',
+        path: 'add-virtual-device',
+        components: {
+          default: () => import('pages/stack/AddVirtualDevicePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         path: 'device-config',
         children: [
           {

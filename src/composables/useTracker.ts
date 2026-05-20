@@ -1,32 +1,21 @@
 /**
- * Lightweight analytics/conversion tracking composable.
- * Currently a no-op stub — wire up a real analytics provider (e.g. Umami, Plausible)
- * when the backend tracking endpoint is ready.
+ * useTracker — lightweight analytics tracking composable.
+ * Stub implementation that logs events in development and will integrate
+ * with a real analytics backend when available.
  */
+
 export function useTracker() {
-  /**
-   * Track a named conversion event.
-   * @param event - Semantic event name (e.g. 'profile_setup', 'auth_login_success')
-   * @param meta  - Optional key-value metadata attached to the event
-   */
-  function trackConversion(event: string, meta?: Record<string, unknown>) {
+  function trackClick(eventName: string, payload?: Record<string, unknown>) {
     if (import.meta.env.DEV) {
-      console.debug('[Tracker] conversion:', event, meta ?? '');
+      console.debug('[tracker:click]', eventName, payload);
     }
-    // TODO: send to analytics backend
   }
 
-  /**
-   * Track a UI click/interaction event.
-   * @param element - Identifier for the clicked element (e.g. 'chat_send_btn')
-   * @param meta   - Optional key-value metadata attached to the event
-   */
-  function trackClick(element: string, meta?: Record<string, unknown>) {
+  function trackConversion(eventName: string, payload?: Record<string, unknown>) {
     if (import.meta.env.DEV) {
-      console.debug('[Tracker] click:', element, meta ?? '');
+      console.debug('[tracker:conversion]', eventName, payload);
     }
-    // TODO: send to analytics backend
   }
 
-  return { trackConversion, trackClick };
+  return { trackClick, trackConversion };
 }

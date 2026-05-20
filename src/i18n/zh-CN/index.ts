@@ -159,6 +159,7 @@ export default {
         labels: {
           noDevice: '暂无设备连接',
           addNewDevice: '添加设备',
+          defaultName: '我的乐宝',
         },
       },
       TopicCard: {
@@ -439,6 +440,8 @@ export default {
         deviceSwitch: {
           title: '切换设备',
           addDevice: '添加乐宝',
+          deviceNameFormat: '{name}的乐宝',
+          unnamedDevice: '未命名设备',
         },
         notifications: {},
       },
@@ -780,10 +783,14 @@ export default {
             startChat: '开始聊天',
             backToHome: '回到首页',
           },
+          familyGroupName: '{name}的家庭组',
         },
         notifications: {
           fieldsRequired: '请完整填写宝宝的名字和生日',
           activateFailed: '激活虚拟设备失败',
+          tokenMissing: '登录已过期，请重新登录',
+          voiceprintFailed: '声纹注册失败',
+          leaveIncomplete: '设备设置尚未完成，离开将产生未配置的设备。确定离开吗？',
         },
       },
       FamilyGroupPage: {
@@ -995,6 +1002,7 @@ export default {
           goalsTitle: '您希望孩子的发展方向：',
           goalsPlaceholder: '可以输入个性或者能力发展方向...',
           submit: '提交',
+          skip: '跳过',
         },
         traitTags: {
           trait_a: '开朗',
@@ -1352,6 +1360,7 @@ export default {
             connected: '已连接',
             notConnected: '未连接',
             availableNetworks: '可用网络',
+            scanNetworks: '扫描网络',
             passwordPlaceholder: '请输入 Wi-Fi 密码',
             connect: '连接',
             cancel: '取消',

@@ -1,31 +1,50 @@
-<script setup lang="ts">
-import { ref } from 'vue';
+<template>
+  <q-page class="device-personality-page">
+    <section class="device-personality-card">
+      <div class="device-personality-row">
+        <span>{{ i18n('labels.toggleLabel') }}</span>
+        <q-toggle v-model="enabled" color="accent" @update:model-value="onToggle" />
+      </div>
+    </section>
+    <p class="device-personality-tip">{{ i18n('labels.tip') }}</p>
+  </q-page>
+</template>
 
-import { router } from 'src/router';
+<script setup lang="ts">
+// PersonalityPage — design f001e23d (未开启态) + 31e9fabe (开启后跳转到详情).
+// Empty-state layout: single white card with one toggle row plus a grey
+// hint paragraph. Toggle uses Quasar `color="accent"` which equals the raw
+// design token rgba(32,204,249,1) (=$accent in quasar.variables.scss). When
+// enabled, it redirects to PersonalityDetailPage for the full config form.
+import { ref, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useDeviceStore } from 'stores/device';
 import { i18nSubPath } from 'src/utils/common';
 
 const i18n = i18nSubPath('pages.stack.PersonalityPage');
+const router = useRouter();
+const deviceStore = useDeviceStore();
 
-const enabled = ref(false);
+const enabled = ref<boolean>(deviceStore.currentDevice?.config?.aiPersonality?.enabled === true);
 
-function onToggle(value: boolean) {
-  enabled.value = value;
-  if (value) {
-    void router.push('/stack/device-config/personality/detail');
+// Sync enabled state when returning from PersonalityDetailPage via router.back()
+watch(
+  () => deviceStore.currentDevice?.config?.aiPersonality?.enabled,
+  (v) => { enabled.value = v === true; },
+);
+
+onMounted(() => {
+  if (enabled.value) {
+    router.replace('/stack/device-config/personality/detail').catch(console.error);
   }
+});
+
+function onToggle(v: boolean) {
+  if (!v) return;
+  const prev = deviceStore.currentDevice?.config?.aiPersonality ?? {};
+  deviceStore.updateCurrentDeviceConfig({
+    aiPersonality: { ...prev, enabled: true },
+  });
+  router.push('/stack/device-config/personality/detail').catch(console.error);
 }
 </script>
-
-<template>
-  <q-page class="column q-pa-md q-gutter-y-md">
-    <q-item>
-      <q-item-section>
-        <q-item-label>{{ i18n('labels.toggleLabel') }}</q-item-label>
-      </q-item-section>
-      <q-item-section side>
-        <q-toggle :model-value="enabled" @update:model-value="onToggle" />
-      </q-item-section>
-    </q-item>
-    <div class="text-caption text-grey q-px-md">{{ i18n('labels.tip') }}</div>
-  </q-page>
-</template>

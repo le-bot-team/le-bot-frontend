@@ -1,17 +1,20 @@
 <script setup lang="ts">
-// BirthdayPicker — A simple year/month/day date picker for profile setup.
-// Emits ISO date string (YYYY-MM-DD) via v-model.
-// When modelValue is empty, shows placeholder options (no date selected).
-import { computed, ref, watch } from 'vue';
+/**
+ * BirthdayPicker — date picker for selecting a child's birthday.
+ * Renders a native-style date input with optional placeholder and default year.
+ */
+import { computed, ref } from 'vue';
 
 const props = withDefaults(
   defineProps<{
     modelValue?: string;
+    placeholder?: string;
     defaultYear?: number;
   }>(),
   {
     modelValue: '',
-    defaultYear: 1995,
+    placeholder: '',
+    defaultYear: 2020,
   },
 );
 
@@ -19,127 +22,89 @@ const emit = defineEmits<{
   'update:modelValue': [value: string];
 }>();
 
-// Parse initial value
-const parseDate = (val: string) => {
-  if (!val) return null;
-  const parts = val.split('-').map(Number);
-  if (!parts[0] || !parts[1] || !parts[2]) return null;
-  return { y: parts[0], m: parts[1], d: parts[2] };
-};
+const inputRef = ref<HTMLInputElement | null>(null);
 
-const initial = parseDate(props.modelValue);
-const year = ref<number | null>(initial?.y ?? null);
-const month = ref<number | null>(initial?.m ?? null);
-const day = ref<number | null>(initial?.d ?? null);
-
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => 1920 + i);
-const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-const daysInMonth = computed(() => {
-  if (!year.value || !month.value) return 31;
-  return new Date(year.value, month.value, 0).getDate();
-});
-
-const days = computed(() => Array.from({ length: daysInMonth.value }, (_, i) => i + 1));
-
-// Clamp day if month/year changes
-watch([year, month], () => {
-  if (day.value && day.value > daysInMonth.value) {
-    day.value = daysInMonth.value;
+const displayValue = computed(() => {
+  if (props.modelValue) {
+    const parts = props.modelValue.split('-');
+    const y = parts[0] ?? '';
+    const m = parts[1] ?? '';
+    const d = parts[2] ?? '';
+    return `${y}年${parseInt(m)}月${parseInt(d)}日`;
   }
+  return '';
 });
 
-// Emit formatted date when all fields are selected
-watch(
-  [year, month, day],
-  () => {
-    if (year.value && month.value && day.value) {
-      const m = String(month.value).padStart(2, '0');
-      const d = String(day.value).padStart(2, '0');
-      const formatted = `${year.value}-${m}-${d}`;
-      // Guard against emit loop when parent syncs back the same value
-      if (formatted !== props.modelValue) {
-        emit('update:modelValue', formatted);
-      }
-    }
-  },
-);
-
-// Emit immediately if modelValue was provided on mount
-if (initial) {
-  const m = String(initial.m).padStart(2, '0');
-  const d = String(initial.d).padStart(2, '0');
-  emit('update:modelValue', `${initial.y}-${m}-${d}`);
+function openPicker() {
+  const el = inputRef.value;
+  if (!el) return;
+  // showPicker() not available on Safari 14; the input covers the full area
+  // so native click-to-open works as fallback without needing el.click()
+  if (typeof el.showPicker === 'function') {
+    el.showPicker();
+  }
 }
 
-// Sync from parent
-watch(
-  () => props.modelValue,
-  (val) => {
-    const parsed = parseDate(val);
-    if (parsed) {
-      year.value = parsed.y;
-      month.value = parsed.m;
-      const maxDay = new Date(parsed.y, parsed.m, 0).getDate();
-      day.value = Math.min(parsed.d, maxDay);
-    } else {
-      year.value = null;
-      month.value = null;
-      day.value = null;
-    }
-  },
-);
+function onDateChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  emit('update:modelValue', target.value);
+}
+
+// Default max date: today (local timezone); default value hint for picker
+const today = computed(() => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+});
+const defaultDate = computed(() => `${props.defaultYear}-06-01`);
 </script>
 
 <template>
-  <div class="birthday-picker">
-    <select v-model="year" class="birthday-picker__select birthday-picker__select--year" :class="{ 'birthday-picker__select--placeholder': !year }" aria-label="Year">
-      <option :value="null" disabled hidden>YYYY</option>
-      <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
-    </select>
-    <select v-model="month" class="birthday-picker__select birthday-picker__select--month" :class="{ 'birthday-picker__select--placeholder': !month }" aria-label="Month">
-      <option :value="null" disabled hidden>MM</option>
-      <option v-for="m in months" :key="m" :value="m">{{ String(m).padStart(2, '0') }}</option>
-    </select>
-    <select v-model="day" class="birthday-picker__select birthday-picker__select--day" :class="{ 'birthday-picker__select--placeholder': !day }" aria-label="Day">
-      <option :value="null" disabled hidden>DD</option>
-      <option v-for="d in days" :key="d" :value="d">{{ String(d).padStart(2, '0') }}</option>
-    </select>
+  <div class="birthday-picker" @click="openPicker">
+    <span v-if="displayValue" class="birthday-picker__value">{{ displayValue }}</span>
+    <span v-else class="birthday-picker__placeholder">{{ placeholder }}</span>
+    <input
+      ref="inputRef"
+      type="date"
+      class="birthday-picker__input"
+      :value="modelValue || defaultDate"
+      :max="today"
+      min="2000-01-01"
+      @change="onDateChange"
+    />
   </div>
 </template>
 
 <style scoped>
 .birthday-picker {
+  position: relative;
   display: flex;
-  gap: 8px;
+  align-items: center;
   width: 100%;
-}
-
-.birthday-picker__select {
-  flex: 1;
-  height: 44px;
-  border: 1px solid rgba(147, 152, 169, 0.3);
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 15px;
-  color: var(--clr-text, #120e2c);
-  background: var(--clr-input-bg, #fff);
-  appearance: none;
-  -webkit-appearance: none;
-  outline: none;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--clr-input-border, #e0e0e0);
+  border-radius: 12px;
+  background: var(--clr-white, #fff);
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239398A9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
 }
 
-.birthday-picker__select--placeholder {
-  color: var(--clr-text-secondary, #9398a9);
+.birthday-picker__value {
+  font-size: 15px;
+  color: var(--clr-text-primary, #151717);
 }
 
-.birthday-picker__select--year {
-  flex: 1.4;
+.birthday-picker__placeholder {
+  font-size: 15px;
+  color: var(--clr-text-placeholder, #9398a9);
+}
+
+.birthday-picker__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  /* Allow click-through to trigger native picker */
 }
 </style>
