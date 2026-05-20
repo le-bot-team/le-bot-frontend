@@ -69,6 +69,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'onboarding-guide',
+        path: 'onboarding-guide',
+        components: {
+          default: () => import('pages/stack/OnboardingGuidePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'chat',
         path: 'chat',
         meta: {

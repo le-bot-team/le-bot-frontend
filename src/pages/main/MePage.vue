@@ -26,8 +26,7 @@ const menuList: MenuEntry[] = [
   {
     iconSrc: iconOrder,
     label: i18n('labels.myOrders'),
-    // TODO: Replace with '/stack/orders' once OrdersPage is implemented.
-    to: '/stack/devices',
+    to: '/stack/orders',
   },
   {
     iconSrc: iconChildInfor,
@@ -37,8 +36,7 @@ const menuList: MenuEntry[] = [
   {
     iconSrc: iconFeedback,
     label: i18n('labels.helpAndFeedback'),
-    // TODO: Replace with '/stack/help' once HelpPage is implemented.
-    to: '/stack/about',
+    to: '/stack/help',
   },
   {
     iconSrc: iconAboutUs,
@@ -55,8 +53,7 @@ const menuList: MenuEntry[] = [
 // Notification icon routes to the message center (design 5f6208e5).
 const onNotificationClick = () => {
   trackClick('btn_click_me_notifications');
-  // TODO: Replace with '/stack/messages' once MessagesPage is implemented.
-  void router.push('/stack/chat/history');
+  void router.push('/stack/messages');
 };
 </script>
 

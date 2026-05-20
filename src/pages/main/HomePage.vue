@@ -93,8 +93,7 @@ function pickTopic(topic: string) {
 
 function goMessages() {
   trackClick('btn_click_messages');
-  // TODO: Replace with '/stack/messages' once MessagesPage is implemented.
-  void router.push('/stack/chat/history');
+  void router.push('/stack/messages');
 }
 
 function goDeviceSwitch() {
