@@ -3,6 +3,7 @@ import { api } from 'boot/axios';
 
 import { setupAuthMock } from 'src/mock/handlers/auth';
 import { setupDeviceMock } from 'src/mock/handlers/device';
+import { setupFamilyGroupMock } from 'src/mock/handlers/family-group';
 import { setupProfileMock } from 'src/mock/handlers/profile';
 import { setupVoiceprintMock } from 'src/mock/handlers/voiceprint';
 import { MockChatWebSocket } from 'src/mock/ws/MockChatWebSocket';
@@ -16,6 +17,7 @@ let originalWebSocket: typeof WebSocket | null = null;
 const handlers: MockSetupFn[] = [
   setupAuthMock,
   setupDeviceMock,
+  setupFamilyGroupMock,
   setupProfileMock,
   setupVoiceprintMock,
 ];

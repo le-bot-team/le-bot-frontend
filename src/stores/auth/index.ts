@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 
 import { SEND_CODE_COOLDOWN_INTERVAL } from 'stores/auth/constants';
+import { useChatStore } from 'stores/chat';
 
 export const useAuthStore = defineStore(
   'auth',
@@ -49,6 +50,17 @@ export const useAuthStore = defineStore(
       startTick();
     };
 
+    /** Clear all user-scoped persisted state on logout/deactivation */
+    const logout = () => {
+      accessToken.value = undefined;
+      sendCodeTime.value = 0;
+      stopTick();
+
+      // Clear chat store (conversationId, mute settings)
+      const chatStore = useChatStore();
+      chatStore.$reset();
+    };
+
     // If store is hydrated from persistence with an active cooldown, resume ticking
     watch(sendCodeTime, (val) => {
       if (val > 0 && Date.now() - val < SEND_CODE_COOLDOWN_INTERVAL) {
@@ -63,6 +75,7 @@ export const useAuthStore = defineStore(
       accessToken,
       sendCodeTime,
       isNeverSendCode,
+      logout,
       markCodeSent,
       remainedSendCodeCooldownSeconds,
       tryResetSendCodeCooldown,

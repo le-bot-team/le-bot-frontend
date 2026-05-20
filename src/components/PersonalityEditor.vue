@@ -42,13 +42,17 @@ const emit = defineEmits<{
 }>();
 
 const enabled = ref<boolean>(props.enabled);
-const traits = ref<string>(props.traits);
-const goals = ref<string>(props.goals);
+
+// Separate data model: tags and free text are independent
+const selectedTraitTags = ref<string[]>([]);
+const selectedGoalTags = ref<string[]>([]);
+const freeTraitsText = ref('');
+const freeGoalsText = ref('');
 
 // Sync internal state when props change (e.g. async-loaded values)
 watch(() => props.enabled, (v) => { enabled.value = v; });
-watch(() => props.traits, (v) => { traits.value = v; parseSelectedTags(); });
-watch(() => props.goals, (v) => { goals.value = v; parseSelectedTags(); });
+watch(() => props.traits, () => { parseFromProps(); });
+watch(() => props.goals, () => { parseFromProps(); });
 
 // 预设个性标签 (与 i18n 对应)
 const traitTagKeys = ['trait_a', 'trait_b', 'trait_c', 'trait_d', 'trait_e', 'trait_f'] as const;
@@ -58,30 +62,30 @@ const traitTagValues = traitTagKeys.map((key) => i18n(`traitTags.${key}`));
 const goalTagKeys = ['goal_a', 'goal_b', 'goal_c', 'goal_d', 'goal_e', 'goal_f'] as const;
 const goalTagValues = goalTagKeys.map((key) => i18n(`goalTags.${key}`));
 
-// 已选中的标签
-const selectedTraitTags = ref<string[]>([]);
-const selectedGoalTags = ref<string[]>([]);
-
-// 从已保存的 traits/goals 中解析出已选中的标签
-function parseSelectedTags() {
-  // Reset first to handle cleared props
-  selectedTraitTags.value = [];
-  selectedGoalTags.value = [];
-
+// Parse saved comma-separated string into tags + free text
+function parseFromProps() {
   if (props.traits) {
-    const savedTraits = props.traits.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
-    selectedTraitTags.value = traitTagValues.filter((tag: string) => savedTraits.includes(tag));
+    const parts = props.traits.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
+    selectedTraitTags.value = parts.filter((t: string) => traitTagValues.includes(t));
+    freeTraitsText.value = parts.filter((t: string) => !traitTagValues.includes(t)).join(', ');
+  } else {
+    selectedTraitTags.value = [];
+    freeTraitsText.value = '';
   }
   if (props.goals) {
-    const savedGoals = props.goals.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
-    selectedGoalTags.value = goalTagValues.filter((tag: string) => savedGoals.includes(tag));
+    const parts = props.goals.split(/[,，;；\n]/).map((t: string) => t.trim()).filter(Boolean);
+    selectedGoalTags.value = parts.filter((t: string) => goalTagValues.includes(t));
+    freeGoalsText.value = parts.filter((t: string) => !goalTagValues.includes(t)).join(', ');
+  } else {
+    selectedGoalTags.value = [];
+    freeGoalsText.value = '';
   }
 }
 
-parseSelectedTags();
+parseFromProps();
 
 const canSubmit = computed(
-  () => enabled.value && (traits.value.trim().length > 0 || goals.value.trim().length > 0 || selectedTraitTags.value.length > 0 || selectedGoalTags.value.length > 0),
+  () => enabled.value && (freeTraitsText.value.trim().length > 0 || freeGoalsText.value.trim().length > 0 || selectedTraitTags.value.length > 0 || selectedGoalTags.value.length > 0),
 );
 
 function onToggle(v: boolean) {
@@ -97,7 +101,6 @@ function toggleTraitTag(tag: string) {
   } else {
     selectedTraitTags.value.push(tag);
   }
-  updateTraitsFromTags();
 }
 
 function toggleGoalTag(tag: string) {
@@ -107,39 +110,16 @@ function toggleGoalTag(tag: string) {
   } else {
     selectedGoalTags.value.push(tag);
   }
-  updateGoalsFromTags();
-}
-
-function updateTraitsFromTags() {
-  // 合并标签和手动输入的内容
-  const manualTraits = traits.value
-    .split(/[,，;；\n]/)
-    .map((t: string) => t.trim())
-    .filter((t: string) => {
-      // 排除预设标签
-      const isPreset = traitTagValues.includes(t) || selectedTraitTags.value.includes(t);
-      return t.length > 0 && !isPreset;
-    });
-  traits.value = [...selectedTraitTags.value, ...manualTraits].join(',');
-}
-
-function updateGoalsFromTags() {
-  const manualGoals = goals.value
-    .split(/[,，;；\n]/)
-    .map((t: string) => t.trim())
-    .filter((t: string) => {
-      const isPreset = goalTagValues.includes(t) || selectedGoalTags.value.includes(t);
-      return t.length > 0 && !isPreset;
-    });
-  goals.value = [...selectedGoalTags.value, ...manualGoals].join(',');
 }
 
 function onSubmit() {
   if (!canSubmit.value) return;
+  const mergedTraits = [...selectedTraitTags.value, ...freeTraitsText.value.split(/[,，;；\n]/).map(t => t.trim()).filter(Boolean)].filter(Boolean).join(',');
+  const mergedGoals = [...selectedGoalTags.value, ...freeGoalsText.value.split(/[,，;；\n]/).map(t => t.trim()).filter(Boolean)].filter(Boolean).join(',');
   emit('submit', {
     enabled: enabled.value,
-    traits: traits.value,
-    goals: goals.value,
+    traits: mergedTraits,
+    goals: mergedGoals,
   });
 }
 </script>
@@ -171,7 +151,7 @@ function onSubmit() {
       </button>
     </div>
     <textarea
-      v-model="traits"
+      v-model="freeTraitsText"
       class="device-personality-textarea"
       :placeholder="i18n('labels.traitsPlaceholder')"
     />
@@ -193,7 +173,7 @@ function onSubmit() {
       </button>
     </div>
     <textarea
-      v-model="goals"
+      v-model="freeGoalsText"
       class="device-personality-textarea"
       :placeholder="i18n('labels.goalsPlaceholder')"
     />

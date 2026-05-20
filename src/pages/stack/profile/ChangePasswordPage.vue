@@ -29,6 +29,14 @@ const oldFocused = ref(false);
 const newFocused = ref(false);
 const confirmFocused = ref(false);
 
+const oldHasBeenFocused = ref(false);
+const newHasBeenFocused = ref(false);
+const confirmHasBeenFocused = ref(false);
+
+watch(oldFocused, (v) => { if (v) oldHasBeenFocused.value = true; });
+watch(newFocused, (v) => { if (v) newHasBeenFocused.value = true; });
+watch(confirmFocused, (v) => { if (v) confirmHasBeenFocused.value = true; });
+
 const isSubmitting = ref(false);
 const errorMsg = ref<string>('');
 
@@ -122,7 +130,7 @@ const onSubmit = async () => {
         />
         <button
           type="button"
-          v-if="oldFocused || oldPassword.length"
+          v-if="oldHasBeenFocused || oldPassword.length"
           class="cpw-action-icon"
           :aria-label="i18n('labels.toggleOldPassword')"
           @click="showOld = !showOld"
@@ -160,7 +168,7 @@ const onSubmit = async () => {
         />
         <button
           type="button"
-          v-if="newFocused || newPassword.length"
+          v-if="newHasBeenFocused || newPassword.length"
           class="cpw-action-icon"
           :aria-label="i18n('labels.toggleNewPassword')"
           @click="showNew = !showNew"
@@ -198,7 +206,7 @@ const onSubmit = async () => {
         />
         <button
           type="button"
-          v-if="confirmFocused || confirmPassword.length"
+          v-if="confirmHasBeenFocused || confirmPassword.length"
           class="cpw-action-icon"
           :aria-label="i18n('labels.toggleConfirmPassword')"
           @click="showConfirm = !showConfirm"

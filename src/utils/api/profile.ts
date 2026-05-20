@@ -9,6 +9,7 @@ import type {
   RetrieveProfileAvatarResponse,
   RetrieveProfileInfoResponse,
   UpdateProfileInfoRequest,
+  UpdateProfileInfoResponse,
   VerifyPhoneCodeResponse,
 } from 'src/types/api/profile';
 
@@ -27,7 +28,7 @@ export const retrieveProfileInfo = async (accessToken: string) =>
   });
 
 export const updateProfileInfo = async (accessToken: string, data: UpdateProfileInfoRequest) =>
-  await api.put<{ success: boolean; message?: string }>('/profiles/info', data, {
+  await api.put<UpdateProfileInfoResponse>('/profiles/info', data, {
     headers: {
       'x-access-token': accessToken,
     },

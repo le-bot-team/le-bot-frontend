@@ -49,6 +49,8 @@ watch(
 // ── Shared state ──
 const isSubmitting = ref(false);
 const errorMsg = ref('');
+/** Verification token from step 1 — proof of old-phone ownership */
+const verificationToken = ref('');
 
 // ── Step 1: Verify old phone ──
 const oldCode = ref('');
@@ -132,6 +134,8 @@ const onVerifyOld = async () => {
     const { data } = await verifyPhoneCode(token, currentPhone.value, oldCode.value);
     if (data.success) {
       userAdvanced.value = true;
+      // Store verification token for step 2 (proof of old-phone ownership)
+      verificationToken.value = (data as { success: true; token?: string }).token ?? '';
       // Clear old countdown timer since we're done with step 1
       if (oldCountdownTimer) {
         clearInterval(oldCountdownTimer);
@@ -159,6 +163,8 @@ let newCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
 const phoneRegex = /^1[3-9]\d{9}$/;
 const isValidNewPhone = computed(() => phoneRegex.test(newPhone.value));
+/** Show phone format hint when user has typed something but it's invalid */
+const showPhoneHint = computed(() => newPhone.value.length > 0 && !isValidNewPhone.value);
 
 const canSendNewCode = computed(
   () => !!accessToken.value && isValidNewPhone.value && !newCodeSending.value && !isSubmitting.value && newCountdown.value === 0,
@@ -232,6 +238,7 @@ const onSubmitNew = async () => {
     const { data } = await changePhone(token, {
       phone: newPhone.value,
       code: newCode.value,
+      verificationToken: verificationToken.value,
     });
     if (data.success) {
       // Update local profile
@@ -339,6 +346,9 @@ onBeforeUnmount(() => {
             :disabled="isSubmitting"
           />
         </div>
+        <p v-if="showPhoneHint" class="cph-hint">
+          {{ i18n('hints.phoneFormat') }}
+        </p>
 
         <!-- New phone verification code -->
         <div class="cph-code-row">

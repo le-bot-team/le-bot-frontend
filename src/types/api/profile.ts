@@ -24,6 +24,15 @@ export type RetrieveProfileInfoResponse =
       data: UserProfile;
     };
 
+export type UpdateProfileInfoResponse =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+    };
+
 export interface UpdateProfileInfoRequest {
   nickname?: string | undefined;
   bio?: string | undefined;
@@ -87,6 +96,8 @@ export type VerifyPhoneCodeResponse =
 export interface ChangePhoneRequest {
   phone: string;
   code: string;
+  /** Proof of old-phone ownership from POST /profiles/phone/verify */
+  verificationToken?: string;
 }
 
 export type ChangePhoneResponse =

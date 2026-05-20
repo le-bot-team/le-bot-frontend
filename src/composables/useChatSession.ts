@@ -1,5 +1,5 @@
 import { uid } from 'quasar';
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref, shallowRef, type Ref } from 'vue';
 
 import { useChatPlayer } from 'src/composables/useChatPlayer';
 import { useChatRecorder } from 'src/composables/useChatRecorder';
@@ -91,7 +91,11 @@ export function useChatSession(): UseChatSessionReturn {
 
   // --- Per-turn player instance management ---
   // Each assistant response turn gets its own player instance
+  const currentTurnPlayerRef = shallowRef(player);
   let currentTurnPlayer = player;
+
+  // Reactive isAudioPlaying that tracks the current player
+  const isAudioPlaying = computed(() => currentTurnPlayerRef.value.isPlaying.value);
 
   // ==========================================================================
   // WebSocket event handlers — mirrors Go's websocket.MessageHandler interface
@@ -204,6 +208,7 @@ export function useChatSession(): UseChatSessionReturn {
         // Create a new player for the upcoming assistant turn
         currentTurnPlayer.destroy();
         currentTurnPlayer = useChatPlayer();
+        currentTurnPlayerRef.value = currentTurnPlayer;
         setupPlayerCallbacks();
       }
     }
@@ -268,6 +273,7 @@ export function useChatSession(): UseChatSessionReturn {
     // Prepare a new player for next response
     currentTurnPlayer.destroy();
     currentTurnPlayer = useChatPlayer();
+    currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
     console.log('[useChatSession] State → WaitingResponse (silence detected)');
@@ -287,6 +293,7 @@ export function useChatSession(): UseChatSessionReturn {
     // Clean up player
     currentTurnPlayer.destroy();
     currentTurnPlayer = useChatPlayer();
+    currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
     // Restart wake word listener
@@ -564,7 +571,7 @@ export function useChatSession(): UseChatSessionReturn {
     isWakeWordSupported: wakeWord.isSupported,
     isWakeWordListening: wakeWord.isListening,
     isRecording: recorder.isRecording,
-    isAudioPlaying: currentTurnPlayer.isPlaying,
+    isAudioPlaying,
     connect,
     disconnect,
     wake,

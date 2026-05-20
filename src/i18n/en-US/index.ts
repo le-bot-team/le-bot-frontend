@@ -221,6 +221,7 @@ export default {
         familyGroupInvite: 'Invite Member',
         familyGroupChildEdit: 'Edit Child Info',
         familyGroupCreate: 'Create Family Group',
+        familyGroupJoin: 'Join Family Group',
         messages: 'Messages',
         messageDetail: 'Message Detail',
         orders: 'My Orders',
@@ -1022,6 +1023,9 @@ export default {
           sendCodeFailed: 'Failed to send verification code',
           sendCodeError: 'Error sending verification code',
           success: 'Phone number changed successfully',
+        },
+        hints: {
+          phoneFormat: 'Please enter a valid 11-digit Chinese mobile number',
         },
       },
       LanguagePage: {

@@ -363,14 +363,7 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-      {
-        name: 'add-virtual-device',
-        path: 'add-virtual-device',
-        components: {
-          default: () => import('pages/stack/family-group/ChildEditPage.vue'),
-          header: () => import('layouts/headers/StackHeader.vue'),
-        },
-      },
+
     ],
   },
 

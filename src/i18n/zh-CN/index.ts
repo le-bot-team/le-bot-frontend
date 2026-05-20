@@ -221,6 +221,7 @@ export default {
         familyGroupInvite: '邀请成员',
         familyGroupChildEdit: '修改儿童信息',
         familyGroupCreate: '创建家庭组',
+        familyGroupJoin: '加入家庭组',
         messages: '消息',
         messageDetail: '消息详情',
         orders: '我的订单',
@@ -1016,6 +1017,9 @@ export default {
           sendCodeFailed: '发送验证码失败',
           sendCodeError: '发送验证码出错',
           success: '手机号修改成功',
+        },
+        hints: {
+          phoneFormat: '请输入有效的11位中国大陆手机号码',
         },
       },
       LanguagePage: {

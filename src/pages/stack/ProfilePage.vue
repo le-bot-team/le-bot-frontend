@@ -10,6 +10,7 @@ import { useDeviceStore } from 'stores/device';
 import { i18nSubPath } from 'src/utils/common';
 import { deactivateAccount } from 'src/utils/api/profile';
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
+import CropperDialog from 'src/components/CropperDialog.vue';
 
 const i18n = i18nSubPath('pages.stack.ProfilePage');
 
@@ -88,6 +89,19 @@ const onRowClick = (row: ProfileRow) => {
   }
 };
 
+const onAvatarClick = () => {
+  $q.dialog({
+    component: CropperDialog,
+    componentProps: {
+      currentImage: profile.value?.avatar,
+    },
+  }).onOk((croppedBase64: string) => {
+    if (profile.value) {
+      updateProfile({ ...profile.value, avatar: croppedBase64 });
+    }
+  });
+};
+
 const onDeactivate = () => {
   $q.dialog({
     component: ConfirmDialog,
@@ -107,7 +121,7 @@ const onDeactivate = () => {
       .then(({ data }) => {
         if (data.success) {
           $q.notify({ type: 'positive', message: i18n('notifications.deactivateSuccess') });
-          accessToken.value = '';
+          authStore.logout();
           updateProfile(undefined);
           deviceStore.updateDevices([]);
           void router.replace('/main/home');
@@ -126,7 +140,7 @@ const onDeactivate = () => {
   <q-page class="profile-page column items-center q-pa-lg q-gutter-y-lg">
     <div class="profile-container column items-center q-gutter-y-lg">
       <!-- Avatar: 72×72 with 3px white border (圆形 33, design 448a71c7) -->
-      <div class="me-avatar profile-avatar">
+      <div class="me-avatar profile-avatar" role="button" tabindex="0" @click="onAvatarClick" @keydown.enter="onAvatarClick">
         <q-img v-if="profile?.avatar" :src="profile.avatar" />
         <q-icon v-else color="grey-5" name="person" size="40px" />
       </div>

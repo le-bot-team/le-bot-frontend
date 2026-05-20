@@ -38,9 +38,3 @@ export interface DeviceInfo {
   childInfo?: ChildInfo | null;
 }
 
-/** Child information associated with a family group */
-export interface ChildInfo {
-  name: string;
-  gender: 'boy' | 'girl';
-  birthday: string;
-}
