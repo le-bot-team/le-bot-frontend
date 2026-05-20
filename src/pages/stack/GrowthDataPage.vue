@@ -19,7 +19,6 @@ import {
   TooltipComponent,
   RadarComponent,
   LegendComponent,
-  MarkLineComponent,
 } from 'echarts/components';
 import VChart from 'vue-echarts';
 
@@ -37,12 +36,12 @@ use([
   TooltipComponent,
   RadarComponent,
   LegendComponent,
-  MarkLineComponent,
 ]);
 
 const i18n = i18nSubPath('pages.stack.GrowthDataPage');
 
 const router = useRouter();
+const baseUrl = import.meta.env.BASE_URL;
 
 // --- Active tab (for anchor highlight) ---
 const activeTab = ref('emotion');
@@ -305,9 +304,9 @@ const chartInitOpts = { renderer: 'canvas' as const };
 
     <!-- Top decoration images (fixed, not scrollable) -->
     <div class="growth-decorations" aria-hidden="true">
-      <img class="growth-decor-top" src="/lanhu-slices/img-1.webp" alt="" />
-      <img class="growth-decor-illust" src="/lanhu-slices/img-2.webp" alt="" />
-      <img class="growth-decor-board" src="/lanhu-slices/img-3.webp" alt="" />
+      <img class="growth-decor-top" :src="`${baseUrl}lanhu-slices/img-1.webp`" alt="" />
+      <img class="growth-decor-illust" :src="`${baseUrl}lanhu-slices/img-2.webp`" alt="" />
+      <img class="growth-decor-board" :src="`${baseUrl}lanhu-slices/img-3.webp`" alt="" />
     </div>
 
     <!--
@@ -421,7 +420,7 @@ const chartInitOpts = { renderer: 'canvas' as const };
             @keydown.space.prevent="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
           >
             {{ i18n('labels.viewReport') }}
-            <img class="growth-arrow-icon" src="/lanhu-slices/icon-3.webp" alt="" />
+            <img class="growth-arrow-icon" :src="`${baseUrl}lanhu-slices/icon-3.webp`" alt="" />
           </span>
         </div>
         <div class="growth-chart-wrap">
@@ -453,7 +452,7 @@ const chartInitOpts = { renderer: 'canvas' as const };
             @keydown.space.prevent="router.push({ name: 'growth-data-weekly-report' })"
           >
             {{ i18n('labels.viewReport') }}
-            <img class="growth-arrow-icon" src="/lanhu-slices/icon-3.webp" alt="" />
+            <img class="growth-arrow-icon" :src="`${baseUrl}lanhu-slices/icon-3.webp`" alt="" />
           </span>
         </div>
         <div class="growth-chart-wrap">

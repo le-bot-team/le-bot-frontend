@@ -24,8 +24,7 @@ use([CanvasRenderer, RadarChart, TooltipComponent, RadarComponent]);
 
 const route = useRoute();
 // capabilityKey will be used for API data fetching when backend is ready
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpression';
+const _capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpression';
 
 const i18n = i18nSubPath('pages.stack.growth-data.CapabilityDetailPage');
 

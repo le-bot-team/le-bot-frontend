@@ -15,13 +15,13 @@ import { computed } from 'vue';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { PieChart } from 'echarts/charts';
-import { TooltipComponent, LegendComponent } from 'echarts/components';
+import { TooltipComponent } from 'echarts/components';
 import VChart from 'vue-echarts';
 
 import { i18nSubPath } from 'src/utils/common';
 
 // Register ECharts modules (tree-shaking)
-use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent]);
+use([CanvasRenderer, PieChart, TooltipComponent]);
 
 const i18n = i18nSubPath('pages.stack.growth-data.ChatWeeklyReportPage');
 
@@ -45,7 +45,6 @@ const pieColors = [
 // --- ECharts Pie option ---
 const pieOption = computed(() => ({
   tooltip: { trigger: 'item' as const },
-  legend: { show: false },
   series: [
     {
       type: 'pie' as const,
