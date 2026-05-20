@@ -112,8 +112,9 @@ export class TelemetryEngine {
 
     // 设置离线队列 flush 回调
     this.offline.onFlush(async (events) => {
-      const success = await this.sendBatch(events);
-      return success;
+      const result = await this.sendBatch(events);
+      // Return true if success OR non-retryable (to remove poisoned events)
+      return result.success || !result.retryable;
     });
 
     // 启动定时 flush
@@ -295,19 +296,24 @@ export class TelemetryEngine {
 
   /** 执行 flush：尝试上报，失败则降级到离线队列 */
   private async doFlush(events: TelemetryEvent[]): Promise<void> {
-    const success = await this.sendBatch(events);
-    if (!success) {
-      // 上报失败，降级到离线队列
+    const result = await this.sendBatch(events);
+    if (!result.success && result.retryable) {
+      // Only enqueue to offline if the failure is retryable
       await this.offline.enqueue(events);
       if (process.env.DEV) {
-        console.warn(`[Telemetry] Flush failed, ${events.length} events queued offline`);
+        console.warn(`[Telemetry] Flush failed (retryable), ${events.length} events queued offline`);
+      }
+    } else if (!result.success) {
+      // Non-retryable failure (4xx) — drop events
+      if (process.env.DEV) {
+        console.warn(`[Telemetry] Flush failed (non-retryable), ${events.length} events dropped`);
       }
     }
   }
 
   /** 发送一个批次到后端 */
-  private async sendBatch(events: TelemetryEvent[]): Promise<boolean> {
-    if (events.length === 0) return true;
+  private async sendBatch(events: TelemetryEvent[]): Promise<{ success: boolean; retryable: boolean }> {
+    if (events.length === 0) return { success: true, retryable: false };
 
     try {
       const request = {
@@ -322,18 +328,20 @@ export class TelemetryEngine {
         if (process.env.DEV) {
           console.debug(`[Telemetry] Batch #${this.batchSeq} sent: ${events.length} events`);
         }
-        return true;
+        return { success: true, retryable: false };
       }
 
       if (process.env.DEV) {
         console.warn(`[Telemetry] Batch rejected: ${response.message}`);
       }
-      return false;
+      // Check if the failure is retryable (default true if not specified)
+      const retryable = response.retryable !== false;
+      return { success: false, retryable };
     } catch (err) {
       if (process.env.DEV) {
         console.warn('[Telemetry] Send error:', err);
       }
-      return false;
+      return { success: false, retryable: true };
     }
   }
 
@@ -368,6 +376,14 @@ export class TelemetryEngine {
       clientTime: Date.now(),
       batchSeq: ++this.batchSeq,
     });
+
+    // sendBeacon has a ~64KB limit; if payload is too large, enqueue to offline for next session
+    const payloadSize = new Blob([payload]).size;
+    if (payloadSize > 60_000) {
+      // Too large for beacon/keepalive — save to offline queue for next session
+      void this.offline.enqueue(events);
+      return;
+    }
 
     // Try sendBeacon first (most reliable during unload)
     if (navigator.sendBeacon) {

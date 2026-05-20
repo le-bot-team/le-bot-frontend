@@ -231,6 +231,9 @@ export class OfflineQueue {
     const store = tx.objectStore(this.config.storeName);
     const index = store.index('timestamp');
 
+    // Attach completion handler BEFORE starting cursor operations
+    const txComplete = this.completeTransaction(tx);
+
     let deleted = 0;
     await new Promise<void>((resolve, reject) => {
       const request = index.openCursor();
@@ -241,7 +244,6 @@ export class OfflineQueue {
           deleted++;
           cursor.continue();
         } else {
-          // Cursor iteration done, now wait for transaction to complete
           resolve();
         }
       };
@@ -249,7 +251,7 @@ export class OfflineQueue {
     });
 
     // Wait for the transaction to fully commit
-    await this.completeTransaction(tx);
+    await txComplete;
   }
 
   /** 等待事务完成 */

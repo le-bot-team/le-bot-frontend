@@ -88,12 +88,16 @@ export class BufferQueue {
       await this.flushCallback(events);
     } catch (err) {
       // flush 失败，将事件放回缓冲区头部（下次重试）
-      this.buffer.unshift(...events);
+      this.buffer = [...events, ...this.buffer];
       if (process.env.DEV) {
         console.warn('[Telemetry] BufferQueue flush failed:', err);
       }
     } finally {
       this.flushing = false;
+      // Re-check if buffer accumulated events during flush
+      if (this.buffer.length >= this.config.maxSize) {
+        void this.flush();
+      }
     }
   }
 

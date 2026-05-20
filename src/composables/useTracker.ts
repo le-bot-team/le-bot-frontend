@@ -19,8 +19,16 @@ import { useTelemetryStore } from 'stores/telemetry';
 // ---------------------------------------------------------------------------
 
 export function useTracker() {
-  const telemetryStore = useTelemetryStore();
   const engine = getTelemetryEngine();
+
+  /** Safely get telemetry store (may fail outside setup context) */
+  function getStore() {
+    try {
+      return useTelemetryStore();
+    } catch {
+      return null;
+    }
+  }
 
   /**
    * 上报点击事件
@@ -29,7 +37,7 @@ export function useTracker() {
    * @param data 事件数据
    */
   function trackClick(eventName: string, data?: Record<string, unknown>): void {
-    telemetryStore.refreshActivity();
+    getStore()?.refreshActivity();
     void engine.trackClick(eventName, data);
   }
 
@@ -40,7 +48,7 @@ export function useTracker() {
    * @param data 事件数据
    */
   function trackCustom(eventName: string, data?: Record<string, unknown>): void {
-    telemetryStore.refreshActivity();
+    getStore()?.refreshActivity();
     void engine.trackCustom(eventName, data);
   }
 
@@ -51,7 +59,7 @@ export function useTracker() {
    * @param data 附加数据
    */
   function trackConversion(node: ConversionNode, data?: Record<string, unknown>): void {
-    telemetryStore.refreshActivity();
+    getStore()?.refreshActivity();
     void engine.trackConversion(node, data);
   }
 
@@ -60,10 +68,11 @@ export function useTracker() {
    * Only creates a new session if the current one has expired.
    */
   function trackAppResume(): void {
-    if (telemetryStore.isSessionExpired) {
-      telemetryStore.createNewSession();
+    const store = getStore();
+    if (store?.isSessionExpired) {
+      store.createNewSession();
     } else {
-      telemetryStore.refreshActivity();
+      store?.refreshActivity();
     }
     void engine.trackAppResume();
   }

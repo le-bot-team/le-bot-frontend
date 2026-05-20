@@ -50,10 +50,26 @@ export async function sendTelemetryBatch(
     );
     return response.data;
   } catch (err) {
-    // 网络错误或服务端 5xx，返回失败响应
+    // Determine if the error is retryable (network/5xx) or not (4xx)
+    const isRetryable = isRetryableError(err);
     return {
       success: false,
       message: err instanceof Error ? err.message : 'Unknown error',
+      retryable: isRetryable,
     };
   }
+}
+
+/** Check if an error is retryable (network errors, 5xx) vs non-retryable (4xx) */
+function isRetryableError(err: unknown): boolean {
+  // axios wraps HTTP errors with a response property
+  if (err && typeof err === 'object' && 'response' in err) {
+    const response = (err as { response?: { status?: number } }).response;
+    if (response?.status) {
+      // 4xx errors are not retryable (bad payload, auth issues, etc.)
+      return response.status >= 500;
+    }
+  }
+  // Network errors (no response) are retryable
+  return true;
 }

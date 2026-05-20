@@ -105,6 +105,8 @@ export interface TelemetryBatchSuccessResponse {
 export interface TelemetryBatchFailResponse {
   success: false;
   message: string;
+  /** Whether the failure is retryable (network/5xx) vs permanent (4xx) */
+  retryable?: boolean;
 }
 
 /** 批量上报响应（discriminated union） */
