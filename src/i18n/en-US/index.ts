@@ -296,8 +296,12 @@ export default {
             readAloudPhrases: 'Read Aloud Phrases',
             readAloudPhrasesDescription: 'Lovely LeBot is my good friend.',
             startRecording: 'Get Ready to Record',
+            stopRecording: 'Stop Recording',
             rerecord: 'Rerecord',
             finish: 'Finish and Submit',
+          },
+          notifications: {
+            recordingFailed: 'Failed to start recording. Please check microphone permissions.',
           },
         },
         SubmitPanel: {
@@ -1173,7 +1177,12 @@ export default {
             addNewPerson: 'Add New Voiceprint',
             testVoice: 'Test Voiceprint',
             temporalTag: 'Temporary',
-            temporalHint: '*Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.*',
+            temporalHint: 'Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.',
+            emptyState: 'No voiceprints yet. Tap the button below to add one.',
+          },
+          notifications: {
+            fetchFailed: 'Failed to fetch voiceprint list',
+            fetchError: 'Error fetching voiceprint list',
           },
         },
         // ===== Batch 4: Settings sub-pages =====
