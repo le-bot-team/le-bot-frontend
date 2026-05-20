@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // ConfirmDialog — shared confirmation dialog per design spec section 5 item 9.
-// 280×180 card, r16, title + description + dual buttons.
+// 311×238 card, r32, gradient bg. Sized via --dialog-width / --dialog-radius.
+// Title + description + dual buttons.
 // Usage:
 //   import { useQuasar } from 'quasar'
 //   const $q = useQuasar()

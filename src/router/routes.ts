@@ -314,18 +314,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            name: 'message-detail',
-            path: ':id',
-            components: {
-              default: () => import('pages/stack/messages/MessageDetailPage.vue'),
-              header: () => import('layouts/headers/StackHeader.vue'),
-            },
-          },
-          {
             name: 'messages-activity',
             path: 'activity',
             components: {
               default: () => import('pages/stack/messages/ActivityMessagesPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'message-detail',
+            path: ':id',
+            components: {
+              default: () => import('pages/stack/messages/MessageDetailPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },

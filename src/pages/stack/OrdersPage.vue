@@ -3,7 +3,7 @@
 //
 // Layout: top tab row (全部 / 待付款 / 待发货 / 待收货 / 售后) + vertical list
 // of order cards. Active tab is 17px Medium; inactive tabs are 14px Regular.
-// Each card stacks a product row (64×64 image placeholder + name + variant +
+// Each card stacks a product row (88×88 image placeholder + name + variant +
 // price) and a trailing action row with rounded-pill buttons. Styles live in
 // app.scss (`.orders-*`).
 
