@@ -104,6 +104,7 @@ const routes: RouteRecordRaw[] = [
           {
             name: 'growth-data',
             path: '',
+            meta: { title: 'components.navigations.stack.growthData' },
             components: {
               default: () => import('pages/stack/GrowthDataPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),

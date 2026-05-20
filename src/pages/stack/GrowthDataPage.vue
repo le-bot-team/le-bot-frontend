@@ -415,9 +415,9 @@ const chartInitOpts = { renderer: 'canvas' as const };
             class="growth-view-report"
             role="button"
             tabindex="0"
-            @click="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
-            @keydown.enter="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
-            @keydown.space.prevent="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
+            @click="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'emotionalExpression' } })"
+            @keydown.enter="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'emotionalExpression' } })"
+            @keydown.space.prevent="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'emotionalExpression' } })"
           >
             {{ i18n('labels.viewReport') }}
             <img class="growth-arrow-icon" :src="`${baseUrl}lanhu-slices/icon-3.webp`" alt="" />

@@ -23,10 +23,9 @@ import { useRoute } from 'vue-router';
 use([CanvasRenderer, RadarChart, TooltipComponent, RadarComponent]);
 
 const route = useRoute();
-// capabilityKey will be used for API data fetching when backend is ready
-const _capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpression';
+const capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpression';
 
-const i18n = i18nSubPath('pages.stack.growth-data.CapabilityDetailPage');
+const i18n = i18nSubPath(`pages.stack.growth-data.CapabilityDetailPage`);
 
 /** Split comparison text on '——' (zh) or ' — ' (en) delimiter, preserving original delimiter */
 function splitComparison(text: string): { key: string; desc: string; delimiter: string } {
@@ -88,7 +87,7 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')].map(splitCompar
 </script>
 
 <template>
-  <q-page class="capability-detail-page">
+  <q-page class="capability-detail-page" :data-capability="capabilityKey">
     <div class="capability-detail-content">
       <!-- Section 1: 综合评分 (Overall Score) -->
       <div class="capability-card">
