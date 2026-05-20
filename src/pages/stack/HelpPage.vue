@@ -45,10 +45,14 @@ function onRowClick(row: HelpRow) {
   if (row.kind === 'link') {
     window.open(`tel:${row.value}`, '_self');
   } else if (row.kind === 'value') {
-    navigator.clipboard.writeText(row.value ?? '').then(
-      () => $q.notify({ message: i18n('notifications.copied'), type: 'positive' }),
-      () => $q.notify({ message: i18n('notifications.copyFailed'), type: 'negative' }),
-    );
+    try {
+      navigator.clipboard?.writeText(row.value ?? '').then(
+        () => $q.notify({ message: i18n('notifications.copied'), type: 'positive' }),
+        () => $q.notify({ message: i18n('notifications.copyFailed'), type: 'negative' }),
+      );
+    } catch {
+      $q.notify({ message: i18n('notifications.copyFailed'), type: 'negative' });
+    }
   } else if (row.kind === 'chevron') {
     if (row.key === 'feedback') {
       router.push('/stack/help/feedback').catch(console.error);

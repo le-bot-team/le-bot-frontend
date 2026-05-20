@@ -13,10 +13,14 @@ const $q = useQuasar();
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 function copyLink() {
-  navigator.clipboard
-    .writeText(window.location.href)
-    .then(() => $q.notify({ type: 'positive', message: i18n('notifications.linkCopied') }))
-    .catch(() => $q.notify({ type: 'negative', message: i18n('notifications.linkCopyFailed') }));
+  try {
+    navigator.clipboard?.writeText(window.location.href).then(
+      () => $q.notify({ type: 'positive', message: i18n('notifications.linkCopied') }),
+      () => $q.notify({ type: 'negative', message: i18n('notifications.linkCopyFailed') }),
+    );
+  } catch {
+    $q.notify({ type: 'negative', message: i18n('notifications.linkCopyFailed') });
+  }
   onDialogCancel();
 }
 
