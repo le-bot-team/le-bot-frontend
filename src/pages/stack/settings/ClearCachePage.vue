@@ -19,9 +19,14 @@ function handleClear() {
       body: i18n('labels.confirmBody'),
       confirmType: 'danger' as const,
     },
-  }).onOk(() => {
-    cacheSize.value = '0M';
-    $q.notify({ type: 'positive', message: i18n('notifications.clearSuccess') });
+  }).onOk(async () => {
+    try {
+      // TODO: connect to real cache-clearing implementation
+      cacheSize.value = '0M';
+      $q.notify({ type: 'positive', message: i18n('notifications.clearSuccess') });
+    } catch {
+      $q.notify({ type: 'negative', message: i18n('notifications.clearFailed') });
+    }
   });
 }
 </script>
@@ -35,7 +40,7 @@ function handleClear() {
       </div>
     </div>
     <div class="q-mt-md">
-      <button class="btn-max" @click="handleClear">{{ i18n('labels.clear') }}</button>
+      <button type="button" class="btn-max" @click="handleClear">{{ i18n('labels.clear') }}</button>
     </div>
   </q-page>
 </template>

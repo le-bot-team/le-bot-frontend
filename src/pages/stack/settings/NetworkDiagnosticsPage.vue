@@ -36,6 +36,8 @@ function cleanup() {
 
 onBeforeUnmount(cleanup);
 
+// NOTE: This is a simulated diagnosis for UI demonstration purposes.
+// TODO: Replace with real network checks (DNS resolution, TCP connectivity, WebSocket handshake).
 function startDiagnosis() {
   if (isRunning.value) return;
   cleanup();
@@ -50,7 +52,8 @@ function startDiagnosis() {
       const idx = i;
       const tid = setTimeout(() => {
         timeoutIds.delete(tid);
-        steps.value[idx]!.status = Math.random() > 0.2 ? 'success' : 'fail';
+        // Simulated result — replace with actual network probe
+        steps.value[idx]!.status = 'success';
       }, 800);
       timeoutIds.add(tid);
       i++;

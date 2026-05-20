@@ -34,7 +34,9 @@ function openSystemSettings() {
     </div>
     <div class="q-mt-md">
       <button
+        type="button"
         class="btn-max"
+        disabled
         @click="openSystemSettings"
       >
         {{ i18n('labels.openSettings') }}
@@ -55,5 +57,10 @@ function openSystemSettings() {
   font-size: var(--font-size-btn);
   font-weight: 500;
   cursor: pointer;
+}
+
+.btn-max:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

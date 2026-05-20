@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
+import { version as appVersion } from '../../../package.json';
+
 import { logoutAccount } from 'src/utils/account';
 import { i18nSubPath } from 'src/utils/common';
 import { useProfileStore } from 'stores/profile';
@@ -47,17 +49,17 @@ const menuGroups = computed<MenuItem[][]>(() => [
     { label: i18n('labels.sensitiveWordFilter'), to: '/stack/settings/word-filter' },
   ],
   [
-    { label: i18n('labels.clearCache'), caption: '146M', to: '/stack/settings/clear-cache' },
+    { label: i18n('labels.clearCache'), to: '/stack/settings/clear-cache' },
     { label: i18n('labels.networkDiagnostics'), to: '/stack/settings/network' },
     { label: i18n('labels.storageSpace'), to: '/stack/settings/storage' },
   ],
   [
-    { label: i18n('labels.appVersion'), caption: 'v1.0' },
+    { label: i18n('labels.appVersion'), caption: `v${appVersion}` },
     { label: i18n('labels.privacyPolicy'), to: '/stack/settings/privacy-policy' },
     { label: i18n('labels.personalInfoList'), to: '/stack/settings/info-list' },
     {
       label: i18n('labels.icpFilingNumber'),
-      caption: i18n('labels.internetICPCode', { code: '沪ICP备00000000号-1' }),
+      caption: i18n('labels.internetICPCode', { code: import.meta.env.VITE_ICP_CODE || '沪ICP备00000000号-1' }),
       disabled: true,
     },
   ],
@@ -65,14 +67,14 @@ const menuGroups = computed<MenuItem[][]>(() => [
 
 const onMenuClick = (item: MenuItem) => {
   if (item.disabled || !item.to) return;
-  router.push(item.to).catch(console.error);
+  void router.push(item.to);
 };
 
 const onBottomAction = () => {
   if (profile.value) {
     logoutAccount();
   } else {
-    router.push('/stack/auth?from=/stack/settings').catch(console.error);
+    void router.push('/stack/auth?from=/stack/settings');
   }
 };
 </script>

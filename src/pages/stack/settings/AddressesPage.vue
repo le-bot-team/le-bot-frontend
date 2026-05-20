@@ -63,7 +63,9 @@ function addAddress() {
     </div>
     <div class="q-mt-md">
       <button
+        type="button"
         class="btn-max"
+        disabled
         @click="addAddress"
       >
         {{ i18n('labels.addAddress') }}
