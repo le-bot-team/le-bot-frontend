@@ -14,6 +14,7 @@ export default {
       NewPasswordPanel: {
         errors: {
           passwordTooShort: 'Password must be at least 8 characters',
+          passwordMismatch: 'Passwords do not match',
         },
         labels: {
           welcome:
@@ -23,12 +24,27 @@ export default {
           welcomeNew: 'Welcome, {username}!\n' + 'Please set your password to continue.',
           newPassword: 'New Password',
           confirmNewPassword: 'Confirm New Password',
+          sending: 'Sending...',
+          sendCode: 'Send Code',
+          resendCode: 'Resend',
+          resendCodeCooldown: 'Resend ({seconds}s)',
+          strengthWeak: 'Weak',
+          strengthMedium: 'Medium',
+          strengthStrong: 'Strong',
+          codePlaceholder: 'Enter verification code',
+          newPasswordPlaceholder: 'Set password',
+          confirmPasswordPlaceholder: 'Confirm password',
+          processing: 'Processing...',
+          completeRegistration: 'Complete Registration',
         },
         notifications: {
           invalidEmail: 'Invalid email address',
           passwordResetSuccess: 'Password reset successfully',
           loginSuccess: 'Login successfully',
           unknownError: 'Unknown error',
+          sendCodeFailed: 'Failed to send verification code',
+          setPasswordFailed: 'Failed to set password',
+          autoLoginFailed: 'Auto login failed',
         },
       },
       PasswordInput: {
@@ -50,9 +66,26 @@ export default {
           nickname: 'Nickname',
           bio: 'Bio',
           confirm: 'Confirm',
+          nicknamePlaceholder: 'Enter nickname',
+          birthday: 'Birthday',
+          relationship: 'Relationship with child',
+          selectRelationship: 'Select Relationship',
+          selectPlaceholder: 'Please select',
+          relations: {
+            mother: 'Mother',
+            father: 'Father',
+            grandma: 'Grandma',
+            grandpa: 'Grandpa',
+            maternalGrandma: 'Maternal Grandma',
+            maternalGrandpa: 'Maternal Grandpa',
+            friend: 'Friend',
+            otherRelative: 'Other Relative',
+          },
         },
         notifications: {
           unknownError: 'Unknown error',
+          saveFailed: 'Save failed',
+          fetchFailed: 'Failed to fetch profile',
         },
       },
       SignInOrSignUpPanel: {
@@ -63,6 +96,18 @@ export default {
           signIn: 'Sign In',
           usePassword: 'Use Password',
           useCode: 'Use Code',
+          sendCode: 'Send Code',
+          sending: 'Sending...',
+          resendCode: 'Resend',
+          resendCodeCooldown: 'Resend ({seconds}s)',
+          codePlaceholder: 'Enter verification code',
+          passwordPlaceholder: 'Enter password',
+          termsPrefix: 'I have read and agree to the ',
+          termsOfService: 'Terms of Service',
+          termsSeparator: ', ',
+          userAgreement: 'User Agreement',
+          termsAnd: ' and ',
+          privacyPolicy: 'Privacy Policy',
         },
         errors: {
           invalidEmail: 'Invalid email address',
@@ -70,6 +115,7 @@ export default {
         notifications: {
           codeSent: 'Verification code sent',
           unknownError: 'Unknown error',
+          sendCodeFailed: 'Failed to send verification code',
         },
       },
       VerificationCodeInput: {
@@ -82,6 +128,7 @@ export default {
           sending: 'Sending...',
           resendCode: 'Resend Code',
           resendCodeCooldown: 'Resend Code ({seconds}s)',
+          codePlaceholder: 'Enter verification code',
         },
         notifications: {
           sendCodeError: 'Error sending verification code',
@@ -121,6 +168,7 @@ export default {
         labels: {
           noDevice: 'No device connected',
           addNewDevice: 'Add Device',
+          defaultName: 'My LeBot',
         },
       },
       TopicCard: {
@@ -193,6 +241,8 @@ export default {
         settingsNetwork: 'Network Diagnostics',
         settingsStorage: 'Storage Space',
         settingsPrivacyPolicy: 'Privacy Policy',
+        settingsTermsOfService: 'Terms of Service',
+        settingsUserAgreement: 'User Agreement',
         settingsInfoList: 'Personal Info List',
         addVirtualDevice: 'Add Virtual LeBot',
         onboarding: 'Onboarding',
@@ -374,6 +424,8 @@ export default {
         labels: {
           title: 'Le Bot',
           description: 'Your intelligent pet and good companion',
+          profileSetupTitle: 'Complete Your Profile',
+          goBack: 'Go back',
         },
       },
       HomePage: {
@@ -404,6 +456,8 @@ export default {
         deviceSwitch: {
           title: 'Switch Device',
           addDevice: 'Add Lebot',
+          deviceNameFormat: "{name}'s LeBot",
+          unnamedDevice: 'Unnamed Device',
         },
         notifications: {},
       },
@@ -747,10 +801,14 @@ export default {
             startChat: 'Start Chat',
             backToHome: 'Back to Home',
           },
+          familyGroupName: "{name}'s Family Group",
         },
         notifications: {
           fieldsRequired: "Please fill in your child's name and birthday",
           activateFailed: 'Failed to activate virtual device',
+          tokenMissing: 'Session expired, please log in again',
+          voiceprintFailed: 'Voiceprint registration failed',
+          leaveIncomplete: 'Device setup is incomplete. Leaving will create an orphaned device. Continue?',
         },
       },
       FamilyGroupPage: {
@@ -963,6 +1021,7 @@ export default {
           goalsTitle: 'Expected development directions:',
           goalsPlaceholder: 'Personality or capability development directions...',
           submit: 'Submit',
+          skip: 'Skip',
         },
         traitTags: {
           trait_a: 'Cheerful',
@@ -1196,6 +1255,7 @@ export default {
         PrivacyPolicyPage: {
           labels: {
             title: 'Privacy Policy',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Information Collection',
@@ -1215,6 +1275,7 @@ export default {
         TermsOfServicePage: {
           labels: {
             title: 'Terms of Service',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Acceptance of Terms',
@@ -1240,6 +1301,7 @@ export default {
         UserAgreementPage: {
           labels: {
             title: 'User Agreement',
+            contentUnavailable: 'Content unavailable',
           },
           content: {
             title1: '1. Scope of Agreement',
@@ -1339,6 +1401,7 @@ export default {
             connected: 'Connected',
             notConnected: 'Not Connected',
             availableNetworks: 'Available Networks',
+            scanNetworks: 'Scan Networks',
             passwordPlaceholder: 'Enter Wi-Fi password',
             connect: 'Connect',
             cancel: 'Cancel',
@@ -1436,6 +1499,26 @@ export default {
         },
       },
       // ===== Batch 5: Onboarding =====
+      OnboardingCompletePage: {
+        labels: {
+          title: 'Setup Complete!',
+          subtitle: "What would you like to do next?",
+          footerHint: 'You can also do this later in "Family Group"',
+        },
+        options: {
+          addDevice: {
+            title: 'Add Virtual LeBot',
+            description: 'Create a dedicated intelligent companion for your child',
+          },
+          scanJoin: {
+            title: 'Scan to Join Family Group',
+            description: 'Join an existing family group via invitation code',
+          },
+        },
+        notifications: {
+          scanComingSoon: 'Scan feature coming soon',
+        },
+      },
       OnboardingGuidePage: {
         labels: {
           skip: 'Skip',

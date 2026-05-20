@@ -59,6 +59,14 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'onboarding-complete',
+        path: 'onboarding-complete',
+        components: {
+          default: () => import('pages/stack/OnboardingCompletePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         name: 'chat',
         path: 'chat',
         components: {
@@ -107,6 +115,22 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'devices',
+        path: 'devices',
+        components: {
+          default: () => import('pages/stack/DevicesPage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
+        name: 'add-virtual-device',
+        path: 'add-virtual-device',
+        components: {
+          default: () => import('pages/stack/AddVirtualDevicePage.vue'),
+          header: () => import('layouts/headers/StackHeader.vue'),
+        },
+      },
+      {
         path: 'device-config',
         children: [
           {
@@ -114,6 +138,62 @@ const routes: RouteRecordRaw[] = [
             path: '',
             components: {
               default: () => import('pages/stack/DeviceConfigPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-voice',
+            path: 'voice',
+            components: {
+              default: () => import('pages/stack/device-config/VoiceStylePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-language',
+            path: 'language',
+            components: {
+              default: () => import('pages/stack/device-config/LanguagePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-personality',
+            path: 'personality',
+            components: {
+              default: () => import('pages/stack/device-config/PersonalityPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-personality-detail',
+            path: 'personality/detail',
+            components: {
+              default: () => import('pages/stack/device-config/PersonalityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-wifi',
+            path: 'wifi',
+            components: {
+              default: () => import('pages/stack/device-config/WifiPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-firmware',
+            path: 'update',
+            components: {
+              default: () => import('pages/stack/device-config/FirmwareUpdatePage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'device-config-about',
+            path: 'about',
+            components: {
+              default: () => import('pages/stack/device-config/AboutDevicePage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },
@@ -127,6 +207,30 @@ const routes: RouteRecordRaw[] = [
             path: '',
             components: {
               default: () => import('pages/stack/SettingsPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-terms-of-service',
+            path: 'terms-of-service',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-user-agreement',
+            path: 'user-agreement',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'settings-privacy-policy',
+            path: 'privacy-policy',
+            components: {
+              default: () => import('pages/stack/settings/LegalPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
             },
           },
