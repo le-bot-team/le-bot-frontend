@@ -4,7 +4,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '',
-    redirect: '/main/home',
+    redirect: '/splash',
   },
   {
     name: 'splash',
@@ -256,6 +256,9 @@ const routes: RouteRecordRaw[] = [
           default: () => import('pages/stack/profile/ChangePasswordPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
+        meta: {
+          title: 'pages.stack.profile.ChangePasswordPage.labels.title',
+        },
       },
       {
         name: 'profile-change-phone',
@@ -352,6 +355,9 @@ const routes: RouteRecordRaw[] = [
         components: {
           default: () => import('pages/stack/DevicesPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
+        },
+        meta: {
+          title: 'pages.stack.DevicesPage.labels.title',
         },
       },
       {

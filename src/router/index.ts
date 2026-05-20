@@ -39,7 +39,7 @@ const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding']);
 
 router.beforeEach((to) => {
   // Allow public pages without restriction
-  if (PUBLIC_ROUTES.has(to.name as string)) return true;
+  if (typeof to.name === 'string' && PUBLIC_ROUTES.has(to.name)) return true;
 
   const authStore = useAuthStore();
   const profileStore = useProfileStore();
