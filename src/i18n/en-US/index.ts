@@ -229,6 +229,8 @@ export default {
         helpFaq: 'FAQ',
         helpFeedback: 'Feedback',
         growthData: 'Growth Data',
+        growthDataCapabilityDetail: 'Capability Detail',
+        growthDataWeeklyReport: 'Weekly Report',
         deviceConfigWifi: 'Wi-Fi Management',
         deviceConfigUpdate: 'Firmware Update',
         deviceConfigAbout: 'About This Device',

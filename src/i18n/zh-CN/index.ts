@@ -229,6 +229,8 @@ export default {
         helpFaq: '常见问题',
         helpFeedback: '意见反馈',
         growthData: '成长数据',
+        growthDataCapabilityDetail: '能力详情',
+        growthDataWeeklyReport: '周报',
         deviceConfigWifi: 'Wi-Fi 管理',
         deviceConfigUpdate: '固件升级',
         deviceConfigAbout: '关于本设备',

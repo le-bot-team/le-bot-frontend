@@ -29,17 +29,17 @@ const capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpres
 
 const i18n = i18nSubPath('pages.stack.growth-data.CapabilityDetailPage');
 
-/** Split comparison text on '——' (zh) or ' — ' (en) delimiter */
-function splitComparison(text: string): [string, string] {
+/** Split comparison text on '——' (zh) or ' — ' (en) delimiter, preserving original delimiter */
+function splitComparison(text: string): { key: string; desc: string; delimiter: string } {
   const zhIdx = text.indexOf('——');
   const enIdx = text.indexOf(' — ');
   if (zhIdx >= 0 && (enIdx < 0 || zhIdx <= enIdx)) {
-    return [text.slice(0, zhIdx), text.slice(zhIdx + 2)];
+    return { key: text.slice(0, zhIdx), desc: text.slice(zhIdx + 2), delimiter: '——' };
   }
   if (enIdx >= 0) {
-    return [text.slice(0, enIdx), text.slice(enIdx + 3)];
+    return { key: text.slice(0, enIdx), desc: text.slice(enIdx + 3), delimiter: ' — ' };
   }
-  return [text, ''];
+  return { key: text, desc: '', delimiter: '' };
 }
 
 // --- Radar chart mock data ---
@@ -81,11 +81,11 @@ const chartInitOpts = { renderer: 'canvas' as const };
 
 // --- Comparison data ---
 // 横向对比 — advantages & disadvantages vs peers
-const advantages = computed(() => [i18n('comparison.advantage1'), i18n('comparison.advantage2')]);
-const disadvantages = computed(() => [i18n('comparison.disadvantage1')]);
+const advantages = computed(() => [i18n('comparison.advantage1'), i18n('comparison.advantage2')].map(splitComparison));
+const disadvantages = computed(() => [i18n('comparison.disadvantage1')].map(splitComparison));
 // 纵向对比 — progress & areas to develop
-const progress = computed(() => [i18n('comparison.progress1')]);
-const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
+const progress = computed(() => [i18n('comparison.progress1')].map(splitComparison));
+const toDevelop = computed(() => [i18n('comparison.toDevelop1')].map(splitComparison));
 </script>
 
 <template>
@@ -131,17 +131,17 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--advantage">{{ i18n('tags.advantage') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in advantages" :key="'adv-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
-                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
-              </p>
+                 <span class="capability-compare-key">{{ item.key }}</span>
+                 <span class="capability-compare-desc">{{ item.desc ? item.delimiter + item.desc : '' }}</span>
+               </p>
             </div>
           </div>
           <div class="capability-compare-row">
             <span class="capability-tag capability-tag--disadvantage">{{ i18n('tags.disadvantage') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in disadvantages" :key="'dis-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
-                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
+                <span class="capability-compare-key">{{ item.key }}</span>
+                <span class="capability-compare-desc">{{ item.desc ? item.delimiter + item.desc : '' }}</span>
               </p>
             </div>
           </div>
@@ -157,8 +157,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--progress">{{ i18n('tags.progress') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in progress" :key="'prog-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
-                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
+                <span class="capability-compare-key">{{ item.key }}</span>
+                <span class="capability-compare-desc">{{ item.desc ? item.delimiter + item.desc : '' }}</span>
               </p>
             </div>
           </div>
@@ -166,8 +166,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--develop">{{ i18n('tags.toDevelop') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in toDevelop" :key="'dev-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
-                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
+                <span class="capability-compare-key">{{ item.key }}</span>
+                <span class="capability-compare-desc">{{ item.desc ? item.delimiter + item.desc : '' }}</span>
               </p>
             </div>
           </div>

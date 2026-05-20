@@ -145,29 +145,13 @@ const hotTopic = computed<string>(() => i18n('mock.hotTopic'));
 
 // Emotion multiline chart mock (5 emotions × 7 days)
 const emotionDays = ['5.12', '5.13', '5.14', '5.15', '5.16', '5.17', '5.18'];
-const emotionLabels = computed(() => [
-  i18n('emotions.happy'),
-  i18n('emotions.delighted'),
-  i18n('emotions.calm'),
-  i18n('emotions.worried'),
-  i18n('emotions.sad'),
+const emotionSeries = computed(() => [
+  { key: 'happy', label: i18n('emotions.happy'), color: 'rgba(32,204,249,1)', data: [80, 75, 82, 78, 85, 88, 90] },
+  { key: 'delighted', label: i18n('emotions.delighted'), color: 'rgba(129,236,223,1)', data: [65, 60, 68, 72, 70, 75, 78] },
+  { key: 'calm', label: i18n('emotions.calm'), color: 'rgba(200,200,200,1)', data: [40, 45, 42, 38, 40, 35, 32], dashed: true },
+  { key: 'worried', label: i18n('emotions.worried'), color: 'rgba(255,183,77,1)', data: [15, 12, 18, 20, 15, 10, 8] },
+  { key: 'sad', label: i18n('emotions.sad'), color: 'rgba(255,138,128,1)', data: [5, 8, 6, 4, 3, 5, 2] },
 ]);
-
-const emotionSeriesData: Record<string, number[]> = {
-  happy: [80, 75, 82, 78, 85, 88, 90],
-  delighted: [65, 60, 68, 72, 70, 75, 78],
-  calm: [40, 45, 42, 38, 40, 35, 32],
-  worried: [15, 12, 18, 20, 15, 10, 8],
-  sad: [5, 8, 6, 4, 3, 5, 2],
-};
-
-const emotionLineColors: Record<string, string> = {
-  happy: 'rgba(32,204,249,1)',
-  delighted: 'rgba(129,236,223,1)',
-  calm: 'rgba(200,200,200,1)',
-  worried: 'rgba(255,183,77,1)',
-  sad: 'rgba(255,138,128,1)',
-};
 
 const emotionOption = computed(() => ({
   grid: { left: 8, right: 16, top: 12, bottom: 28 },
@@ -185,58 +169,16 @@ const emotionOption = computed(() => ({
     splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } },
     axisLabel: { show: false },
   },
-  series: [
-    {
-      name: emotionLabels.value[0],
-      type: 'line' as const,
-      data: emotionSeriesData.happy,
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 4,
-      lineStyle: { color: emotionLineColors.happy, width: 2 },
-      itemStyle: { color: emotionLineColors.happy },
-    },
-    {
-      name: emotionLabels.value[1],
-      type: 'line' as const,
-      data: emotionSeriesData.delighted,
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 4,
-      lineStyle: { color: emotionLineColors.delighted, width: 2 },
-      itemStyle: { color: emotionLineColors.delighted },
-    },
-    {
-      name: emotionLabels.value[2],
-      type: 'line' as const,
-      data: emotionSeriesData.calm,
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 4,
-      lineStyle: { color: emotionLineColors.calm, width: 2, type: 'dashed' as const },
-      itemStyle: { color: emotionLineColors.calm },
-    },
-    {
-      name: emotionLabels.value[3],
-      type: 'line' as const,
-      data: emotionSeriesData.worried,
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 4,
-      lineStyle: { color: emotionLineColors.worried, width: 2 },
-      itemStyle: { color: emotionLineColors.worried },
-    },
-    {
-      name: emotionLabels.value[4],
-      type: 'line' as const,
-      data: emotionSeriesData.sad,
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 4,
-      lineStyle: { color: emotionLineColors.sad, width: 2 },
-      itemStyle: { color: emotionLineColors.sad },
-    },
-  ],
+  series: emotionSeries.value.map((e) => ({
+    name: e.label,
+    type: 'line' as const,
+    data: e.data,
+    smooth: true,
+    symbol: 'circle',
+    symbolSize: 4,
+    lineStyle: { color: e.color, width: 2, ...(e.dashed ? { type: 'dashed' as const } : {}) },
+    itemStyle: { color: e.color },
+  })),
   tooltip: { trigger: 'axis' as const },
 }));
 
@@ -419,12 +361,12 @@ const chartInitOpts = { renderer: 'canvas' as const };
         <div class="growth-chart-wrap growth-chart-wrap--with-axis-labels">
           <div class="emotion-axis-labels">
             <span
-              v-for="(label, i) in emotionLabels"
-              :key="label"
+              v-for="e in emotionSeries"
+              :key="e.key"
               class="emotion-axis-label"
-              :style="{ color: Object.values(emotionLineColors)[i], fontSize: '10px' }"
+              :style="{ color: e.color, fontSize: '10px' }"
             >
-              {{ label }}
+              {{ e.label }}
             </span>
           </div>
           <v-chart
