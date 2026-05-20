@@ -99,12 +99,33 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'growth-data',
         path: 'growth-data',
-        components: {
-          default: () => import('pages/stack/GrowthDataPage.vue'),
-          header: () => import('layouts/headers/StackHeader.vue'),
-        },
+        children: [
+          {
+            name: 'growth-data',
+            path: '',
+            components: {
+              default: () => import('pages/stack/GrowthDataPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'growth-data-capability-detail',
+            path: 'capability/:capabilityKey',
+            components: {
+              default: () => import('pages/stack/growth-data/CapabilityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'growth-data-weekly-report',
+            path: 'weekly-report',
+            components: {
+              default: () => import('pages/stack/growth-data/ChatWeeklyReportPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
       },
       {
         path: 'profile',

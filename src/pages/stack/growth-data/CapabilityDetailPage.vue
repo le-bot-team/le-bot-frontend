@@ -29,6 +29,19 @@ const capabilityKey = (route.params.capabilityKey as string) || 'emotionalExpres
 
 const i18n = i18nSubPath('pages.stack.growth-data.CapabilityDetailPage');
 
+/** Split comparison text on '——' (zh) or ' — ' (en) delimiter */
+function splitComparison(text: string): [string, string] {
+  const zhIdx = text.indexOf('——');
+  const enIdx = text.indexOf(' — ');
+  if (zhIdx >= 0 && (enIdx < 0 || zhIdx <= enIdx)) {
+    return [text.slice(0, zhIdx), text.slice(zhIdx + 2)];
+  }
+  if (enIdx >= 0) {
+    return [text.slice(0, enIdx), text.slice(enIdx + 3)];
+  }
+  return [text, ''];
+}
+
 // --- Radar chart mock data ---
 // 4 sub-dimensions for 语言表达力 from design 8c683896
 const radarDimensions = computed(() => [
@@ -118,8 +131,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--advantage">{{ i18n('tags.advantage') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in advantages" :key="'adv-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ item.split('——')[0] }}</span>
-                <span class="capability-compare-desc">——{{ item.split('——').slice(1).join('——') }}</span>
+                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
+                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
               </p>
             </div>
           </div>
@@ -127,8 +140,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--disadvantage">{{ i18n('tags.disadvantage') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in disadvantages" :key="'dis-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ item.split('——')[0] }}</span>
-                <span class="capability-compare-desc">——{{ item.split('——').slice(1).join('——') }}</span>
+                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
+                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
               </p>
             </div>
           </div>
@@ -144,8 +157,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--progress">{{ i18n('tags.progress') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in progress" :key="'prog-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ item.split('——')[0] }}</span>
-                <span class="capability-compare-desc">——{{ item.split('——').slice(1).join('——') }}</span>
+                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
+                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
               </p>
             </div>
           </div>
@@ -153,8 +166,8 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
             <span class="capability-tag capability-tag--develop">{{ i18n('tags.toDevelop') }}</span>
             <div class="capability-compare-items">
               <p v-for="(item, idx) in toDevelop" :key="'dev-' + idx" class="capability-compare-item q-ma-none">
-                <span class="capability-compare-key">{{ item.split('——')[0] }}</span>
-                <span class="capability-compare-desc">——{{ item.split('——').slice(1).join('——') }}</span>
+                <span class="capability-compare-key">{{ splitComparison(item)[0] }}</span>
+                <span class="capability-compare-desc">{{ splitComparison(item)[1] ? '——' + splitComparison(item)[1] : '' }}</span>
               </p>
             </div>
           </div>
@@ -235,7 +248,7 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
   font-size: 15px;
   font-weight: 500;
   line-height: 22px;
-  color: rgba(255, 255, 255, 1);
+  color: var(--clr-text);
   margin-bottom: 12px;
 }
 
@@ -244,7 +257,7 @@ const toDevelop = computed(() => [i18n('comparison.toDevelop1')]);
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
-  color: rgba(255, 255, 255, 1);
+  color: var(--clr-text-tertiary);
   margin-left: 4px;
 }
 

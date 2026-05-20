@@ -169,7 +169,7 @@ const emotionLineColors: Record<string, string> = {
   sad: 'rgba(255,138,128,1)',
 };
 
-const emotionOption = shallowRef({
+const emotionOption = computed(() => ({
   grid: { left: 8, right: 16, top: 12, bottom: 28 },
   xAxis: {
     type: 'category' as const,
@@ -187,7 +187,7 @@ const emotionOption = shallowRef({
   },
   series: [
     {
-      name: '开心',
+      name: emotionLabels.value[0],
       type: 'line' as const,
       data: emotionSeriesData.happy,
       smooth: true,
@@ -197,7 +197,7 @@ const emotionOption = shallowRef({
       itemStyle: { color: emotionLineColors.happy },
     },
     {
-      name: '愉悦',
+      name: emotionLabels.value[1],
       type: 'line' as const,
       data: emotionSeriesData.delighted,
       smooth: true,
@@ -207,7 +207,7 @@ const emotionOption = shallowRef({
       itemStyle: { color: emotionLineColors.delighted },
     },
     {
-      name: '平静',
+      name: emotionLabels.value[2],
       type: 'line' as const,
       data: emotionSeriesData.calm,
       smooth: true,
@@ -217,7 +217,7 @@ const emotionOption = shallowRef({
       itemStyle: { color: emotionLineColors.calm },
     },
     {
-      name: '担忧',
+      name: emotionLabels.value[3],
       type: 'line' as const,
       data: emotionSeriesData.worried,
       smooth: true,
@@ -227,7 +227,7 @@ const emotionOption = shallowRef({
       itemStyle: { color: emotionLineColors.worried },
     },
     {
-      name: '难过',
+      name: emotionLabels.value[4],
       type: 'line' as const,
       data: emotionSeriesData.sad,
       smooth: true,
@@ -238,7 +238,7 @@ const emotionOption = shallowRef({
     },
   ],
   tooltip: { trigger: 'axis' as const },
-});
+}));
 
 // Interaction bar chart mock
 const interactionDays = ['5.12', '5.13', '5.14', '5.15', '5.16', '5.17', '5.18'];
@@ -390,6 +390,7 @@ const chartInitOpts = { renderer: 'canvas' as const };
           :weekly-interact="4.6"
           :best-capability="bestCapability"
           :hot-topic="hotTopic"
+          :accompany-hours="105"
         />
       </div>
 
@@ -473,12 +474,9 @@ const chartInitOpts = { renderer: 'canvas' as const };
             class="growth-view-report"
             role="button"
             tabindex="0"
-            @click="
-              router.push({
-                name: 'growth-data-capability-detail',
-                params: { capabilityKey: 'languageExpression' },
-              })
-            "
+            @click="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
+            @keydown.enter="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
+            @keydown.space.prevent="router.push({ name: 'growth-data-capability-detail', params: { capabilityKey: 'languageExpression' } })"
           >
             {{ i18n('labels.viewReport') }}
             <img class="growth-arrow-icon" src="/lanhu-slices/icon-3.webp" alt="" />
@@ -509,6 +507,8 @@ const chartInitOpts = { renderer: 'canvas' as const };
             role="button"
             tabindex="0"
             @click="router.push({ name: 'growth-data-weekly-report' })"
+            @keydown.enter="router.push({ name: 'growth-data-weekly-report' })"
+            @keydown.space.prevent="router.push({ name: 'growth-data-weekly-report' })"
           >
             {{ i18n('labels.viewReport') }}
             <img class="growth-arrow-icon" src="/lanhu-slices/icon-3.webp" alt="" />

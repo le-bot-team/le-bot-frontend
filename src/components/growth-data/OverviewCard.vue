@@ -17,6 +17,7 @@ defineProps<{
   weeklyInteract: number | string;
   bestCapability: string;
   hotTopic: string;
+  accompanyHours?: number;
 }>();
 
 const i18n = i18nSubPath('components.growthData.OverviewCard');
@@ -41,7 +42,7 @@ const i18n = i18nSubPath('components.growthData.OverviewCard');
         </div>
       </div>
       <div class="growth-accompany-badge">
-        {{ i18n('labels.accompanyTime', { hours: 105 }) }}
+        {{ i18n('labels.accompanyTime', { hours: accompanyHours ?? 0 }) }}
       </div>
     </div>
 
