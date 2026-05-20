@@ -28,7 +28,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <q-page class="column q-gutter-y-lg q-pa-md">
+  <q-page class="voiceprint-record-page">
     <q-tab-panels class="full-width col-grow bg-transparent" v-model="panelIndex">
       <record-panel
         :name="0"
@@ -43,8 +43,8 @@ onBeforeMount(async () => {
         :name="1"
         :data="data"
         :person-id="personId"
-        @finish="router.go(-1)"
-        @previous="panelIndex = 0"
+        @finish="router.push('/stack/settings/voiceprint').catch(console.error)"
+        @previous="data = undefined; panelIndex = 0"
       />
     </q-tab-panels>
   </q-page>
