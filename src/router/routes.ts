@@ -11,6 +11,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        name: 'home',
         path: 'home',
         components: Platform.is.mobile
           ? {
@@ -24,6 +25,7 @@ const routes: RouteRecordRaw[] = [
             },
       },
       {
+        name: 'me',
         path: 'me',
         components: Platform.is.mobile
           ? {

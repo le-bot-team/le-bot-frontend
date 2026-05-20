@@ -1,30 +1,86 @@
 /**
- * useTracker — lightweight analytics event tracker.
+ * useTracker — 命令式遥测事件上报 Composable
  *
- * Provides `trackClick` for UI interaction events and `trackConversion` for
- * one-time milestone events (deduplicated per session). Currently logs to
- * console in development; replace with a real analytics SDK when available.
+ * 提供在组件内部灵活上报自定义事件的能力，
+ * 适用于 v-track 指令无法覆盖的复杂场景：
+ * - API 调用成功/失败
+ * - 异步流程完成
+ * - 复合交互（如多步骤表单完成）
+ * - 转化漏斗节点
  */
 
-const firedConversions = new Set<string>();
+import type { ConversionNode } from 'src/types/api/telemetry';
+
+import { getTelemetryEngine } from 'src/utils/telemetry/engine';
+import { useTelemetryStore } from 'stores/telemetry';
+
+// ---------------------------------------------------------------------------
+// Composable
+// ---------------------------------------------------------------------------
 
 export function useTracker() {
-  function trackClick(eventName: string, payload?: Record<string, unknown>) {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[Tracker] click:', eventName, payload);
+  const engine = getTelemetryEngine();
+
+  /** Safely get telemetry store (may fail outside setup context) */
+  function getStore() {
+    try {
+      return useTelemetryStore();
+    } catch {
+      return null;
     }
-    // TODO: integrate with analytics SDK
   }
 
-  function trackConversion(eventName: string, payload?: Record<string, unknown>) {
-    if (firedConversions.has(eventName)) return;
-    firedConversions.add(eventName);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[Tracker] conversion:', eventName, payload);
-    }
-    // TODO: integrate with analytics SDK
+  /**
+   * 上报点击事件
+   *
+   * @param eventName 事件名称
+   * @param data 事件数据
+   */
+  function trackClick(eventName: string, data?: Record<string, unknown>): void {
+    getStore()?.refreshActivity();
+    void engine.trackClick(eventName, data);
   }
 
-  return { trackClick, trackConversion };
+  /**
+   * 上报自定义业务事件
+   *
+   * @param eventName 事件名称
+   * @param data 事件数据
+   */
+  function trackCustom(eventName: string, data?: Record<string, unknown>): void {
+    getStore()?.refreshActivity();
+    void engine.trackCustom(eventName, data);
+  }
+
+  /**
+   * 上报转化节点事件（不受采样率影响，始终全量）
+   *
+   * @param node 转化节点枚举值
+   * @param data 附加数据
+   */
+  function trackConversion(node: ConversionNode, data?: Record<string, unknown>): void {
+    getStore()?.refreshActivity();
+    void engine.trackConversion(node, data);
+  }
+
+  /**
+   * 上报 App 恢复前台事件
+   * Only creates a new session if the current one has expired.
+   */
+  function trackAppResume(): void {
+    const store = getStore();
+    if (store?.isSessionExpired) {
+      store.createNewSession();
+    } else {
+      store?.refreshActivity();
+    }
+    void engine.trackAppResume();
+  }
+
+  return {
+    trackClick,
+    trackCustom,
+    trackConversion,
+    trackAppResume,
+  };
 }
