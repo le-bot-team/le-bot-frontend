@@ -47,6 +47,11 @@ export function useWsClient(): UseWsClientReturn {
       connectionState.value = 'connected';
     });
 
+    // Track disconnections so reactive state reflects reconnect window
+    ws.addOnCloseHandler(() => {
+      connectionState.value = 'connecting';
+    });
+
     // Apply any handlers registered before connect
     for (const [action, handler] of pendingHandlers) {
       ws.setHandler(action, handler);

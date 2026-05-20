@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 
 import { STACK_NAVIGATIONS } from 'components/navigations';
-
+import { bus } from 'src/boot/bus';
 import { router } from 'src/router';
 
 const { dark } = useQuasar();
@@ -13,6 +13,8 @@ const route = useRoute();
 const title = computed(
   () => STACK_NAVIGATIONS.find((navigation) => navigation.route === route.name?.toString())?.label,
 );
+
+const isChatRoute = computed(() => route.name === 'chat');
 </script>
 
 <template>
@@ -30,6 +32,12 @@ const title = computed(
       <q-toolbar-title class="text-center">
         {{ title }}
       </q-toolbar-title>
+      <div v-if="isChatRoute" class="absolute-right column justify-center full-height q-pr-sm">
+        <div class="row no-wrap">
+          <q-btn flat icon="volume_off" round size="sm" aria-label="Mute" @click="bus.emit('chat:mute')" />
+          <q-btn flat icon="phone" round size="sm" aria-label="Call" @click="bus.emit('chat:call')" />
+        </div>
+      </div>
     </q-toolbar>
   </q-header>
 </template>

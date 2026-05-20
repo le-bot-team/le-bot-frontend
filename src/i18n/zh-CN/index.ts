@@ -14,6 +14,7 @@ export default {
       NewPasswordPanel: {
         errors: {
           passwordTooShort: '密码至少 8 位',
+          passwordMismatch: '两次输入的密码不一致',
         },
         labels: {
           welcome:
@@ -23,12 +24,27 @@ export default {
           welcomeNew: '欢迎，{username}！\n请设置您的密码以继续。',
           newPassword: '新密码',
           confirmNewPassword: '确认新密码',
+          sending: '发送中...',
+          sendCode: '发送验证码',
+          resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
+          strengthWeak: '弱',
+          strengthMedium: '中',
+          strengthStrong: '强',
+          codePlaceholder: '请输入验证码',
+          newPasswordPlaceholder: '请设置密码',
+          confirmPasswordPlaceholder: '请再次输入设置的密码',
+          processing: '处理中...',
+          completeRegistration: '完成注册并登录',
         },
         notifications: {
           invalidEmail: '邮箱地址无效',
           passwordResetSuccess: '密码重置成功',
           loginSuccess: '登录成功',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
+          setPasswordFailed: '设置密码失败',
+          autoLoginFailed: '自动登录失败',
         },
       },
       PasswordInput: {
@@ -50,9 +66,26 @@ export default {
           nickname: '昵称',
           bio: '个人简介',
           confirm: '确认',
+          nicknamePlaceholder: '请输入昵称',
+          birthday: '生日',
+          relationship: '您与孩子的关系',
+          selectRelationship: '选择关系',
+          selectPlaceholder: '请选择',
+          relations: {
+            mother: '妈妈',
+            father: '爸爸',
+            grandma: '奶奶',
+            grandpa: '爷爷',
+            maternalGrandma: '外婆',
+            maternalGrandpa: '外公',
+            friend: '朋友',
+            otherRelative: '其他亲属',
+          },
         },
         notifications: {
           unknownError: '未知错误',
+          saveFailed: '保存失败',
+          fetchFailed: '获取资料失败',
         },
       },
       SignInOrSignUpPanel: {
@@ -61,8 +94,20 @@ export default {
           password: '密码',
           signInOrSignUp: '登录 / 注册',
           signIn: '登录',
-          usePassword: '使用密码',
-          useCode: '使用验证码',
+          usePassword: '密码登录',
+          useCode: '验证码登录',
+          sendCode: '发送验证码',
+          sending: '发送中...',
+          resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
+          codePlaceholder: '请输入验证码',
+          passwordPlaceholder: '请输入密码',
+          termsPrefix: '我已阅读并同意',
+          termsOfService: '《服务条款》',
+          termsSeparator: '、',
+          userAgreement: '《用户协议》',
+          termsAnd: '和',
+          privacyPolicy: '《隐私政策》',
         },
         errors: {
           invalidEmail: '邮箱地址无效',
@@ -70,6 +115,7 @@ export default {
         notifications: {
           codeSent: '验证码已发送',
           unknownError: '未知错误',
+          sendCodeFailed: '验证码发送失败',
         },
       },
       VerificationCodeInput: {
@@ -82,6 +128,7 @@ export default {
           sending: '发送中...',
           resendCode: '重新发送',
           resendCodeCooldown: '重新发送 ({seconds}s)',
+          codePlaceholder: '请输入验证码',
         },
         notifications: {
           sendCodeError: '发送验证码出错',
@@ -107,11 +154,21 @@ export default {
         },
       },
     },
+    chat: {
+      ChatMessageItem: {
+        labels: {
+          typing: '正在输入',
+          playAudio: '播放语音',
+          stopAudio: '停止播放',
+        },
+      },
+    },
     home: {
       DeviceCard: {
         labels: {
           noDevice: '暂无设备连接',
           addNewDevice: '添加设备',
+          defaultName: '我的乐宝',
         },
       },
       TopicCard: {
@@ -151,6 +208,9 @@ export default {
         settingsVoiceprint: '声纹设置',
         settingsVoiceprintDetail: '声纹设置',
         settingsVoiceprintNew: '添加声纹',
+        chatVoiceCall: '语音通话',
+        chatHistory: '聊天记录',
+        chatMuteSettings: '静音设置',
         deviceConfigVoice: '语音风格',
         deviceConfigLanguage: '多语言',
         deviceConfigPersonality: 'AI个性调节',
@@ -167,7 +227,6 @@ export default {
         help: '帮助与反馈',
         helpFaq: '常见问题',
         helpFeedback: '意见反馈',
-        chatHistory: '聊天记录',
         growthData: '成长数据',
         deviceConfigWifi: 'Wi-Fi 管理',
         deviceConfigUpdate: '固件升级',
@@ -183,6 +242,8 @@ export default {
         settingsNetwork: '网络检测',
         settingsStorage: '存储空间',
         settingsPrivacyPolicy: '隐私政策',
+        settingsTermsOfService: '服务条款',
+        settingsUserAgreement: '用户协议',
         settingsInfoList: '个人信息收集清单',
         addVirtualDevice: '添加虚拟乐宝',
         onboarding: '引导页',
@@ -366,6 +427,8 @@ export default {
         labels: {
           title: '乐宝',
           description: '您的智能宠物好伙伴',
+          profileSetupTitle: '完善个人信息',
+          goBack: '返回',
         },
       },
       HomePage: {
@@ -396,6 +459,8 @@ export default {
         deviceSwitch: {
           title: '切换设备',
           addDevice: '添加乐宝',
+          deviceNameFormat: '{name}的乐宝',
+          unnamedDevice: '未命名设备',
         },
         notifications: {},
       },
@@ -513,6 +578,8 @@ export default {
           searchComingSoon: '搜索功能即将上线',
           muteEnabled: '已关闭自动朗读',
           muteDisabled: '已开启自动朗读',
+          muteModeEnabled: '已开启静音模式',
+          muteModeDisabled: '已关闭静音模式',
           callComingSoon: '呼叫功能即将上线',
         },
       },
@@ -737,10 +804,14 @@ export default {
             startChat: '开始聊天',
             backToHome: '回到首页',
           },
+          familyGroupName: '{name}的家庭组',
         },
         notifications: {
           fieldsRequired: '请完整填写宝宝的名字和生日',
           activateFailed: '激活虚拟设备失败',
+          tokenMissing: '登录已过期，请重新登录',
+          voiceprintFailed: '声纹注册失败',
+          leaveIncomplete: '设备设置尚未完成，离开将产生未配置的设备。确定离开吗？',
         },
       },
       FamilyGroupPage: {
@@ -954,6 +1025,7 @@ export default {
           goalsTitle: '您希望孩子的发展方向：',
           goalsPlaceholder: '可以输入个性或者能力发展方向...',
           submit: '提交',
+          skip: '跳过',
         },
         traitTags: {
           trait_a: '开朗',
@@ -1191,6 +1263,7 @@ export default {
         PrivacyPolicyPage: {
           labels: {
             title: '隐私政策',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、信息收集',
@@ -1206,6 +1279,7 @@ export default {
         TermsOfServicePage: {
           labels: {
             title: '服务条款',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、接受条款',
@@ -1225,6 +1299,7 @@ export default {
         UserAgreementPage: {
           labels: {
             title: '用户协议',
+            contentUnavailable: '内容暂不可用',
           },
           content: {
             title1: '一、协议范围',
@@ -1257,6 +1332,7 @@ export default {
             title: '聊天记录',
             searchPlaceholder: '搜索聊天记录',
             empty: '暂无聊天记录',
+            comingSoon: '聊天记录功能即将上线',
           },
         },
         MuteSettingsPage: {
@@ -1272,10 +1348,15 @@ export default {
             endTime: '结束时间',
             enabled: '已开启',
             disabled: '已关闭',
+            tip: '开启静音模式后，乐宝将不再主动说话，但您仍可随时唤醒对话。',
           },
           notifications: {
             muteEnabled: '已开启静音模式',
             muteDisabled: '已关闭静音模式',
+            notificationsEnabled: '已开启静音通知',
+            notificationsDisabled: '已关闭静音通知',
+            autoMuteEnabled: '已开启定时静音',
+            autoMuteDisabled: '已关闭定时静音',
           },
         },
         VoiceCallPage: {
@@ -1295,6 +1376,7 @@ export default {
             // Design 64d5ecc8 raw JSON
             startSpeaking: '你可以开始说话', // raw: "你可以开始说话" 15px/22px #151717 at y=718
             aiGenerated: '内容由AI生成', // raw: "内容由AI生成" 12px/16px opacity-50 at y=748
+            comingSoon: '语音通话功能即将上线',
           },
           notifications: {
             callConnected: '通话已连接',
@@ -1312,6 +1394,7 @@ export default {
             connected: '已连接',
             notConnected: '未连接',
             availableNetworks: '可用网络',
+            scanNetworks: '扫描网络',
             passwordPlaceholder: '请输入 Wi-Fi 密码',
             connect: '连接',
             cancel: '取消',
