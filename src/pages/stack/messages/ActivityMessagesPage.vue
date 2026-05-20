@@ -44,9 +44,8 @@ const activities = computed<ActivityItem[]>(() => [
   },
 ]);
 
-function onItemClick(item: ActivityItem) {
+function onItemClick(_item: ActivityItem) {
   // TODO: navigate to activity detail page when design is ready
-  void item;
   $q.notify({ message: i18n('labels.comingSoon'), type: 'info' });
 }
 </script>

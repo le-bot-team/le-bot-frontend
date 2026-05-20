@@ -90,9 +90,9 @@ const messages = ref<MessageItem[]>([
   },
 ]);
 
-/** Toggle edit mode (default ↔ editing) */
-function toggleEdit() {
-  isEditing.value = !isEditing.value;
+/** Exit edit mode — triggered by tapping "Done" */
+function exitEditMode() {
+  isEditing.value = false;
 }
 
 /** Enter edit mode — triggered by tapping the nav delete icon */
@@ -158,7 +158,7 @@ function onDeleteClick(item: MessageItem) {
         v-else
         type="button"
         class="messages-nav__action messages-nav__done"
-        @click="toggleEdit"
+        @click="exitEditMode"
       >
         {{ i18n('labels.done') }}
       </button>
@@ -172,7 +172,6 @@ function onDeleteClick(item: MessageItem) {
         class="messages-row"
         :role="isEditing ? undefined : 'button'"
         :tabindex="isEditing ? undefined : 0"
-        :aria-disabled="isEditing ? true : undefined"
         @click="onItemClick(item)"
         @keydown.enter="onItemClick(item)"
         @keydown.space.prevent="onItemClick(item)"

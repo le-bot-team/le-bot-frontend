@@ -45,7 +45,7 @@ function onRowClick(row: HelpRow) {
   if (row.kind === 'link') {
     const dialable = row.value?.replace(/[^\d+]/g, '');
     if (dialable && dialable.length >= 3) {
-      window.open(`tel:${dialable}`, '_self');
+      window.location.href = `tel:${dialable}`;
     } else {
       $q.notify({ message: row.value ?? '', type: 'info' });
     }

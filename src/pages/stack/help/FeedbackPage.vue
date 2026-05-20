@@ -56,7 +56,7 @@ async function handleSubmit() {
         <q-icon name="mdi-image-plus" size="24px" class="q-mr-sm" />
         <span style="font-size: 14px">{{ i18n('labels.uploadImage') }}</span>
       </div>
-      <button type="button" class="btn-max" :disabled="isSubmitting" @click="handleSubmit">
+      <button type="button" class="btn-max" :disabled="isSubmitting" :aria-busy="isSubmitting" @click="handleSubmit">
         <q-spinner v-if="isSubmitting" size="20px" color="white" />
         <template v-else>{{ i18n('labels.submit') }}</template>
       </button>

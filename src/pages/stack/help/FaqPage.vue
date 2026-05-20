@@ -37,7 +37,7 @@ const faqItems = computed(() =>
 <template>
   <q-page class="settings-sub-page">
     <!-- Category tabs -->
-    <div class="row q-gutter-x-sm q-mb-md" style="flex-wrap: wrap">
+    <div class="row q-gutter-x-sm q-mb-md" role="tablist" style="flex-wrap: wrap">
       <q-chip
         v-for="cat in categories"
         :key="cat.key"
@@ -49,6 +49,8 @@ const faqItems = computed(() =>
           color: activeTab === cat.key ? 'var(--clr-white)' : 'var(--clr-text)',
         }"
         clickable
+        role="tab"
+        :aria-selected="activeTab === cat.key"
         @click="activeTab = cat.key"
       >
         {{ cat.label }}

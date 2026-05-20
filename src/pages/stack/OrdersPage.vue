@@ -77,8 +77,7 @@ function onTabClick(tab: OrderTab) {
   activeTab.value = tab;
 }
 
-function onActionClick(order: Order, action: OrderAction) {
-  void order;
+function onActionClick(_order: Order, action: OrderAction) {
   $q.notify({ message: action.label, type: 'info' });
 }
 </script>
