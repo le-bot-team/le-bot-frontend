@@ -116,10 +116,6 @@ const daysInMonth = computed(() => {
   return new Date(y, m, 0).getDate();
 });
 
-const availableDayOptions = computed(() => {
-  return dayOptions.filter((d) => parseInt(d.value, 10) <= daysInMonth.value);
-});
-
 // Days available based on BUFFERED year/month (used while picker is open)
 const bufDaysInMonth = computed(() => {
   const y = parseInt(bufYear.value || '2000', 10);

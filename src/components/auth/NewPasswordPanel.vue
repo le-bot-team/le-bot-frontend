@@ -111,7 +111,7 @@ const sendCode = async () => {
       return;
     }
     authStore.markCodeSent();
-  } catch (err) {
+  } catch {
     errorMsg.value = i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;

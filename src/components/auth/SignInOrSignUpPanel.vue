@@ -82,7 +82,7 @@ const sendCode = async () => {
     }
     notify({ type: 'positive', message: i18n('notifications.codeSent') });
     authStore.markCodeSent();
-  } catch (err) {
+  } catch {
     errorMsg.value = i18n('notifications.sendCodeFailed');
   }
   isSendingCode.value = false;

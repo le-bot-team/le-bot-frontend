@@ -44,7 +44,7 @@ export function setupWsMock(): void {
   if (originalWebSocket) return;
 
   originalWebSocket = window.WebSocket;
-  (window as { WebSocket: unknown }).WebSocket = MockChatWebSocket as unknown as typeof WebSocket;
+  (window as { WebSocket: unknown }).WebSocket = MockChatWebSocket;
 
   console.warn('[Mock] WebSocket mocking enabled — send() returns a stub echo response only');
 }

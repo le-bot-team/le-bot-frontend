@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
 function goBack() {
   // If there's no in-app history (deep link / fresh tab), fall back to home.
   if (window.history.length <= 1) {
-    router.replace('/main/home');
+    void router.replace('/main/home');
   } else {
     router.go(-1);
   }

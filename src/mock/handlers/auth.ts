@@ -10,14 +10,14 @@ import {
 } from 'src/mock/data/auth';
 import { mockError, mockSuccess } from 'src/mock/utils';
 
-let lastCodeSentAt = new Map<string, number>();
+const lastCodeSentAt = new Map<string, number>();
 
 /** Safely parse JSON body, returning empty object on failure. */
 function safeParseBody<T = Record<string, unknown>>(data: unknown): Partial<T> {
   try {
     return JSON.parse((data as string) ?? '{}') as Partial<T>;
   } catch {
-    return {} as Partial<T>;
+    return {};
   }
 }
 

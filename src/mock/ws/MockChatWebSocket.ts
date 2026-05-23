@@ -254,8 +254,7 @@ export class MockChatWebSocket {
   }
 
   private _addTrackedTimer(callback: () => void, delay: number): void {
-    let handle: ReturnType<typeof setTimeout>;
-    handle = setTimeout(() => {
+    const handle: ReturnType<typeof setTimeout> = setTimeout(() => {
       this._removeTimer(handle);
       callback();
     }, delay);
