@@ -410,7 +410,7 @@ function onCancel() {
 .birthday-picker__value {
   position: relative;
   z-index: 0;
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 15px;
   font-weight: 500;
   line-height: 22px;
@@ -458,14 +458,14 @@ function onCancel() {
 }
 
 .birthday-picker__picker-title {
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--clr-text-primary);
 }
 
 .birthday-picker__header-btn {
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 15px;
   font-weight: 500;
   border: none;
@@ -503,7 +503,7 @@ function onCancel() {
 .birthday-picker__col-label {
   padding: 10px 0 6px;
   text-align: center;
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 13px;
   font-weight: 500;
   color: var(--clr-caption);
@@ -529,7 +529,7 @@ function onCancel() {
   width: 100%;
   text-align: center;
   padding: 8px 0;
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 15px;
   font-weight: 400;
   color: var(--clr-text);

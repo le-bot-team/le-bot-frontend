@@ -331,7 +331,7 @@ onUnmounted(() => {
 // Only component-specific overrides remain here.
 
 .email-text {
-  font-family: var(--font-family);
+  font-family: var(--font-family), sans-serif;
   font-size: 15px;
   font-weight: 500;
   line-height: 22px;
