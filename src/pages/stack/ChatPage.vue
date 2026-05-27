@@ -24,16 +24,18 @@ import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 import { useChatStore } from 'stores/chat';
+import { useDeviceStore } from 'stores/device';
 
 const i18n = i18nSubPath('pages.stack.ChatPage');
 const route = useRoute();
 const { accessToken } = storeToRefs(useAuthStore());
 const chatStore = useChatStore();
 const { isMuted } = storeToRefs(chatStore);
+const { currentDeviceId } = storeToRefs(useDeviceStore());
 const { notify } = useQuasar();
 const { trackClick, trackConversion } = useTracker();
 
-const { messages, isConnected, isMediaReady, connect, wake, destroy } = useChatSession();
+const { messages, isConnected, isMediaReady, connect, wake, endTurn, destroy } = useChatSession();
 
 const pressing = ref(false);
 
@@ -48,7 +50,7 @@ async function bootstrap() {
   try {
     const q = route.query.session;
     const sessionId = typeof q === 'string' ? q : undefined;
-    await connect(accessToken.value, undefined, sessionId);
+    await connect(accessToken.value, currentDeviceId.value ?? undefined, sessionId);
   } catch (err) {
     console.error('[ChatPage] connect failed', err);
     notify({ type: 'negative', message: i18n('notifications.connectFailed') });
@@ -78,6 +80,7 @@ function onPress() {
 function onRelease() {
   trackClick('btn_click_release_talk');
   pressing.value = false;
+  endTurn();
 }
 
 // --- Header actions (driven by route meta + bus) ---

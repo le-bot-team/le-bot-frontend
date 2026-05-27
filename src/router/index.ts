@@ -37,7 +37,10 @@ export const router = createRouter({
 // Route guard: protect main app routes from users with incomplete onboarding
 const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding', 'onboarding-guide']);
 
-router.beforeEach((to) => {
+// Track whether the initial profile sync has completed
+let profileSynced = false;
+
+router.beforeEach(async (to) => {
   // Allow public pages without restriction
   if (typeof to.name === 'string' && PUBLIC_ROUTES.has(to.name)) return true;
 
@@ -47,6 +50,22 @@ router.beforeEach((to) => {
   // No token: redirect to auth
   if (!authStore.accessToken) {
     return { name: 'auth' };
+  }
+
+  // On first navigation with a token, wait for profile to be fetched from API
+  // (App.vue onMounted does this, but we need to ensure it completes before
+  // the guard makes its decision)
+  if (!profileSynced && !profileStore.profile?.nickname) {
+    try {
+      const { retrieveProfileInfo } = await import('src/utils/api/profile');
+      const { data } = await retrieveProfileInfo(authStore.accessToken);
+      if (data?.success) {
+        profileStore.updateProfile(data.data);
+      }
+    } catch {
+      // If fetch fails, fall through to the nickname check below
+    }
+    profileSynced = true;
   }
 
   // Has token but profile incomplete (no nickname): allow onboarding flow

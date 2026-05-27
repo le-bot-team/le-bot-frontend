@@ -52,6 +52,8 @@ export interface UseChatSessionReturn {
   disconnect: () => void;
   /** Manually trigger a wake (button press equivalent of GPIO) */
   wake: () => Promise<void>;
+  /** End the current recording turn (button release — sends inputAudioComplete immediately) */
+  endTurn: () => void;
   /** Manually interrupt the current session */
   interrupt: () => void;
   /** Clear the conversation context */
@@ -563,6 +565,22 @@ export function useChatSession(): UseChatSessionReturn {
     return messages.value.findLast((m) => m.role === 'user' && !m.isFinished);
   }
 
+  /**
+   * End the current recording turn immediately (called on button release).
+   * Sends inputAudioComplete to signal the server that audio input is done.
+   * Does NOT transition to Idle — waits for server response (TTS playback).
+   */
+  function endTurn(): void {
+    if (state.value !== ChatState.WaitingResponse && state.value !== ChatState.Active) {
+      return;
+    }
+    // Stop recording
+    recorder.stopRecording();
+    // Send inputAudioComplete to server
+    wsClient.sendAction(new WsInputAudioCompleteRequest(''));
+    console.log('[useChatSession] endTurn — sent inputAudioComplete');
+  }
+
   return {
     state,
     messages,
@@ -575,6 +593,7 @@ export function useChatSession(): UseChatSessionReturn {
     connect,
     disconnect,
     wake,
+    endTurn,
     interrupt,
     clearContext,
     destroy,
