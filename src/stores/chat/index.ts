@@ -11,6 +11,15 @@ export const useChatStore = defineStore(
     const autoMuteStart = ref('22:00');
     const autoMuteEnd = ref('07:00');
 
+    const resetState = () => {
+      conversationId.value = '';
+      isMuted.value = false;
+      muteNotifications.value = true;
+      autoMute.value = false;
+      autoMuteStart.value = '22:00';
+      autoMuteEnd.value = '07:00';
+    };
+
     return {
       conversationId,
       isMuted,
@@ -18,6 +27,7 @@ export const useChatStore = defineStore(
       autoMute,
       autoMuteStart,
       autoMuteEnd,
+      resetState,
     };
   },
   {

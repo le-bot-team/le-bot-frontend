@@ -4,6 +4,8 @@ import {
   MOCK_AUTH_DATA,
   MOCK_AUTH_DATA_NEW_USER,
   MOCK_NEW_USER_EMAIL,
+  MOCK_FAIL_EMAIL,
+  MOCK_BLOCKED_EMAIL,
   MOCK_CODE_COOLDOWN_MS,
   MOCK_VERIFICATION_CODE,
   MOCK_PASSWORD,
@@ -32,6 +34,17 @@ const resolveAuthData = (email: string) =>
  * Register mock handlers for the auth module.
  */
 export function setupAuthMock(mock: MockAdapter): void {
+  // Check if email is registered
+  mock.onGet('/auth/email/check').reply((config) => {
+    const email = config.params?.email as string | undefined;
+    if (!email) {
+      return [200, mockError('邮箱不能为空')];
+    }
+    const isNew = email === MOCK_NEW_USER_EMAIL;
+    console.log(`[Mock Auth] Email check: ${email} (isNew=${isNew})`);
+    return [200, mockSuccess({ isNew })];
+  });
+
   // Send verification code
   mock.onPost('/auth/email/challenge').reply((config) => {
     const { email } = safeParseBody<{ email: string }>(config.data);
@@ -40,14 +53,39 @@ export function setupAuthMock(mock: MockAdapter): void {
       return [200, mockError('邮箱不能为空')];
     }
 
+    // Basic email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.warn(`[Mock Auth] Challenge rejected — invalid email format: ${email}`);
+      return [200, mockError('邮箱格式不正确')];
+    }
+
+    // Simulate server-side send failure for specific test email
+    if (email === MOCK_FAIL_EMAIL) {
+      console.error(`[Mock Auth] Challenge FAILED (simulated server error) for ${email}`);
+      return [500, mockError('邮件发送失败，请稍后重试')];
+    }
+
+    // Simulate permanently blocked address
+    if (email === MOCK_BLOCKED_EMAIL) {
+      console.warn(`[Mock Auth] Challenge rejected — address blocked: ${email}`);
+      return [200, mockError('该邮箱已被限制，无法发送验证码')];
+    }
+
+    // Cooldown rate-limit check (per-email)
     const now = Date.now();
     const lastSent = lastCodeSentAt.get(email) ?? 0;
-    if (now - lastSent < MOCK_CODE_COOLDOWN_MS) {
-      return [200, mockError('发送频率过高，请稍后再试')];
+    const elapsed = now - lastSent;
+    if (elapsed < MOCK_CODE_COOLDOWN_MS) {
+      const remainingSec = Math.ceil((MOCK_CODE_COOLDOWN_MS - elapsed) / 1000);
+      console.warn(`[Mock Auth] Challenge rate-limited for ${email} (retry in ${remainingSec}s)`);
+      return [200, mockError(`发送频率过高，请 ${remainingSec} 秒后再试`)];
     }
     lastCodeSentAt.set(email, now);
 
-    console.log(`[Mock Auth] Verification code sent to ${email} (use ${MOCK_VERIFICATION_CODE})`);
+    console.log(
+      `[Mock Auth] ✓ Verification code sent to ${email}\n` +
+      `           code = ${MOCK_VERIFICATION_CODE}  (cooldown ${MOCK_CODE_COOLDOWN_MS / 1000}s)`,
+    );
     return [200, mockSuccess(undefined)];
   });
 

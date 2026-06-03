@@ -64,7 +64,8 @@ export function setupProfileMock(mock: MockAdapter): void {
   // Change password
   mock.onPost('/profiles/password').reply((config) => {
     const data = JSON.parse(config.data ?? '{}') as ChangePasswordRequest;
-    if (!data.oldPassword || data.oldPassword !== mockPassword) {
+    // Allow empty oldPassword for new users setting their initial password
+    if (data.oldPassword && data.oldPassword !== mockPassword) {
       return [
         200,
         { success: false as const, message: 'Old password is incorrect', code: 'wrongOldPassword' },

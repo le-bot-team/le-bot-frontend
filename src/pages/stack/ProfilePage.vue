@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 
@@ -102,7 +102,11 @@ const onAvatarClick = () => {
   });
 };
 
+const deactivating = ref(false);
+
 const onDeactivate = () => {
+  if (deactivating.value) return;
+
   $q.dialog({
     component: ConfirmDialog,
     componentProps: {
@@ -117,20 +121,31 @@ const onDeactivate = () => {
       $q.notify({ type: 'negative', message: i18n('notifications.notLoggedIn') });
       return;
     }
-    deactivateAccount(token)
-      .then(({ data }) => {
-        if (data.success) {
+
+    deactivating.value = true;
+    void deactivateAccount(token)
+      .then(
+        ({ data }) => data,
+        () => null, // API error → null sentinel
+      )
+      .then((data) => {
+        if (data?.success) {
           $q.notify({ type: 'positive', message: i18n('notifications.deactivateSuccess') });
+          // Clean up all local state after successful deactivation
           authStore.logout();
           updateProfile(undefined);
           deviceStore.updateDevices([]);
-          void router.replace('/main/home');
-        } else {
+          // Navigate directly to auth page instead of going through /main/home
+          // (which would trigger a double-redirect via the route guard)
+          void router.replace({ name: 'auth' });
+        } else if (data) {
           $q.notify({ type: 'negative', message: data.message });
+        } else {
+          $q.notify({ type: 'negative', message: i18n('notifications.deactivateFailed') });
         }
       })
-      .catch(() => {
-        $q.notify({ type: 'negative', message: i18n('notifications.deactivateFailed') });
+      .finally(() => {
+        deactivating.value = false;
       });
   });
 };
@@ -140,7 +155,13 @@ const onDeactivate = () => {
   <q-page class="profile-page column items-center q-pa-lg q-gutter-y-lg">
     <div class="profile-container column items-center q-gutter-y-lg">
       <!-- Avatar: 72×72 with 3px white border (圆形 33, design 448a71c7) -->
-      <div class="me-avatar profile-avatar" role="button" tabindex="0" @click="onAvatarClick" @keydown.enter="onAvatarClick">
+      <div
+        class="me-avatar profile-avatar"
+        role="button"
+        tabindex="0"
+        @click="onAvatarClick"
+        @keydown.enter="onAvatarClick"
+      >
         <q-img v-if="profile?.avatar" :src="profile.avatar" />
         <q-icon v-else color="grey-5" name="person" size="40px" />
       </div>
@@ -182,7 +203,7 @@ const onDeactivate = () => {
       </div>
 
       <!-- Deactivate button (矩形 1907: 335×56, rgba(255,93,93,1), radius 28) -->
-      <button class="me-btn-danger" type="button" @click="onDeactivate">
+      <button class="me-btn-danger" type="button" :disabled="deactivating" @click="onDeactivate">
         {{ i18n('labels.removeAccount') }}
       </button>
     </div>

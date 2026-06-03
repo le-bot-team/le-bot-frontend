@@ -1,6 +1,10 @@
 import { api } from 'boot/axios';
 
-import type { ChallengeResponse, AuthResponse } from 'src/types/api/auth';
+import type { ChallengeResponse, AuthResponse, EmailCheckResponse, LegalDocumentResponse } from 'src/types/api/auth';
+
+export const emailCheck = async (email: string) => {
+  return await api.get<EmailCheckResponse>('/auth/email/check', { params: { email } });
+};
 
 export const emailChallenge = async (email: string) => {
   return await api.post<ChallengeResponse>('/auth/email/challenge', { email });
@@ -23,5 +27,13 @@ export const validateAccessToken = async (accessToken: string) => {
     headers: {
       'x-access-token': accessToken,
     },
+  });
+};
+
+export type LegalDocumentType = 'terms-of-service' | 'user-agreement' | 'privacy-policy';
+
+export const fetchLegalDocument = async (docType: LegalDocumentType, lang?: string) => {
+  return await api.get<LegalDocumentResponse>(`/legal/${docType}`, {
+    params: lang ? { lang } : undefined,
   });
 };

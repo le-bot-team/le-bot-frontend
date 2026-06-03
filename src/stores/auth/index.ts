@@ -58,16 +58,20 @@ export const useAuthStore = defineStore(
 
       // Clear chat store (conversationId, mute settings)
       const chatStore = useChatStore();
-      chatStore.$reset();
+      chatStore.resetState();
     };
 
     // If store is hydrated from persistence with an active cooldown, resume ticking
-    watch(sendCodeTime, (val) => {
-      if (val > 0 && Date.now() - val < SEND_CODE_COOLDOWN_INTERVAL) {
-        now.value = Date.now();
-        startTick();
-      }
-    }, { immediate: true });
+    watch(
+      sendCodeTime,
+      (val) => {
+        if (val > 0 && Date.now() - val < SEND_CODE_COOLDOWN_INTERVAL) {
+          now.value = Date.now();
+          startTick();
+        }
+      },
+      { immediate: true },
+    );
 
     onScopeDispose(() => stopTick());
 

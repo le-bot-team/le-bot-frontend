@@ -1,11 +1,15 @@
 <script setup lang="ts">
 // NewPasswordPanel — design 2d090f70 (登录页-注册).
-// Password setup step: email display (readonly), verification code, new password,
-// confirm password, and submit button.
+// Password setup step: email display (readonly), verification code,
+// new password, confirm password, and submit button.
+// User must manually click "Send Code" to request verification code.
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { emailChallenge, emailPassword, emailReset } from 'src/utils/api/auth';
+import { emailChallenge, emailCode, emailPassword, emailReset } from 'src/utils/api/auth';
+import { changePassword } from 'src/utils/api/profile';
+import iconVisible from 'src/assets/icons/auth/visible/icon_visible_password@2x.png';
+import iconInvisible from 'src/assets/icons/auth/invisible/icon_invisible_password@2x.png';
 import { useAuthStore } from 'stores/auth';
 import { i18nSubPath } from 'src/utils/common';
 
@@ -20,11 +24,10 @@ const emit = defineEmits<{
 }>();
 
 const authStore = useAuthStore();
-const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } =
-  storeToRefs(authStore);
+const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } = storeToRefs(authStore);
 const i18n = i18nSubPath('components.auth.NewPasswordPanel');
 
-const code = ref<string>();
+const localCode = ref<string>();
 const newPassword = ref<string>();
 const confirmPassword = ref<string>();
 const errorMsg = ref<string>();
@@ -35,7 +38,9 @@ const showConfirm = ref(false);
 const isNewPasswordFocused = ref(false);
 const isConfirmFocused = ref(false);
 
-const codeError = computed(() => code.value?.length !== 6);
+// Effective code: use local input
+const effectiveCode = computed(() => localCode.value ?? '');
+const codeError = computed(() => effectiveCode.value.length !== 6);
 const passwordError = computed(
   () => newPassword.value === undefined || newPassword.value.length < 8,
 );
@@ -74,7 +79,7 @@ const canSubmit = computed(
     !codeError.value &&
     !passwordError.value &&
     !confirmError.value &&
-    !!code.value?.length &&
+    !!effectiveCode.value?.length &&
     !!newPassword.value?.length &&
     !!confirmPassword.value?.length &&
     !isSubmitting.value,
@@ -96,7 +101,7 @@ const canSendCode = computed(
 );
 
 // Clear error on input
-watch([code, newPassword, confirmPassword], () => {
+watch([localCode, newPassword, confirmPassword], () => {
   errorMsg.value = undefined;
 });
 
@@ -121,7 +126,7 @@ const confirmNewPassword = async () => {
   if (!canSubmit.value || isSubmitting.value) return;
 
   // Snapshot reactive values before async operations (#5 TOCTOU guard)
-  const snapshotCode = code.value ?? '';
+  const snapshotCode = effectiveCode.value;
   const snapshotPassword = newPassword.value ?? '';
   const snapshotEmail = props.email;
 
@@ -129,16 +134,46 @@ const confirmNewPassword = async () => {
   errorMsg.value = undefined;
 
   try {
-    // Step 1: Reset password with verification code
-    const { data: resetData } = await emailReset(snapshotEmail, snapshotCode, snapshotPassword);
-    if (!resetData.success) {
-      errorMsg.value = resetData.message || i18n('notifications.setPasswordFailed');
-      isSubmitting.value = false;
-      return;
+    if (props.isNew) {
+      // New user registration flow:
+      // Step 1: Register via verification code (creates user in backend, returns token)
+      const { data: codeData } = await emailCode(snapshotEmail, snapshotCode);
+      if (!codeData.success) {
+        errorMsg.value = codeData.message || i18n('notifications.setPasswordFailed');
+        isSubmitting.value = false;
+        return;
+      }
+      // Write access token from registration
+      if (codeData.success && 'data' in codeData && codeData.data) {
+        accessToken.value = codeData.data.accessToken;
+      }
+
+      // Step 2: Set initial password via authenticated endpoint
+      // Code was consumed by emailCode, so use /profiles/password with empty oldPassword
+      if (accessToken.value) {
+        try {
+          const { data: pwdData } = await changePassword(accessToken.value, {
+            oldPassword: '',
+            newPassword: snapshotPassword,
+          });
+          if (!pwdData.success) {
+            console.warn('Initial password set via /profiles/password failed:', pwdData.message);
+          }
+        } catch {
+          console.warn('Initial password set failed, user can set later via settings');
+        }
+      }
+    } else {
+      // Existing user (noPassword=true) — set password via email reset
+      const { data: resetData } = await emailReset(snapshotEmail, snapshotCode, snapshotPassword);
+      if (!resetData.success) {
+        errorMsg.value = resetData.message || i18n('notifications.setPasswordFailed');
+        isSubmitting.value = false;
+        return;
+      }
     }
 
-    // Step 2: Auto-login with the new password (skip if token already valid)
-    // If this fails, proceed anyway — password was already reset successfully
+    // Step 3: Auto-login with the new password (skip if token already valid)
     if (!accessToken.value) {
       try {
         const { data } = await emailPassword(snapshotEmail, snapshotPassword);
@@ -146,13 +181,12 @@ const confirmNewPassword = async () => {
           accessToken.value = data.data.accessToken;
         }
       } catch {
-        // Auto-login failed but password reset succeeded — proceed
+        // Auto-login failed but password set succeeded — proceed
       }
     }
 
     emit('next');
   } catch (err) {
-    // Only reaches here if step 1 (emailReset) threw
     errorMsg.value = (err as Error).message || i18n('notifications.unknownError');
   } finally {
     isSubmitting.value = false;
@@ -165,7 +199,9 @@ onMounted(() => {
   if (!props.email?.length) {
     errorMsg.value = i18n('notifications.invalidEmail');
     fallbackTimer = setTimeout(() => emit('previous'), 3000);
+    return;
   }
+  // Do NOT auto-send verification code — let user click "Send Code" manually.
 });
 
 onUnmounted(() => {
@@ -185,7 +221,7 @@ onUnmounted(() => {
       <div class="auth-input-group auth-input-group--code">
         <input
           class="auth-input"
-          v-model="code"
+          v-model="localCode"
           :placeholder="i18n('labels.codePlaceholder')"
           maxlength="6"
           autocomplete="one-time-code"
@@ -206,7 +242,10 @@ onUnmounted(() => {
     </div>
 
     <!-- New password -->
-    <div class="auth-input-group" :class="{ 'auth-input-group--error': passwordError && newPassword?.length }">
+    <div
+      class="auth-input-group"
+      :class="{ 'auth-input-group--error': passwordError && newPassword?.length }"
+    >
       <div class="auth-input-with-action">
         <input
           class="auth-input auth-input--flex"
@@ -225,22 +264,11 @@ onUnmounted(() => {
           @click="showPassword = !showPassword"
           aria-label="Toggle password visibility"
         >
-          <svg v-if="showPassword" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 4C4 4 1 10 1 10C1 10 4 16 10 16C16 16 19 10 19 10C19 10 16 4 10 4Z"
-              stroke="#9398A9"
-              stroke-width="1.5"
-            />
-            <circle cx="10" cy="10" r="3" stroke="#9398A9" stroke-width="1.5" />
-          </svg>
-          <svg v-else width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 4C4 4 1 10 1 10C1 10 4 16 10 16C16 16 19 10 19 10C19 10 16 4 10 4Z"
-              stroke="#9398A9"
-              stroke-width="1.5"
-            />
-            <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
-          </svg>
+          <img
+            :src="showPassword ? iconVisible : iconInvisible"
+            alt=""
+            class="password-toggle-icon"
+          />
         </button>
       </div>
     </div>
@@ -262,9 +290,15 @@ onUnmounted(() => {
         ></div>
       </div>
       <div class="password-strength__labels">
-        <span :class="{ 'active': passwordStrength.level >= 1 }">{{ i18n('labels.strengthWeak') }}</span>
-        <span :class="{ 'active': passwordStrength.level >= 2 }">{{ i18n('labels.strengthMedium') }}</span>
-        <span :class="{ 'active': passwordStrength.level >= 3 }">{{ i18n('labels.strengthStrong') }}</span>
+        <span :class="{ active: passwordStrength.level >= 1 }">{{
+          i18n('labels.strengthWeak')
+        }}</span>
+        <span :class="{ active: passwordStrength.level >= 2 }">{{
+          i18n('labels.strengthMedium')
+        }}</span>
+        <span :class="{ active: passwordStrength.level >= 3 }">{{
+          i18n('labels.strengthStrong')
+        }}</span>
       </div>
     </div>
 
@@ -288,22 +322,11 @@ onUnmounted(() => {
           @click="showConfirm = !showConfirm"
           aria-label="Toggle password visibility"
         >
-          <svg v-if="showConfirm" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 4C4 4 1 10 1 10C1 10 4 16 10 16C16 16 19 10 19 10C19 10 16 4 10 4Z"
-              stroke="#9398A9"
-              stroke-width="1.5"
-            />
-            <circle cx="10" cy="10" r="3" stroke="#9398A9" stroke-width="1.5" />
-          </svg>
-          <svg v-else width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 4C4 4 1 10 1 10C1 10 4 16 10 16C16 16 19 10 19 10C19 10 16 4 10 4Z"
-              stroke="#9398A9"
-              stroke-width="1.5"
-            />
-            <line x1="3" y1="3" x2="17" y2="17" stroke="#9398A9" stroke-width="1.5" />
-          </svg>
+          <img
+            :src="showConfirm ? iconVisible : iconInvisible"
+            alt=""
+            class="password-toggle-icon"
+          />
         </button>
       </div>
     </div>
@@ -320,7 +343,14 @@ onUnmounted(() => {
       :disabled="!canSubmit"
       @click="confirmNewPassword"
     >
-      {{ isSubmitting ? i18n('labels.processing') : isNew ? i18n('labels.completeRegistration') : i18n('labels.confirmNewPassword') }}
+      <q-spinner v-if="isSubmitting" size="20px" class="q-mr-sm" />
+      {{
+        isSubmitting
+          ? i18n('labels.processing')
+          : isNew
+            ? i18n('labels.completeRegistration')
+            : i18n('labels.confirmNewPassword')
+      }}
     </button>
   </q-tab-panel>
 </template>
@@ -343,6 +373,13 @@ onUnmounted(() => {
   margin-top: 48px;
 }
 
+.password-toggle-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
 .password-strength {
   display: flex;
   flex-direction: column;
@@ -357,32 +394,32 @@ onUnmounted(() => {
   &__bar {
     flex: 1;
     height: 4px;
-    background: #E5E6EB;
+    background: #e5e6eb;
     border-radius: 2px;
     transition: background-color 0.3s ease;
   }
 
   &__bar--active:first-of-type {
-    background: #FF4D4F;
+    background: #ff4d4f;
   }
 
   &__bar--active:nth-of-type(2) {
-    background: #FFA940;
+    background: #ffa940;
   }
 
   &__bar--active:last-of-type {
-    background: #52C41A;
+    background: #52c41a;
   }
 
   &__labels {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: #9398A9;
+    color: #9398a9;
     transition: color 0.3s ease;
 
     span.active {
-      color: #52C41A;
+      color: #52c41a;
     }
   }
 }

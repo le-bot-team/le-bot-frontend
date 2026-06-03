@@ -121,7 +121,7 @@ const confirm = async () => {
 <template>
   <q-tab-panel :name="name" class="auth-panel q-pa-none">
     <!-- Avatar: 87x87px circular, fill rgba(229,229,239,1), 3px white border -->
-    <button type="button" class="setup-profile-avatar-shell" @click="editAvatar" :aria-label="i18n('labels.uploadAvatar')">
+    <button type="button" class="setup-profile-avatar-shell" :disabled="isSending" @click="editAvatar" :aria-label="i18n('labels.uploadAvatar')">
       <div class="setup-profile-avatar-circle">
         <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" :alt="i18n('labels.avatar')" />
         <div v-else class="setup-profile-avatar-placeholder">
@@ -142,20 +142,20 @@ const confirm = async () => {
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.nickname') }}</label>
       <div class="auth-input-group">
-        <input class="auth-input" v-model="nickname" :placeholder="i18n('labels.nicknamePlaceholder')" maxlength="20" />
+        <input class="auth-input" v-model="nickname" :placeholder="i18n('labels.nicknamePlaceholder')" maxlength="20" :disabled="isSending" />
       </div>
     </div>
 
     <!-- Birthday -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.birthday') }}</label>
-      <BirthdayPicker v-model="birthday" :default-year="1995" />
+      <BirthdayPicker v-model="birthday" :default-year="1995" :disabled="isSending" />
     </div>
 
     <!-- Relationship -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.relationship') }}</label>
-      <button type="button" class="auth-input-group auth-input-group--clickable" @click="showRelationSheet = true" aria-haspopup="dialog" :aria-expanded="showRelationSheet">
+      <button type="button" class="auth-input-group auth-input-group--clickable" :disabled="isSending" @click="showRelationSheet = true" aria-haspopup="dialog" :aria-expanded="showRelationSheet">
         <span
           class="setup-profile-field-value"
           :class="{ 'setup-profile-field-value--placeholder': !relationship }"
@@ -182,7 +182,8 @@ const confirm = async () => {
       :disabled="!canSubmit"
       @click="confirm"
     >
-      {{ i18n('labels.confirm') }}
+      <q-spinner v-if="isSending" size="20px" class="q-mr-sm" />
+      {{ isSending ? i18n('labels.processing') : i18n('labels.confirm') }}
     </button>
 
     <!-- Relationship bottom sheet — teleported to body to avoid multi-root in q-tab-panels -->

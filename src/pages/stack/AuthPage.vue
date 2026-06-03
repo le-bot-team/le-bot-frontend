@@ -1,23 +1,34 @@
 <script setup lang="ts">
 // AuthPage — Container page for the full auth flow:
-// login/signup -> password setup (if needed) -> profile setup (required, no skip) -> add virtual device.
+// Panel 0: SignInOrSignUpPanel (email + privacy check → route by isNew)
+// Panel 1: NewPasswordPanel (registration: code + password setup)
+// Panel 2: SetupProfilePanel (profile setup for new users)
+// Panel 3: SignInPanel (login for existing users: password or code)
 // Page background uses the shared auth gradient (--gradient-page-bg).
 
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 
+import appLogo from 'src/assets/logo.png';
 import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
 import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
+import SignInPanel from 'components/auth/SignInPanel.vue';
 import { router } from 'src/router';
+import { retrieveProfile } from 'src/utils/account';
+import { retrieveDevices } from 'src/utils/device';
 import { i18nSubPath } from 'src/utils/common';
+import { useDeviceStore } from 'stores/device';
+import { useProfileStore } from 'stores/profile';
 
 const i18n = i18nSubPath('pages.main.AuthPage');
 
-const avatar = ref<string>('');
+const route = useRoute();
+
 const email = ref<string>('');
+const isFinishing = ref<boolean>(false);
 const isNew = ref<boolean>(false);
 const panelIndex = ref<number>(0);
-const skippedPassword = ref<boolean>(false);
 
 function onProfileFinish() {
   // After profile setup, navigate to the onboarding complete guide page
@@ -25,21 +36,44 @@ function onProfileFinish() {
   void router.replace({ name: 'onboarding-complete' });
 }
 
+async function onDirectFinish() {
+  // Existing user with password: load data and navigate directly to home
+  isFinishing.value = true;
+  try {
+    const deviceStore = useDeviceStore();
+    const profileStore = useProfileStore();
+    deviceStore.updateDevices(await retrieveDevices());
+    profileStore.updateProfile(await retrieveProfile());
+  } catch (error) {
+    console.warn('Failed to load user data on direct login', error);
+  }
+  await router
+    .replace(typeof route.query.from === 'string' ? route.query.from : '/')
+    .catch((error) => console.warn(error));
+}
+
 function goBack() {
-  if (panelIndex.value === 2 && skippedPassword.value) {
+  // Panel 1 (registration) and 3 (login) go back to panel 0
+  // Panel 2 (profile setup) goes back to panel 0 (skipping registration)
+  if (panelIndex.value > 0) {
     panelIndex.value = 0;
-  } else if (panelIndex.value > 0) {
-    panelIndex.value--;
   }
 }
 </script>
 
 <template>
   <q-page class="auth-page">
+    <!-- Finishing overlay: shown while loading user data on direct login -->
+    <div v-if="isFinishing" class="auth-finishing-overlay">
+      <div class="auth-finishing-content">
+        <q-spinner size="48px" color="primary" />
+        <span class="auth-finishing-text">{{ i18n('labels.finishing') }}</span>
+      </div>
+    </div>
     <div class="auth-container" :class="{ 'auth-container--sub': panelIndex > 1 }">
-      <!-- Back arrow: visible on sub-pages (password setup, profile setup) -->
+      <!-- Back arrow: visible on all sub-pages (1, 2, 3) -->
       <button
-        v-if="panelIndex === 1 || panelIndex === 2"
+        v-if="panelIndex >= 1"
         type="button"
         class="auth-back"
         :aria-label="i18n('labels.goBack')"
@@ -56,31 +90,15 @@ function goBack() {
         </svg>
       </button>
 
-      <!-- Logo: shown on entry page and password setup page -->
+      <!-- Logo: shown on entry page and registration page -->
       <div v-if="panelIndex <= 1" class="auth-logo">
-        <q-img v-if="avatar" :src="avatar" class="logo-img" />
-        <div v-else class="logo-placeholder">
-          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-            <circle cx="60" cy="60" r="60" fill="#F0F8FF" />
-            <text
-              x="60"
-              y="65"
-              text-anchor="middle"
-              font-size="28"
-              font-weight="600"
-              fill="#20CCF9"
-            >
-              Logo
-            </text>
-          </svg>
-        </div>
+        <q-img :src="appLogo" class="logo-img" />
       </div>
 
-      <!-- Slogan: shown on entry page and password setup page (smaller on password page per design spec) -->
+      <!-- Slogan: shown on entry page and registration page -->
       <div
         v-if="panelIndex <= 1"
         class="auth-slogan"
-        :class="{ 'auth-slogan--sm': panelIndex === 1 }"
       >
         {{ i18n('labels.description') }}
       </div>
@@ -92,13 +110,13 @@ function goBack() {
         <sign-in-or-sign-up-panel
           :name="0"
           @next="
-            (_isNew, _email, _code, needsPassword) => {
+            (_isNew, _email) => {
               isNew = _isNew;
               email = _email;
-              skippedPassword = !needsPassword;
-              panelIndex = needsPassword ? 1 : 2;
+              panelIndex = _isNew ? 1 : 3;
             }
           "
+          @finish="onDirectFinish"
         />
         <new-password-panel
           :email="email"
@@ -108,6 +126,12 @@ function goBack() {
           @previous="panelIndex = 0"
         />
         <setup-profile-panel :name="2" @finish="onProfileFinish" @previous="goBack" />
+        <sign-in-panel
+          :email="email"
+          :name="3"
+          @finish="onDirectFinish"
+          @previous="panelIndex = 0"
+        />
       </q-tab-panels>
     </div>
   </q-page>
@@ -144,6 +168,9 @@ function goBack() {
   justify-content: center;
   cursor: pointer;
   color: var(--clr-text);
+  background: transparent;
+  border: none;
+  padding: 0;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -155,18 +182,10 @@ function goBack() {
   margin-bottom: 8px;
 }
 
-.logo-img,
-.logo-placeholder {
+.logo-img {
   width: var(--logo-size);
   height: var(--logo-size);
-  border-radius: 50%;
   overflow: hidden;
-}
-
-.logo-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 // Slogan: entry page (72b3b33f) — 20px/28px, deep purple rgba(18,14,44,1)
@@ -206,5 +225,32 @@ function goBack() {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+// Finishing overlay
+.auth-finishing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.auth-finishing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-finishing-text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body, 15px);
+  font-weight: 400;
+  color: var(--clr-weak);
+  text-align: center;
 }
 </style>

@@ -35,7 +35,16 @@ export const router = createRouter({
 });
 
 // Route guard: protect main app routes from users with incomplete onboarding
-const PUBLIC_ROUTES = new Set(['auth', 'splash', 'onboarding', 'onboarding-guide']);
+const PUBLIC_ROUTES = new Set([
+  'auth',
+  'splash',
+  'onboarding',
+  'onboarding-guide',
+  // Legal documents are public content, accessible without authentication
+  'settings-terms-of-service',
+  'settings-user-agreement',
+  'settings-privacy-policy',
+]);
 
 // Track whether the initial profile sync has completed
 let profileSynced = false;
@@ -79,5 +88,14 @@ router.beforeEach(async (to) => {
 });
 
 export default defineRouter(function (/* { store, ssrContext } */) {
+  // Reset profile sync flag when user logs out / deactivates, so that
+  // the next login will re-fetch the profile from the API.
+  const authStore = useAuthStore();
+  authStore.$subscribe((_mutation, state) => {
+    if (!state.accessToken) {
+      profileSynced = false;
+    }
+  });
+
   return router;
 });

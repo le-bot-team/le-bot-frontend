@@ -10,6 +10,12 @@ export const MOCK_PASSWORD = 'password123';
 /** Mock email that triggers the new-user registration flow. */
 export const MOCK_NEW_USER_EMAIL = 'new@lebot.ai';
 
+/** Mock email that simulates a challenge send failure (server error). */
+export const MOCK_FAIL_EMAIL = 'fail@lebot.ai';
+
+/** Mock email that simulates a permanently blocked/banned address. */
+export const MOCK_BLOCKED_EMAIL = 'blocked@lebot.ai';
+
 /** Mock auth response for existing users. */
 export const MOCK_AUTH_DATA = {
   accessToken: 'mock-access-token-existing',

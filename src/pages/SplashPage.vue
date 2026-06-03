@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="splash-page">
-    <img src="~assets/quasar-logo-vertical.svg" alt="LeBot" class="splash-page__logo" />
+    <img src="~assets/logo.png" alt="LeBot" class="splash-page__logo" />
     <div class="splash-page__slogan">{{ i18n('labels.slogan') }}</div>
     <div class="splash-page__progress-track">
       <div class="splash-page__progress-fill" :style="{ width: `${progress}%` }" />
