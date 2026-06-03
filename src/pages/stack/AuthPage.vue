@@ -70,7 +70,7 @@ function goBack() {
         <span class="auth-finishing-text">{{ i18n('labels.finishing') }}</span>
       </div>
     </div>
-    <div class="auth-container" :class="{ 'auth-container--sub': panelIndex > 1 }">
+    <div class="auth-container">
       <!-- Back arrow: visible on all sub-pages (1, 2, 3) -->
       <button
         v-if="panelIndex >= 1"
@@ -90,16 +90,18 @@ function goBack() {
         </svg>
       </button>
 
-      <!-- Logo: shown on entry page and registration page -->
-      <div v-if="panelIndex <= 1" class="auth-logo">
+      <!-- Logo: shown on entry page, registration page, and login page -->
+      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-logo">
         <q-img :src="appLogo" class="logo-img" />
       </div>
 
-      <!-- Slogan: shown on entry page and registration page -->
-      <div
-        v-if="panelIndex <= 1"
-        class="auth-slogan"
-      >
+      <!-- Title: brand name text, consistent with SplashPage -->
+      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-title-brand">
+        {{ i18n('labels.title') }}
+      </div>
+
+      <!-- Slogan: shown on entry page, registration page, and login page -->
+      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-slogan">
         {{ i18n('labels.description') }}
       </div>
 
@@ -152,11 +154,8 @@ function goBack() {
   position: relative;
 }
 
-.auth-container--sub {
-  padding-top: 44px;
-}
-
 // Back arrow (9×16 path, design 路径 element in all 4 artboards)
+// Positioned within the top padding area, above the logo (which starts at padding-top: 120px)
 .auth-back {
   position: absolute;
   top: 64px;
@@ -179,13 +178,24 @@ function goBack() {
 .auth-logo {
   width: var(--logo-size);
   height: var(--logo-size);
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .logo-img {
   width: var(--logo-size);
   height: var(--logo-size);
   overflow: hidden;
+}
+
+// Brand title: consistent with SplashPage slogan pattern
+.auth-title-brand {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--clr-slogan-entry);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 0;
 }
 
 // Slogan: entry page (72b3b33f) — 20px/28px, deep purple rgba(18,14,44,1)
