@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { emailChallenge } from 'src/utils/api/auth';
+import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
 import { i18nSubPath } from 'src/utils/common';
 import { computed, ref } from 'vue';
 import { useQuasar } from 'quasar';
@@ -49,7 +50,7 @@ const sendCode = async () => {
       notify({
         type: 'warning',
         message: i18n('notifications.sendCodeFailed'),
-        caption: result.data.message,
+        caption: mapAuthBusinessError(result.data.message || '', 'authErrors.unknownError'),
       });
       isSendingCode.value = false;
       return;
@@ -62,7 +63,7 @@ const sendCode = async () => {
     notify({
       type: 'negative',
       message: i18n('notifications.sendCodeError'),
-      caption: (error as Error).message,
+      caption: mapAuthError(error, 'authErrors.unknownError'),
     });
   }
   isSendingCode.value = false;

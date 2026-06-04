@@ -1,4 +1,20 @@
 export default {
+  authErrors: {
+    networkError: 'Network error, please check your connection and try again',
+    serverError: 'Server is busy, please try again later',
+    badRequest: 'Invalid request, please check your input',
+    invalidCredentials: 'Invalid email or password, please try again',
+    unauthorized: 'Session expired, please log in again',
+    validationError: 'Input does not meet requirements, please check and try again',
+    forbidden: 'You do not have permission to perform this action',
+    notFound: 'The requested resource was not found',
+    rateLimited: 'Too many requests, please try again later',
+    timeout: 'Request timed out, please try again',
+    tokenExpired: 'Session expired, please log in again',
+    emailBlocked: 'This email address has been restricted',
+    invalidCode: 'Verification code is incorrect or expired, please re-enter',
+    unknownError: 'Operation failed, please try again later',
+  },
   components: {
     auth: {
       FinishPanel: {
@@ -121,12 +137,38 @@ export default {
           resendCode: 'Resend',
           resendCodeCooldown: 'Resend ({seconds}s)',
           codePlaceholder: 'Enter verification code',
+          forgotPassword: 'Forgot Password?',
         },
         notifications: {
           unknownError: 'Unknown error',
           networkError: 'Network error, please check your connection',
           sendCodeFailed: 'Failed to send verification code',
           codeSent: 'Verification code sent',
+        },
+      },
+      ForgotPasswordPanel: {
+        errors: {
+          passwordTooShort: 'Password must be at least 8 characters',
+          passwordMismatch: 'Passwords do not match',
+        },
+        labels: {
+          codePlaceholder: 'Enter verification code',
+          newPasswordPlaceholder: 'Set new password',
+          confirmPasswordPlaceholder: 'Confirm new password',
+          sendCode: 'Send Code',
+          sending: 'Sending...',
+          resendCode: 'Resend',
+          resendCodeCooldown: 'Resend ({seconds}s)',
+          submit: 'Reset Password',
+          processing: 'Processing...',
+          strengthWeak: 'Weak',
+          strengthMedium: 'Medium',
+          strengthStrong: 'Strong',
+        },
+        notifications: {
+          invalidEmail: 'Invalid email address',
+          sendCodeFailed: 'Failed to send verification code',
+          resetSuccess: 'Password reset successfully',
         },
       },
       VerificationCodeInput: {
@@ -314,11 +356,27 @@ export default {
             readAloudPhrasesDescription: 'Lovely LeBot is my good friend.',
             startRecording: 'Get Ready to Record',
             stopRecording: 'Stop Recording',
+            longPressHint: 'Long press to record',
             rerecord: 'Rerecord',
             finish: 'Finish and Submit',
           },
           notifications: {
             recordingFailed: 'Failed to start recording. Please check microphone permissions.',
+          },
+        },
+        VoiceprintIntroPanel: {
+          labels: {
+            title: 'Voiceprint Recording',
+            whatIsVoiceprint: 'What is a Voiceprint',
+            whatIsVoiceprintDesc:
+              'A voiceprint is the "fingerprint" of your voice — a unique biometric feature in every person\'s speech.',
+            voiceprintPurpose: 'How LeBot Uses Voiceprints',
+            voiceprintPurposeDesc:
+              'Voiceprints let LeBot recognize who is speaking, ensuring accurate identification during chats and providing personalized service without interference from surrounding voices.',
+            voiceprintPrivacy: 'Voiceprint Privacy Commitment',
+            voiceprintPrivacyDesc:
+              'We encrypt and desensitize your voiceprint data and commit to strict confidentiality. It is used solely for identity recognition during app chats and for no other purpose.',
+            continue: 'Start Recording',
           },
         },
         SubmitPanel: {
@@ -384,7 +442,8 @@ export default {
       JoinConfirmDialog: {
         labels: {
           invitesYou: 'invites you to join',
-          hintText: 'After joining, you can view {childName}\'s chat history with LeBot and continue the conversation',
+          hintText:
+            "After joining, you can view {childName}'s chat history with LeBot and continue the conversation",
           roleTitle: 'Select your role in the family',
         },
         buttons: {
@@ -468,7 +527,7 @@ export default {
           messages: 'Messages',
           messagesComingSoon: 'Messages center is under construction.',
           mascotPlaceholder: 'Lebot',
-          bubbleLine1: "Hi, Xiaoxin~",
+          bubbleLine1: 'Hi, Xiaoxin~',
           bubbleLine2: 'Tap my head to start chatting~',
           hotTopicsTitle: 'Hot Topics',
           chatHistory: 'Chat History',
@@ -657,8 +716,7 @@ export default {
           dateRange: '2025.5.12~2025.5.18',
           bestCapability: 'Social Understanding',
           hotTopic: 'Play House',
-          emotionSummary:
-            'Your emotional state has been great recently, keep it up!',
+          emotionSummary: 'Your emotional state has been great recently, keep it up!',
           interactionSummary:
             'Weekly interaction reached 276 minutes, up from last week. Keep it up!',
           capabilitySummary:
@@ -675,7 +733,7 @@ export default {
             weeklyStory: 'Weekly Growth Story',
             interests: 'Interests & Preferences',
             emotion: 'Emotional State',
-            lebotRole: 'LeBot\'s Role',
+            lebotRole: "LeBot's Role",
             toParents: 'A Message for Parents',
           },
           hotTopics: {
@@ -687,26 +745,29 @@ export default {
           },
           story: {
             title: 'Imagination, Love & Police Dreams',
-            body: 'Dear Parents:\nThis week, through our voice companionship records, we\'ve seen a Mianmian full of imagination, kindness, and liveliness. She took LeBot on adventures—rescuing babies, catching bad guys, caring for her kitten Xiao Wanzi, and even helping mom peel garlic... In these seemingly whimsical conversations, we witnessed the little world that Mianmian is quietly building.',
+            body: "Dear Parents:\nThis week, through our voice companionship records, we've seen a Mianmian full of imagination, kindness, and liveliness. She took LeBot on adventures—rescuing babies, catching bad guys, caring for her kitten Xiao Wanzi, and even helping mom peel garlic... In these seemingly whimsical conversations, we witnessed the little world that Mianmian is quietly building.",
           },
           interests: {
             title: 'Little Storyteller & Animal Guardian',
-            growthSignal: 'Growth Signal: Mianmian is at the peak of symbolic play, learning to understand the world, express emotions, and build moral concepts through role-playing and fictional plots.',
+            growthSignal:
+              'Growth Signal: Mianmian is at the peak of symbolic play, learning to understand the world, express emotions, and build moral concepts through role-playing and fictional plots.',
             body: 'Mianmian loves making up stories and playing roles. She often imagines herself as a little hero who can "jump 1,300 feet high" and "ride on somersault clouds," worrying about "babies trapped in boxes" and figuring out ways to rescue "doctors swallowed by sea snakes."\nLoves animals: Especially her kitten "Xiao Wanzi." She can describe Xiao Wanzi\'s appearance and habits in detail, even its "pink nose" and "shiny black eyes."\nCurious about family life: Helping mom peel garlic, worrying about mosquito bites, and imagining the details of mom cooking.\nInitial understanding of "justice": Loves playing police catching bad guys, caring about "whether the bad guys will be caught."',
           },
           emotion: {
             title: 'Warm, Playful, Occasionally Anxious',
-            growthSignal: 'Growth Signal: Mianmian is learning emotional regulation and empathy. She can express worry through stories and find security in interaction.',
+            growthSignal:
+              'Growth Signal: Mianmian is learning emotional regulation and empathy. She can express worry through stories and find security in interaction.',
             body: 'Mianmian\'s emotions are rich and real:\nWarm and caring: Mianmian reminds the robot that "mom works hard cooking" and wipes Xiao Wanzi\'s mouth and feeds it snacks.\nPlayful and humorous: Mianmian jokes "you\'re a big dummy" and makes up tense plots like "I\'m trapped by a water ball," enjoying the surprises in interaction.\nOccasionally anxious: When stories involve "a baby not breathing" or "Xiao Wanzi running away," Mianmian shows worry and concern, but quickly resolves emotions through imagination or action.',
           },
           lebotRole: {
             title: 'Patient Playmate & Emotion Container',
-            growthSignal: 'LeBot\'s Value: It becomes a "playmate" that Mianmian can fully control, allowing her to practice language, express emotions, and build confidence in a safe relationship.',
+            growthSignal:
+              'LeBot\'s Value: It becomes a "playmate" that Mianmian can fully control, allowing her to practice language, express emotions, and build confidence in a safe relationship.',
             body: 'In these conversations, LeBot is not just a listener but Mianmian\'s story partner and emotional supporter:\nLeBot joins Mianmian in "rescuing babies," "catching sea snakes," and "peeling garlic," giving her imagination a place to land.\nWhen Mianmian is anxious, LeBot says "Don\'t panic, let\'s figure it out together"; when she\'s hungry, LeBot chats with her to distract her.\nLeBot accepts Mianmian\'s jokes, repeated questions, and even nonsensical plot twists, giving her full freedom of expression.',
           },
           toParents: {
             body: 'Hidden in Mianmian\'s conversations is a kind, imaginative little person striving to understand the world. Every "why" and "what then" is her actively building her cognitive map.\nAnd LeBot, like a little "story partner," accompanies Mianmian to explore this map freely without fear of getting lost. The love and security you give Mianmian daily is the very foundation that enables her to imagine boldly and express freely.\nThank you for letting us witness these adorable and precious moments of Mianmian\'s growth.',
-            signature1: 'LeBot & Mianmian\'s Growth Recorder',
+            signature1: "LeBot & Mianmian's Growth Recorder",
             signature2: 'August 2025',
           },
         },
@@ -724,18 +785,23 @@ export default {
             fluency: 'Fluency',
           },
           review: {
-            text: 'Mianmian\'s language expression is generally good. There are shortcomings in sentence completeness and fluency, but her vocabulary richness is high, her tone and prosody are vivid and lively, and her daily expression is fine.',
+            text: "Mianmian's language expression is generally good. There are shortcomings in sentence completeness and fluency, but her vocabulary richness is high, her tone and prosody are vivid and lively, and her daily expression is fine.",
           },
           comparison: {
             horizontal: 'Horizontal Comparison',
             horizontalSub: '(Same-age child development standards)',
             vertical: 'Vertical Comparison',
             verticalSub: '(Personal development trajectory)',
-            advantage1: 'Rich narrative imagination — Can autonomously construct multi-character fantasy scenes (e.g., "turning into a water dragon wrapping the earth" "interacting with Sun Wukong"), far exceeding the average narrative level of 5-year-olds.',
-            advantage2: 'Vivid emotional delivery — Effectively conveys emotions through exaggerated expressions (e.g., "stinky Nezha" "handsome Nezha") and interjections (e.g., "hahaha").',
-            disadvantage1: 'Weak logical connection — Frequent event switches (e.g., suddenly jumping from "pooping" to "Sun Wukong"), low causal relevance.',
-            progress1: 'Improved topic persistence — Can sustain conversation on the "Nezha" theme for over 20 rounds, with noticeably improved focus compared to earlier.',
-            toDevelop1: 'Complex sentence usage — No conditional or transitional compound structures observed; mostly simple or coordinate sentences.',
+            advantage1:
+              'Rich narrative imagination — Can autonomously construct multi-character fantasy scenes (e.g., "turning into a water dragon wrapping the earth" "interacting with Sun Wukong"), far exceeding the average narrative level of 5-year-olds.',
+            advantage2:
+              'Vivid emotional delivery — Effectively conveys emotions through exaggerated expressions (e.g., "stinky Nezha" "handsome Nezha") and interjections (e.g., "hahaha").',
+            disadvantage1:
+              'Weak logical connection — Frequent event switches (e.g., suddenly jumping from "pooping" to "Sun Wukong"), low causal relevance.',
+            progress1:
+              'Improved topic persistence — Can sustain conversation on the "Nezha" theme for over 20 rounds, with noticeably improved focus compared to earlier.',
+            toDevelop1:
+              'Complex sentence usage — No conditional or transitional compound structures observed; mostly simple or coordinate sentences.',
           },
           tags: {
             advantage: 'Strength',
@@ -756,7 +822,8 @@ export default {
           aboutThisDevice: 'About This Device',
           unbindDevice: 'Delete Device',
           deleteConfirmTitle: 'Confirm Deletion',
-          deleteConfirmBody: 'Deleting this device will also remove the linked family group, chat history, growth reports, etc. Are you sure you want to proceed?',
+          deleteConfirmBody:
+            'Deleting this device will also remove the linked family group, chat history, growth reports, etc. Are you sure you want to proceed?',
           confirmDelete: 'Confirm',
         },
         notifications: {
@@ -772,7 +839,8 @@ export default {
           serialNumber: 'SN: {sn}',
           unbind: 'Unbind',
           cancel: 'Cancel',
-          unbindConfirm: 'Deleting this device will also remove its associated family group info. Are you sure you want to unbind?',
+          unbindConfirm:
+            'Deleting this device will also remove its associated family group info. Are you sure you want to unbind?',
           noVirtualDevices: 'No virtual devices yet. Add one to start chatting!',
           maxDevicesReached: 'You can add up to 5 virtual devices',
         },
@@ -797,6 +865,7 @@ export default {
             male: 'Boy',
             female: 'Girl',
             next: 'Next',
+            back: 'Back',
             deviceNameSuffix: "'s LeBot",
             deviceNamePreview: 'LeBot Name',
           },
@@ -820,7 +889,8 @@ export default {
         step4: {
           labels: {
             title: 'AI Personality',
-            description: 'When enabled, LeBot will interact with your child based on the personality traits you set',
+            description:
+              'When enabled, LeBot will interact with your child based on the personality traits you set',
             enabled: 'Enable AI Personality',
             next: 'Next',
             skip: 'Skip, use default personality',
@@ -845,7 +915,15 @@ export default {
           activateFailed: 'Failed to activate virtual device',
           tokenMissing: 'Session expired, please log in again',
           voiceprintFailed: 'Voiceprint registration failed',
-          leaveIncomplete: 'Device setup is incomplete. Leaving will create an orphaned device. Continue?',
+          leaveIncomplete:
+            'Device setup is incomplete. The activated device will be removed if you leave. Continue?',
+          leaveConfirmTitle: 'Leave Setup?',
+          leaveConfirmBody:
+            'Device setup is not complete yet. The activated device will be automatically removed if you leave now.',
+          leaveConfirmAction: 'Leave & Remove',
+          resumingFlow: 'Continuing your device setup',
+          flowExpired: 'Previous session expired, please start over',
+          deviceRolledBack: 'Incomplete device has been removed',
         },
       },
       FamilyGroupPage: {
@@ -949,10 +1027,16 @@ export default {
           },
         },
         ChildEditPage: {
+          pageTitle: 'Fill in Child Information',
+          infoCard: {
+            title: 'Why fill in child information',
+            description:
+              "Completing child information will help you create a customized LeBot that matches your child's personality!",
+          },
           questions: {
-            gender: "What is your child's gender?",
-            name: "What is your child's name?",
-            birthday: "What is your child's birthday?",
+            gender: 'Child Gender',
+            name: 'Child Name',
+            birthday: 'Child Birthday',
           },
           labels: {
             male: 'Boy',
@@ -960,11 +1044,10 @@ export default {
             next: 'Next',
             saveAndBack: 'Save and Return',
             submitChanges: 'Submit Changes',
-            skip: 'Skip',
           },
           placeholders: {
-            name: "Enter your child's name",
-            birthday: "Select your child's birthday",
+            name: "Enter child's name",
+            birthday: "Enter child's birthday",
           },
           notifications: {
             fieldsRequired: "Please fill in your child's name and birthday",
@@ -999,6 +1082,11 @@ export default {
           deactivateConfirm:
             'Are you sure you want to deactivate your account? This action cannot be undone.',
           deactivateConfirmOk: 'Confirm',
+          deactivateCreatorWarning:
+            'You are the creator of the following family group(s). Deactivating your account will delete all data for these groups, and other members will need to re-register and bind their devices:\n{groupNames}',
+          deactivateMemberNote:
+            'Other groups you joined (not created by you) will not be affected.',
+          deactivateCreatorConfirmOk: 'I understand, deactivate',
         },
         notifications: {
           notLoggedIn: 'You are not logged in',
@@ -1074,7 +1162,7 @@ export default {
           toggleLabel: 'AI Personality',
           tip: '*Enabling personality adjustment helps match the robot to your preferences',
           traitsTitle: "Describe your child's personality:",
-          traitsPlaceholder: '(Optional) Describe your child\'s personality in detail...',
+          traitsPlaceholder: "(Optional) Describe your child's personality in detail...",
           goalsTitle: 'Expected development directions:',
           goalsPlaceholder: 'Personality or capability development directions...',
           submit: 'Submit',
@@ -1205,7 +1293,8 @@ export default {
             addNewPerson: 'Add New Voiceprint',
             testVoice: 'Test Voiceprint',
             temporalTag: 'Temporary',
-            temporalHint: 'Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.',
+            temporalHint:
+              'Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.',
             emptyState: 'No voiceprints yet. Tap the button below to add one.',
           },
           notifications: {
@@ -1454,7 +1543,7 @@ export default {
             mute: 'Mute',
             endCall: 'End Call',
             // Design 64d5ecc8 raw JSON
-            startSpeaking: "You can start speaking", // raw: "你可以开始说话"
+            startSpeaking: 'You can start speaking', // raw: "你可以开始说话"
             aiGenerated: 'Content generated by AI', // raw: "内容由AI生成"
             comingSoon: 'Voice call coming soon',
           },
@@ -1560,11 +1649,14 @@ export default {
           },
           items: {
             m1Title: 'New Notification',
-            m1Content: 'You have a new notification. This is a reminder about your device update, please check it promptly.',
+            m1Content:
+              'You have a new notification. This is a reminder about your device update, please check it promptly.',
             m2Title: 'Low Mood Detected',
-            m2Content: 'Long-term low mood detected. We suggest more interaction with LeBot to improve your mood.',
+            m2Content:
+              'Long-term low mood detected. We suggest more interaction with LeBot to improve your mood.',
             m3Title: 'Notification',
-            m3Content: 'This is the notification content describing the specific details of the notice.',
+            m3Content:
+              'This is the notification content describing the specific details of the notice.',
             m4Title: 'New Member Benefits Issued',
             m4Content: 'Check it in the Member Center! Welcome to the LeBot family.',
           },
@@ -1587,7 +1679,7 @@ export default {
       OnboardingCompletePage: {
         labels: {
           title: 'Setup Complete!',
-          subtitle: "What would you like to do next?",
+          subtitle: 'What would you like to do next?',
           footerHint: 'You can also do this later in "Family Group"',
         },
         options: {

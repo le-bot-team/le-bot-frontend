@@ -1,13 +1,11 @@
 <script setup lang="ts">
-// NewPasswordPanel — design 2d090f70 (登录页-注册).
-// Password setup step: email display (readonly), verification code,
-// new password, confirm password, and submit button.
-// User must manually click "Send Code" to request verification code.
+// ForgotPasswordPanel — password reset flow for existing users.
+// Steps: email display (readonly), verification code, new password,
+// confirm password, and submit. On success, auto-login and emit finish.
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { emailChallenge, emailCode, emailPassword, emailReset } from 'src/utils/api/auth';
-import { changePassword } from 'src/utils/api/profile';
+import { emailChallenge, emailPassword, emailReset } from 'src/utils/api/auth';
 import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
 import iconVisible from 'src/assets/icons/auth/visible/icon_visible_password@2x.png';
 import iconInvisible from 'src/assets/icons/auth/invisible/icon_invisible_password@2x.png';
@@ -16,17 +14,16 @@ import { i18nSubPath } from 'src/utils/common';
 
 const props = defineProps<{
   email: string;
-  isNew: boolean;
   name: string | number;
 }>();
 const emit = defineEmits<{
-  next: [];
+  finish: [];
   previous: [];
 }>();
 
 const authStore = useAuthStore();
 const { accessToken, isNeverSendCode, remainedSendCodeCooldownSeconds } = storeToRefs(authStore);
-const i18n = i18nSubPath('components.auth.NewPasswordPanel');
+const i18n = i18nSubPath('components.auth.ForgotPasswordPanel');
 
 const localCode = ref<string>();
 const newPassword = ref<string>();
@@ -39,7 +36,7 @@ const showConfirm = ref(false);
 const isNewPasswordFocused = ref(false);
 const isConfirmFocused = ref(false);
 
-// Effective code: use local input
+// Effective code
 const effectiveCode = computed(() => localCode.value ?? '');
 const codeError = computed(() => effectiveCode.value.length !== 6);
 const passwordError = computed(
@@ -51,7 +48,7 @@ const passwordErrorMsg = computed(() => {
   return '';
 });
 
-// 密码强度计算
+// Password strength
 const passwordStrength = computed(() => {
   const pwd = newPassword.value ?? '';
   if (!pwd.length) return { level: 0, label: '' };
@@ -125,10 +122,10 @@ const sendCode = async () => {
   isSendingCode.value = false;
 };
 
-const confirmNewPassword = async () => {
+const handleResetPassword = async () => {
   if (!canSubmit.value || isSubmitting.value) return;
 
-  // Snapshot reactive values before async operations (#5 TOCTOU guard)
+  // Snapshot reactive values before async operations (TOCTOU guard)
   const snapshotCode = effectiveCode.value;
   const snapshotPassword = newPassword.value ?? '';
   const snapshotEmail = props.email;
@@ -137,73 +134,32 @@ const confirmNewPassword = async () => {
   errorMsg.value = undefined;
 
   try {
-    if (props.isNew) {
-      // New user registration flow:
-      // Step 1: Register via verification code (creates user in backend, returns token)
-      let codeData: Awaited<ReturnType<typeof emailCode>>['data'];
-      try {
-        ({ data: codeData } = await emailCode(snapshotEmail, snapshotCode));
-      } catch (codeErr) {
-        // HTTP 4xx from /auth/email/code — most likely an invalid/expired code
-        errorMsg.value = mapAuthError(codeErr, 'authErrors.invalidCode');
-        isSubmitting.value = false;
-        return;
-      }
-      if (!codeData.success) {
-        errorMsg.value = mapAuthBusinessError(codeData.message || '', 'authErrors.invalidCode');
-        isSubmitting.value = false;
-        return;
-      }
-      // Write access token from registration
-      if (codeData.success && 'data' in codeData && codeData.data) {
-        accessToken.value = codeData.data.accessToken;
-      }
-
-      // Step 2: Set initial password via authenticated endpoint
-      // Code was consumed by emailCode, so use /profiles/password with empty oldPassword
-      if (accessToken.value) {
-        try {
-          const { data: pwdData } = await changePassword(accessToken.value, {
-            oldPassword: '',
-            newPassword: snapshotPassword,
-          });
-          if (!pwdData.success) {
-            console.warn('Initial password set via /profiles/password failed:', pwdData.message);
-          }
-        } catch {
-          console.warn('Initial password set failed, user can set later via settings');
-        }
-      }
-    } else {
-      // Existing user (noPassword=true) — set password via email reset
-      let resetData: Awaited<ReturnType<typeof emailReset>>['data'];
-      try {
-        ({ data: resetData } = await emailReset(snapshotEmail, snapshotCode, snapshotPassword));
-      } catch (resetErr) {
-        errorMsg.value = mapAuthError(resetErr, 'authErrors.invalidCode');
-        isSubmitting.value = false;
-        return;
-      }
-      if (!resetData.success) {
-        errorMsg.value = mapAuthBusinessError(resetData.message || '', 'authErrors.invalidCode');
-        isSubmitting.value = false;
-        return;
-      }
+    // Step 1: Reset password via email reset
+    let resetData: Awaited<ReturnType<typeof emailReset>>['data'];
+    try {
+      ({ data: resetData } = await emailReset(snapshotEmail, snapshotCode, snapshotPassword));
+    } catch (resetErr) {
+      errorMsg.value = mapAuthError(resetErr, 'authErrors.invalidCode');
+      isSubmitting.value = false;
+      return;
+    }
+    if (!resetData.success) {
+      errorMsg.value = mapAuthBusinessError(resetData.message || '', 'authErrors.invalidCode');
+      isSubmitting.value = false;
+      return;
     }
 
-    // Step 3: Auto-login with the new password (skip if token already valid)
-    if (!accessToken.value) {
-      try {
-        const { data } = await emailPassword(snapshotEmail, snapshotPassword);
-        if (data.success) {
-          accessToken.value = data.data.accessToken;
-        }
-      } catch {
-        // Auto-login failed but password set succeeded — proceed
+    // Step 2: Auto-login with the new password
+    try {
+      const { data } = await emailPassword(snapshotEmail, snapshotPassword);
+      if (data.success) {
+        accessToken.value = data.data.accessToken;
       }
+    } catch {
+      // Auto-login failed but password reset succeeded — proceed
     }
 
-    emit('next');
+    emit('finish');
   } catch (err) {
     errorMsg.value = mapAuthError(err, 'authErrors.unknownError');
   } finally {
@@ -229,7 +185,7 @@ onUnmounted(() => {
 
 <template>
   <q-tab-panel :name="name" class="auth-panel">
-    <!-- Email display (read-only, styled as input-group per design spec) -->
+    <!-- Email display (read-only) -->
     <div class="auth-input-group auth-input-group--readonly">
       <span class="email-text">{{ email }}</span>
     </div>
@@ -359,22 +315,16 @@ onUnmounted(() => {
       class="auth-btn-primary auth-btn-primary--mt-lg"
       :class="{ 'auth-btn-primary--disabled': !canSubmit }"
       :disabled="!canSubmit"
-      @click="confirmNewPassword"
+      @click="handleResetPassword"
     >
       <q-spinner v-if="isSubmitting" size="20px" class="q-mr-sm" />
-      {{
-        isSubmitting
-          ? i18n('labels.processing')
-          : isNew
-            ? i18n('labels.completeRegistration')
-            : i18n('labels.confirmNewPassword')
-      }}
+      {{ isSubmitting ? i18n('labels.processing') : i18n('labels.submit') }}
     </button>
   </q-tab-panel>
 </template>
 
 <style scoped lang="scss">
-// NewPasswordPanel — design 2d090f70 (登录页-注册)
+// ForgotPasswordPanel — password reset flow for existing users.
 // Shared input/button/error styles from app.scss globals.
 // Only component-specific overrides remain here.
 

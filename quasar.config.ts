@@ -66,8 +66,8 @@ export default defineConfig((ctx) => {
           : ctx.dev
             ? 'ws://localhost:3000'
             : '',
-        VITE_MOCK_ENABLED: process.env.VITE_MOCK_ENABLED ?? (ctx.dev ? 'true' : 'false'),
-        VITE_MOCK_WS_ENABLED: process.env.VITE_MOCK_WS_ENABLED ?? (ctx.dev ? 'true' : 'false'),
+        VITE_MOCK_ENABLED: false,
+        VITE_MOCK_WS_ENABLED: false,
       },
 
       target: {

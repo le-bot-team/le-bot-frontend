@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 /**
  * BirthdayPicker — Mobile-friendly birthday selector with three custom selects.
  *
@@ -192,9 +191,15 @@ const onMenuShow = () => {
 
 // --- Emit & close ---
 
-const onYearChange = (val: string) => { bufYear.value = val; };
-const onMonthChange = (val: string) => { bufMonth.value = val; };
-const onDayChange = (val: string) => { bufDay.value = val; };
+const onYearChange = (val: string) => {
+  bufYear.value = val;
+};
+const onMonthChange = (val: string) => {
+  bufMonth.value = val;
+};
+const onDayChange = (val: string) => {
+  bufDay.value = val;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const menuRef = ref<any>();
@@ -232,10 +237,7 @@ function onCancel() {
 </script>
 
 <template>
-  <div
-    class="birthday-picker"
-    :class="{ 'birthday-picker--disabled': disabled }"
-  >
+  <div class="birthday-picker" :class="{ 'birthday-picker--disabled': disabled }">
     <!-- Visual shell: border + background -->
     <div class="birthday-picker__shell" />
 
@@ -246,13 +248,7 @@ function onCancel() {
     >
       {{ modelValue || placeholder }}
     </span>
-    <svg
-      class="birthday-picker__arrow"
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-    >
+    <svg class="birthday-picker__arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path
         d="M2 4L6 8L10 4"
         stroke="currentColor"
@@ -263,13 +259,7 @@ function onCancel() {
     </svg>
 
     <!-- Hidden button triggers the bottom sheet -->
-    <q-btn
-      class="birthday-picker__trigger"
-      flat
-      no-caps
-      unelevated
-      :disable="disabled"
-    />
+    <q-btn class="birthday-picker__trigger" flat no-caps unelevated :disable="disabled" />
 
     <!-- Bottom sheet -->
     <q-menu
@@ -283,11 +273,17 @@ function onCancel() {
     >
       <!-- Header with cancel + title + confirm -->
       <div class="birthday-picker__picker-header">
-        <button class="birthday-picker__header-btn birthday-picker__header-btn--cancel" @click="onCancel">
+        <button
+          class="birthday-picker__header-btn birthday-picker__header-btn--cancel"
+          @click="onCancel"
+        >
           取消
         </button>
         <span class="birthday-picker__picker-title">选择生日</span>
-        <button class="birthday-picker__header-btn birthday-picker__header-btn--confirm" @click="onConfirm">
+        <button
+          class="birthday-picker__header-btn birthday-picker__header-btn--confirm"
+          @click="onConfirm"
+        >
           确定
         </button>
       </div>
@@ -410,6 +406,8 @@ function onCancel() {
 .birthday-picker__value {
   position: relative;
   z-index: 0;
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-family), sans-serif;
   font-size: 15px;
   font-weight: 500;
@@ -419,6 +417,7 @@ function onCancel() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 
   &--placeholder {
     font-weight: 400;

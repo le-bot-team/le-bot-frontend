@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
 
 import { emailChallenge, emailCode, emailPassword } from 'src/utils/api/auth';
+import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
 import iconVisible from 'src/assets/icons/auth/visible/icon_visible_password@2x.png';
 import iconInvisible from 'src/assets/icons/auth/invisible/icon_invisible_password@2x.png';
 import { useAuthStore } from 'stores/auth';
@@ -19,6 +20,7 @@ defineProps<{
 const emit = defineEmits<{
   finish: [];
   previous: [];
+  forgotPassword: [];
 }>();
 
 const authStore = useAuthStore();
@@ -58,19 +60,15 @@ watch(codeOrPassword, () => {
   errorMsg.value = undefined;
 });
 
-const isNetworkError = (err: unknown): boolean => {
-  if (!(err instanceof Error)) return false;
-  const msg = err.message.toLowerCase();
-  return msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('network');
-};
-
 const sendCode = async (email: string) => {
   if (!canSendCode.value || isSendingCode.value) return;
   isSendingCode.value = true;
   try {
     const result = await emailChallenge(email);
     if (!result.data.success) {
-      errorMsg.value = i18n('notifications.sendCodeFailed');
+      errorMsg.value =
+        mapAuthBusinessError(result.data.message || '', 'authErrors.unknownError') ||
+        i18n('notifications.sendCodeFailed');
       isSendingCode.value = false;
       return;
     }
@@ -92,9 +90,15 @@ const handleLogin = async (email: string) => {
 
     if (loginMethod.value === 'code') {
       // Code login
-      const { data } = await emailCode(email, code);
+      let data: Awaited<ReturnType<typeof emailCode>>['data'];
+      try {
+        ({ data } = await emailCode(email, code));
+      } catch (codeErr) {
+        errorMsg.value = mapAuthError(codeErr, 'authErrors.invalidCode');
+        return;
+      }
       if (!data.success) {
-        errorMsg.value = data.message || i18n('notifications.unknownError');
+        errorMsg.value = mapAuthBusinessError(data.message || '', 'authErrors.invalidCode');
         return;
       }
       accessToken.value = data.data.accessToken;
@@ -104,7 +108,7 @@ const handleLogin = async (email: string) => {
       // Password login
       const { data } = await emailPassword(email, code);
       if (!data.success) {
-        errorMsg.value = data.message || i18n('notifications.unknownError');
+        errorMsg.value = mapAuthBusinessError(data.message || '', 'authErrors.unknownError');
         return;
       }
       accessToken.value = data.data.accessToken;
@@ -112,9 +116,7 @@ const handleLogin = async (email: string) => {
       emit('finish');
     }
   } catch (err) {
-    errorMsg.value = isNetworkError(err)
-      ? i18n('notifications.networkError')
-      : ((err as Error).message ?? i18n('notifications.unknownError'));
+    errorMsg.value = mapAuthError(err, 'authErrors.unknownError');
   } finally {
     isSubmitting.value = false;
   }
@@ -145,8 +147,7 @@ const handleLogin = async (email: string) => {
           type="button"
           class="auth-action-link"
           :class="{
-            'auth-action-link--disabled':
-              !canSendCode || isSubmitting,
+            'auth-action-link--disabled': !canSendCode || isSubmitting,
           }"
           :disabled="!canSendCode || isSubmitting"
           @click="sendCode(email)"
@@ -183,6 +184,18 @@ const handleLogin = async (email: string) => {
           />
         </button>
       </div>
+    </div>
+
+    <!-- Forgot password link (only in password mode) -->
+    <div v-if="loginMethod === 'password'" class="forgot-password-row">
+      <button
+        type="button"
+        class="forgot-password-link"
+        :disabled="isSubmitting"
+        @click="emit('forgotPassword')"
+      >
+        {{ i18n('labels.forgotPassword') }}
+      </button>
     </div>
 
     <!-- Error message -->
@@ -235,5 +248,44 @@ const handleLogin = async (email: string) => {
   height: 20px;
   object-fit: contain;
   display: block;
+}
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 311px;
+  margin-top: var(--spacing-sm);
+}
+
+.forgot-password-link {
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--font-family), sans-serif;
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+  line-height: var(--line-height-caption);
+  color: var(--clr-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover {
+    color: var(--clr-primary);
+  }
+
+  &:active {
+    color: var(--clr-primary);
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 </style>

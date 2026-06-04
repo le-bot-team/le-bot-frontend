@@ -7,6 +7,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { emailCheck } from 'src/utils/api/auth';
+import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
 import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
@@ -28,9 +29,7 @@ const errorMsg = ref<string>();
 const isSubmitting = ref(false);
 
 const isValidEmail = computed(() => emailRegex.test(email.value ?? ''));
-const canSubmit = computed(
-  () => isValidEmail.value && agreeTerms.value && !isSubmitting.value,
-);
+const canSubmit = computed(() => isValidEmail.value && agreeTerms.value && !isSubmitting.value);
 
 // Navigation to legal pages
 const goToTermsOfService = () => router.push('/stack/settings/terms-of-service');
@@ -41,12 +40,6 @@ const goToPrivacyPolicy = () => router.push('/stack/settings/privacy-policy');
 watch(email, () => {
   errorMsg.value = undefined;
 });
-
-const isNetworkError = (err: unknown): boolean => {
-  if (!(err instanceof Error)) return false;
-  const msg = err.message.toLowerCase();
-  return msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('network');
-};
 
 const handleSubmit = async () => {
   if (!canSubmit.value || isSubmitting.value) return;
@@ -60,7 +53,7 @@ const handleSubmit = async () => {
     // Check if email is registered
     const { data } = await emailCheck(e);
     if (!data.success) {
-      errorMsg.value = data.message || i18n('notifications.unknownError');
+      errorMsg.value = mapAuthBusinessError(data.message || '', 'authErrors.unknownError');
       isSubmitting.value = false;
       return;
     }
@@ -75,9 +68,7 @@ const handleSubmit = async () => {
       emit('next', false, e, '', false);
     }
   } catch (err) {
-    errorMsg.value = isNetworkError(err)
-      ? i18n('notifications.networkError')
-      : ((err as Error).message ?? i18n('notifications.unknownError'));
+    errorMsg.value = mapAuthError(err, 'authErrors.unknownError');
   } finally {
     isSubmitting.value = false;
   }

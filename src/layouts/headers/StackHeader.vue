@@ -29,7 +29,8 @@ interface HeaderActionMeta {
 const { dark } = useQuasar();
 const i18n = useI18n();
 const route = useRoute();
-const { currentDevice } = storeToRefs(useDeviceStore());
+const deviceStore = useDeviceStore();
+const { currentDevice, virtualDevices } = storeToRefs(deviceStore);
 const chatStore = useChatStore();
 
 // Mute state synced from ChatPage via bus (initialized from persisted store)
@@ -39,14 +40,17 @@ const isMuted = ref(chatStore.isMuted);
 const isTextMode = ref(true);
 
 // Reset header action states when navigating away from relevant routes.
-watch(() => route.name, (newName, oldName) => {
-  if (oldName === 'chat-voice-call' && newName !== 'chat-voice-call') {
-    isTextMode.value = true;
-  }
-  if (oldName === 'chat' && newName !== 'chat') {
-    isMuted.value = chatStore.isMuted;
-  }
-});
+watch(
+  () => route.name,
+  (newName, oldName) => {
+    if (oldName === 'chat-voice-call' && newName !== 'chat-voice-call') {
+      isTextMode.value = true;
+    }
+    if (oldName === 'chat' && newName !== 'chat') {
+      isMuted.value = chatStore.isMuted;
+    }
+  },
+);
 
 // Title resolution priority:
 //   1. Chat page: show current device name (e.g. "xx的乐宝"), fallback to i18n default
@@ -56,7 +60,8 @@ const title = computed(() => {
   // Chat page: dynamic device name
   if (route.name === 'chat' || route.name === 'chat-voice-call') {
     const childName = currentDevice.value?.childInfo?.name;
-    if (childName) return i18n.t('pages.main.HomePage.deviceSwitch.deviceNameFormat', { name: childName });
+    if (childName)
+      return i18n.t('pages.main.HomePage.deviceSwitch.deviceNameFormat', { name: childName });
     const deviceName = currentDevice.value?.name;
     if (deviceName) return deviceName;
   }
@@ -93,6 +98,16 @@ onBeforeUnmount(() => {
   bus.off('chat:text-mode-state', onTextModeChange);
 });
 
+// Hide the back button when:
+//   1. Route meta explicitly sets hideBackButton, OR
+//   2. On add-virtual-device page with no virtual devices yet (first device flow)
+// Use storeToRefs-unwrapped `virtualDevices` to guarantee reactivity tracking.
+const hideBackButton = computed(() => {
+  if (route.meta?.hideBackButton) return true;
+  if (route.name === 'add-virtual-device' && virtualDevices.value.length === 0) return true;
+  return false;
+});
+
 function goBack() {
   // If there's no in-app history (deep link / fresh tab), fall back to home.
   if (window.history.length <= 1) {
@@ -112,7 +127,7 @@ function goBack() {
     }"
   >
     <q-toolbar>
-      <div v-if="!route.meta?.hideBackButton" class="absolute-left column justify-center full-height q-pl-sm">
+      <div v-if="!hideBackButton" class="absolute-left column justify-center full-height q-pl-sm">
         <q-btn flat icon="arrow_back_ios_new" round @click="goBack" />
       </div>
       <q-toolbar-title class="text-center">
@@ -131,9 +146,15 @@ function goBack() {
             :class="[
               `stack-header-action--${action.icon}`,
               action.icon === 'chat-mute' && isMuted ? 'stack-header-action--chat-mute-muted' : '',
-              action.icon === 'chat-text-toggle' && !isTextMode ? 'stack-header-action--chat-text-toggle-off' : ''
+              action.icon === 'chat-text-toggle' && !isTextMode
+                ? 'stack-header-action--chat-text-toggle-off'
+                : '',
             ]"
-            :aria-label="action.ariaLabelKey && i18n.te(action.ariaLabelKey) ? i18n.t(action.ariaLabelKey) : (action.ariaLabel ?? action.icon)"
+            :aria-label="
+              action.ariaLabelKey && i18n.te(action.ariaLabelKey)
+                ? i18n.t(action.ariaLabelKey)
+                : (action.ariaLabel ?? action.icon)
+            "
             @click="onActionTap(action)"
           />
         </div>

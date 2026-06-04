@@ -7,6 +7,7 @@ import { computed, ref, watch, onUnmounted } from 'vue';
 import CropperDialog from 'components/CropperDialog.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
+import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
 import { useTracker } from 'src/composables/useTracker';
@@ -35,7 +36,16 @@ const isSending = ref(false);
 
 // Relationship options: order matches design fb8d01d5 grid (3-col, L-to-R, top-to-bottom).
 // Raw JSON text frames at y=621/681/741: 妈妈/爸爸/奶奶 | 爷爷/外婆/外公 | 朋友/其他亲属 (8 items).
-const relationOptionKeys = ['mother', 'father', 'grandma', 'grandpa', 'maternalGrandma', 'maternalGrandpa', 'friend', 'otherRelative'] as const;
+const relationOptionKeys = [
+  'mother',
+  'father',
+  'grandma',
+  'grandpa',
+  'maternalGrandma',
+  'maternalGrandpa',
+  'friend',
+  'otherRelative',
+] as const;
 const relationOptions = computed(() =>
   relationOptionKeys.map((key) => ({
     key,
@@ -90,7 +100,7 @@ const confirm = async () => {
     if (!data.success) {
       notify({
         type: 'negative',
-        message: data.message || i18n('notifications.saveFailed'),
+        message: mapAuthBusinessError(data.message || '', 'authErrors.unknownError'),
       });
       isSending.value = false;
       return;
@@ -100,7 +110,7 @@ const confirm = async () => {
     if (!profileRes.data.success) {
       notify({
         type: 'negative',
-        message: profileRes.data.message || i18n('notifications.fetchFailed'),
+        message: mapAuthBusinessError(profileRes.data.message || '', 'authErrors.unknownError'),
       });
       isSending.value = false;
       return;
@@ -111,7 +121,7 @@ const confirm = async () => {
   } catch (err) {
     notify({
       type: 'negative',
-      message: (err as Error).message || i18n('notifications.unknownError'),
+      message: mapAuthError(err, 'authErrors.unknownError'),
     });
   }
   isSending.value = false;
@@ -121,9 +131,20 @@ const confirm = async () => {
 <template>
   <q-tab-panel :name="name" class="auth-panel q-pa-none">
     <!-- Avatar: 87x87px circular, fill rgba(229,229,239,1), 3px white border -->
-    <button type="button" class="setup-profile-avatar-shell" :disabled="isSending" @click="editAvatar" :aria-label="i18n('labels.uploadAvatar')">
+    <button
+      type="button"
+      class="setup-profile-avatar-shell"
+      :disabled="isSending"
+      @click="editAvatar"
+      :aria-label="i18n('labels.uploadAvatar')"
+    >
       <div class="setup-profile-avatar-circle">
-        <img v-if="avatar" :src="avatar" class="setup-profile-avatar-img" :alt="i18n('labels.avatar')" />
+        <img
+          v-if="avatar"
+          :src="avatar"
+          class="setup-profile-avatar-img"
+          :alt="i18n('labels.avatar')"
+        />
         <div v-else class="setup-profile-avatar-placeholder">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <circle cx="16" cy="10" r="6" stroke="#9398A9" stroke-width="1.5" />
@@ -142,7 +163,13 @@ const confirm = async () => {
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.nickname') }}</label>
       <div class="auth-input-group">
-        <input class="auth-input" v-model="nickname" :placeholder="i18n('labels.nicknamePlaceholder')" maxlength="20" :disabled="isSending" />
+        <input
+          class="auth-input"
+          v-model="nickname"
+          :placeholder="i18n('labels.nicknamePlaceholder')"
+          maxlength="20"
+          :disabled="isSending"
+        />
       </div>
     </div>
 
@@ -155,12 +182,23 @@ const confirm = async () => {
     <!-- Relationship -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.relationship') }}</label>
-      <button type="button" class="auth-input-group auth-input-group--clickable" :disabled="isSending" @click="showRelationSheet = true" aria-haspopup="dialog" :aria-expanded="showRelationSheet">
+      <button
+        type="button"
+        class="auth-input-group auth-input-group--clickable"
+        :disabled="isSending"
+        @click="showRelationSheet = true"
+        aria-haspopup="dialog"
+        :aria-expanded="showRelationSheet"
+      >
         <span
           class="setup-profile-field-value"
           :class="{ 'setup-profile-field-value--placeholder': !relationship }"
         >
-          {{ relationship ? i18n(`labels.relations.${relationship}`) : i18n('labels.selectPlaceholder') }}
+          {{
+            relationship
+              ? i18n(`labels.relations.${relationship}`)
+              : i18n('labels.selectPlaceholder')
+          }}
         </span>
         <span class="setup-profile-field-arrow">
           <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
@@ -199,7 +237,9 @@ const confirm = async () => {
         >
           <div class="setup-profile-relation-sheet">
             <div class="setup-profile-relation-head">
-              <span class="setup-profile-relation-title">{{ i18n('labels.selectRelationship') }}</span>
+              <span class="setup-profile-relation-title">{{
+                i18n('labels.selectRelationship')
+              }}</span>
             </div>
             <div class="setup-profile-relation-body">
               <button

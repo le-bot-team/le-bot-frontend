@@ -8,15 +8,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import type {
-  ChildInfo,
-  FamilyGroup,
-  FamilyMember,
-  InviteCode,
-} from './types';
-import {
-  MAX_FAMILY_MEMBERS,
-} from './types';
+import type { ChildInfo, FamilyGroup, FamilyMember, InviteCode } from './types';
+import { MAX_FAMILY_MEMBERS } from './types';
 import { useProfileStore } from 'stores/profile';
 
 // Re-export types for convenience
@@ -41,9 +34,7 @@ export const useFamilyGroupStore = defineStore(
     );
 
     /** 当前选中家庭组的成员列表 */
-    const currentMembers = computed<FamilyMember[]>(() =>
-      currentGroup.value?.members ?? [],
-    );
+    const currentMembers = computed<FamilyMember[]>(() => currentGroup.value?.members ?? []);
 
     /** 当前家庭组的儿童成员 (memberType==='child') */
     const currentChild = computed<FamilyMember | undefined>(() =>
@@ -62,10 +53,16 @@ export const useFamilyGroupStore = defineStore(
       return currentGroup.value.creatorId === profileStore.profile?.id;
     });
 
+    /** 当前用户作为创建者的家庭组列表 */
+    const createdGroups = computed<FamilyGroup[]>(() => {
+      const profileStore = useProfileStore();
+      const userId = profileStore.profile?.id;
+      if (!userId) return [];
+      return groups.value.filter((g) => g.creatorId === userId);
+    });
+
     /** 是否可以继续邀请新成员 */
-    const canInviteMore = computed(() =>
-      currentMembers.value.length < MAX_FAMILY_MEMBERS,
-    );
+    const canInviteMore = computed(() => currentMembers.value.length < MAX_FAMILY_MEMBERS);
 
     /** 邀请码是否有效（未过期且未达使用上限） */
     const isInviteCodeValid = computed(() => {
@@ -194,6 +191,7 @@ export const useFamilyGroupStore = defineStore(
       currentChild,
       currentAdultMembers,
       isCurrentUserCreator,
+      createdGroups,
       canInviteMore,
       isInviteCodeValid,
 

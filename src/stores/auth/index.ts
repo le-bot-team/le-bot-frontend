@@ -3,6 +3,7 @@ import { computed, onScopeDispose, ref, watch } from 'vue';
 
 import { SEND_CODE_COOLDOWN_INTERVAL } from 'stores/auth/constants';
 import { useChatStore } from 'stores/chat';
+import { useOnboardingFlowStore } from 'stores/onboarding-flow';
 
 export const useAuthStore = defineStore(
   'auth',
@@ -59,6 +60,10 @@ export const useAuthStore = defineStore(
       // Clear chat store (conversationId, mute settings)
       const chatStore = useChatStore();
       chatStore.resetState();
+
+      // Clear any in-progress onboarding flow
+      const onboardingFlow = useOnboardingFlowStore();
+      onboardingFlow.completeFlow();
     };
 
     // If store is hydrated from persistence with an active cooldown, resume ticking

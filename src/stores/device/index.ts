@@ -19,10 +19,23 @@ export const useDeviceStore = defineStore(
     const virtualDevices = computed(() => devices.value.filter((d) => d.type === 'virtual'));
 
     const updateDevices = (newDevices: DeviceInfo[] = []) => {
-      devices.value = newDevices;
+      // Merge strategy: preserve frontend-only fields (childInfo, name) from
+      // existing entries that the backend API does not return.
+      const existingMap = new Map(devices.value.map((d) => [d.id, d]));
+      const merged = newDevices.map((apiDevice) => {
+        const existing = existingMap.get(apiDevice.id);
+        if (!existing) return apiDevice;
+        return {
+          ...apiDevice,
+          // Preserve frontend-only fields when the API does not provide them
+          childInfo: apiDevice.childInfo ?? existing.childInfo ?? null,
+          name: apiDevice.name ?? existing.name ?? null,
+        };
+      });
+      devices.value = merged;
       // Preserve selection if device still exists; otherwise auto-select first
-      if (currentDeviceId.value && !newDevices.some((d) => d.id === currentDeviceId.value)) {
-        currentDeviceId.value = newDevices[0]?.id ?? null;
+      if (currentDeviceId.value && !merged.some((d) => d.id === currentDeviceId.value)) {
+        currentDeviceId.value = merged[0]?.id ?? null;
       }
     };
 

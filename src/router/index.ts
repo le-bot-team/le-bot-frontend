@@ -8,6 +8,8 @@ import {
 import routes from './routes';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
+import { useOnboardingFlowStore } from 'stores/onboarding-flow';
+import { useDeviceStore } from 'stores/device';
 
 /*
  * If not building with SSR mode, you can
@@ -82,6 +84,38 @@ router.beforeEach(async (to) => {
     const onboardingRoutes = ['onboarding-complete', 'onboarding-guide', 'add-virtual-device'];
     if (typeof to.name === 'string' && onboardingRoutes.includes(to.name)) return true;
     return { name: 'onboarding-complete' };
+  }
+
+  // Onboarding device-add flow in progress: steer user back to the guided flow
+  // when they try to navigate to core app pages (chat, home, etc.).
+  // Allow access to auxiliary pages (settings, profile, devices, onboarding-complete).
+  // Skip this guard entirely when the user already has virtual devices (subsequent add flow).
+  const onboardingFlow = useOnboardingFlowStore();
+  const deviceStore = useDeviceStore();
+  if (
+    onboardingFlow.active &&
+    !onboardingFlow.isExpired() &&
+    deviceStore.virtualDevices.length === 0
+  ) {
+    if (to.name !== 'add-virtual-device') {
+      const ALLOWED_DURING_ONBOARDING = new Set([
+        'onboarding-complete',
+        'onboarding-guide',
+        'settings',
+        'settings-language',
+        'settings-terms-of-service',
+        'settings-user-agreement',
+        'settings-privacy-policy',
+        'profile',
+        'profile-edit',
+        'profile-change-password',
+        'profile-change-phone',
+        'devices',
+      ]);
+      if (typeof to.name === 'string' && !ALLOWED_DURING_ONBOARDING.has(to.name)) {
+        return { name: 'add-virtual-device' };
+      }
+    }
   }
 
   return true;

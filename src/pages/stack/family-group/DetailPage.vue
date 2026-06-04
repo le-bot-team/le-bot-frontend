@@ -166,6 +166,9 @@ function onInvite() {
   padding: 24px 0 28px;
   cursor: pointer;
   transition: opacity 0.15s;
+  border: none;
+  background: transparent;
+  outline: none;
 
   &:hover {
     opacity: 0.8;

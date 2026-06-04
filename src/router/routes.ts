@@ -81,8 +81,16 @@ const routes: RouteRecordRaw[] = [
         path: 'chat',
         meta: {
           headerActions: [
-            { icon: 'chat-mute', event: 'chat:mute', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute' },
-            { icon: 'chat-call', event: 'chat:call', ariaLabelKey: 'pages.stack.ChatPage.labels.voiceCall' },
+            {
+              icon: 'chat-mute',
+              event: 'chat:mute',
+              ariaLabelKey: 'pages.stack.ChatPage.labels.toggleMute',
+            },
+            {
+              icon: 'chat-call',
+              event: 'chat:call',
+              ariaLabelKey: 'pages.stack.ChatPage.labels.voiceCall',
+            },
           ],
         },
         components: {
@@ -96,7 +104,11 @@ const routes: RouteRecordRaw[] = [
         meta: {
           hideBackButton: true,
           headerActions: [
-            { icon: 'chat-text-toggle', event: 'chat:text-toggle', ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode' },
+            {
+              icon: 'chat-text-toggle',
+              event: 'chat:text-toggle',
+              ariaLabelKey: 'pages.stack.ChatPage.labels.toggleTextMode',
+            },
           ],
         },
         components: {
@@ -524,6 +536,7 @@ const routes: RouteRecordRaw[] = [
           {
             name: 'family-group-child-edit',
             path: 'child-edit',
+            meta: { title: 'pages.stack.family-group.ChildEditPage.pageTitle' },
             components: {
               default: () => import('pages/stack/family-group/ChildEditPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
@@ -548,6 +561,7 @@ const routes: RouteRecordRaw[] = [
           {
             name: 'family-group-create',
             path: 'create',
+            meta: { title: 'pages.stack.family-group.ChildEditPage.pageTitle' },
             components: {
               default: () => import('pages/stack/family-group/ChildEditPage.vue'),
               header: () => import('layouts/headers/StackHeader.vue'),
@@ -563,7 +577,6 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-
     ],
   },
 

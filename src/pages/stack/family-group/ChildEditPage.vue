@@ -11,11 +11,9 @@ import { useQuasar } from 'quasar';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.png';
-import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.png';
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
-import BirthdayPicker from 'components/BirthdayPicker.vue';
+import ChildInfoForm from 'components/ChildInfoForm.vue';
 import { useFamilyGroupStore } from 'stores/family-group';
 import type { ChildInfo } from 'stores/device/types';
 import type { FamilyGroup } from 'stores/family-group/types';
@@ -27,16 +25,22 @@ const route = useRoute();
 const familyGroupStore = useFamilyGroupStore();
 const profileStore = useProfileStore();
 
-const isCreateMode = computed(() => route.name === 'family-group-create' || route.name === 'add-virtual-device');
+const isCreateMode = computed(
+  () => route.name === 'family-group-create' || route.name === 'add-virtual-device',
+);
 
 // Navigation timer (cleared on unmount to prevent stale navigation)
 let navTimer: ReturnType<typeof setTimeout> | null = null;
 
 // Sync groupId from route query to store (supports deep-link / refresh)
 const urlGroupId = computed(() => route.query.groupId as string | undefined);
-watch(urlGroupId, (id) => {
-  if (id) familyGroupStore.setCurrentGroup(id);
-}, { immediate: true });
+watch(
+  urlGroupId,
+  (id) => {
+    if (id) familyGroupStore.setCurrentGroup(id);
+  },
+  { immediate: true },
+);
 
 // ── 表单数据 ──
 const childGender = ref<'boy' | 'girl'>('boy');
@@ -58,13 +62,13 @@ function loadFromStore() {
 }
 
 // 路由变化时重新加载（如从详情页返回编辑）
-watch(() => route.query.childId, () => {
-  loadFromStore();
-}, { immediate: true });
-
-function selectGender(gender: 'boy' | 'girl') {
-  childGender.value = gender;
-}
+watch(
+  () => route.query.childId,
+  () => {
+    loadFromStore();
+  },
+  { immediate: true },
+);
 
 /** Maximum allowed length for child name */
 const MAX_NAME_LENGTH = 20;
@@ -139,10 +143,6 @@ function onSubmit() {
   }
 }
 
-function onSkip() {
-  void router.replace({ name: 'family-groups' });
-}
-
 onBeforeUnmount(() => {
   if (navTimer) {
     clearTimeout(navTimer);
@@ -153,65 +153,15 @@ onBeforeUnmount(() => {
 
 <template>
   <q-page class="child-edit-page">
-    <p class="child-edit-question child-edit-question--first">
-      {{ i18n('questions.gender') }}
-    </p>
-    <div class="child-edit-gender-row">
-      <button type="button" class="child-edit-gender-option" @click="selectGender('boy')">
-        <span class="child-edit-avatar">
-          <img :src="boyAvatar" alt="boy avatar" />
-        </span>
-        <span
-          class="child-edit-gender-label"
-          :class="{ 'child-edit-gender-label--active': childGender === 'boy' }"
-        >
-          {{ i18n('labels.male') }}
-        </span>
-      </button>
-      <button type="button" class="child-edit-gender-option" @click="selectGender('girl')">
-        <span class="child-edit-avatar">
-          <img :src="girlAvatar" alt="girl avatar" />
-        </span>
-        <span
-          class="child-edit-gender-label"
-          :class="{ 'child-edit-gender-label--active': childGender === 'girl' }"
-        >
-          {{ i18n('labels.female') }}
-        </span>
-      </button>
-    </div>
-
-    <p class="child-edit-question child-edit-question--followup">
-      {{ i18n('questions.name') }}
-    </p>
-    <input
-      v-model="childName"
-      class="child-edit-input"
-      type="text"
-      :maxlength="MAX_NAME_LENGTH"
-      :placeholder="i18n('placeholders.name')"
+    <ChildInfoForm
+      v-model:gender="childGender"
+      v-model:name="childName"
+      v-model:birthday="childBirthday"
     />
 
-    <p class="child-edit-question child-edit-question--followup">
-      {{ i18n('questions.birthday') }}
-    </p>
-    <BirthdayPicker
-      v-model="childBirthday"
-      :placeholder="i18n('placeholders.birthday')"
-    />
-
-    <button
-      type="button"
-      class="child-edit-primary-btn"
-      :class="{ 'child-edit-primary-btn--single': !isCreateMode }"
-      @click="onSubmit"
-    >
+    <!-- Primary action button -->
+    <button type="button" class="child-edit-primary-btn" @click="onSubmit">
       {{ isCreateMode ? i18n('labels.next') : i18n('labels.submitChanges') }}
-    </button>
-    <button v-if="isCreateMode" type="button" class="child-edit-skip-btn" @click="onSkip">
-      {{ i18n('labels.skip') }}
     </button>
   </q-page>
 </template>
-
-<style scoped></style>

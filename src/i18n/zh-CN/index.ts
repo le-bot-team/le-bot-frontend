@@ -1,4 +1,20 @@
 export default {
+  authErrors: {
+    networkError: '网络连接异常，请检查网络后重试',
+    serverError: '服务器繁忙，请稍后再试',
+    badRequest: '请求参数有误，请检查输入',
+    invalidCredentials: '邮箱或密码错误，请重新输入',
+    unauthorized: '登录已过期，请重新登录',
+    validationError: '输入不符合要求，请检查后重试',
+    forbidden: '无权执行此操作',
+    notFound: '请求的资源不存在',
+    rateLimited: '操作过于频繁，请稍后再试',
+    timeout: '请求超时，请稍后重试',
+    tokenExpired: '登录已过期，请重新登录',
+    emailBlocked: '该邮箱已被限制使用',
+    invalidCode: '验证码错误或已过期，请重新输入',
+    unknownError: '操作失败，请稍后重试',
+  },
   components: {
     auth: {
       FinishPanel: {
@@ -121,12 +137,38 @@ export default {
           resendCode: '重新发送',
           resendCodeCooldown: '重新发送({seconds}s)',
           codePlaceholder: '请输入验证码',
+          forgotPassword: '忘记密码？',
         },
         notifications: {
           unknownError: '未知错误',
           networkError: '网络连接失败，请检查网络后重试',
           sendCodeFailed: '验证码发送失败',
           codeSent: '验证码已发送',
+        },
+      },
+      ForgotPasswordPanel: {
+        errors: {
+          passwordTooShort: '密码长度不能少于8位',
+          passwordMismatch: '两次输入的密码不一致',
+        },
+        labels: {
+          codePlaceholder: '请输入验证码',
+          newPasswordPlaceholder: '设置新密码',
+          confirmPasswordPlaceholder: '确认新密码',
+          sendCode: '发送验证码',
+          sending: '发送中...',
+          resendCode: '重新发送',
+          resendCodeCooldown: '重新发送({seconds}s)',
+          submit: '重置密码',
+          processing: '处理中...',
+          strengthWeak: '弱',
+          strengthMedium: '中',
+          strengthStrong: '强',
+        },
+        notifications: {
+          invalidEmail: '邮箱地址无效',
+          sendCodeFailed: '验证码发送失败',
+          resetSuccess: '密码重置成功',
         },
       },
       VerificationCodeInput: {
@@ -309,11 +351,26 @@ export default {
             readAloudPhrasesDescription: '可爱的乐宝是我的好朋友。',
             startRecording: '准备去录制',
             stopRecording: '停止录制',
+            longPressHint: '长按进行录音',
             rerecord: '重新录制',
             finish: '完成录制并提交',
           },
           notifications: {
             recordingFailed: '录音启动失败，请检查麦克风权限。',
+          },
+        },
+        VoiceprintIntroPanel: {
+          labels: {
+            title: '声纹录制',
+            whatIsVoiceprint: '什么是声纹',
+            whatIsVoiceprintDesc: '声纹就是声音的“指纹”，是每个人说话时独一无二的生物特征。',
+            voiceprintPurpose: '声纹在乐宝中的作用',
+            voiceprintPurposeDesc:
+              '声纹让乐宝能“听音识人”，保证用户在与乐宝聊天过程中不受周遭人声干扰，准确识别聊天对象，提供专属服务。',
+            voiceprintPrivacy: '声纹保密承诺',
+            voiceprintPrivacyDesc:
+              '我们对您的声纹进行加密脱敏处理，并承诺严格保密，仅用于app聊天过程中的身份识别，不会用于其他任何目的。',
+            continue: '去录制声纹',
           },
         },
         SubmitPanel: {
@@ -797,6 +854,7 @@ export default {
             male: '男孩',
             female: '女孩',
             next: '下一步',
+            back: '返回',
             deviceNameSuffix: '的乐宝',
             deviceNamePreview: '乐宝名称',
           },
@@ -845,7 +903,13 @@ export default {
           activateFailed: '激活虚拟设备失败',
           tokenMissing: '登录已过期，请重新登录',
           voiceprintFailed: '声纹注册失败',
-          leaveIncomplete: '设备设置尚未完成，离开将产生未配置的设备。确定离开吗？',
+          leaveIncomplete: '设备设置尚未完成，离开将自动删除已激活的设备。确定离开吗？',
+          leaveConfirmTitle: '确认离开？',
+          leaveConfirmBody: '设备设置尚未完成，离开将自动删除已激活的设备。',
+          leaveConfirmAction: '离开并删除',
+          resumingFlow: '继续上次的设备添加流程',
+          flowExpired: '上次流程已过期，请重新开始',
+          deviceRolledBack: '已自动删除未完成的设备',
         },
       },
       FamilyGroupPage: {
@@ -949,22 +1013,26 @@ export default {
           },
         },
         ChildEditPage: {
+          pageTitle: '填写儿童信息',
+          infoCard: {
+            title: '为什么要填写儿童信息',
+            description: '完成儿童信息填写，将为您定制一个契合孩子性格特点的专属乐宝！',
+          },
           questions: {
-            gender: '宝宝的性别是？',
-            name: '宝宝的名字是？',
-            birthday: '宝宝的生日是？',
+            gender: '儿童性别',
+            name: '儿童姓名',
+            birthday: '儿童生日',
           },
           labels: {
-            male: '男孩',
-            female: '女孩',
+            male: '男生',
+            female: '女生',
             next: '下一步',
             saveAndBack: '保存修改并返回',
             submitChanges: '提交修改',
-            skip: '跳过',
           },
           placeholders: {
-            name: '请输入宝宝的名字',
-            birthday: '请选择宝宝的生日',
+            name: '请输入儿童姓名',
+            birthday: '请输入儿童生日',
           },
           notifications: {
             fieldsRequired: '请完整填写宝宝的名字和生日',
@@ -998,6 +1066,10 @@ export default {
           deactivateTitle: '注销账号',
           deactivateConfirm: '确定要注销账号吗？此操作不可撤销。',
           deactivateConfirmOk: '确认',
+          deactivateCreatorWarning:
+            '您是以下家庭组的创建者，注销账号将导致这些家庭组的所有信息被清除，其他成员需要重新注册并绑定设备：\n{groupNames}',
+          deactivateMemberNote: '您加入的其他家庭组（非您创建）不受影响。',
+          deactivateCreatorConfirmOk: '我已知晓，确认注销',
         },
         notifications: {
           notLoggedIn: '您未登录',

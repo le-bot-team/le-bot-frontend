@@ -7,6 +7,7 @@ import { useQuasar } from 'quasar';
 import { useProfileStore } from 'stores/profile';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
+import { useFamilyGroupStore } from 'stores/family-group';
 import { i18nSubPath } from 'src/utils/common';
 import { deactivateAccount } from 'src/utils/api/profile';
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
@@ -25,6 +26,9 @@ const authStore = useAuthStore();
 const { accessToken } = storeToRefs(authStore);
 
 const deviceStore = useDeviceStore();
+
+const familyGroupStore = useFamilyGroupStore();
+const { createdGroups } = storeToRefs(familyGroupStore);
 
 // ID account display text (e.g. "ID账号：LB55667788")
 const idAccountText = computed(() =>
@@ -107,14 +111,33 @@ const deactivating = ref(false);
 const onDeactivate = () => {
   if (deactivating.value) return;
 
+  // Check if user is creator of any family groups
+  const creatorGroups = createdGroups.value;
+  const isCreator = creatorGroups.length > 0;
+
+  // Build dialog props based on creator status
+  const dialogProps = isCreator
+    ? {
+        title: i18n('labels.deactivateTitle'),
+        body:
+          i18n('labels.deactivateCreatorWarning', {
+            groupNames: creatorGroups.map((g) => `「${g.name}」`).join('\n'),
+          }) +
+          '\n\n\n' +
+          i18n('labels.deactivateMemberNote'),
+        confirmType: 'danger' as const,
+        confirmLabel: i18n('labels.deactivateCreatorConfirmOk'),
+      }
+    : {
+        title: i18n('labels.deactivateTitle'),
+        body: i18n('labels.deactivateConfirm'),
+        confirmType: 'danger' as const,
+        confirmLabel: i18n('labels.deactivateConfirmOk'),
+      };
+
   $q.dialog({
     component: ConfirmDialog,
-    componentProps: {
-      title: i18n('labels.deactivateTitle'),
-      body: i18n('labels.deactivateConfirm'),
-      confirmType: 'danger',
-      confirmLabel: i18n('labels.deactivateConfirmOk'),
-    },
+    componentProps: dialogProps,
   }).onOk(() => {
     const token = accessToken.value;
     if (!token) {
@@ -135,6 +158,7 @@ const onDeactivate = () => {
           authStore.logout();
           updateProfile(undefined);
           deviceStore.updateDevices([]);
+          familyGroupStore.reset();
           // Navigate directly to auth page instead of going through /main/home
           // (which would trigger a double-redirect via the route guard)
           void router.replace({ name: 'auth' });

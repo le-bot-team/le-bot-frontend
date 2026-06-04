@@ -6,7 +6,7 @@ import { useQuasar } from 'quasar';
 import { onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 
 import iconRead from 'src/assets/lanhu/voiceprint/icon-read.webp';
-import recordMicImg from 'src/assets/lanhu/voiceprint/record-mic.webp';
+import lebotRobotImg from 'src/assets/lanhu/home/img-lebot-example.png';
 import { i18nSubPath } from 'src/utils/common';
 
 defineProps<{
@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="voiceprint-record-pet-stage">
-        <img :src="recordMicImg" alt="" aria-hidden="true" class="voiceprint-record-pet-img" />
+        <img :src="lebotRobotImg" alt="" aria-hidden="true" class="voiceprint-record-pet-img" />
       </div>
 
       <p class="voiceprint-record-phrase">
@@ -266,24 +266,13 @@ onBeforeUnmount(() => {
           @ended="onAudioEnded"
           @timeupdate="onAudioTimeUpdate"
         />
-        <button
-          class="voiceprint-record-playback-btn"
-          type="button"
-          @click="togglePlayback"
-        >
+        <button class="voiceprint-record-playback-btn" type="button" @click="togglePlayback">
           <q-icon :name="isPlaying ? 'pause' : 'play_arrow'" size="24px" />
         </button>
         <div class="voiceprint-record-progress">
-          <div
-            class="voiceprint-record-progress-bar"
-            :style="{ width: playbackProgress + '%' }"
-          />
+          <div class="voiceprint-record-progress-bar" :style="{ width: playbackProgress + '%' }" />
         </div>
-        <button
-          class="voiceprint-record-reset-btn"
-          type="button"
-          @click="resetRecording"
-        >
+        <button class="voiceprint-record-reset-btn" type="button" @click="resetRecording">
           {{ i18n('labels.rerecord') }}
         </button>
       </div>
@@ -291,13 +280,16 @@ onBeforeUnmount(() => {
       <!-- Recording button (shown when no audio)
            Pointer: press-and-hold (start on pointerdown, stop on lostpointercapture)
            Keyboard: toggle (Enter/Space toggles start/stop) for accessibility -->
-      <div v-else>
+      <div v-else class="voiceprint-record-btn-group">
         <button
           class="voiceprint-record-pulse-ring"
           :class="{ 'voiceprint-record-pulse-ring--recording': isRecording }"
           type="button"
           :aria-label="isRecording ? i18n('labels.stopRecording') : i18n('labels.startRecording')"
-          @pointerdown.prevent="($event.currentTarget as HTMLElement).setPointerCapture($event.pointerId); startRecording()"
+          @pointerdown.prevent="
+            ($event.currentTarget as HTMLElement).setPointerCapture($event.pointerId);
+            startRecording();
+          "
           @pointercancel="stopRecording"
           @lostpointercapture="stopRecording"
           @keydown.enter.prevent="isRecording ? stopRecording() : startRecording()"
@@ -305,6 +297,9 @@ onBeforeUnmount(() => {
         >
           <div class="voiceprint-record-pulse-inner" />
         </button>
+        <p class="voiceprint-record-long-press-hint">
+          {{ isRecording ? i18n('labels.stopRecording') : i18n('labels.longPressHint') }}
+        </p>
       </div>
 
       <button

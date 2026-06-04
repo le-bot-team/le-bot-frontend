@@ -4,6 +4,7 @@
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
@@ -13,12 +14,22 @@ import { useDeviceStore } from 'stores/device';
 import { MAX_VIRTUAL_DEVICES } from 'stores/device/types';
 
 const i18n = i18nSubPath('pages.stack.DevicesPage');
+const { t: globalT } = useI18n();
+const deviceNameFormatKey = 'pages.main.HomePage.deviceSwitch.deviceNameFormat';
 
 const router = useRouter();
 const $q = useQuasar();
 
 const { virtualDevices } = storeToRefs(useDeviceStore());
 const deviceStore = useDeviceStore();
+
+/** Display name: prefer childInfo.name + suffix, fallback to device.name */
+function getDeviceDisplayName(device: { name?: string | null; childInfo?: { name?: string } | null }): string {
+  const childName = device.childInfo?.name;
+  return childName
+    ? globalT(deviceNameFormatKey, { name: childName })
+    : (device.name || i18n('labels.virtualDevice'));
+}
 
 const canAddMore = computed(() => virtualDevices.value.length < MAX_VIRTUAL_DEVICES);
 
@@ -82,11 +93,11 @@ function goToDeviceConfig(deviceId: string) {
         <button
           type="button"
           class="settings-menu-row__nav"
-          :aria-label="device.name || i18n('labels.virtualDevice')"
+          :aria-label="getDeviceDisplayName(device)"
           @click="goToDeviceConfig(device.id)"
         >
           <div class="column">
-            <span>{{ device.name || i18n('labels.virtualDevice') }}</span>
+            <span>{{ getDeviceDisplayName(device) }}</span>
             <span class="settings-menu-row__caption">{{
               i18n('labels.serialNumber', { sn: device.identifier })
             }}</span>

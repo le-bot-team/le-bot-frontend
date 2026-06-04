@@ -4,6 +4,7 @@
 // Panel 1: NewPasswordPanel (registration: code + password setup)
 // Panel 2: SetupProfilePanel (profile setup for new users)
 // Panel 3: SignInPanel (login for existing users: password or code)
+// Panel 4: ForgotPasswordPanel (password reset: code + new password)
 // Page background uses the shared auth gradient (--gradient-page-bg).
 
 import { ref } from 'vue';
@@ -11,6 +12,7 @@ import { useRoute } from 'vue-router';
 
 import appLogo from 'src/assets/logo.png';
 import NewPasswordPanel from 'components/auth/NewPasswordPanel.vue';
+import ForgotPasswordPanel from 'components/auth/ForgotPasswordPanel.vue';
 import SetupProfilePanel from 'components/auth/SetupProfilePanel.vue';
 import SignInOrSignUpPanel from 'components/auth/SignInOrSignUpPanel.vue';
 import SignInPanel from 'components/auth/SignInPanel.vue';
@@ -53,6 +55,11 @@ async function onDirectFinish() {
 }
 
 function goBack() {
+  // Panel 4 (forgot password) goes back to panel 3 (sign-in)
+  if (panelIndex.value === 4) {
+    panelIndex.value = 3;
+    return;
+  }
   // Panel 1 (registration) and 3 (login) go back to panel 0
   // Panel 2 (profile setup) goes back to panel 0 (skipping registration)
   if (panelIndex.value > 0) {
@@ -90,18 +97,18 @@ function goBack() {
         </svg>
       </button>
 
-      <!-- Logo: shown on entry page, registration page, and login page -->
-      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-logo">
+      <!-- Logo: shown on entry page, registration page, login page, and forgot-password page -->
+      <div v-if="panelIndex <= 1 || panelIndex === 3 || panelIndex === 4" class="auth-logo">
         <q-img :src="appLogo" class="logo-img" />
       </div>
 
       <!-- Title: brand name text, consistent with SplashPage -->
-      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-title-brand">
+      <div v-if="panelIndex <= 1 || panelIndex === 3 || panelIndex === 4" class="auth-title-brand">
         {{ i18n('labels.title') }}
       </div>
 
-      <!-- Slogan: shown on entry page, registration page, and login page -->
-      <div v-if="panelIndex <= 1 || panelIndex === 3" class="auth-slogan">
+      <!-- Slogan: shown on entry page, registration page, login page, and forgot-password page -->
+      <div v-if="panelIndex <= 1 || panelIndex === 3 || panelIndex === 4" class="auth-slogan">
         {{ i18n('labels.description') }}
       </div>
 
@@ -133,6 +140,13 @@ function goBack() {
           :name="3"
           @finish="onDirectFinish"
           @previous="panelIndex = 0"
+          @forgot-password="panelIndex = 4"
+        />
+        <forgot-password-panel
+          :email="email"
+          :name="4"
+          @finish="onDirectFinish"
+          @previous="panelIndex = 3"
         />
       </q-tab-panels>
     </div>

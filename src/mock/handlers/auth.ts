@@ -94,11 +94,11 @@ export function setupAuthMock(mock: MockAdapter): void {
     const { email, code } = safeParseBody<{ email: string; code: string }>(config.data);
 
     if (!email || !code) {
-      return [200, mockError('邮箱和验证码不能为空')];
+      return [400, mockError('邮箱和验证码不能为空')];
     }
 
     if (code !== MOCK_VERIFICATION_CODE) {
-      return [200, mockError('验证码错误或已过期')];
+      return [400, mockError('验证码错误或已过期')];
     }
 
     const authData = resolveAuthData(email);
@@ -138,11 +138,11 @@ export function setupAuthMock(mock: MockAdapter): void {
     }>(config.data);
 
     if (!email || !code || !newPassword) {
-      return [200, mockError('参数不完整')];
+      return [400, mockError('参数不完整')];
     }
 
     if (code !== MOCK_VERIFICATION_CODE) {
-      return [200, mockError('验证码错误或已过期')];
+      return [400, mockError('验证码错误或已过期')];
     }
 
     console.log(`[Mock Auth] Password reset succeeded for ${email}`);
