@@ -84,7 +84,7 @@ export function setupAuthMock(mock: MockAdapter): void {
 
     console.log(
       `[Mock Auth] ✓ Verification code sent to ${email}\n` +
-      `           code = ${MOCK_VERIFICATION_CODE}  (cooldown ${MOCK_CODE_COOLDOWN_MS / 1000}s)`,
+        `           code = ${MOCK_VERIFICATION_CODE}  (cooldown ${MOCK_CODE_COOLDOWN_MS / 1000}s)`,
     );
     return [200, mockSuccess(undefined)];
   });
@@ -131,7 +131,11 @@ export function setupAuthMock(mock: MockAdapter): void {
 
   // Reset password
   mock.onPost('/auth/email/reset').reply((config) => {
-    const { email, code, newPassword } = safeParseBody<{ email: string; code: string; newPassword: string }>(config.data);
+    const { email, code, newPassword } = safeParseBody<{
+      email: string;
+      code: string;
+      newPassword: string;
+    }>(config.data);
 
     if (!email || !code || !newPassword) {
       return [200, mockError('参数不完整')];
