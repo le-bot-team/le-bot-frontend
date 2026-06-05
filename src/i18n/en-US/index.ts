@@ -1321,7 +1321,7 @@ export default {
             testVoice: 'Test Voiceprint',
             temporalTag: 'Temporary',
             temporalHint:
-              'Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.',
+              '*Temporary voiceprints will be automatically cleared after a period of time. Tap to keep them.*',
             emptyState: 'No voiceprints yet. Tap the button below to add one.',
           },
           notifications: {

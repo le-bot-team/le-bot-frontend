@@ -45,6 +45,7 @@ const submitUpdate = async () => {
     const { data: response } = await updatePerson(accessToken.value, personId.value, {
       name,
       relationship: editableRelationship.value,
+      isTemporal: false,
     });
     if (response.success) {
       notify({ type: 'positive', message: i18n('notifications.updateSuccess') });
