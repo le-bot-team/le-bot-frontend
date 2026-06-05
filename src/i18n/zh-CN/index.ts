@@ -280,6 +280,7 @@ export default {
         messages: '消息',
         messageDetail: '消息详情',
         messagesActivity: '活动消息',
+        messagesActivityDetail: '活动详情',
         orders: '我的订单',
         help: '帮助与反馈',
         helpFaq: '常见问题',
@@ -584,6 +585,7 @@ export default {
           empty: '暂无消息',
           done: '完成',
           deleteConfirm: '确定删除该条消息吗？',
+          deleteConfirmTitle: '删除消息',
           cancel: '取消',
           confirm: '确定',
           delete: '删除',
@@ -1640,6 +1642,7 @@ export default {
           labels: {
             title: '消息详情',
             noContent: '暂无内容',
+            goToGrowthData: '前往成长数据中心',
           },
           items: {
             m1Title: '新的通知',
@@ -1659,10 +1662,26 @@ export default {
             viewDetail: '查看详情',
             comingSoon: '活动详情即将上线',
           },
+          status: {
+            ongoing: '进行中',
+            upcoming: '即将开始',
+            ended: '已结束',
+          },
           items: {
             a1Title: '会员日，优惠限今日',
             a2Title: '会员日，优惠限今日',
             a3Title: '会员日，优惠限今日',
+          },
+        },
+        ActivityDetailPage: {
+          labels: {
+            title: '活动详情',
+            noContent: '暂无内容',
+          },
+          status: {
+            ongoing: '进行中',
+            upcoming: '即将开始',
+            ended: '已结束',
           },
         },
       },

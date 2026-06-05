@@ -468,6 +468,15 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            name: 'messages-activity-detail',
+            path: 'activity/:id',
+            meta: { title: 'components.navigations.stack.messagesActivityDetail' },
+            components: {
+              default: () => import('pages/stack/messages/ActivityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
             name: 'message-detail',
             path: ':id',
             components: {

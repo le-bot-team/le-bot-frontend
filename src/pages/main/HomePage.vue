@@ -20,6 +20,7 @@ import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
+import { useMessagesStore } from 'stores/messages';
 import { useTracker } from 'src/composables/useTracker';
 import DeviceSwitchPanel from 'components/home/DeviceSwitchPanel.vue';
 
@@ -50,12 +51,9 @@ const currentDeviceName = computed(() => {
   return name ? i18n('deviceSwitch.deviceNameFormat', { name }) : i18n('labels.robotName');
 });
 
-// 未读消息状态（mock数据，后续接入后端替换为真实数据）
-const unreadMessages = ref([
-  { id: '1', unread: true },
-  { id: '2', unread: true },
-]);
-const hasUnreadMessages = computed(() => unreadMessages.value.some((m) => m.unread));
+const messagesStore = useMessagesStore();
+const { unreadCount } = storeToRefs(messagesStore);
+const hasUnreadMessages = computed(() => unreadCount.value > 0);
 
 // 设备切换弹窗
 const showDeviceSwitch = ref(false);
@@ -78,6 +76,9 @@ const topics = computed<string[]>(() => [
 onBeforeMount(() => {
   if (!accessToken.value?.length) {
     void router.push('/stack/auth?from=/main/home');
+  } else {
+    // Fetch messages to keep unread badge in sync
+    void messagesStore.fetchMessages();
   }
 });
 

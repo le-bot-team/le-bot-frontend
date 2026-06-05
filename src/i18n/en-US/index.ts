@@ -280,6 +280,7 @@ export default {
         messages: 'Messages',
         messageDetail: 'Message Detail',
         messagesActivity: 'Activity Messages',
+        messagesActivityDetail: 'Activity Detail',
         orders: 'My Orders',
         help: 'Help & Feedback',
         helpFaq: 'FAQ',
@@ -591,6 +592,7 @@ export default {
           empty: 'No messages yet',
           done: 'Done',
           deleteConfirm: 'Are you sure you want to delete this message?',
+          deleteConfirmTitle: 'Delete Message',
           cancel: 'Cancel',
           confirm: 'OK',
           delete: 'Delete',
@@ -1668,6 +1670,7 @@ export default {
           labels: {
             title: 'Message Detail',
             noContent: 'No content available',
+            goToGrowthData: 'Go to Growth Data Center',
           },
           items: {
             m1Title: 'New Notification',
@@ -1690,10 +1693,26 @@ export default {
             viewDetail: 'View details',
             comingSoon: 'Activity details coming soon',
           },
+          status: {
+            ongoing: 'Ongoing',
+            upcoming: 'Upcoming',
+            ended: 'Ended',
+          },
           items: {
             a1Title: 'Member Day - Limited Time Offer',
             a2Title: 'Member Day - Limited Time Offer',
             a3Title: 'Member Day - Limited Time Offer',
+          },
+        },
+        ActivityDetailPage: {
+          labels: {
+            title: 'Activity Detail',
+            noContent: 'No content available',
+          },
+          status: {
+            ongoing: 'Ongoing',
+            upcoming: 'Upcoming',
+            ended: 'Ended',
           },
         },
       },

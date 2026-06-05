@@ -3788,6 +3788,230 @@ body {
   opacity: 0.8; // Raw: opacity-80 class on date element
 }
 
+// ===== MessageDetailPage (消息详情) =====
+.message-detail-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.message-detail-card {
+  width: 335px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.message-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.message-detail-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.message-detail-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-detail-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+}
+
+.message-detail-date {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--clr-caption);
+}
+
+.message-detail-body {
+  padding: 0 16px 16px;
+}
+
+.message-detail-content {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: rgba(74, 74, 74, 1);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.message-detail-action {
+  padding: 0 16px 16px;
+}
+
+.message-detail-action-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: var(--clr-primary-bg, rgba(82, 196, 26, 1));
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.message-detail-empty {
+  margin-top: 120px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+  text-align: center;
+}
+
+// ===== ActivityDetailPage (活动详情) =====
+.activity-detail-page {
+  background: var(--clr-page-bg-neutral);
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.activity-detail-card {
+  width: 335px;
+  background: var(--clr-card-bg);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.activity-detail-hero {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.activity-detail-hero__img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.activity-detail-hero__placeholder {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(216, 244, 255, 1), rgba(225, 255, 242, 1));
+}
+
+.activity-detail-body {
+  padding: 16px;
+}
+
+.activity-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.activity-detail-title {
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--clr-text);
+  margin: 0;
+  flex: 1;
+}
+
+.activity-detail-status {
+  flex-shrink: 0;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.activity-detail-status--ongoing {
+  background: rgba(82, 196, 26, 0.1);
+  color: rgba(82, 196, 26, 1);
+}
+
+.activity-detail-status--upcoming {
+  background: rgba(24, 144, 255, 0.1);
+  color: rgba(24, 144, 255, 1);
+}
+
+.activity-detail-status--ended {
+  background: rgba(147, 152, 169, 0.1);
+  color: rgba(147, 152, 169, 1);
+}
+
+.activity-detail-dates {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  color: var(--clr-caption);
+  margin-top: 4px;
+}
+
+.activity-detail-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 12px 0;
+}
+
+.activity-detail-content {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: rgba(74, 74, 74, 1);
+  white-space: pre-wrap;
+}
+
+.activity-detail-empty {
+  margin-top: 120px;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--clr-caption);
+  text-align: center;
+}
+
 // ===== OrdersPage (我的订单) patterns, design 64595f70 =====
 // Neutral page bg; top 5-item tab row (active 17px Medium rgba(48,49,51,1),
 // inactive 14px Regular rgba(96,98,102,1)); body is a vertical list of order

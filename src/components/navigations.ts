@@ -296,6 +296,12 @@ export const STACK_NAVIGATIONS: Navigation[] = [
     route: 'messages-activity',
   },
   {
+    label: i18n('stack.messagesActivityDetail'),
+    icon: 'mdi-message-text',
+    available: true,
+    route: 'messages-activity-detail',
+  },
+  {
     label: i18n('stack.orders'),
     icon: 'mdi-shopping',
     available: true,

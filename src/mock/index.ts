@@ -3,6 +3,7 @@ import { api } from 'boot/axios';
 
 import { setupDeviceMock } from 'src/mock/handlers/device';
 import { setupFamilyGroupMock } from 'src/mock/handlers/family-group';
+import { setupMessageMock } from 'src/mock/handlers/message';
 import { setupProfileMock } from 'src/mock/handlers/profile';
 import { setupVoiceprintMock } from 'src/mock/handlers/voiceprint';
 import { MockChatWebSocket } from 'src/mock/ws/MockChatWebSocket';
@@ -17,6 +18,7 @@ const handlers: MockSetupFn[] = [
   // Auth mock removed — auth endpoints now hit the real backend
   setupDeviceMock,
   setupFamilyGroupMock,
+  setupMessageMock,
   setupProfileMock,
   setupVoiceprintMock,
 ];
