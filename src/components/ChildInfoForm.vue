@@ -139,23 +139,23 @@ function selectGender(g: 'boy' | 'girl') {
 <style scoped>
 /* Spacing between form elements — compact to fit within single viewport */
 .child-edit-label + .child-edit-avatar-picker-wrapper {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .child-edit-avatar-picker-wrapper + .child-edit-label {
-  margin-top: 16px;
-}
-
-.child-edit-label + .child-edit-gender-row {
   margin-top: 12px;
 }
 
+.child-edit-label + .child-edit-gender-row {
+  margin-top: 8px;
+}
+
 .child-edit-gender-row + .child-edit-label {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .child-edit-input + .child-edit-label {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 /* Birthday wrapper: same margin-top as .child-edit-input so label-to-input gap is identical */

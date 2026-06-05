@@ -5,15 +5,22 @@ import { Cropper, RectangleStencil } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 
 import {
-  parentAvatarsByGender,
-  type ParentAvatar,
-  type ParentGender,
+  avatarsByGender,
+  getGenderTabsForUserType,
+  type AvatarGender,
+  type DefaultAvatar,
+  type UserType,
 } from 'src/utils/defaultAvatars';
 import { i18nSubPath } from 'src/utils/common';
 
-const props = defineProps<{
-  src?: string | undefined;
-}>();
+const props = withDefaults(
+  defineProps<{
+    src?: string | undefined;
+    /** 用户类型：parent（家长）| child（儿童） */
+    userType?: UserType;
+  }>(),
+  { userType: 'parent' },
+);
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const i18n = i18nSubPath('components.CropperDialog');
@@ -24,15 +31,10 @@ const { notify } = useQuasar();
 // Active tab: 'default' | 'upload'
 const activeTab = ref<'default' | 'upload'>(props.src ? 'upload' : 'default');
 
-// Gender filter for default avatars
-const genderFilter = ref<ParentGender>('man');
-const genderTabs = computed(() => [
-  { key: 'man' as const, label: i18n('labels.man') },
-  { key: 'woman' as const, label: i18n('labels.woman') },
-]);
-const filteredAvatars = computed<ParentAvatar[]>(() =>
-  parentAvatarsByGender(genderFilter.value),
-);
+// Gender tabs driven by userType (parent → man/woman, child → boy/girl)
+const genderTabs = computed(() => getGenderTabsForUserType(props.userType));
+const genderFilter = ref<AvatarGender>(genderTabs.value[0]?.key ?? 'man');
+const filteredAvatars = computed<DefaultAvatar[]>(() => avatarsByGender(genderFilter.value));
 
 // Cropper state (for upload tab)
 const image = ref(props.src);
@@ -42,11 +44,16 @@ const cropper = ref<typeof Cropper>();
 // Selected default avatar
 const selectedDefaultAvatar = ref<string | undefined>(props.src);
 
-const onSelectDefaultAvatar = (avatar: ParentAvatar) => {
+const onSelectDefaultAvatar = (avatar: DefaultAvatar) => {
   selectedDefaultAvatar.value = avatar.url;
 };
 
-const isSelected = (avatar: ParentAvatar) => selectedDefaultAvatar.value === avatar.url;
+const isSelected = (avatar: DefaultAvatar) => selectedDefaultAvatar.value === avatar.url;
+
+// Reset gender filter when switching user type (safety guard)
+const onGenderTabClick = (key: AvatarGender) => {
+  genderFilter.value = key;
+};
 
 const onConfirm = () => {
   // If on default tab and a default is selected, use it directly
@@ -117,7 +124,7 @@ const onRejected = () => {
 
       <!-- Default avatar tab -->
       <div v-if="activeTab === 'default'" class="cropper-dialog__default-panel">
-        <!-- Gender sub-tabs -->
+        <!-- Gender sub-tabs (man/woman for parent, boy/girl for child) -->
         <div class="cropper-dialog__gender-tabs">
           <button
             v-for="g in genderTabs"
@@ -125,9 +132,9 @@ const onRejected = () => {
             type="button"
             class="cropper-dialog__gender-tab"
             :class="{ 'cropper-dialog__gender-tab--active': genderFilter === g.key }"
-            @click="genderFilter = g.key"
+            @click="onGenderTabClick(g.key)"
           >
-            {{ g.label }}
+            {{ i18n(`labels.${g.i18nSuffix}`) }}
           </button>
         </div>
 
@@ -143,6 +150,11 @@ const onRejected = () => {
           >
             <img :src="avatar.url" :alt="`${avatar.gender} ${avatar.index}`" />
           </button>
+        </div>
+
+        <!-- Empty state when no assets for current gender -->
+        <div v-if="filteredAvatars.length === 0" class="cropper-dialog__empty-grid">
+          {{ i18n('labels.noDefaultAvatars') }}
         </div>
 
         <!-- Preview of selected default avatar -->
@@ -231,10 +243,18 @@ const onRejected = () => {
       </template>
 
       <div class="cropper-dialog__actions">
-        <button type="button" class="cropper-dialog__btn cropper-dialog__btn--cancel" @click="onDialogCancel">
+        <button
+          type="button"
+          class="cropper-dialog__btn cropper-dialog__btn--cancel"
+          @click="onDialogCancel"
+        >
           {{ i18n('labels.cancel') }}
         </button>
-        <button type="button" class="cropper-dialog__btn cropper-dialog__btn--confirm" @click="onConfirm">
+        <button
+          type="button"
+          class="cropper-dialog__btn cropper-dialog__btn--confirm"
+          @click="onConfirm"
+        >
           {{ i18n('labels.confirm') }}
         </button>
       </div>
@@ -356,6 +376,15 @@ const onRejected = () => {
     object-fit: cover;
     display: block;
   }
+}
+
+.cropper-dialog__empty-grid {
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--clr-caption, #9398a9);
+  text-align: center;
+  padding: 24px 0;
+  margin-bottom: 16px;
 }
 
 .cropper-dialog__preview-row {

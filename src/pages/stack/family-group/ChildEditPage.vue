@@ -163,6 +163,9 @@ onBeforeUnmount(() => {
       v-model:avatar="childAvatar"
     />
 
+    <!-- Flex spacer: pushes button to bottom on large screens while keeping min gap -->
+    <div class="child-edit-spacer" />
+
     <!-- Primary action button -->
     <button type="button" class="child-edit-primary-btn" @click="onSubmit">
       {{ isCreateMode ? i18n('labels.next') : i18n('labels.submitChanges') }}

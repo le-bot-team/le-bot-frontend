@@ -425,6 +425,9 @@ export default {
         tabUpload: '上传头像',
         man: '男',
         woman: '女',
+        boy: '男生',
+        girl: '女生',
+        noDefaultAvatars: '暂无可用默认头像',
       },
       notifications: {
         invalidFile: '文件无效',

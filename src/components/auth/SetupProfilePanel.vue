@@ -74,6 +74,7 @@ const editAvatar = () => {
     component: CropperDialog,
     componentProps: {
       src: avatar.value,
+      userType: 'parent' as const,
     },
     persistent: true,
   }).onOk((data) => {

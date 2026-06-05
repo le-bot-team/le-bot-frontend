@@ -4,7 +4,7 @@
  *
  * 支持两种方式：
  * 1. 上传自定义头像（调用 POST /upload/avatar，后端未就绪时 fallback 为 base64 预览）
- * 2. 选择系统默认头像（9 款/性别，来自 src/assets/default-avatars/）
+ * 2. 选择系统默认头像（来自 src/assets/default-avatars/，通过 shared utility 加载）
  *
  * Props:
  *   modelValue: string | undefined — 当前选中的头像 URL 或路径
@@ -16,36 +16,17 @@ import { computed, ref, watch } from 'vue';
 import { uploadAvatar } from 'src/utils/api/upload';
 import { useAuthStore } from 'stores/auth';
 import { i18nSubPath } from 'src/utils/common';
-
-// 动态导入所有默认头像（Vite 会在构建时解析 glob）
-const defaultAvatarModules = import.meta.glob(
-  'src/assets/default-avatars/img_default_avatar_*.png',
-  { eager: true, import: 'default' },
-);
-
-// 将 glob 结果整理为 { gender, index, url }[]
-interface DefaultAvatar {
-  gender: 'boy' | 'girl';
-  index: number;
-  url: string;
-}
-
-const allDefaultAvatars: DefaultAvatar[] = Object.entries(defaultAvatarModules).map(
-  ([path, url]) => {
-    const match = /img_default_avatar_(boy|girl)(\d+)\.png/.exec(path);
-    return {
-      gender: (match?.[1] ?? 'boy') as 'boy' | 'girl',
-      index: Number(match?.[2] ?? 1),
-      url: url as string,
-    };
-  },
-);
+import {
+  childAvatarsByGender,
+  type DefaultAvatar,
+  type ChildGender,
+} from 'src/utils/defaultAvatars';
 
 const i18n = i18nSubPath('pages.stack.family-group.ChildEditPage.avatar');
 
 const props = defineProps<{
   modelValue: string | undefined;
-  gender: 'boy' | 'girl';
+  gender: ChildGender;
 }>();
 
 const emit = defineEmits<{
@@ -65,9 +46,7 @@ const uploadError = ref('');
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
 /** 按性别过滤的默认头像列表 */
-const filteredAvatars = computed<DefaultAvatar[]>(() =>
-  allDefaultAvatars.filter((a) => a.gender === props.gender),
-);
+const filteredAvatars = computed<DefaultAvatar[]>(() => childAvatarsByGender(props.gender));
 
 /** 当前预览头像（选中值或空） */
 const currentAvatar = computed(() => props.modelValue);
@@ -252,7 +231,7 @@ function clearAvatar() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .avatar-picker__preview {
@@ -264,8 +243,8 @@ function clearAvatar() {
 
 .avatar-picker__circle {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
@@ -358,9 +337,10 @@ function clearAvatar() {
 
 .avatar-picker__grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
   width: 100%;
+  max-width: 240px;
   padding: 0 4px;
 }
 

@@ -102,6 +102,7 @@ const onAvatarClick = () => {
     component: CropperDialog,
     componentProps: {
       src: profile.value?.avatar,
+      userType: 'parent' as const,
     },
   }).onOk((croppedBase64: string) => {
     if (profile.value) {

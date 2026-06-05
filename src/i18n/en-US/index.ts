@@ -429,8 +429,11 @@ export default {
         confirm: 'Confirm',
         tabDefault: 'Default',
         tabUpload: 'Upload',
-        man: 'Male',
-        woman: 'Female',
+        man: 'Male Parent',
+        woman: 'Female Parent',
+        boy: 'Boy',
+        girl: 'Girl',
+        noDefaultAvatars: 'No default avatars available',
       },
       notifications: {
         invalidFile: 'Invalid file',

@@ -2341,8 +2341,9 @@ body {
 // Page bg rgba(241,249,248,1). No skip button.
 .child-edit-page {
   background: var(--clr-page-bg-neutral);
-  min-height: 100%;
-  padding: 24px 20px 40px;
+  height: 100%;
+  overflow: hidden;
+  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -2354,16 +2355,16 @@ body {
 .child-edit-info-card {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   background: var(--clr-white);
-  border-radius: 16px;
-  padding: 20px 16px;
-  margin-bottom: 24px;
+  border-radius: 14px;
+  padding: 14px 14px;
+  margin-bottom: 10px;
 }
 
 .child-edit-info-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
@@ -2374,18 +2375,18 @@ body {
 
 .child-edit-info-title {
   font-family: var(--font-family);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 22px;
   color: var(--clr-text);
-  margin: 0 0 12px;
+  margin: 0 0 6px;
 }
 
 .child-edit-info-desc {
   font-family: var(--font-family);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 20px;
   color: var(--clr-weak);
   margin: 0;
 }
@@ -2403,7 +2404,7 @@ body {
 }
 
 .child-edit-gender-row {
-  margin-top: 12px;
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
   padding: 0 16px;
@@ -2419,8 +2420,8 @@ body {
 }
 
 .child-edit-avatar {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   background: var(--clr-card-bg);
@@ -2453,9 +2454,9 @@ body {
 
 .child-edit-input {
   // Raw c7826afa: input (32,482) / (32,586) => margin-top ~12px after label.
-  margin-top: 12px;
+  margin-top: 8px;
   width: 100%;
-  height: var(--input-height, 48px);
+  height: var(--input-height, 44px);
   border-radius: var(--input-radius, 8px);
   background: var(--clr-input-bg);
   border: none;
@@ -2482,10 +2483,18 @@ body {
   }
 }
 
+// Flex spacer between form and button — absorbs extra vertical space on tall screens.
+.child-edit-spacer {
+  flex: 1 1 0%;
+  min-height: 8px;
+}
+
 .child-edit-primary-btn {
   // c7826afa updated: button at bottom, no skip btn.
   // 311x56 r28, deep-purple bg rgba(18,14,44,1), white 17px Medium text.
-  margin-top: auto;
+  // margin-top: auto pushes button to bottom when content is short;
+  // the min-height on the wrapper ensures ≥ 20px gap above the button.
+  margin-top: 20px;
   align-self: center;
   width: var(--btn-width, 311px);
   height: var(--btn-height, 56px);
