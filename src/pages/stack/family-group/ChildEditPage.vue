@@ -46,6 +46,7 @@ watch(
 const childGender = ref<'boy' | 'girl'>('boy');
 const childName = ref('');
 const childBirthday = ref('');
+const childAvatar = ref<string | undefined>(undefined);
 
 // 编辑模式下从 store 加载已有数据
 function loadFromStore() {
@@ -58,6 +59,7 @@ function loadFromStore() {
     childGender.value = currentChild.childInfo.gender ?? 'boy';
     childName.value = currentChild.childInfo.name ?? '';
     childBirthday.value = currentChild.childInfo.birthday ?? '';
+    childAvatar.value = currentChild.childInfo.avatar;
   }
 }
 
@@ -88,6 +90,7 @@ function onSubmit() {
     name: childName.value.trim(),
     gender: childGender.value,
     birthday: childBirthday.value.trim(),
+    avatar: childAvatar.value,
   };
 
   if (isCreateMode.value) {
@@ -157,6 +160,7 @@ onBeforeUnmount(() => {
       v-model:gender="childGender"
       v-model:name="childName"
       v-model:birthday="childBirthday"
+      v-model:avatar="childAvatar"
     />
 
     <!-- Primary action button -->

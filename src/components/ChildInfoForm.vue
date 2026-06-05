@@ -13,6 +13,7 @@ import boyAvatar from 'src/assets/lanhu/child-edit/boy-avatar.png';
 import girlAvatar from 'src/assets/lanhu/child-edit/girl-avatar.png';
 import questionIcon from 'src/assets/lanhu/child-edit/question-icon.png';
 import { i18nSubPath } from 'src/utils/common';
+import AvatarPicker from 'components/AvatarPicker.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 
 const i18n = i18nSubPath('pages.stack.family-group.ChildEditPage');
@@ -21,23 +22,33 @@ interface Props {
   gender: 'boy' | 'girl';
   name: string;
   birthday: string;
+  avatar?: string | undefined;
   nameMaxlength?: number;
   defaultYear?: number;
+  /** Whether to show the avatar picker (default: true) */
+  showAvatar?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   nameMaxlength: 20,
+  showAvatar: true,
 });
 
 const emit = defineEmits<{
   'update:gender': [value: 'boy' | 'girl'];
   'update:name': [value: string];
   'update:birthday': [value: string];
+  'update:avatar': [value: string | undefined];
 }>();
 
 const genderValue = computed({
   get: () => props.gender,
   set: (v: 'boy' | 'girl') => emit('update:gender', v),
+});
+
+const avatarValue = computed({
+  get: () => props.avatar,
+  set: (v: string | undefined) => emit('update:avatar', v),
 });
 
 function selectGender(g: 'boy' | 'girl') {
@@ -54,6 +65,20 @@ function selectGender(g: 'boy' | 'girl') {
       <p class="child-edit-info-desc">{{ i18n('infoCard.description') }}</p>
     </div>
   </div>
+
+  <!-- Avatar picker (optional) -->
+  <template v-if="showAvatar">
+    <p class="child-edit-label">
+      {{ i18n('avatar.title') }}
+    </p>
+    <div class="child-edit-avatar-picker-wrapper">
+      <AvatarPicker
+        :model-value="avatarValue"
+        :gender="gender"
+        @update:model-value="emit('update:avatar', $event)"
+      />
+    </div>
+  </template>
 
   <!-- Gender section -->
   <p class="child-edit-label">
@@ -113,6 +138,14 @@ function selectGender(g: 'boy' | 'girl') {
 
 <style scoped>
 /* Spacing between form elements — compact to fit within single viewport */
+.child-edit-label + .child-edit-avatar-picker-wrapper {
+  margin-top: 12px;
+}
+
+.child-edit-avatar-picker-wrapper + .child-edit-label {
+  margin-top: 16px;
+}
+
 .child-edit-label + .child-edit-gender-row {
   margin-top: 12px;
 }

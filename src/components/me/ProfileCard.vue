@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { i18nSubPath } from 'src/utils/common';
-import { useProfileStore } from 'stores/profile';
 import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+
+import { i18nSubPath } from 'src/utils/common';
+import { getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
+import { useProfileStore } from 'stores/profile';
 
 const i18n = i18nSubPath('components.me.ProfileCard');
 
 const { profile } = storeToRefs(useProfileStore());
+const displayAvatar = computed(() => profile.value?.avatar || getDefaultAvatarUrl());
 </script>
 
 <template>
@@ -16,7 +20,7 @@ const { profile } = storeToRefs(useProfileStore());
   >
     <q-item-section avatar>
       <div class="me-avatar profile-card-avatar">
-        <q-img v-if="profile?.avatar" :src="profile.avatar" />
+        <q-img v-if="profile" :src="displayAvatar" />
         <q-icon v-else color="grey-6" name="person" size="40px" />
       </div>
     </q-item-section>

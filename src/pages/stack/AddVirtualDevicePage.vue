@@ -154,6 +154,7 @@ onMounted(() => {
       childGender.value = onboardingFlow.childInfo.gender;
       childName.value = onboardingFlow.childInfo.name;
       childBirthday.value = onboardingFlow.childInfo.birthday;
+      childAvatar.value = onboardingFlow.childInfo.avatar;
     }
 
     // Check if a device was activated in the previous session
@@ -267,6 +268,7 @@ onBeforeRouteLeave((_to, _from, next) => {
 const childGender = ref<'boy' | 'girl'>('boy');
 const childName = ref('');
 const childBirthday = ref('');
+const childAvatar = ref<string | undefined>(undefined);
 
 const deviceDisplayName = computed(() => {
   const name = childName.value.trim();
@@ -287,6 +289,7 @@ function goStep2() {
     name: childName.value.trim(),
     gender: childGender.value,
     birthday: childBirthday.value.trim(),
+    avatar: childAvatar.value,
   });
   step.value = 1;
   // Auto-trigger activation
@@ -316,6 +319,7 @@ async function activateDevice() {
       name: childName.value.trim(),
       gender: childGender.value,
       birthday: childBirthday.value.trim(),
+      avatar: childAvatar.value,
     };
     const device = await activateAndAddVirtualDeviceWithChild(childInfo, deviceDisplayName.value);
     activatedDeviceId.value = device.id;
@@ -437,6 +441,7 @@ function createFamilyGroupForDevice() {
     name: childName.value.trim(),
     gender: childGender.value,
     birthday: childBirthday.value.trim(),
+    avatar: childAvatar.value,
   };
 
   // Create a local family group entry (will sync with backend when API is ready)
@@ -532,6 +537,7 @@ function goToHome() {
             v-model:gender="childGender"
             v-model:name="childName"
             v-model:birthday="childBirthday"
+            v-model:avatar="childAvatar"
             :default-year="2020"
           />
 

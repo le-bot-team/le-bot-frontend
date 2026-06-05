@@ -422,11 +422,15 @@ export default {
     },
     CropperDialog: {
       labels: {
-        title: 'Crop Image',
+        title: 'Set Avatar',
         chooseImage: 'Choose Image',
         noImage: 'Choose an image to start cropping',
         cancel: 'Cancel',
         confirm: 'Confirm',
+        tabDefault: 'Default',
+        tabUpload: 'Upload',
+        man: 'Male',
+        woman: 'Female',
       },
       notifications: {
         invalidFile: 'Invalid file',
@@ -527,7 +531,8 @@ export default {
           messages: 'Messages',
           messagesComingSoon: 'Messages center is under construction.',
           mascotPlaceholder: 'Lebot',
-          bubbleLine1: 'Hi, Xiaoxin~',
+          defaultChildName: 'kiddo',
+          bubbleLine1: 'Hi, {name}~',
           bubbleLine2: 'Tap my head to start chatting~',
           hotTopicsTitle: 'Hot Topics',
           chatHistory: 'Chat History',
@@ -815,7 +820,7 @@ export default {
         labels: {
           voiceStyle: 'Voice Style',
           defaultStyle: 'Default Style',
-          language: 'Language',
+          language: '多语言/Language',
           personalityAdjustment: 'AI Personality Adjustment',
           wifiManagement: 'Wi-Fi Management',
           firmwareUpdate: 'Firmware Update',
@@ -825,6 +830,8 @@ export default {
           deleteConfirmBody:
             'Deleting this device will also remove the linked family group, chat history, growth reports, etc. Are you sure you want to proceed?',
           confirmDelete: 'Confirm',
+          personalityHint:
+            '*Enabling personality adjustment helps users find a robot personality that better suits their preferences',
         },
         notifications: {
           unbindSuccess: 'Device deleted successfully',
@@ -1032,6 +1039,18 @@ export default {
             title: 'Why fill in child information',
             description:
               "Completing child information will help you create a customized LeBot that matches your child's personality!",
+          },
+          avatar: {
+            title: 'Set Avatar',
+            default: 'Default',
+            upload: 'Upload',
+            clear: 'Clear Avatar',
+            uploadHint: 'Supports JPG, PNG format, max 2MB',
+            uploading: 'Uploading...',
+            errors: {
+              invalidType: 'Please upload an image file',
+              tooLarge: 'Image size cannot exceed 2MB',
+            },
           },
           questions: {
             gender: 'Child Gender',

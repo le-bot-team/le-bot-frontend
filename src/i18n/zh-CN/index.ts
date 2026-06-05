@@ -416,11 +416,15 @@ export default {
     },
     CropperDialog: {
       labels: {
-        title: '裁剪图片',
+        title: '设置头像',
         chooseImage: '选择图片',
         noImage: '选择一张图片开始裁剪',
         cancel: '取消',
         confirm: '确认',
+        tabDefault: '默认头像',
+        tabUpload: '上传头像',
+        man: '男',
+        woman: '女',
       },
       notifications: {
         invalidFile: '文件无效',
@@ -520,7 +524,8 @@ export default {
           messages: '消息',
           messagesComingSoon: '消息中心建设中~',
           mascotPlaceholder: '乐宝',
-          bubbleLine1: '你好呀，小新~',
+          defaultChildName: '小朋友',
+          bubbleLine1: '你好呀，{name}~',
           bubbleLine2: '点击我的脑袋去聊天吧~',
           hotTopicsTitle: '高频话题',
           chatHistory: '聊天记录',
@@ -803,10 +808,10 @@ export default {
       },
       DeviceConfigPage: {
         labels: {
-          voiceStyle: '音色风格',
+          voiceStyle: '语音风格',
           defaultStyle: '默认风格',
-          language: '语言',
-          personalityAdjustment: 'AI 个性调节',
+          language: '多语言/Language',
+          personalityAdjustment: 'AI个性调节',
           wifiManagement: 'Wi-Fi 管理',
           firmwareUpdate: '固件升级',
           aboutThisDevice: '关于本设备',
@@ -815,6 +820,7 @@ export default {
           deleteConfirmBody:
             '删除设备的同时，该设备绑定的儿童家庭组、聊天记录、成长报告等都将一并删除，确定删除吗？',
           confirmDelete: '确定',
+          personalityHint: '*开启个性调节有助于用户匹配到更适合个人喜好的机器人个性',
         },
         notifications: {
           unbindSuccess: '设备删除成功',
@@ -1017,6 +1023,18 @@ export default {
           infoCard: {
             title: '为什么要填写儿童信息',
             description: '完成儿童信息填写，将为您定制一个契合孩子性格特点的专属乐宝！',
+          },
+          avatar: {
+            title: '设置头像',
+            default: '默认头像',
+            upload: '上传头像',
+            clear: '清除头像',
+            uploadHint: '支持 JPG、PNG 格式，最大 2MB',
+            uploading: '上传中...',
+            errors: {
+              invalidType: '请上传图片文件',
+              tooLarge: '图片大小不能超过 2MB',
+            },
           },
           questions: {
             gender: '儿童性别',

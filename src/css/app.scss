@@ -8,6 +8,7 @@
   // Colors
   --clr-text: rgba(21, 23, 23, 1);
   --clr-placeholder: rgba(147, 152, 169, 1);
+  --clr-hint-text: rgba(168, 171, 178, 1); // #A8ABB2 辅助提示文字 (设计规范 50f08b5c)
   --clr-link: rgba(32, 204, 249, 1);
   --clr-error: rgba(255, 93, 93, 1);
   --clr-weak: rgba(83, 89, 89, 1); // #535959 文本2 (设计规范 0b33e4ae)
@@ -226,18 +227,18 @@
   --home-glow-amber-size-w: 364px;
   --home-glow-amber-size-h: 75px;
   --home-glow-amber-left: 6px;
-  --home-glow-amber-top: 478px;
+  --home-glow-amber-top: 466px;
   --home-glow-amber-gradient: radial-gradient(
     ellipse 182px 37.5px at 50% 50%,
     rgba(246, 223, 175, 1) 40.86%,
     rgba(255, 245, 222, 0) 100%
   );
 
-  // Speech bubble (矩形 1907, 175×86): 设计稿位置 left:168, top:168
-  --home-bubble-w: 175px;
-  --home-bubble-h: 86px;
-  --home-bubble-left: 168px;
-  --home-bubble-top: 168px;
+  // Speech bubble (组 422, 215×117): 使用 img_chat_bubble_home.png 完整气泡图片
+  --home-bubble-w: 215px;
+  --home-bubble-h: 117px;
+  --home-bubble-left: 147px;
+  --home-bubble-top: 130px;
   --home-bubble-radius: 16px;
   --clr-home-bubble-bg: rgba(255, 255, 255, 1);
   --clr-home-bubble-border: rgba(175, 238, 255, 1);
@@ -283,11 +284,11 @@
   --personality-hint-color: rgba(147, 152, 169, 1); // equals --clr-placeholder / --clr-caption
   --personality-section-gap: 16px;
 
-  // HomePage mascot (3D 乐宝机器人) — 位置对齐设计稿乐宝正面 shape
-  --home-mascot-w: 240px;
-  --home-mascot-h: 320px;
-  --home-mascot-left: 68px;
-  --home-mascot-top: 210px;
+  // HomePage mascot (3D 乐宝机器人) — 设计稿组385: 375×367, 全宽居中
+  --home-mascot-w: 375px;
+  --home-mascot-h: 367px;
+  --home-mascot-left: 0px;
+  --home-mascot-top: 190px;
 
   // ===== Shared dialog / confirm-dialog tokens =====
   // Design 33aebf1c (raw JSON verified):
@@ -887,8 +888,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 62px;
-  padding: 0 20px;
+  width: 100%;
+  min-height: 60px;
+  padding: 0 16px 0 20px;
+  background: transparent;
+  border: none;
   font-family: var(--font-family);
   font-size: 15px;
   font-weight: 400;
@@ -923,6 +927,17 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+}
+
+.settings-hint-text {
+  padding: 4px 0 0 3px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--clr-hint-text);
+  margin: 0;
 }
 
 .settings-logout {
@@ -1237,6 +1252,10 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 .home-icon-msg-dot {
@@ -1273,6 +1292,10 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 .home-icon-robot-set {
@@ -1285,6 +1308,10 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 .home-companion-days {
@@ -1348,6 +1375,10 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 .home-mascot-img {
@@ -1386,43 +1417,31 @@ body {
   top: var(--home-bubble-top);
   width: var(--home-bubble-w);
   height: var(--home-bubble-h);
-  background: var(--clr-home-bubble-bg);
-  border: 1px solid var(--clr-home-bubble-border);
-  border-radius: var(--home-bubble-radius);
+  pointer-events: none;
+}
+
+// 气泡背景图（含尾巴），覆盖整个容器
+.home-bubble-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+// 气泡文字区域：设计稿 text frame left:162, top:163, w:157, h:44
+// 相对于气泡容器(left:147, top:130)的偏移 = left:15, top:13
+.home-bubble-text {
+  position: absolute;
+  left: 15px;
+  top: 33px;
+  width: 180px;
+  height: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
-  box-sizing: border-box;
-  pointer-events: none;
-
-  // 气泡下方小三角（指向机器人头部，偏左）
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 28%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid var(--clr-home-bubble-bg);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: -9px;
-    left: 28%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    border-top: 9px solid var(--clr-home-bubble-border);
-  }
 }
 
 .home-bubble-line1,
@@ -1434,6 +1453,7 @@ body {
   color: var(--clr-home-bubble-text);
   text-align: center;
   margin: 0;
+  white-space: nowrap;
 }
 
 // --- Topics section (高频话题) ---
@@ -1477,6 +1497,10 @@ body {
   line-height: 20px;
   color: var(--clr-weak);
   cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 .home-topics-history-icon {
@@ -1506,6 +1530,7 @@ body {
   height: 28px;
   padding: 0 10px;
   background: #fff;
+  border: none;
   border-radius: 14px;
   font-family: var(--font-family);
   font-size: 14px;
@@ -1515,6 +1540,7 @@ body {
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  outline: none;
 }
 
 .home-topic-chip-icon {
@@ -1537,6 +1563,10 @@ body {
   color: rgba(35, 35, 35, 1);
   cursor: pointer;
   user-select: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
 // --- Bottom tab bar overrides (MainFooter on mobile) ---
@@ -1839,7 +1869,7 @@ body {
   width: 100%;
   max-width: var(--device-card-max-w);
   align-self: center;
-  margin: 0;
+  margin: -4px 0 0;
   padding: 0 3px;
   font-family: var(--font-family);
   font-size: 12px;

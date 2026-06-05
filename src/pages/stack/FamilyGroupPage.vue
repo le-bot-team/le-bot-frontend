@@ -24,15 +24,11 @@ const { trackClick, trackConversion } = useTracker();
 /** 从 store 读取家庭组列表 */
 const familyGroups = computed<FamilyGroup[]>(() => familyGroupStore.groups);
 
-/** 获取家庭组中儿童成员的性别 */
-function getChildGender(group: FamilyGroup): string | undefined {
+/** 获取家庭组中儿童成员的头像（优先 childInfo.avatar，fallback 性别默认头像） */
+function getChildAvatar(group: FamilyGroup): string {
   const child = group.members.find((m) => m.memberType === 'child');
-  return child?.childInfo?.gender;
-}
-
-/** 根据性别获取默认头像 */
-function getChildAvatar(gender?: string) {
-  return gender === 'girl' ? girlAvatarUrl : boyAvatarUrl;
+  if (child?.childInfo?.avatar) return child.childInfo.avatar;
+  return child?.childInfo?.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl;
 }
 
 function onGroupClick(group: FamilyGroup) {
@@ -59,11 +55,7 @@ function onAddDevice() {
         @click="onGroupClick(group)"
       >
         <!-- 儿童头像 -->
-        <img
-          :src="getChildAvatar(getChildGender(group))"
-          alt=""
-          class="family-group-card__avatar"
-        />
+        <img :src="getChildAvatar(group)" alt="" class="family-group-card__avatar" />
         <!-- 信息区 -->
         <div class="family-group-card__info">
           <span class="family-group-card__name">{{ group.name }}</span>
@@ -79,11 +71,7 @@ function onAddDevice() {
     <!-- Empty state -->
     <div v-else class="family-group-empty">
       <p class="family-group-empty__text">{{ i18n('labels.emptyState') }}</p>
-      <button
-        type="button"
-        class="family-group-empty__btn"
-        @click="onAddDevice"
-      >
+      <button type="button" class="family-group-empty__btn" @click="onAddDevice">
         {{ i18n('labels.addFirstDevice') }}
       </button>
     </div>
@@ -172,6 +160,6 @@ function onAddDevice() {
 }
 
 .family-group-card__chevron {
-  color: #C4C4CC;
+  color: #c4c4cc;
 }
 </style>

@@ -61,7 +61,7 @@ function handleUnbind() {
 }
 
 const visibleMenuGroups = computed(() => {
-  const groups: { label: string; sideLabel?: string; to?: string }[][] = [
+  const groups: { label: string; sideLabel?: string; to?: string; hint?: string }[][] = [
     [
       {
         label: i18n('labels.voiceStyle'),
@@ -77,6 +77,7 @@ const visibleMenuGroups = computed(() => {
       {
         label: i18n('labels.personalityAdjustment'),
         to: '/stack/device-config/personality',
+        hint: i18n('labels.personalityHint'),
       },
     ],
   ];
@@ -92,6 +93,11 @@ const visibleMenuGroups = computed(() => {
   return groups;
 });
 
+// Extract per-group hint texts (rendered outside the card per design 50f08b5c)
+const groupHints = computed(() =>
+  visibleMenuGroups.value.map((group) => group.filter((m) => m.hint).map((m) => m.hint!)),
+);
+
 onBeforeMount(() => {
   if (!currentDevice.value) {
     router.replace('/stack/devices').catch(console.error);
@@ -101,23 +107,32 @@ onBeforeMount(() => {
 
 <template>
   <q-page class="settings-page column">
-    <div v-for="(menuGroup, groupIndex) in visibleMenuGroups" :key="groupIndex" class="me-card">
-      <button
-        v-for="(menu, menuIndex) in menuGroup"
-        :key="menuIndex"
-        type="button"
-        class="settings-menu-row"
-        @click="menu.to ? router.push(menu.to).catch(console.error) : undefined"
-      >
-        <span>{{ menu.label }}</span>
-        <span class="settings-menu-row__right">
-          <span v-if="menu.sideLabel?.length" class="settings-menu-row__caption">
-            {{ menu.sideLabel }}
+    <template v-for="(menuGroup, groupIndex) in visibleMenuGroups" :key="groupIndex">
+      <div class="me-card">
+        <button
+          v-for="(menu, menuIndex) in menuGroup"
+          :key="menuIndex"
+          type="button"
+          class="settings-menu-row"
+          @click="menu.to ? router.push(menu.to).catch(console.error) : undefined"
+        >
+          <span>{{ menu.label }}</span>
+          <span class="settings-menu-row__right">
+            <span v-if="menu.sideLabel?.length" class="settings-menu-row__caption">
+              {{ menu.sideLabel }}
+            </span>
+            <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
           </span>
-          <q-icon class="settings-menu-row__chevron" name="chevron_right" size="12px" />
-        </span>
-      </button>
-    </div>
+        </button>
+      </div>
+      <p
+        v-for="(hint, hintIndex) in groupHints[groupIndex]"
+        :key="'hint-' + hintIndex"
+        class="settings-hint-text"
+      >
+        {{ hint }}
+      </p>
+    </template>
 
     <q-space />
 

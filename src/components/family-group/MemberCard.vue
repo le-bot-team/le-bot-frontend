@@ -18,13 +18,15 @@ const emit = defineEmits<{
   (e: 'click', member: FamilyMember): void;
 }>();
 
-/** 根据性别获取头像 */
+/** 根据成员类型获取头像（优先 childInfo.avatar，fallback 性别默认头像） */
 function getAvatar(): string {
-  if (props.member.avatar) return props.member.avatar;
   if (props.member.memberType === 'child' && props.member.childInfo) {
-    return props.member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl;
+    return (
+      props.member.childInfo.avatar ||
+      (props.member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl)
+    );
   }
-  return boyAvatarUrl;
+  return props.member.avatar || boyAvatarUrl;
 }
 
 /** 获取元信息文本 */
@@ -39,9 +41,10 @@ function getMetaText(): string {
         const now = new Date();
         let ageNum = now.getFullYear() - birth.getFullYear();
         if (
-          now.getMonth() < birth.getMonth()
-          || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
-        ) ageNum--;
+          now.getMonth() < birth.getMonth() ||
+          (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+        )
+          ageNum--;
         age = ` ${Math.max(0, ageNum)}岁`;
       }
     }
@@ -65,11 +68,7 @@ function getMetaText(): string {
 </script>
 
 <template>
-  <button
-    class="member-card"
-    type="button"
-    @click="emit('click', member)"
-  >
+  <button class="member-card" type="button" @click="emit('click', member)">
     <img :src="getAvatar()" alt="" class="member-card__avatar" />
     <div class="member-card__body">
       <span class="member-card__name">
@@ -84,12 +83,7 @@ function getMetaText(): string {
       size="14px"
       class="member-card__badge"
     />
-    <q-icon
-      v-else
-      name="chevron_right"
-      size="16px"
-      class="member-card__arrow"
-    />
+    <q-icon v-else name="chevron_right" size="16px" class="member-card__arrow" />
   </button>
 </template>
 
@@ -150,10 +144,10 @@ function getMetaText(): string {
 }
 
 .member-card__badge {
-  color: #FFB800;
+  color: #ffb800;
 }
 
 .member-card__arrow {
-  color: #C4C4CC;
+  color: #c4c4cc;
 }
 </style>

@@ -3,7 +3,7 @@
     <section class="device-personality-card">
       <div class="device-personality-row">
         <span>{{ i18n('labels.toggleLabel') }}</span>
-        <q-toggle v-model="enabled" color="accent" @update:model-value="onToggle" />
+        <q-toggle :model-value="enabled" color="accent" @update:model-value="onToggle" />
       </div>
     </section>
     <p class="device-personality-tip">{{ i18n('labels.tip') }}</p>
@@ -16,7 +16,7 @@
 // hint paragraph. Toggle uses Quasar `color="accent"` which equals the raw
 // design token rgba(32,204,249,1) (=$accent in quasar.variables.scss). When
 // enabled, it redirects to PersonalityDetailPage for the full config form.
-import { ref, watch, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDeviceStore } from 'stores/device';
 import { i18nSubPath } from 'src/utils/common';
@@ -25,12 +25,8 @@ const i18n = i18nSubPath('pages.stack.PersonalityPage');
 const router = useRouter();
 const deviceStore = useDeviceStore();
 
-const enabled = ref<boolean>(deviceStore.currentDevice?.config?.aiPersonality?.enabled === true);
-
-// Sync enabled state when returning from PersonalityDetailPage via router.back()
-watch(
-  () => deviceStore.currentDevice?.config?.aiPersonality?.enabled,
-  (v) => { enabled.value = v === true; },
+const enabled = computed<boolean>(
+  () => deviceStore.currentDevice?.config?.aiPersonality?.enabled === true,
 );
 
 onMounted(() => {

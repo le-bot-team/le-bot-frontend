@@ -29,17 +29,19 @@ const profileStore = useProfileStore();
 
 // 从 URL query 同步 groupId 到 store
 const urlGroupId = computed(() => route.query.groupId as string | undefined);
-watch(urlGroupId, (id) => {
-  if (id) familyGroupStore.setCurrentGroup(id);
-}, { immediate: true });
+watch(
+  urlGroupId,
+  (id) => {
+    if (id) familyGroupStore.setCurrentGroup(id);
+  },
+  { immediate: true },
+);
 
 /** 当前家庭组 */
 const group = computed(() => familyGroupStore.currentGroup);
 
 /** 当前成员列表 */
-const members = computed<FamilyMember[]>(
-  () => group.value?.members ?? [],
-);
+const members = computed<FamilyMember[]>(() => group.value?.members ?? []);
 
 /** 儿童成员 */
 const child = computed(() => members.value.find((m) => m.memberType === 'child'));
@@ -53,10 +55,12 @@ const isCreator = computed(() => {
   return group.value.creatorId === profileStore.profile?.id;
 });
 
-/** 根据性别获取头像 */
+/** 根据成员类型获取头像（优先 childInfo.avatar，fallback 性别默认头像） */
 function getAvatar(member: FamilyMember): string {
   if (member.memberType === 'child' && member.childInfo) {
-    return member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl;
+    return (
+      member.childInfo.avatar || (member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl)
+    );
   }
   return member.avatar || boyAvatarUrl;
 }
@@ -69,8 +73,8 @@ function childAge(birthday?: string): number {
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();
   if (
-    now.getMonth() < birth.getMonth()
-    || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+    now.getMonth() < birth.getMonth() ||
+    (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
   ) {
     age--;
   }
@@ -102,17 +106,8 @@ function onInvite() {
 <template>
   <q-page class="family-group-page detail-page">
     <!-- ── 儿童区域：100px 圆形头像居中 ── -->
-    <button
-      v-if="child"
-      class="detail-child-zone"
-      type="button"
-      @click="onMemberClick(child)"
-    >
-      <img
-        :src="getAvatar(child)"
-        alt=""
-        class="detail-child-zone__avatar"
-      />
+    <button v-if="child" class="detail-child-zone" type="button" @click="onMemberClick(child)">
+      <img :src="getAvatar(child)" alt="" class="detail-child-zone__avatar" />
       <span class="detail-child-zone__name">{{ child.childInfo?.name }}</span>
       <span class="detail-child-zone__meta">
         {{ child.childInfo?.gender === 'girl' ? i18n('meta.female') : i18n('meta.male') }}
@@ -131,25 +126,30 @@ function onInvite() {
       >
         <span class="family-group-member-name">
           {{ member.nickname }}
-          <span
-            v-if="member.isCreator"
-            class="detail-creator-tag"
-          >{{ i18n('labels.creator') }}</span>
+          <span v-if="member.isCreator" class="detail-creator-tag">{{
+            i18n('labels.creator')
+          }}</span>
         </span>
         <span class="family-group-member-meta">{{ roleLabel(member.role) }}</span>
-        <svg class="family-group-member-chevron" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1 1L6 6L1 11" stroke="#9398A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          class="family-group-member-chevron"
+          viewBox="0 0 7 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1 1L6 6L1 11"
+            stroke="#9398A9"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </template>
 
     <!-- 底部操作区：仅创建者可见邀请按钮（复用全局 .family-group-add-btn） -->
-    <button
-      v-if="isCreator"
-      class="family-group-add-btn"
-      type="button"
-      @click="onInvite"
-    >
+    <button v-if="isCreator" class="family-group-add-btn" type="button" @click="onInvite">
       {{ i18n('labels.invite') }}
     </button>
   </q-page>
@@ -206,7 +206,7 @@ function onInvite() {
   margin-left: 6px;
   font-size: 10px;
   line-height: 16px;
-  color: #FFB800;
+  color: #ffb800;
   background: rgba(255, 184, 0, 0.1);
   border-radius: 8px;
   white-space: nowrap;

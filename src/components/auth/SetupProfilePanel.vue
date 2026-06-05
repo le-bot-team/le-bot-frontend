@@ -8,6 +8,7 @@ import CropperDialog from 'components/CropperDialog.vue';
 import BirthdayPicker from 'components/BirthdayPicker.vue';
 import { retrieveProfileInfo, updateProfileInfo } from 'src/utils/api/profile';
 import { mapAuthError, mapAuthBusinessError } from 'src/utils/auth-error';
+import { getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
 import { useAuthStore } from 'stores/auth';
 import { useProfileStore } from 'stores/profile';
 import { useTracker } from 'src/composables/useTracker';
@@ -27,7 +28,7 @@ const { updateProfile } = useProfileStore();
 const { trackConversion } = useTracker();
 const i18n = i18nSubPath('components.auth.SetupProfilePanel');
 
-const avatar = ref<string>();
+const avatar = ref<string>(getDefaultAvatarUrl());
 const nickname = ref<string>();
 const birthday = ref<string>('');
 const relationship = ref<string>();
@@ -158,7 +159,6 @@ const confirm = async () => {
         </div>
       </div>
     </button>
-
     <!-- Nickname -->
     <div class="setup-profile-field-row">
       <label class="setup-profile-field-label">{{ i18n('labels.nickname') }}</label>

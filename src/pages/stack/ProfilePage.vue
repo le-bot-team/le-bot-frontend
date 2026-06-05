@@ -10,6 +10,7 @@ import { useDeviceStore } from 'stores/device';
 import { useFamilyGroupStore } from 'stores/family-group';
 import { i18nSubPath } from 'src/utils/common';
 import { deactivateAccount } from 'src/utils/api/profile';
+import { getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
 import ConfirmDialog from 'src/components/ConfirmDialog.vue';
 import CropperDialog from 'src/components/CropperDialog.vue';
 
@@ -34,6 +35,9 @@ const { createdGroups } = storeToRefs(familyGroupStore);
 const idAccountText = computed(() =>
   profile.value?.id ? i18n('labels.idAccount', { id: profile.value.id }) : '',
 );
+
+// Display avatar: use profile avatar or fall back to default
+const displayAvatar = computed(() => profile.value?.avatar || getDefaultAvatarUrl());
 
 // Menu rows — single card per design 448a71c7 (编辑资料):
 // 昵称, 生日, 手机号, 修改密码
@@ -186,8 +190,7 @@ const onDeactivate = () => {
         @click="onAvatarClick"
         @keydown.enter="onAvatarClick"
       >
-        <q-img v-if="profile?.avatar" :src="profile.avatar" />
-        <q-icon v-else color="grey-5" name="person" size="40px" />
+        <q-img :src="displayAvatar" />
       </div>
 
       <!-- ID account text below avatar (design 448a71c7: 14px Regular, rgba(99,104,104,1)) -->

@@ -222,7 +222,9 @@ export const useFamilyGroupStore = defineStore(
           }
           for (const member of group.members) {
             if (member.avatar && member.avatar.length > 200) {
-              // Clear base64 data URIs; keep short URL strings
+              // Clear base64 data URIs on user-type members; keep short URL strings.
+              // Note: child-type members' avatar is stored in childInfo.avatar and
+              // intentionally preserved here (may be a default-asset path or uploaded URL).
               member.avatar = undefined;
               stripped = true;
             }

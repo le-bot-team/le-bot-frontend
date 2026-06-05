@@ -25,13 +25,13 @@ import DeviceSwitchPanel from 'components/home/DeviceSwitchPanel.vue';
 
 import iconMsgHomeUrl from 'src/assets/lanhu/home/icon-msg-home.png';
 import iconDeviceChangeUrl from 'src/assets/lanhu/home/icon-device-change.png';
-import iconRobotSetUrl from 'src/assets/lanhu/home/icon-device-change-home.png';
+import iconRobotSetUrl from 'src/assets/lanhu/home/icon-robot-set-home.png';
 import iconTopicUrl from 'src/assets/lanhu/home/icon-topic.png';
 import iconArrowRightUrl from 'src/assets/lanhu/home/icon-arrow-right-home.png';
+import imgLebotHomeUrl from 'src/assets/lanhu/home/img-lebot-home.png';
+import imgChatBubbleHomeUrl from 'src/assets/lanhu/home/img-chat-bubble-home.png';
 
-// Mascot placeholder: 设计稿中"乐宝正面"为shape占位符，暂无透明背景PNG切图。
-// 待设计师提供后替换 iconMascotUrl 为真实图片路径。
-const iconMascotUrl = ''; // 占位：无可用透明背景mascot图片
+const iconMascotUrl = imgLebotHomeUrl;
 
 const i18n = i18nSubPath('pages.main.HomePage');
 const { accessToken } = storeToRefs(useAuthStore());
@@ -39,10 +39,15 @@ const deviceStore = useDeviceStore();
 const { currentDevice } = storeToRefs(deviceStore);
 const { trackClick, trackConversion } = useTracker();
 
+/** 当前儿童姓名（用于欢迎气泡等个性化展示），无儿童信息时回退为默认称呼 */
+const childName = computed(() => {
+  return currentDevice.value?.childInfo?.name || i18n('labels.defaultChildName');
+});
+
 /** 当前设备名称（如"小新的乐宝"） */
 const currentDeviceName = computed(() => {
-  const childName = currentDevice.value?.childInfo?.name;
-  return childName ? i18n('deviceSwitch.deviceNameFormat', { name: childName }) : i18n('labels.robotName');
+  const name = currentDevice.value?.childInfo?.name;
+  return name ? i18n('deviceSwitch.deviceNameFormat', { name }) : i18n('labels.robotName');
 });
 
 // 未读消息状态（mock数据，后续接入后端替换为真实数据）
@@ -50,7 +55,7 @@ const unreadMessages = ref([
   { id: '1', unread: true },
   { id: '2', unread: true },
 ]);
-const hasUnreadMessages = computed(() => unreadMessages.value.some(m => m.unread));
+const hasUnreadMessages = computed(() => unreadMessages.value.some((m) => m.unread));
 
 // 设备切换弹窗
 const showDeviceSwitch = ref(false);
@@ -176,10 +181,13 @@ function handleAddDevice() {
         </div>
         <img v-else :src="iconMascotUrl" alt="" class="home-mascot-img" />
       </button>
-      <!-- 设计稿气泡文案 -->
+      <!-- 设计稿气泡：使用 img_chat_bubble_home.png 图片 + 文字叠加 -->
       <div class="home-hero-bubble">
-        <p class="home-bubble-line1">{{ i18n('labels.bubbleLine1') }}</p>
-        <p class="home-bubble-line2">{{ i18n('labels.bubbleLine2') }}</p>
+        <img :src="imgChatBubbleHomeUrl" alt="" class="home-bubble-bg" />
+        <div class="home-bubble-text">
+          <p class="home-bubble-line1">{{ i18n('labels.bubbleLine1', { name: childName }) }}</p>
+          <p class="home-bubble-line2">{{ i18n('labels.bubbleLine2') }}</p>
+        </div>
       </div>
 
       <!-- 高频话题 -->
@@ -207,16 +215,20 @@ function handleAddDevice() {
             {{ topic }}
           </button>
           <!-- More indicator matching design ... -->
-          <button type="button" class="home-topics-more" @click="goChatHistory" :aria-label="i18n('labels.chatHistory')">...</button>
+          <button
+            type="button"
+            class="home-topics-more"
+            @click="goChatHistory"
+            :aria-label="i18n('labels.chatHistory')"
+          >
+            ...
+          </button>
         </div>
       </section>
     </div>
 
     <!-- 设备切换弹窗 -->
-    <DeviceSwitchPanel
-      v-model:show="showDeviceSwitch"
-      @add-device="handleAddDevice"
-    />
+    <DeviceSwitchPanel v-model:show="showDeviceSwitch" @add-device="handleAddDevice" />
   </q-page>
 </template>
 

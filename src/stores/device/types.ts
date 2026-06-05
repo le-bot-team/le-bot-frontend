@@ -7,6 +7,8 @@ export interface ChildInfo {
   name: string;
   gender: 'boy' | 'girl';
   birthday: string;
+  /** 头像 URL（来自上传接口或默认头像路径） */
+  avatar?: string | undefined;
 }
 
 export interface DeviceInfo {
@@ -37,4 +39,3 @@ export interface DeviceInfo {
   /** Child info associated with this device (front-end family group association) */
   childInfo?: ChildInfo | null;
 }
-
