@@ -1569,6 +1569,76 @@ body {
   outline: none;
 }
 
+// --- Empty state (no devices) ---
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1; // fill remaining vertical space in home-canvas
+  padding: 40px 32px;
+  text-align: center;
+  position: relative;
+  z-index: 1; // above hero decorations
+}
+
+.home-empty-mascot {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  margin-bottom: 24px;
+  opacity: 0.85;
+}
+
+.home-empty-title {
+  font-family: var(--font-family);
+  font-size: 20px;
+  font-weight: 600;
+  color: #151717;
+  line-height: 28px;
+  margin-bottom: 8px;
+}
+
+.home-empty-subtitle {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  color: #8c8c8c;
+  line-height: 22px;
+  margin-bottom: 32px;
+}
+
+.home-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  height: 48px;
+  padding: 0 32px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(67, 233, 123, 0.3);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(67, 233, 123, 0.3);
+  }
+}
+
 // --- Bottom tab bar overrides (MainFooter on mobile) ---
 .q-footer .q-tabs .q-tab__label {
   font-family: var(--font-family);

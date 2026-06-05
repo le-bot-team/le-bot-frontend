@@ -535,6 +535,9 @@ export default {
           chatHistory: '聊天记录',
           myDevices: '我的设备',
           tryChatting: '开始聊天',
+          noDeviceTitle: '还没有乐宝哦~',
+          noDeviceSubtitle: '添加一个乐宝，开始愉快的聊天吧！',
+          addDevice: '添加乐宝',
         },
         topics: {
           draw: '画画',

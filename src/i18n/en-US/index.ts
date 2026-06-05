@@ -542,6 +542,9 @@ export default {
           chatHistory: 'Chat History',
           myDevices: 'My Devices',
           tryChatting: 'Try Chatting',
+          noDeviceTitle: 'No LeBot yet~',
+          noDeviceSubtitle: 'Add a LeBot and start chatting!',
+          addDevice: 'Add LeBot',
         },
         topics: {
           draw: 'Drawing',

@@ -37,8 +37,11 @@ const iconMascotUrl = imgLebotHomeUrl;
 const i18n = i18nSubPath('pages.main.HomePage');
 const { accessToken } = storeToRefs(useAuthStore());
 const deviceStore = useDeviceStore();
-const { currentDevice } = storeToRefs(deviceStore);
+const { currentDevice, virtualDevices } = storeToRefs(deviceStore);
 const { trackClick, trackConversion } = useTracker();
+
+/** Whether the user has at least one device — controls empty-state vs normal view */
+const hasDevices = computed(() => virtualDevices.value.length > 0);
 
 /** 当前儿童姓名（用于欢迎气泡等个性化展示），无儿童信息时回退为默认称呼 */
 const childName = computed(() => {
@@ -127,105 +130,120 @@ function handleAddDevice() {
         <div class="home-hero-glow-amber" />
       </div>
 
-      <!-- Top navigation (robot name + companion days + icons) -->
-      <div class="home-topnav">
-        <!-- 左上：标题 + 设备切换 -->
-        <div class="home-title-row">
-          <div class="home-robot-name">{{ currentDeviceName }}</div>
+      <!-- ============ 有设备: 正常首页 ============ -->
+      <template v-if="hasDevices">
+        <!-- Top navigation (robot name + companion days + icons) -->
+        <div class="home-topnav">
+          <!-- 左上：标题 + 设备切换 -->
+          <div class="home-title-row">
+            <div class="home-robot-name">{{ currentDeviceName }}</div>
+            <button
+              type="button"
+              class="home-device-change"
+              :aria-label="i18n('labels.deviceChange')"
+              @click="goDeviceSwitch"
+            >
+              <img :src="iconDeviceChangeUrl" alt="" class="home-icon-img" />
+            </button>
+          </div>
+
+          <!-- 右上：设置图标 -->
           <button
             type="button"
-            class="home-device-change"
-            :aria-label="i18n('labels.deviceChange')"
-            @click="goDeviceSwitch"
+            class="home-icon-robot-set"
+            :aria-label="i18n('labels.robotSettings')"
+            @click="goRobotSettings"
           >
-            <img :src="iconDeviceChangeUrl" alt="" class="home-icon-img" />
+            <img :src="iconRobotSetUrl" alt="" class="home-icon-img" />
           </button>
+
+          <!-- 右上：消息图标（最右侧） -->
+          <button
+            type="button"
+            class="home-icon-msg"
+            :aria-label="i18n('labels.messages')"
+            @click="goMessages"
+          >
+            <img :src="iconMsgHomeUrl" alt="" class="home-icon-img" />
+            <!-- 未读红点：有未读消息时显示 -->
+            <span v-if="hasUnreadMessages" class="home-icon-msg-dot" aria-hidden="true" />
+          </button>
+
+          <!-- 陪伴天数 - 导航栏下方 -->
+          <div class="home-companion-days">
+            {{ i18n('labels.companionDays', { days: companionDays }) }}
+          </div>
         </div>
 
-        <!-- 右上：设置图标 -->
+        <!-- Mascot (3D 乐宝机器人形象) — 占位：待设计师提供透明背景PNG -->
         <button
           type="button"
-          class="home-icon-robot-set"
-          :aria-label="i18n('labels.robotSettings')"
-          @click="goRobotSettings"
+          class="home-hero-mascot"
+          :aria-label="i18n('labels.mascotPlaceholder')"
+          @click="goChat"
         >
-          <img :src="iconRobotSetUrl" alt="" class="home-icon-img" />
+          <div v-if="!iconMascotUrl" class="home-mascot-placeholder">
+            <span class="home-mascot-placeholder-text">乐宝</span>
+          </div>
+          <img v-else :src="iconMascotUrl" alt="" class="home-mascot-img" />
         </button>
-
-        <!-- 右上：消息图标（最右侧） -->
-        <button
-          type="button"
-          class="home-icon-msg"
-          :aria-label="i18n('labels.messages')"
-          @click="goMessages"
-        >
-          <img :src="iconMsgHomeUrl" alt="" class="home-icon-img" />
-          <!-- 未读红点：有未读消息时显示 -->
-          <span v-if="hasUnreadMessages" class="home-icon-msg-dot" aria-hidden="true" />
-        </button>
-
-        <!-- 陪伴天数 - 导航栏下方 -->
-        <div class="home-companion-days">
-          {{ i18n('labels.companionDays', { days: companionDays }) }}
+        <!-- 设计稿气泡：使用 img_chat_bubble_home.png 图片 + 文字叠加 -->
+        <div class="home-hero-bubble">
+          <img :src="imgChatBubbleHomeUrl" alt="" class="home-bubble-bg" />
+          <div class="home-bubble-text">
+            <p class="home-bubble-line1">{{ i18n('labels.bubbleLine1', { name: childName }) }}</p>
+            <p class="home-bubble-line2">{{ i18n('labels.bubbleLine2') }}</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Mascot (3D 乐宝机器人形象) — 占位：待设计师提供透明背景PNG -->
-      <button
-        type="button"
-        class="home-hero-mascot"
-        :aria-label="i18n('labels.mascotPlaceholder')"
-        @click="goChat"
-      >
-        <div v-if="!iconMascotUrl" class="home-mascot-placeholder">
-          <span class="home-mascot-placeholder-text">乐宝</span>
-        </div>
-        <img v-else :src="iconMascotUrl" alt="" class="home-mascot-img" />
-      </button>
-      <!-- 设计稿气泡：使用 img_chat_bubble_home.png 图片 + 文字叠加 -->
-      <div class="home-hero-bubble">
-        <img :src="imgChatBubbleHomeUrl" alt="" class="home-bubble-bg" />
-        <div class="home-bubble-text">
-          <p class="home-bubble-line1">{{ i18n('labels.bubbleLine1', { name: childName }) }}</p>
-          <p class="home-bubble-line2">{{ i18n('labels.bubbleLine2') }}</p>
-        </div>
-      </div>
+        <!-- 高频话题 -->
+        <section class="home-topics">
+          <header class="home-topics-head">
+            <div class="home-topics-title">{{ i18n('labels.hotTopicsTitle') }}</div>
+            <button type="button" class="home-topics-history" @click="goChatHistory">
+              <span>{{ i18n('labels.chatHistory') }}</span>
+              <span class="home-topics-history-icon">
+                <img :src="iconArrowRightUrl" alt="" class="home-icon-img" />
+              </span>
+            </button>
+          </header>
+          <div class="home-topics-chips">
+            <button
+              v-for="topic in topics"
+              :key="topic"
+              type="button"
+              class="home-topic-chip"
+              @click="pickTopic(topic)"
+            >
+              <span class="home-topic-chip-icon">
+                <img :src="iconTopicUrl" alt="" class="home-icon-img" />
+              </span>
+              {{ topic }}
+            </button>
+            <!-- More indicator matching design ... -->
+            <button
+              type="button"
+              class="home-topics-more"
+              @click="goChatHistory"
+              :aria-label="i18n('labels.chatHistory')"
+            >
+              ...
+            </button>
+          </div>
+        </section>
+      </template>
 
-      <!-- 高频话题 -->
-      <section class="home-topics">
-        <header class="home-topics-head">
-          <div class="home-topics-title">{{ i18n('labels.hotTopicsTitle') }}</div>
-          <button type="button" class="home-topics-history" @click="goChatHistory">
-            <span>{{ i18n('labels.chatHistory') }}</span>
-            <span class="home-topics-history-icon">
-              <img :src="iconArrowRightUrl" alt="" class="home-icon-img" />
-            </span>
-          </button>
-        </header>
-        <div class="home-topics-chips">
-          <button
-            v-for="topic in topics"
-            :key="topic"
-            type="button"
-            class="home-topic-chip"
-            @click="pickTopic(topic)"
-          >
-            <span class="home-topic-chip-icon">
-              <img :src="iconTopicUrl" alt="" class="home-icon-img" />
-            </span>
-            {{ topic }}
-          </button>
-          <!-- More indicator matching design ... -->
-          <button
-            type="button"
-            class="home-topics-more"
-            @click="goChatHistory"
-            :aria-label="i18n('labels.chatHistory')"
-          >
-            ...
+      <!-- ============ 无设备: 空状态引导 ============ -->
+      <template v-else>
+        <div class="home-empty">
+          <img :src="iconMascotUrl" alt="" class="home-empty-mascot" />
+          <div class="home-empty-title">{{ i18n('labels.noDeviceTitle') }}</div>
+          <div class="home-empty-subtitle">{{ i18n('labels.noDeviceSubtitle') }}</div>
+          <button type="button" class="home-empty-btn" @click="handleAddDevice">
+            {{ i18n('labels.addDevice') }}
           </button>
         </div>
-      </section>
+      </template>
     </div>
 
     <!-- 设备切换弹窗 -->
