@@ -79,11 +79,16 @@ router.beforeEach(async (to) => {
     profileSynced = true;
   }
 
-  // Has token but profile incomplete (no nickname): allow onboarding flow
+  // Has token but profile incomplete (no nickname): redirect back to auth page
+  // so the user can continue filling in their profile (SetupProfilePanel).
+  // Previously this redirected to onboarding-complete, which caused users who
+  // refreshed during registration to be incorrectly routed into the device-add
+  // flow (AddVirtualDevicePage → voiceprint recording) instead of finishing
+  // their profile setup first.
   if (!profileStore.profile?.nickname) {
-    const onboardingRoutes = ['onboarding-complete', 'onboarding-guide', 'add-virtual-device'];
+    const onboardingRoutes = ['auth', 'onboarding-complete', 'onboarding-guide'];
     if (typeof to.name === 'string' && onboardingRoutes.includes(to.name)) return true;
-    return { name: 'onboarding-complete' };
+    return { name: 'auth' };
   }
 
   // Onboarding device-add flow in progress: steer user back to the guided flow
