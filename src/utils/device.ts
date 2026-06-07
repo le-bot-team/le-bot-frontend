@@ -1,3 +1,4 @@
+import type { ActivateVirtualDeviceRequest } from 'src/types/api/device';
 import type { ChildInfo, DeviceInfo } from 'stores/device/types';
 import { MAX_VIRTUAL_DEVICES } from 'stores/device/types';
 import { useAuthStore } from 'stores/auth';
@@ -27,7 +28,7 @@ export const retrieveDevices = async (): Promise<DeviceInfo[]> => {
  * Pre-checks the local virtual device limit before calling the backend.
  * @returns The newly created device from the API response.
  */
-const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
+const activateVirtualDeviceOrThrow = async (payload: ActivateVirtualDeviceRequest = {}): Promise<DeviceInfo> => {
   const authStore = useAuthStore();
   const deviceStore = useDeviceStore();
 
@@ -40,7 +41,7 @@ const activateVirtualDeviceOrThrow = async (): Promise<DeviceInfo> => {
     throw new Error(`Cannot add more than ${MAX_VIRTUAL_DEVICES} virtual devices`);
   }
 
-  const { data: response } = await activateVirtualDevice(authStore.accessToken);
+  const { data: response } = await activateVirtualDevice(authStore.accessToken, payload);
   if (!response.success) {
     throw new Error(response.message || 'Failed to activate virtual device');
   }
@@ -63,7 +64,7 @@ export const activateAndAddVirtualDevice = async (): Promise<DeviceInfo> => {
 
 /**
  * Activate a new virtual device and associate child info in the store.
- * The backend API does not accept child info; it is stored front-end only.
+ * Child metadata is sent to the backend so fresh sessions and other clients see the same device profile.
  * @param childInfo - The child info to associate with the device.
  * @param deviceName - Display name for the device (e.g. "小新的乐宝").
  * @returns The newly created virtual device info with childInfo attached.
@@ -73,17 +74,13 @@ export const activateAndAddVirtualDeviceWithChild = async (
   deviceName: string,
 ): Promise<DeviceInfo> => {
   const deviceStore = useDeviceStore();
-  const apiDevice = await activateVirtualDeviceOrThrow();
-
-  // Create a new object with additional frontend-only fields instead of mutating the response
-  const device: DeviceInfo = {
-    ...apiDevice,
-    childInfo,
+  const apiDevice = await activateVirtualDeviceOrThrow({
     name: deviceName,
-  };
+    childInfo,
+  });
 
-  deviceStore.addDevice(device);
-  return device;
+  deviceStore.addDevice(apiDevice);
+  return apiDevice;
 };
 
 /**

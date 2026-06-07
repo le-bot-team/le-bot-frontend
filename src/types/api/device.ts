@@ -12,6 +12,18 @@ export type RetrieveMineResponse =
       };
     };
 
+export interface ActivateVirtualDeviceRequest {
+  name?: string;
+  childInfo?: {
+    name: string;
+    age?: number;
+    gender?: 'male' | 'female' | 'boy' | 'girl';
+    birthday?: string;
+    avatar?: string | undefined;
+  };
+  config?: DeviceInfo['config'];
+}
+
 export type ActivateVirtualDeviceResponse =
   | {
       success: false;

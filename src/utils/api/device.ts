@@ -1,6 +1,7 @@
 import { api } from 'boot/axios';
 
 import type {
+  ActivateVirtualDeviceRequest,
   ActivateVirtualDeviceResponse,
   BindDeviceRequest,
   BindDeviceResponse,
@@ -15,10 +16,10 @@ export const retrieveMine = async (accessToken: string) =>
     },
   });
 
-export const activateVirtualDevice = async (accessToken: string) =>
+export const activateVirtualDevice = async (accessToken: string, data: ActivateVirtualDeviceRequest = {}) =>
   await api.post<ActivateVirtualDeviceResponse>(
     '/devices/virtual/activate',
-    {},
+    data,
     {
       headers: {
         'x-access-token': accessToken,
