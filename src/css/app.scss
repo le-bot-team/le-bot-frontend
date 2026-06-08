@@ -1088,6 +1088,25 @@ body {
   box-sizing: border-box;
 }
 
+// Design 774291fe: when VoiceNamingPanel is rendered inside the voiceprint
+// recording stage (SubmitPanel in NewPage), add top padding so the avatar
+// sits at ~168px from the artboard top (80px below the 88px nav header).
+.voiceprint-record-stage .voice-naming-panel {
+  padding-top: 40px;
+}
+
+// Button position: match RecordPanel's CTA pattern (margin-top: auto + 48px
+// bottom margin) so both pages' buttons align at the same vertical position.
+.voiceprint-record-stage .voice-naming-spacer {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.voiceprint-record-stage .voice-naming-primary-btn {
+  margin-top: auto;
+  margin-bottom: 48px;
+}
+
 .voice-naming-avatar {
   width: 88px;
   height: 88px;
@@ -1162,6 +1181,12 @@ body {
   flex-shrink: 0;
   color: var(--clr-placeholder);
   pointer-events: none;
+}
+
+// Center the relationship display text inside the clickable input box,
+// overriding the left-align set by .voice-naming-input-box--clickable.
+.voice-naming-input-box--clickable .voice-naming-relationship-value {
+  text-align: center;
 }
 
 .voice-naming-audio {
@@ -2811,7 +2836,10 @@ body {
 // padding so q-tab-panel default padding doesn't double up.
 
 .voiceprint-record-page {
-  height: 100vh;
+  // Use 100% instead of 100vh: the page lives inside q-page-container which
+  // sits below the StackHeader. 100vh exceeds the container's available height
+  // and triggers overflow-y: auto on the container, producing a scrollbar.
+  height: 100%;
   box-sizing: border-box;
   background: var(--clr-page-bg-neutral, rgba(241, 248, 248, 1));
   font-family: var(--font-family);
@@ -2823,20 +2851,24 @@ body {
   // tinted background only inside the panel area. Force all three layers to be
   // transparent so .voiceprint-record-page bg shows full-screen.
   // Also ensure height propagates through the chain so the stage can fill 100%.
+  // overflow: hidden on each layer prevents scrollbar leaking from inner content.
   > .q-tab-panels {
     flex: 1 1 0;
     min-height: 0;
     background: transparent;
+    overflow: hidden;
   }
 
   .q-panel {
     height: 100%;
     background: transparent;
+    overflow: hidden;
   }
 
   .q-tab-panel {
     height: 100%;
     background: transparent;
+    overflow: hidden;
   }
 }
 
@@ -4473,6 +4505,45 @@ body {
   &__btn--link {
     background: var(--clr-dialog-btn-link-bg);
     color: var(--clr-dialog-btn-link-text);
+  }
+
+  // Navigation links area — between body and action buttons
+  &__links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(21, 23, 23, 0.04);
+    color: var(--clr-link, #3b82f6);
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+
+    svg {
+      flex-shrink: 0;
+      margin-left: 6px;
+      opacity: 0.6;
+    }
+
+    &:hover {
+      background: rgba(21, 23, 23, 0.08);
+    }
+
+    &:active {
+      background: rgba(21, 23, 23, 0.12);
+    }
   }
 }
 

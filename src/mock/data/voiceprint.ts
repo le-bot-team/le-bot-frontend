@@ -11,7 +11,7 @@ export const MOCK_PERSONS: PersonDetail[] = [
     name: '张三',
     age: 30,
     address: '北京',
-    relationship: 'self',
+    relationship: 'father',
     voices: [
       {
         voice_id: 'mock-voice-00000000-0000-0000-0000-000000000011',
@@ -32,7 +32,7 @@ export const MOCK_PERSONS: PersonDetail[] = [
     name: '李四',
     age: 25,
     address: '上海',
-    relationship: 'family',
+    relationship: 'mother',
     voices: [
       {
         voice_id: 'mock-voice-00000000-0000-0000-0000-000000000021',

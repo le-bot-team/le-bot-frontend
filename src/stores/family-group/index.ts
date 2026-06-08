@@ -173,6 +173,16 @@ export const useFamilyGroupStore = defineStore(
     };
 
     /**
+     * Check if a child with the given name already exists across all family groups.
+     * Comparison is case-insensitive and trims whitespace.
+     */
+    const isChildNameDuplicate = (name: string): boolean => {
+      const normalized = name.trim().toLowerCase();
+      if (!normalized) return false;
+      return groups.value.some((g) => g.childName.trim().toLowerCase() === normalized);
+    };
+
+    /**
      * 清空所有数据 (登出时调用)
      */
     const reset = () => {
@@ -205,6 +215,7 @@ export const useFamilyGroupStore = defineStore(
       removeMember,
       setInviteCode,
       updateChildInfo,
+      isChildNameDuplicate,
       reset,
     };
   },

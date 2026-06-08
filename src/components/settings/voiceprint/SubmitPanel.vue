@@ -6,13 +6,15 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
+import ConfirmDialog from 'src/components/ConfirmDialog.vue';
 import VoiceNamingPanel from 'components/settings/voiceprint/VoiceNamingPanel.vue';
 import { type VprRelationship } from 'components/vpr-relationships';
 
-import { addVoice, register } from 'src/utils/api/voiceprint';
+import voiceprintAvatarImg from 'src/assets/lanhu/voiceprint/icon-1.webp';
+import { addVoice, recognize, register } from 'src/utils/api/voiceprint';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
-import type { EmptyResponse, RegisterResponse } from 'src/types/api/voiceprint';
+import type { EmptyResponse, RegisterResponse, RecognitionData } from 'src/types/api/voiceprint';
 
 const props = defineProps<{
   name: string | number;
@@ -29,7 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const { accessToken } = storeToRefs(useAuthStore());
-const { notify } = useQuasar();
+const { notify, dialog: $qDialog } = useQuasar();
 
 const i18n = i18nSubPath('components.settings.voiceprint.SubmitPanel');
 
@@ -42,6 +44,28 @@ const isRegisterMode = computed(() => !props.personId?.length);
 const primaryDisabled = computed(
   () => !props.data || (isRegisterMode.value && !personName.value.trim().length),
 );
+
+// Confidence threshold for duplicate voiceprint detection (0-1 scale).
+// Matches at or above this value are considered potential duplicates.
+const DUPLICATE_CONFIDENCE_THRESHOLD = 0.8;
+
+/**
+ * Run voiceprint recognition against the recorded audio to detect whether
+ * this voice already exists in the system. Returns the recognition data when
+ * a high-confidence match is found, or `undefined` otherwise.
+ */
+const checkDuplicateVoiceprint = async (audioBase64: string): Promise<RecognitionData | undefined> => {
+  if (!accessToken.value) return undefined;
+  try {
+    const { data: result } = await recognize(accessToken.value, audioBase64);
+    if (result.success && result.data.confidence >= DUPLICATE_CONFIDENCE_THRESHOLD) {
+      return result.data;
+    }
+  } catch {
+    // Recognition failure (no match in voiceprint DB) is normal — continue to register
+  }
+  return undefined;
+};
 
 const confirm = async (): Promise<void> => {
   if (!accessToken.value) {
@@ -57,6 +81,39 @@ const confirm = async (): Promise<void> => {
   try {
     const dataUrl = await blobToDataUrl(props.data);
     const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+
+    // --- Duplicate voiceprint detection (register mode only) ---
+    if (isRegisterMode.value) {
+      const duplicate = await checkDuplicateVoiceprint(audioBase64);
+      if (duplicate) {
+        isLoading.value = false;
+        const matchedName = duplicate.name ?? i18n('labels.unknownPerson');
+        // Normalize confidence to percentage (handle both 0-1 and 0-100 scales)
+        const confidencePct =
+          duplicate.confidence > 1
+            ? duplicate.confidence
+            : duplicate.confidence * 100;
+        // Block registration — show alert and return to editing
+        await new Promise<void>((resolve) => {
+          $qDialog({
+            component: ConfirmDialog,
+            componentProps: {
+              title: i18n('notifications.duplicateVoiceprintTitle'),
+              body: i18n('notifications.duplicateVoiceprintBody', {
+                name: matchedName,
+                confidence: confidencePct.toFixed(2),
+              }),
+              confirmLabel: i18n('notifications.duplicateConfirmLabel'),
+              alert: true,
+            },
+          })
+            .onOk(() => resolve())
+            .onDismiss(() => resolve());
+        });
+        return;
+      }
+    }
+
     let result: EmptyResponse | RegisterResponse;
     if (props.personId?.length) {
       result = (
@@ -126,6 +183,7 @@ onBeforeUnmount(() => {
     <voice-naming-panel
       v-model:name="personName"
       v-model:relationship="relationship"
+      :avatar-src="voiceprintAvatarImg"
       :audio-src="audioSrc"
       :whose-voice-label="i18n('labels.whoseVoice')"
       :name-placeholder="i18n('labels.whoseVoiceHint')"
@@ -136,6 +194,7 @@ onBeforeUnmount(() => {
       :loading="isLoading"
       :secondary-label="i18n('labels.previous')"
       secondary-variant="weak"
+      :show-secondary="false"
       :name-editable="isRegisterMode"
       :relationship-editable="isRegisterMode"
       @primary="confirm"

@@ -3,8 +3,7 @@
 // Visual baseline: lanhu design d2a7b5f3 (DetailPage). Reused by both the
 // voiceprint settings DetailPage (edit mode) and the recording flow
 // SubmitPanel (register / addVoice). See plan VoiceNaming Unified Panel.
-import { BottomSheet } from 'quasar';
-import { computed } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 
 import {
   getRelationshipLabel,
@@ -27,6 +26,7 @@ const props = withDefaults(
     loading?: boolean;
     secondaryLabel: string;
     secondaryVariant?: 'weak' | 'danger';
+    showSecondary?: boolean;
     nameEditable?: boolean;
     relationshipEditable?: boolean;
   }>(),
@@ -36,6 +36,7 @@ const props = withDefaults(
     primaryDisabled: false,
     loading: false,
     secondaryVariant: 'weak',
+    showSecondary: true,
     nameEditable: true,
     relationshipEditable: true,
   },
@@ -55,24 +56,33 @@ const nameModel = computed({
 
 const relationshipText = computed(() => getRelationshipLabel(props.relationship));
 
+// Relationship bottom-sheet state — mirrors SetupProfilePanel grid-chip UX.
+const showRelationSheet = ref(false);
+
+const relationOptions = computed(() => getRelationshipOptions());
+
+const onEscape = (e: KeyboardEvent): void => {
+  if (e.key === 'Escape') showRelationSheet.value = false;
+};
+watch(showRelationSheet, (open) => {
+  if (open) {
+    window.addEventListener('keydown', onEscape);
+  } else {
+    window.removeEventListener('keydown', onEscape);
+  }
+});
+onUnmounted(() => window.removeEventListener('keydown', onEscape));
+
 const chooseRelationship = (): void => {
   if (!props.relationshipEditable) {
     return;
   }
-  BottomSheet.create({
-    title: props.relationshipSheetTitle,
-    grid: false,
-    actions: getRelationshipOptions().map((o) => ({
-      label: o.label,
-      id: o.value,
-    })),
-  })
-    .onOk((action) => {
-      emit('update:relationship', action.id as VprRelationship);
-    })
-    .onCancel(() => {
-      // no-op
-    });
+  showRelationSheet.value = true;
+};
+
+const selectRelationship = (val: VprRelationship): void => {
+  emit('update:relationship', val);
+  showRelationSheet.value = false;
 };
 </script>
 
@@ -107,7 +117,9 @@ const chooseRelationship = (): void => {
         type="button"
         @click="chooseRelationship"
       >
-        <span class="voice-naming-input voice-naming-input--readonly">
+        <span
+          class="voice-naming-input voice-naming-input--readonly voice-naming-relationship-value"
+        >
           {{ relationshipText }}
         </span>
         <q-icon class="voice-naming-relationship-chevron" name="expand_more" size="18px" />
@@ -115,7 +127,13 @@ const chooseRelationship = (): void => {
     </template>
 
     <!-- Audio preview (only rendered when audioSrc is available) -->
-    <audio v-if="audioSrc" class="voice-naming-audio" controls :src="audioSrc" aria-label="Audio preview" />
+    <audio
+      v-if="audioSrc"
+      class="voice-naming-audio"
+      controls
+      :src="audioSrc"
+      aria-label="Audio preview"
+    />
 
     <div class="voice-naming-spacer" aria-hidden="true" />
 
@@ -128,6 +146,7 @@ const chooseRelationship = (): void => {
       {{ primaryLabel }}
     </button>
     <button
+      v-if="showSecondary"
       class="voice-naming-secondary-btn"
       :class="[`voice-naming-secondary-btn--${secondaryVariant}`]"
       type="button"
@@ -137,9 +156,50 @@ const chooseRelationship = (): void => {
       {{ secondaryLabel }}
     </button>
   </div>
+
+  <!-- Relationship bottom sheet — teleported to body; reuses SetupProfilePanel CSS classes. -->
+  <Teleport to="body">
+    <transition name="vnp-sheet">
+      <div
+        v-if="showRelationSheet"
+        class="setup-profile-relation-overlay"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="relationshipSheetTitle"
+        @click.self="showRelationSheet = false"
+      >
+        <div class="setup-profile-relation-sheet">
+          <div class="setup-profile-relation-head">
+            <span class="setup-profile-relation-title">{{ relationshipSheetTitle }}</span>
+          </div>
+          <div class="setup-profile-relation-body">
+            <button
+              v-for="opt in relationOptions"
+              :key="opt.value"
+              class="setup-profile-relation-chip"
+              :class="{ 'setup-profile-relation-chip--active': relationship === opt.value }"
+              @click="selectRelationship(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </Teleport>
 </template>
 
 <style scoped>
 /* All structural styles live in src/css/app.scss under
-   "===== VoiceNamingPanel (shared) patterns =====". */
+   "===== SetupProfilePanel patterns, designs ed71eb82 / fb8d01d5 =====".
+   Only the Vue <transition> hooks are scoped. */
+.vnp-sheet-enter-active,
+.vnp-sheet-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.vnp-sheet-enter-from,
+.vnp-sheet-leave-to {
+  opacity: 0;
+}
 </style>

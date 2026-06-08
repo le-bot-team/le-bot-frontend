@@ -17,7 +17,7 @@ import VoiceprintIntroPanel from 'components/settings/voiceprint/VoiceprintIntro
 import ChildInfoForm from 'components/ChildInfoForm.vue';
 import PersonalityEditor from 'components/PersonalityEditor.vue';
 import { blobToDataUrl, i18nSubPath } from 'src/utils/common';
-import { register } from 'src/utils/api/voiceprint';
+import { recognize, register } from 'src/utils/api/voiceprint';
 import { activateAndAddVirtualDeviceWithChild, unbindAndRemoveDevice } from 'src/utils/device';
 import { useDeviceStore } from 'stores/device';
 import { useAuthStore } from 'stores/auth';
@@ -279,9 +279,52 @@ const step1Valid = computed(
   () => childName.value.trim().length > 0 && childBirthday.value.trim().length > 0,
 );
 
+/**
+ * Build navigation links for the duplicate-detection dialog.
+ * Includes device-config and (when child/group info is available) child-edit links.
+ */
+function buildDuplicateDialogLinks(group?: {
+  id: string;
+  members: { id: string; memberType: string }[];
+}) {
+  const links: { label: string; to: string }[] = [
+    { label: i18n('notifications.linkDeviceConfig'), to: '/stack/device-config' },
+  ];
+  if (group) {
+    const childMember = group.members.find((m) => m.memberType === 'child');
+    if (childMember) {
+      links.push({
+        label: i18n('notifications.linkChildEdit'),
+        to: `/stack/family-group/child-edit?childId=${childMember.id}&groupId=${group.id}`,
+      });
+    }
+  }
+  return links;
+}
+
 function goStep2() {
   if (!step1Valid.value) {
     $q.notify({ message: i18n('notifications.fieldsRequired'), type: 'warning' });
+    return;
+  }
+  // Duplicate child name detection: block if a child with the same name already exists
+  if (familyGroupStore.isChildNameDuplicate(childName.value.trim())) {
+    // Clear the onboarding flow so re-entering the page starts fresh
+    // (no device was activated at this point, so no cleanup needed)
+    onboardingFlow.completeFlow();
+    const matchedGroup = familyGroupStore.groups.find(
+      (g) => g.childName.trim().toLowerCase() === childName.value.trim().toLowerCase(),
+    );
+    $q.dialog({
+      component: ConfirmDialog,
+      componentProps: {
+        title: i18n('notifications.duplicateChildName'),
+        body: i18n('notifications.duplicateChildHint'),
+        confirmLabel: i18n('notifications.duplicateConfirmLabel'),
+        alert: true,
+        links: buildDuplicateDialogLinks(matchedGroup),
+      },
+    });
     return;
   }
   // Persist child info before advancing
@@ -354,6 +397,42 @@ async function onVoiceprintRecorded(data: Blob) {
 
     const dataUrl = await blobToDataUrl(data);
     const audioBase64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+
+    // Voiceprint duplicate detection: check if this voice already exists
+    // and is linked to an existing child in the user's family groups.
+    try {
+      const recognizeResult = await recognize(accessToken.value, audioBase64);
+      if (recognizeResult.data.success) {
+        const matchedName = recognizeResult.data.data.name;
+        if (matchedName) {
+          const existingGroup = familyGroupStore.groups.find(
+            (g) => g.childName.trim().toLowerCase() === matchedName.trim().toLowerCase(),
+          );
+          if (existingGroup) {
+            $q.dialog({
+              component: ConfirmDialog,
+              componentProps: {
+                title: i18n('notifications.duplicateVoiceprint'),
+                body: i18n('notifications.duplicateChildHint'),
+                confirmLabel: i18n('notifications.duplicateConfirmLabel'),
+                alert: true,
+                links: buildDuplicateDialogLinks(existingGroup),
+              },
+            });
+            // Clean up the orphaned device (activated in step 2) and clear the
+            // onboarding flow so re-entering the page starts fresh.
+            void cleanupIncompleteDevice();
+            isRegisteringVoiceprint.value = false;
+            // Return to step 0 so the user can retry with different info
+            step.value = 0;
+            return;
+          }
+        }
+      }
+    } catch {
+      // Recognition failure (no match in voiceprint DB) is normal — continue to register
+    }
+
     const childAge = childBirthday.value
       ? (() => {
           const birth = new Date(childBirthday.value);

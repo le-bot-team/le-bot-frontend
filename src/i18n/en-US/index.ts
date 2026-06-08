@@ -384,28 +384,37 @@ export default {
           labels: {
             hint: 'Please ensure that your recording is clear and distinguishable. If you are not satisfied, you can go back and re-record.',
             whoseVoice: 'Whose voice is this?',
-            whoseVoiceHint: "Enter the voice owner's name",
+            whoseVoiceHint: 'Enter nickname',
             relationship: 'Relationship with you',
             relationshipHint: 'Select the relationship with the voice owner',
             relationshipLabel: 'Relationship with the child',
             selectRelationship: 'Select relationship with the child',
             confirm: 'Confirm and Submit',
             previous: 'Go back',
+            unknownPerson: 'Unknown person',
           },
           notifications: {
             registrationSuccess: 'Voiceprint registered successfully',
             registrationFailed: 'Voiceprint registration failed: {message}',
             registrationError: 'Voiceprint registration error',
+            duplicateVoiceprintTitle: 'Voiceprint Already Exists',
+            duplicateVoiceprintBody:
+              'The system detected that this voice is highly similar to the registered voiceprint of "{name}" (confidence: {confidence}%). Duplicate voiceprints cannot be added. Please re-record a different voice.',
+            duplicateConfirmLabel: 'Got it',
           },
         },
       },
     },
     vprRelationships: {
-      self: 'Self',
-      family: 'Family',
+      mother: 'Mother',
+      father: 'Father',
+      grandma: 'Grandma',
+      grandpa: 'Grandpa',
+      maternalGrandma: 'Maternal Grandma',
+      maternalGrandpa: 'Maternal Grandpa',
       friend: 'Friend',
-      colleague: 'Colleague',
-      other: 'Other',
+      otherRelative: 'Other Relative',
+      self: 'Self',
     },
     AudioRecorder: {
       labels: {
@@ -930,6 +939,14 @@ export default {
           activateFailed: 'Failed to activate virtual device',
           tokenMissing: 'Session expired, please log in again',
           voiceprintFailed: 'Voiceprint registration failed',
+          duplicateChildName: 'This child already has a Virtual LeBot, cannot add another',
+          duplicateVoiceprint:
+            'This voiceprint is already linked to an existing child, cannot add another',
+          duplicateChildHint:
+            'The system currently does not support multiple devices per child. You can adjust voice, tone and personalization in Device Settings, or edit child info in the Family Group.',
+          duplicateConfirmLabel: 'Got it',
+          linkDeviceConfig: 'Go to Device Settings',
+          linkChildEdit: 'Edit Child Info',
           leaveIncomplete:
             'Device setup is incomplete. The activated device will be removed if you leave. Continue?',
           leaveConfirmTitle: 'Leave Setup?',

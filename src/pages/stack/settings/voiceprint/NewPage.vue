@@ -28,7 +28,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <q-page class="voiceprint-record-page">
+  <q-page class="voiceprint-record-page voiceprint-add-page">
     <q-tab-panels class="full-width col-grow bg-transparent" v-model="panelIndex">
       <record-panel
         :name="0"
@@ -50,4 +50,9 @@ onBeforeMount(async () => {
   </q-page>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* Design 774291fe: "添加声纹" step-2 submit panel uses white bg. */
+.voiceprint-add-page {
+  background: #ffffff;
+}
+</style>
