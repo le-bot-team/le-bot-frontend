@@ -7,8 +7,7 @@
  */
 
 import type { FamilyMember } from 'stores/family-group/types';
-import boyAvatarUrl from 'src/assets/lanhu/child-edit/boy-avatar.png';
-import girlAvatarUrl from 'src/assets/lanhu/child-edit/girl-avatar.png';
+import { avatarsByGender, getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
 
 const props = defineProps<{
   member: FamilyMember;
@@ -21,12 +20,10 @@ const emit = defineEmits<{
 /** 根据成员类型获取头像（优先 childInfo.avatar，fallback 性别默认头像） */
 function getAvatar(): string {
   if (props.member.memberType === 'child' && props.member.childInfo) {
-    return (
-      props.member.childInfo.avatar ||
-      (props.member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl)
-    );
+    const gender = props.member.childInfo.gender;
+    return props.member.childInfo.avatar || avatarsByGender(gender)[0]?.url || getDefaultAvatarUrl('child');
   }
-  return props.member.avatar || boyAvatarUrl;
+  return props.member.avatar || getDefaultAvatarUrl('parent');
 }
 
 /** 获取元信息文本 */

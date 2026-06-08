@@ -108,7 +108,7 @@ export default {
       SignInOrSignUpPanel: {
         labels: {
           email: '邮箱',
-          continue: '继续',
+          continue: '一键登录/注册',
           signingIn: '处理中...',
           termsPrefix: '我已阅读并同意',
           termsOfService: '《服务条款》',

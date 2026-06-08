@@ -7,7 +7,7 @@
 // Panel 4: ForgotPasswordPanel (password reset: code + new password)
 // Page background uses the shared auth gradient (--gradient-page-bg).
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import appLogo from 'src/assets/logo.png';
@@ -22,6 +22,7 @@ import { retrieveDevices } from 'src/utils/device';
 import { i18nSubPath } from 'src/utils/common';
 import { useDeviceStore } from 'stores/device';
 import { useProfileStore } from 'stores/profile';
+import { useAuthStore } from 'stores/auth';
 
 const i18n = i18nSubPath('pages.main.AuthPage');
 
@@ -31,6 +32,20 @@ const email = ref<string>('');
 const isFinishing = ref<boolean>(false);
 const isNew = ref<boolean>(false);
 const panelIndex = ref<number>(0);
+
+// Resume profile setup after page refresh:
+// If the user has a valid token but no nickname, they registered successfully
+// but haven't completed SetupProfilePanel yet (e.g. they refreshed mid-form).
+// Auto-advance to panel 2 so they can continue filling in their profile
+// instead of being stuck on the login panel.
+onMounted(() => {
+  const authStore = useAuthStore();
+  const profileStore = useProfileStore();
+  if (authStore.accessToken && !profileStore.profile?.nickname) {
+    isNew.value = true;
+    panelIndex.value = 2;
+  }
+});
 
 function onProfileFinish() {
   // After profile setup, navigate to the onboarding complete guide page
@@ -46,8 +61,21 @@ async function onDirectFinish() {
     const profileStore = useProfileStore();
     deviceStore.updateDevices(await retrieveDevices());
     profileStore.updateProfile(await retrieveProfile());
+
+    // Profile incomplete (e.g. user went back from SetupProfilePanel
+    // and re-logged-in): show profile setup panel instead of navigating away.
+    if (!profileStore.profile?.nickname) {
+      isNew.value = true;
+      panelIndex.value = 2;
+      return;
+    }
   } catch (error) {
     console.warn('Failed to load user data on direct login', error);
+  } finally {
+    // Always clear the loading overlay, even if navigation was blocked
+    // by the router guard (e.g. incomplete profile redirected to 'auth'
+    // while already on 'auth' → navigation cancelled).
+    isFinishing.value = false;
   }
   await router
     .replace(typeof route.query.from === 'string' ? route.query.from : '/')
