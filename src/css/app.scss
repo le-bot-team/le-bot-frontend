@@ -3274,12 +3274,11 @@ body {
 //   矩形 1904/1908/1906/1910 (AI bubbles) fills[0] -> rgba(255,255,255,1)
 //   矩形 1903/1909/1905 (User bubbles) fills[0]    -> rgba(39.3,145.4,233.75,1)
 //                                                     ≈ rgba(39,145,234,1)
+//   AI bubble text color  -> rgba(21,23,23,1) (dark, from text nodes over white)
+//   User bubble text color -> rgba(255,255,255,1) (white, from text nodes over blue)
 //   矩形 1907 (input bar) frame -> 335×48 @ left:20 top:740, radius 12,
 //                                  fills[0] = rgba(255,255,255,1)
 //   bubble / input radius    -> 12 (rect.radius.topLeft=12 on all)
-// Text color tokens reuse --clr-text for AI and white for user (raw has no
-// type:text layer — typography renders as paths; colors derived from
-// Quasar theme and ChatMessageItem.vue authoring comment).
 //
 // NOTE (Principle 10 — code enhancement beyond raw):
 //   * 组 385 raw has empty fills; the radial-gradient on .chat-page__hero-bg
@@ -3305,18 +3304,18 @@ body {
   --chat-hero-mascot-left: 73px;
   --chat-hero-mascot-top: 30px; // = raw mascot top 118 - hero top 88
 
-  // Bubbles (AI / User)
-  // Design a2096a64: AI text = white (#FFFFFF), User text = blue (#2791EA)
+  // Bubbles (AI / User) — design a2096a64 raw JSON verified
+  // AI: white bg + dark text | User: blue bg + white text
   --chat-bubble-radius: 12px;
   --chat-bubble-max-w: 295px; // implementation bound; raw widest AI = 335, user = 214
   --chat-bubble-gap: 16px;
   --chat-list-padding-x: 20px;
   --chat-list-padding-top: 16px;
   --chat-list-padding-bottom: 24px;
-  --chat-ai-bg: transparent; // no bubble bg — text overlays directly on robot area
-  --chat-ai-color: rgba(255, 255, 255, 1); // AI text: white (设计稿)
-  --chat-user-bg: transparent; // no bubble bg
-  --chat-user-color: rgba(39, 145, 234, 1); // User text: blue (设计稿 #2791EA)
+  --chat-ai-bg: rgba(255, 255, 255, 1); // white bubble bg (设计稿)
+  --chat-ai-color: rgba(21, 23, 23, 1); // dark text on AI bubble (设计稿)
+  --chat-user-bg: rgba(39, 145, 234, 1); // blue bubble bg #2791EA (设计稿)
+  --chat-user-color: rgba(255, 255, 255, 1); // white text on user bubble (设计稿)
 
   // Input bar (矩形 1907)
   --chat-input-bar-w: 335px;
@@ -3421,13 +3420,13 @@ body {
 .chat-bubble--ai {
   align-self: flex-start;
   background: var(--chat-ai-bg);
-  color: var(--chat-ai-color); // white text for AI (设计稿)
+  color: var(--chat-ai-color); // dark text on white bg (设计稿)
 }
 
 .chat-bubble--user {
   align-self: flex-end;
   background: var(--chat-user-bg);
-  color: var(--chat-user-color); // blue text for user (设计稿 #2791EA)
+  color: var(--chat-user-color); // white text on blue bg (设计稿)
 }
 
 .chat-bubble__typing {

@@ -134,6 +134,7 @@ export function useChatSession(): UseChatSessionReturn {
   }
 
   async function handleOutputAudioStream(message: WsOutputAudioStreamResponseSuccess) {
+    console.log('[useChatSession] outputAudioStream received, chatId:', message.data.chatId);
     chatStore.conversationId = message.data.conversationId;
 
     // Reset the waiting response timer on each audio chunk (prevents premature timeout)
@@ -173,6 +174,7 @@ export function useChatSession(): UseChatSessionReturn {
   }
 
   function handleOutputTextStream(message: WsOutputTextStreamResponseSuccess) {
+    console.log('[useChatSession] outputTextStream received:', message.data);
     chatStore.conversationId = message.data.conversationId;
 
     if (message.data.role === 'assistant') {
@@ -193,6 +195,7 @@ export function useChatSession(): UseChatSessionReturn {
   }
 
   function handleOutputTextComplete(message: WsOutputTextCompleteResponseSuccess) {
+    console.log('[useChatSession] outputTextComplete received:', message.data);
     chatStore.conversationId = message.data.conversationId;
 
     if (message.data.role === 'assistant') {

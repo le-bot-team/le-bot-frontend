@@ -123,8 +123,8 @@ export function useWakeWord(): UseWakeWordReturn {
     };
 
     recognition.onerror = (event) => {
-      // 'no-speech' and 'aborted' are expected — just log others
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      // 'no-speech', 'aborted', and 'network' are expected — just log others
+      if (event.error !== 'no-speech' && event.error !== 'aborted' && event.error !== 'network') {
         console.warn('[useWakeWord] Recognition error:', event.error);
       }
     };

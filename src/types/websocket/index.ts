@@ -88,6 +88,7 @@ export class WsWrapper {
         console.warn('[WsWrapper] Failed to parse message:', event.data);
         return;
       }
+      console.log('[WsWrapper] Received action:', message.action);
       if (this._actionHandlers.has(message.action)) {
         await this._actionHandlers.get(message.action)?.call(this, message as never);
       } else {
