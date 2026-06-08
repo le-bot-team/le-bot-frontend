@@ -14,8 +14,7 @@ import { i18nSubPath } from 'src/utils/common';
 import { useFamilyGroupStore } from 'stores/family-group';
 import type { FamilyGroup } from 'stores/family-group/types';
 import { useTracker } from 'src/composables/useTracker';
-import boyAvatarUrl from 'src/assets/lanhu/child-edit/boy-avatar.png';
-import girlAvatarUrl from 'src/assets/lanhu/child-edit/girl-avatar.png';
+import { avatarsByGender, getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
 
 const i18n = i18nSubPath('pages.stack.FamilyGroupPage');
 const familyGroupStore = useFamilyGroupStore();
@@ -28,7 +27,9 @@ const familyGroups = computed<FamilyGroup[]>(() => familyGroupStore.groups);
 function getChildAvatar(group: FamilyGroup): string {
   const child = group.members.find((m) => m.memberType === 'child');
   if (child?.childInfo?.avatar) return child.childInfo.avatar;
-  return child?.childInfo?.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl;
+  const gender = child?.childInfo?.gender;
+  if (gender) return avatarsByGender(gender)[0]?.url || getDefaultAvatarUrl('child');
+  return getDefaultAvatarUrl('child');
 }
 
 function onGroupClick(group: FamilyGroup) {

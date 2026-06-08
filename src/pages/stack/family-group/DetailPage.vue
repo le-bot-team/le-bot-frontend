@@ -19,8 +19,7 @@ import { useFamilyGroupStore } from 'stores/family-group';
 import type { FamilyMember } from 'stores/family-group/types';
 import { useProfileStore } from 'stores/profile';
 import { router } from 'src/router';
-import boyAvatarUrl from 'src/assets/lanhu/child-edit/boy-avatar.png';
-import girlAvatarUrl from 'src/assets/lanhu/child-edit/girl-avatar.png';
+import { avatarsByGender, getDefaultAvatarUrl } from 'src/utils/defaultAvatars';
 
 const i18n = i18nSubPath('pages.stack.family-group.DetailPage');
 const route = useRoute();
@@ -58,11 +57,10 @@ const isCreator = computed(() => {
 /** 根据成员类型获取头像（优先 childInfo.avatar，fallback 性别默认头像） */
 function getAvatar(member: FamilyMember): string {
   if (member.memberType === 'child' && member.childInfo) {
-    return (
-      member.childInfo.avatar || (member.childInfo.gender === 'girl' ? girlAvatarUrl : boyAvatarUrl)
-    );
+    const gender = member.childInfo.gender;
+    return member.childInfo.avatar || avatarsByGender(gender)[0]?.url || getDefaultAvatarUrl('child');
   }
-  return member.avatar || boyAvatarUrl;
+  return member.avatar || getDefaultAvatarUrl('parent');
 }
 
 /** 计算儿童年龄 */
