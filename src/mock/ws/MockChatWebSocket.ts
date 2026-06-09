@@ -179,10 +179,9 @@ export class MockChatWebSocket {
           },
         });
 
-        const partialText = assistantText.slice(
-          0,
-          Math.floor(((i + 1) / chunks.length) * assistantText.length),
-        );
+        const start = Math.floor((i / chunks.length) * assistantText.length);
+        const end = Math.floor(((i + 1) / chunks.length) * assistantText.length);
+        const deltaText = assistantText.slice(start, end);
         this._dispatch({
           id: uid(),
           action: WsAction.outputTextStream,
@@ -191,7 +190,7 @@ export class MockChatWebSocket {
             chatId,
             conversationId,
             role: 'assistant',
-            text: partialText,
+            text: deltaText,
           },
         });
       }, i * 800);

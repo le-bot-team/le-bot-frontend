@@ -163,4 +163,8 @@ function goBack() {
   </q-header>
 </template>
 
-<style scoped></style>
+<style scoped>
+.q-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+</style>

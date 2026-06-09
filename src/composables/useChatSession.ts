@@ -1,5 +1,5 @@
 import { uid } from 'quasar';
-import { computed, ref, shallowRef, type Ref } from 'vue';
+import { computed, ref, shallowRef, watch, type Ref } from 'vue';
 
 import { useChatPlayer } from 'src/composables/useChatPlayer';
 import { useChatRecorder } from 'src/composables/useChatRecorder';
@@ -25,7 +25,7 @@ import type {
   WsOutputTextStreamResponseSuccess,
   WsUpdateConfigResponseSuccess,
 } from 'src/types/websocket/types';
-import { useChatStore } from 'stores/chat';
+import { useChatStore, type PersistedChatMessage } from 'stores/chat';
 
 import { pcmToWav } from 'src/utils/audio';
 
@@ -84,7 +84,35 @@ export function useChatSession(): UseChatSessionReturn {
 
   // --- Core state ---
   const state = ref<ChatState>(ChatState.Idle);
-  const messages = ref<ChatMessage[]>([]);
+
+  // Restore messages from persisted store on mount
+  const restoredMessages: ChatMessage[] = chatStore.persistedMessages.map((pm) => {
+    const msg: ChatMessage = {
+      id: pm.id,
+      role: pm.role,
+      text: pm.text,
+      audioChunks: [],
+      isFinished: pm.isFinished,
+      isStreaming: false, // restored messages are no longer streaming
+      timestamp: pm.timestamp,
+    };
+    if (pm.chatId !== undefined) msg.chatId = pm.chatId;
+    if (pm.conversationId !== undefined) msg.conversationId = pm.conversationId;
+    return msg;
+  });
+  const messages = ref<ChatMessage[]>(restoredMessages);
+
+  // Sync messages → store (debounced via Vue reactivity)
+  watch(
+    messages,
+    (msgs) => {
+      const persisted: PersistedChatMessage[] = msgs
+        .filter((m) => m.text.trim().length > 0 || m.isFinished)
+        .map(toPersisted);
+      chatStore.setPersistedMessages(persisted);
+    },
+    { deep: true },
+  );
   const isConnected = computed(() => wsClient.connectionState.value === 'connected');
 
   let currentRequestId = '';
@@ -107,6 +135,11 @@ export function useChatSession(): UseChatSessionReturn {
     wsClient.onAction(WsAction.establishConnection, () => {
       console.log('[useChatSession] Connection established');
       sendUpdateConfig();
+      // After reconnect, if we're in Idle state, restart wake word listening
+      // (it may have been skipped during transitionToIdle due to dead connection)
+      if (state.value === ChatState.Idle) {
+        wakeWord.start();
+      }
     });
 
     wsClient.onAction(WsAction.updateConfig, handleUpdateConfig);
@@ -179,11 +212,12 @@ export function useChatSession(): UseChatSessionReturn {
 
     if (message.data.role === 'assistant') {
       const msg = findOrCreateAssistantMessage(message.data.chatId, message.data.conversationId);
-      msg.text = message.data.text;
+      // outputTextStream sends incremental delta text — append, not overwrite
+      msg.text += message.data.text;
       msg.isStreaming = true;
     } else if (message.data.role === 'user') {
       const msg = findOrCreateUserMessage(message.data.chatId, message.data.conversationId);
-      msg.text = message.data.text;
+      msg.text += message.data.text;
 
       // Voice interrupt: if server recognized user speech (len >= 2), stop playback
       // Mirrors Go's HandleOutputTextStream with role=="user" && len(text)>=2
@@ -200,16 +234,24 @@ export function useChatSession(): UseChatSessionReturn {
 
     if (message.data.role === 'assistant') {
       const msg = findOrCreateAssistantMessage(message.data.chatId, message.data.conversationId);
-      msg.text = message.data.text;
+      // Stream deltas (+=) already accumulated the full text including tokens
+      // that outputTextComplete may omit (e.g. leading emoji).
+      // Fallback: if no stream was received (text is empty), use complete text.
+      if (msg.text.length === 0) {
+        msg.text = message.data.text;
+      }
       msg.isStreaming = false;
     } else if (message.data.role === 'user') {
       const msg = findOrCreateUserMessage(message.data.chatId, message.data.conversationId);
-      msg.text = message.data.text;
+      // Same: prefer accumulated stream text; fallback to complete text if empty
+      if (msg.text.length === 0) {
+        msg.text = message.data.text;
+      }
       msg.isFinished = true;
       msg.isStreaming = false;
 
       // After user text is finalized with sufficient length, prepare for assistant response
-      if (message.data.text.length >= 2) {
+      if (msg.text.length >= 2) {
         // Create a new player for the upcoming assistant turn
         currentTurnPlayer.destroy();
         currentTurnPlayer = useChatPlayer();
@@ -301,9 +343,14 @@ export function useChatSession(): UseChatSessionReturn {
     currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
-    // Restart wake word listener
-    if (isConnected.value) {
+    // Restart wake word listener — but only if the connection is actually alive.
+    // If the connection dropped (half-open socket), skip restarting wake word
+    // to avoid waking into a dead connection. The heartbeat will force a
+    // reconnect, and the establishConnection handler will re-setup state.
+    if (isConnected.value && wsClient.isAlive()) {
       wakeWord.start();
+    } else {
+      console.log('[useChatSession] Skipping wakeWord restart — connection not healthy');
     }
 
     // Stop timeout checker
@@ -405,10 +452,7 @@ export function useChatSession(): UseChatSessionReturn {
 
     // Setup recorder chunk handler — sends audio to server
     recorder.onChunk((base64: string) => {
-      if (
-        state.value === ChatState.WaitingResponse ||
-        state.value === ChatState.Active
-      ) {
+      if (state.value === ChatState.WaitingResponse || state.value === ChatState.Active) {
         wsClient.sendAction(new WsInputAudioStreamRequest(base64));
 
         // Accumulate chunks into current user message
@@ -455,10 +499,22 @@ export function useChatSession(): UseChatSessionReturn {
 
     state.value = ChatState.Idle;
 
-    // Revoke all audio URLs
+    // Revoke all audio URLs (prevent memory leaks)
     messages.value.forEach((msg) => {
       if (msg.audioUrl) URL.revokeObjectURL(msg.audioUrl);
     });
+
+    // Persist messages to store before clearing local ref
+    // (the watcher already keeps them in sync, but ensure final state is saved)
+    const persisted: PersistedChatMessage[] = messages.value
+      .filter((m) => m.text.trim().length > 0 || m.isFinished)
+      .map((m) => {
+        const p = toPersisted(m);
+        p.isStreaming = false;
+        return p;
+      });
+    chatStore.setPersistedMessages(persisted);
+
     messages.value = [];
   }
 
@@ -466,6 +522,21 @@ export function useChatSession(): UseChatSessionReturn {
     if (!isConnected.value) {
       console.warn('[useChatSession] Cannot wake — not connected');
       return;
+    }
+
+    // Heartbeat-aware health check: if the connection is half-open (readyState
+    // OPEN but no data received within heartbeat timeout), force reconnect and
+    // wait for it to come back before proceeding.
+    if (!wsClient.isAlive()) {
+      console.warn('[useChatSession] Connection appears dead (heartbeat timeout) — forcing reconnect');
+      // Proactively close the socket; the onclose handler triggers auto-reconnect in 3 s.
+      wsClient.forceReconnect();
+      // Give the reconnect cycle time to complete (3 s reconnect delay + margin)
+      await sleep(4000);
+      if (!isConnected.value) {
+        console.warn('[useChatSession] Reconnect did not complete in time');
+        return;
+      }
     }
 
     // Stop wake word listener during session
@@ -502,6 +573,7 @@ export function useChatSession(): UseChatSessionReturn {
   function clearContext(): void {
     wsClient.sendAction(new WsClearContextRequest());
     chatStore.conversationId = '';
+    chatStore.clearMessages();
   }
 
   function destroy() {
@@ -513,9 +585,7 @@ export function useChatSession(): UseChatSessionReturn {
   // ==========================================================================
 
   function findOrCreateAssistantMessage(chatId: string, conversationId: string): ChatMessage {
-    let msg = messages.value.findLast(
-      (m) => m.role === 'assistant' && !m.isFinished,
-    );
+    let msg = messages.value.findLast((m) => m.role === 'assistant' && !m.isFinished);
     if (!msg) {
       msg = {
         id: uid(),
@@ -537,9 +607,7 @@ export function useChatSession(): UseChatSessionReturn {
   }
 
   function findOrCreateUserMessage(chatId: string, conversationId: string): ChatMessage {
-    let msg = messages.value.findLast(
-      (m) => m.role === 'user' && !m.isFinished,
-    );
+    let msg = messages.value.findLast((m) => m.role === 'user' && !m.isFinished);
     if (!msg) {
       msg = {
         id: uid(),
@@ -618,4 +686,19 @@ function base64ToBlob(base64: string): Blob {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Strip non-serializable fields and undefined optionals for safe localStorage persistence */
+function toPersisted(m: ChatMessage): PersistedChatMessage {
+  const base: PersistedChatMessage = {
+    id: m.id,
+    role: m.role,
+    text: m.text,
+    isFinished: m.isFinished,
+    isStreaming: m.isStreaming,
+    timestamp: m.timestamp,
+  };
+  if (m.chatId !== undefined) base.chatId = m.chatId;
+  if (m.conversationId !== undefined) base.conversationId = m.conversationId;
+  return base;
 }

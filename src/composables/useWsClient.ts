@@ -20,6 +20,10 @@ export interface UseWsClientReturn {
   sendAction: <T extends WsRequest>(request: T) => void;
   /** Whether the WebSocket is currently open */
   isConnected: () => boolean;
+  /** Whether the connection is alive (heartbeat-aware, detects half-open sockets) */
+  isAlive: () => boolean;
+  /** Force-close the current socket to trigger auto-reconnect */
+  forceReconnect: () => void;
 }
 
 /**
@@ -95,6 +99,14 @@ export function useWsClient(): UseWsClientReturn {
     return ws?.isOpen() ?? false;
   }
 
+  function isAlive(): boolean {
+    return ws?.isAlive() ?? false;
+  }
+
+  function forceReconnect(): void {
+    ws?.forceReconnect();
+  }
+
   return {
     connectionState,
     connect,
@@ -103,5 +115,7 @@ export function useWsClient(): UseWsClientReturn {
     offAction,
     sendAction,
     isConnected,
+    isAlive,
+    forceReconnect,
   };
 }

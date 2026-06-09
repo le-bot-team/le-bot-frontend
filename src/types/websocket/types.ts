@@ -11,6 +11,8 @@ export enum WsAction {
   outputAudioStream = 'outputAudioStream',
   outputTextComplete = 'outputTextComplete',
   outputTextStream = 'outputTextStream',
+  ping = 'ping',
+  pong = 'pong',
   updateConfig = 'updateConfig',
 }
 
@@ -201,6 +203,16 @@ export interface WsUpdateConfigResponseSuccess extends WsBaseResponseSuccess {
   };
 }
 
+export interface WsPingResponseSuccess extends WsBaseResponseSuccess {
+  action: WsAction.pong;
+}
+
+// ping is send-only; no response is ever received under this key.
+// A dummy interface is required to satisfy the WsResponseMapping index.
+export interface WsPingNeverResponse extends WsBaseResponseSuccess {
+  action: WsAction.ping;
+}
+
 export interface WsResponseMapping {
   [WsAction.cancelOutput]: WsCancelOutputResponseSuccess;
   [WsAction.chatComplete]: WsChatCompleteResponseSuccess | WsChatCompleteResponseError;
@@ -212,6 +224,8 @@ export interface WsResponseMapping {
   [WsAction.outputAudioStream]: WsOutputAudioStreamResponseSuccess;
   [WsAction.outputTextComplete]: WsOutputTextCompleteResponseSuccess;
   [WsAction.outputTextStream]: WsOutputTextStreamResponseSuccess;
+  [WsAction.ping]: WsPingNeverResponse;
+  [WsAction.pong]: WsPingResponseSuccess;
   [WsAction.updateConfig]: WsUpdateConfigResponseSuccess;
 }
 
