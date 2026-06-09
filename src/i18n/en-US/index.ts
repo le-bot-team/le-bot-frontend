@@ -849,10 +849,15 @@ export default {
           confirmDelete: 'Confirm',
           personalityHint:
             '*Enabling personality adjustment helps users find a robot personality that better suits their preferences',
+          clearChatHistory: 'Clear Chat History',
+          clearChatConfirmTitle: 'Confirm Clear Chat History',
+          clearChatConfirmBody: 'Chat history cannot be recovered after clearing. Are you sure?',
+          confirmClear: 'Confirm',
         },
         notifications: {
           unbindSuccess: 'Device deleted successfully',
           unbindFailed: 'Failed to delete device',
+          clearChatSuccess: 'Chat history cleared',
         },
       },
       DevicesPage: {

@@ -838,10 +838,15 @@ export default {
             '删除设备的同时，该设备绑定的儿童家庭组、聊天记录、成长报告等都将一并删除，确定删除吗？',
           confirmDelete: '确定',
           personalityHint: '*开启个性调节有助于用户匹配到更适合个人喜好的机器人个性',
+          clearChatHistory: '清空聊天记录',
+          clearChatConfirmTitle: '确认清空聊天记录',
+          clearChatConfirmBody: '清空后聊天记录将无法恢复，确定要清空吗？',
+          confirmClear: '确定清空',
         },
         notifications: {
           unbindSuccess: '设备删除成功',
           unbindFailed: '删除设备失败',
+          clearChatSuccess: '聊天记录已清空',
         },
       },
       DevicesPage: {

@@ -25,6 +25,27 @@ const isVirtual = computed(() => currentDevice.value?.type === 'virtual');
 // TODO: 当真实硬件设备上线时，恢复 Wi-Fi 管理 / 固件升级 / 关于本设备 菜单
 const HIDE_HARDWARE_MENUS = true;
 
+function handleClearChatHistory() {
+  if (!currentDevice.value) return;
+  trackClick('btn_click_clear_chat_history');
+  $q.dialog({
+    component: ConfirmDialog,
+    componentProps: {
+      title: i18n('labels.clearChatConfirmTitle'),
+      body: i18n('labels.clearChatConfirmBody'),
+      confirmType: 'danger' as const,
+      confirmLabel: i18n('labels.confirmClear'),
+    },
+  }).onOk(() => {
+    // TODO: implement clear chat history API call
+    $q.notify({
+      type: 'positive',
+      message: i18n('notifications.clearChatSuccess'),
+      icon: 'check',
+    });
+  });
+}
+
 function handleUnbind() {
   if (!currentDevice.value) return;
 
@@ -61,7 +82,13 @@ function handleUnbind() {
 }
 
 const visibleMenuGroups = computed(() => {
-  const groups: { label: string; sideLabel?: string; to?: string; hint?: string }[][] = [
+  const groups: {
+    label: string;
+    sideLabel?: string;
+    to?: string;
+    hint?: string;
+    action?: () => void;
+  }[][] = [
     [
       {
         label: i18n('labels.voiceStyle'),
@@ -78,6 +105,10 @@ const visibleMenuGroups = computed(() => {
         label: i18n('labels.personalityAdjustment'),
         to: '/stack/device-config/personality',
         hint: i18n('labels.personalityHint'),
+      },
+      {
+        label: i18n('labels.clearChatHistory'),
+        action: handleClearChatHistory,
       },
     ],
   ];
@@ -114,7 +145,13 @@ onBeforeMount(() => {
           :key="menuIndex"
           type="button"
           class="settings-menu-row"
-          @click="menu.to ? router.push(menu.to).catch(console.error) : undefined"
+          @click="
+            menu.to
+              ? router.push(menu.to).catch(console.error)
+              : menu.action
+                ? menu.action()
+                : undefined
+          "
         >
           <span>{{ menu.label }}</span>
           <span class="settings-menu-row__right">
