@@ -264,7 +264,7 @@ export default {
         settingsVoiceprintNew: 'Add Voiceprint',
         settingsVoiceprintTest: 'Voiceprint Test',
         chatVoiceCall: 'Voice Call',
-        chatHistory: 'Chat History',
+        chatHistory: 'Chat Summary',
         chatMuteSettings: 'Mute Settings',
         deviceConfigVoice: 'Voice Style',
         deviceConfigLanguage: 'Language',
@@ -1547,10 +1547,18 @@ export default {
       chat: {
         ChatHistoryPage: {
           labels: {
-            title: 'Chat History',
-            searchPlaceholder: 'Search chat history',
-            empty: 'No chat history',
-            comingSoon: 'Chat history coming soon',
+            title: 'Chat Summary',
+            highFreqTopics: 'Frequent Topics',
+            chatSummary: 'Chat Summary',
+            growthSignal: 'Growth Signal',
+            empty: 'No chat summary available',
+            comingSoon: 'Chat summary coming soon',
+            emptyTitle: 'No chat records today',
+            emptySubtitle: 'Chat with Lebao and see what new discoveries today brings~',
+            goChat: 'Start Chat',
+            loadFailed: 'Failed to load summary',
+            retry: 'Retry',
+            loading: 'Loading...',
           },
         },
         MuteSettingsPage: {

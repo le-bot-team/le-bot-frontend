@@ -119,6 +119,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'chat-history',
         path: 'chat/history',
+        meta: { title: 'pages.stack.chat.ChatHistoryPage.labels.title' },
         components: {
           default: () => import('pages/stack/chat/ChatHistoryPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),

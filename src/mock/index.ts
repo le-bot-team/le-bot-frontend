@@ -1,6 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import { api } from 'boot/axios';
 
+import { setupChatSummaryMock } from 'src/mock/handlers/chat-summary';
 import { setupDeviceMock } from 'src/mock/handlers/device';
 import { setupFamilyGroupMock } from 'src/mock/handlers/family-group';
 import { setupMessageMock } from 'src/mock/handlers/message';
@@ -16,6 +17,7 @@ let originalWebSocket: typeof WebSocket | null = null;
 
 const handlers: MockSetupFn[] = [
   // Auth mock removed — auth endpoints now hit the real backend
+  setupChatSummaryMock,
   setupDeviceMock,
   setupFamilyGroupMock,
   setupMessageMock,
