@@ -35,7 +35,9 @@ function toggleAudio() {
   } else {
     el.currentTime = 0;
     el.play()
-      .then(() => { isPlaying.value = true; })
+      .then(() => {
+        isPlaying.value = true;
+      })
       .catch((err) => {
         console.error('[ChatMessageItem] audio play failed:', err);
         isPlaying.value = false;

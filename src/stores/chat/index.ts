@@ -13,7 +13,7 @@ export interface PersistedChatMessage {
   timestamp: number;
 }
 
-const MAX_PERSISTED_MESSAGES = 200;
+const MAX_PERSISTED_MESSAGES = 150;
 
 export const useChatStore = defineStore(
   'chat',

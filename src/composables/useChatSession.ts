@@ -26,6 +26,7 @@ import type {
   WsUpdateConfigResponseSuccess,
 } from 'src/types/websocket/types';
 import { useChatStore, type PersistedChatMessage } from 'stores/chat';
+import { getChatHistoryDB, type ChatDateEntry } from 'src/utils/chat/chatHistoryDB';
 
 import { pcmToWav } from 'src/utils/audio';
 
@@ -46,6 +47,10 @@ export interface UseChatSessionReturn {
   isRecording: Ref<boolean>;
   /** Whether assistant audio is currently playing */
   isAudioPlaying: Ref<boolean>;
+  /** Whether older messages are available in IndexedDB */
+  hasMoreHistory: Ref<boolean>;
+  /** Whether older messages are currently being loaded */
+  isLoadingHistory: Ref<boolean>;
   /** Connect to the chat server */
   connect: (token: string, deviceId?: string, sessionId?: string) => Promise<void>;
   /** Disconnect from the chat server */
@@ -58,6 +63,12 @@ export interface UseChatSessionReturn {
   interrupt: () => void;
   /** Clear the conversation context */
   clearContext: () => void;
+  /** Load older messages from IndexedDB (pagination) */
+  loadMore: () => Promise<void>;
+  /** Return a list of calendar dates that have messages */
+  getDateList: () => Promise<ChatDateEntry[]>;
+  /** Load messages for a specific day from IndexedDB */
+  loadDateMessages: (dateTimestamp: number) => Promise<ChatMessage[]>;
   /** Clean up all resources (call in onBeforeUnmount) */
   destroy: () => void;
 }
@@ -82,10 +93,19 @@ export function useChatSession(): UseChatSessionReturn {
   const wakeWord = useWakeWord();
   const chatStore = useChatStore();
 
+  // --- IndexedDB history storage ---
+  const chatDB = getChatHistoryDB();
+  const hasMoreHistory = ref(false);
+  const isLoadingHistory = ref(false);
+  const PAGE_SIZE = 50;
+
   // --- Core state ---
   const state = ref<ChatState>(ChatState.Idle);
 
-  // Restore messages from persisted store on mount
+  // Restore messages from persisted store on mount (fast cache — latest 150)
+  // NOTE: This cache is device-agnostic (localStorage), so it may contain
+  // messages from a different device. We use it only as initial render data;
+  // connect() will overwrite with the correct device's messages from IndexedDB.
   const restoredMessages: ChatMessage[] = chatStore.persistedMessages.map((pm) => {
     const msg: ChatMessage = {
       id: pm.id,
@@ -102,13 +122,20 @@ export function useChatSession(): UseChatSessionReturn {
   });
   const messages = ref<ChatMessage[]>(restoredMessages);
 
-  // Sync messages → store (debounced via Vue reactivity)
+  // Track whether the localStorage→IndexedDB migration has already been done
+  // (only needed once, for the very first session after the IndexedDB upgrade).
+  let localStorageMigrated = false;
+
+  // Sync messages → localStorage (capped at 150) + IndexedDB (full history)
   watch(
     messages,
     (msgs) => {
       const persisted: PersistedChatMessage[] = msgs
         .filter((m) => m.text.trim().length > 0 || m.isFinished)
         .map(toPersisted);
+      // Write to IndexedDB (full history)
+      void chatDB.addMessages(persisted);
+      // Keep localStorage as fast cache (latest 150 only)
       chatStore.setPersistedMessages(persisted);
     },
     { deep: true },
@@ -437,6 +464,34 @@ export function useChatSession(): UseChatSessionReturn {
   // ==========================================================================
 
   async function connect(token: string, deviceId?: string, sessionId?: string): Promise<void> {
+    // Immediately clear messages so the UI does not show another device's history
+    messages.value = [];
+    hasMoreHistory.value = false;
+
+    // Initialize IndexedDB for chat history, scoped to the current device
+    const effectiveDeviceId = deviceId ?? 'default';
+    try {
+      await chatDB.init(effectiveDeviceId);
+
+      // One-time migration: on the very first connect after IndexedDB was introduced,
+      // seed the default device's store from localStorage. Skip for all subsequent
+      // connects and for non-default devices to avoid cross-device pollution.
+      if (!localStorageMigrated && restoredMessages.length > 0 && effectiveDeviceId === 'default') {
+        const persisted: PersistedChatMessage[] = restoredMessages.map(toPersisted);
+        await chatDB.addMessages(persisted);
+        localStorageMigrated = true;
+      }
+
+      // Load latest 150 messages exclusively from this device's IndexedDB store
+      const latest = await chatDB.getLatest(150);
+      if (latest.length > 0) {
+        messages.value = latest.map(toChatMessage);
+        hasMoreHistory.value = await chatDB.hasOlder(latest[0]!.timestamp);
+      }
+    } catch (err) {
+      console.warn('[useChatSession] IndexedDB init failed, using localStorage only:', err);
+    }
+
     // Setup WS handlers before connecting — useWsClient queues them as
     // pendingHandlers and applies them inside connect() to the new WsWrapper
     setupWsHandlers();
@@ -528,7 +583,9 @@ export function useChatSession(): UseChatSessionReturn {
     // OPEN but no data received within heartbeat timeout), force reconnect and
     // wait for it to come back before proceeding.
     if (!wsClient.isAlive()) {
-      console.warn('[useChatSession] Connection appears dead (heartbeat timeout) — forcing reconnect');
+      console.warn(
+        '[useChatSession] Connection appears dead (heartbeat timeout) — forcing reconnect',
+      );
       // Proactively close the socket; the onclose handler triggers auto-reconnect in 3 s.
       wsClient.forceReconnect();
       // Give the reconnect cycle time to complete (3 s reconnect delay + margin)
@@ -574,10 +631,51 @@ export function useChatSession(): UseChatSessionReturn {
     wsClient.sendAction(new WsClearContextRequest());
     chatStore.conversationId = '';
     chatStore.clearMessages();
+    messages.value = [];
+    hasMoreHistory.value = false;
+    void chatDB.clear();
+  }
+
+  async function loadMore(): Promise<void> {
+    if (isLoadingHistory.value || !hasMoreHistory.value) return;
+    isLoadingHistory.value = true;
+    try {
+      const oldest = messages.value[0];
+      if (!oldest) return;
+      const older = await chatDB.getOlder(oldest.timestamp, PAGE_SIZE);
+      if (older.length > 0) {
+        const chatMsgs = older.map(toChatMessage);
+        messages.value = [...chatMsgs, ...messages.value];
+      }
+      if (older.length < PAGE_SIZE) {
+        hasMoreHistory.value = false;
+      } else {
+        hasMoreHistory.value = await chatDB.hasOlder(older[0]!.timestamp);
+      }
+    } catch (err) {
+      console.error('[useChatSession] loadMore failed', err);
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  }
+
+  async function getDateList(): Promise<ChatDateEntry[]> {
+    return chatDB.getDateList();
+  }
+
+  async function loadDateMessages(dateTimestamp: number): Promise<ChatMessage[]> {
+    const d = new Date(dateTimestamp);
+    d.setHours(0, 0, 0, 0);
+    const start = d.getTime();
+    d.setHours(23, 59, 59, 999);
+    const end = d.getTime();
+    const msgs = await chatDB.getByDateRange(start, end);
+    return msgs.map(toChatMessage);
   }
 
   function destroy() {
     disconnect();
+    chatDB.destroy();
   }
 
   // ==========================================================================
@@ -661,12 +759,17 @@ export function useChatSession(): UseChatSessionReturn {
     isWakeWordListening: wakeWord.isListening,
     isRecording: recorder.isRecording,
     isAudioPlaying,
+    hasMoreHistory,
+    isLoadingHistory,
     connect,
     disconnect,
     wake,
     endTurn,
     interrupt,
     clearContext,
+    loadMore,
+    getDateList,
+    loadDateMessages,
     destroy,
   };
 }
@@ -701,4 +804,20 @@ function toPersisted(m: ChatMessage): PersistedChatMessage {
   if (m.chatId !== undefined) base.chatId = m.chatId;
   if (m.conversationId !== undefined) base.conversationId = m.conversationId;
   return base;
+}
+
+/** Restore a PersistedChatMessage back to a full ChatMessage (for IndexedDB reads). */
+function toChatMessage(pm: PersistedChatMessage): ChatMessage {
+  const msg: ChatMessage = {
+    id: pm.id,
+    role: pm.role,
+    text: pm.text,
+    audioChunks: [],
+    isFinished: pm.isFinished,
+    isStreaming: false,
+    timestamp: pm.timestamp,
+  };
+  if (pm.chatId !== undefined) msg.chatId = pm.chatId;
+  if (pm.conversationId !== undefined) msg.conversationId = pm.conversationId;
+  return msg;
 }

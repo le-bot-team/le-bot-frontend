@@ -17,9 +17,11 @@ import { useRoute } from 'vue-router';
 
 import ChatInputBar from 'src/components/chat/ChatInputBar.vue';
 import ChatMessageList from 'src/components/chat/ChatMessageList.vue';
+import ChatDateNav from 'src/components/chat/ChatDateNav.vue';
 import { bus } from 'src/boot/bus';
 import { useChatSession } from 'src/composables/useChatSession';
 import { useTracker } from 'src/composables/useTracker';
+import type { ChatDateEntry } from 'src/utils/chat/chatHistoryDB';
 import { router } from 'src/router';
 import { i18nSubPath } from 'src/utils/common';
 import { useAuthStore } from 'stores/auth';
@@ -35,8 +37,22 @@ const { currentDeviceId } = storeToRefs(useDeviceStore());
 const { notify } = useQuasar();
 const { trackClick, trackConversion } = useTracker();
 
-const { messages, isConnected, isMediaReady, connect, wake, endTurn, destroy } = useChatSession();
+const {
+  messages,
+  isConnected,
+  isMediaReady,
+  hasMoreHistory,
+  isLoadingHistory,
+  connect,
+  wake,
+  endTurn,
+  loadMore,
+  getDateList,
+  destroy,
+} = useChatSession();
 
+const messageListRef = ref<InstanceType<typeof ChatMessageList> | null>(null);
+const dateList = ref<ChatDateEntry[]>([]);
 const pressing = ref(false);
 
 // --- Session bootstrap ---
@@ -51,10 +67,27 @@ async function bootstrap() {
     const q = route.query.session;
     const sessionId = typeof q === 'string' ? q : undefined;
     await connect(accessToken.value, currentDeviceId.value ?? undefined, sessionId);
+    // Load date navigation list after connection
+    void refreshDateList();
   } catch (err) {
     console.error('[ChatPage] connect failed', err);
     notify({ type: 'negative', message: i18n('notifications.connectFailed') });
   }
+}
+
+async function refreshDateList() {
+  dateList.value = await getDateList();
+}
+
+function onLoadMore() {
+  void loadMore().then(() => {
+    // Refresh date list after loading more messages
+    void refreshDateList();
+  });
+}
+
+function onDateSelect(dateKey: string) {
+  messageListRef.value?.scrollToDate(dateKey);
 }
 
 // --- Press-to-talk ---
@@ -132,7 +165,17 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Scrollable bubble list -->
-    <ChatMessageList :messages="messages" :empty-hint="i18n('labels.emptyHint')" />
+    <ChatMessageList
+      ref="messageListRef"
+      :messages="messages"
+      :empty-hint="i18n('labels.emptyHint')"
+      :has-more-history="hasMoreHistory"
+      :is-loading-history="isLoadingHistory"
+      @load-more="onLoadMore"
+    />
+
+    <!-- Date navigation bar (shows only when there is enough history) -->
+    <ChatDateNav :dates="dateList" @select="onDateSelect" />
 
     <!-- Bottom press-to-talk bar -->
     <ChatInputBar
