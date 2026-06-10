@@ -61,9 +61,15 @@ const hasUnreadMessages = computed(() => unreadCount.value > 0);
 // 设备切换弹窗
 const showDeviceSwitch = ref(false);
 
-// Companion days — mock (D3 default). Replace with a computed diff from the
-// user's profile bind date when the backend exposes it.
-const companionDays = computed<number>(() => 263);
+// Companion days — computed from current device's createdAt date.
+const companionDays = computed<number>(() => {
+  const createdAt = currentDevice.value?.createdAt;
+  if (!createdAt) return 0;
+  const created = new Date(createdAt);
+  const now = new Date();
+  const diffMs = now.getTime() - created.getTime();
+  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+});
 
 // Topic chips — static mock (D4 default); backend-driven later.
 // Design order: Row1=画画/猫咪/过家家酒, Row2=奥特曼/妈妈/托托 + ...
