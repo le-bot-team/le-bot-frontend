@@ -706,8 +706,12 @@ export default {
           weeklyInteraction: 'Weekly Interaction',
           minutes: 'min',
           viewReport: 'View Report',
+          totalMinutes: 'Total {n} min',
+          currentPeriod: 'Current Period Duration',
+          chatSummary: 'Summary',
         },
         sections: {
+          chatSummary: 'Chat Summary',
           emotion: 'Emotion Changes',
           interaction: 'Interaction Duration',
           capability: 'Capability Development',

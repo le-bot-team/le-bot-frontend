@@ -4,6 +4,7 @@ import { api } from 'boot/axios';
 import { setupChatSummaryMock } from 'src/mock/handlers/chat-summary';
 import { setupDeviceMock } from 'src/mock/handlers/device';
 import { setupFamilyGroupMock } from 'src/mock/handlers/family-group';
+import { setupGrowthDataMock } from 'src/mock/handlers/growth-data';
 import { setupMessageMock } from 'src/mock/handlers/message';
 import { setupProfileMock } from 'src/mock/handlers/profile';
 import { setupVoiceprintMock } from 'src/mock/handlers/voiceprint';
@@ -20,6 +21,7 @@ const handlers: MockSetupFn[] = [
   setupChatSummaryMock,
   setupDeviceMock,
   setupFamilyGroupMock,
+  setupGrowthDataMock,
   setupMessageMock,
   setupProfileMock,
   setupVoiceprintMock,

@@ -699,8 +699,12 @@ export default {
           weeklyInteraction: '本周互动时长',
           minutes: '分钟',
           viewReport: '查看报告',
+          totalMinutes: '总计 {n} 分钟',
+          currentPeriod: '本周期互动时长',
+          chatSummary: '摘要',
         },
         sections: {
+          chatSummary: '聊天摘要',
           emotion: '情绪变化',
           interaction: '互动时长',
           capability: '能力发展',

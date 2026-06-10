@@ -19,8 +19,8 @@ export const MAIN_NAVIGATIONS: Navigation[] = [
   {
     label: i18n('main.growth'),
     icon: 'mdi-sprout',
-    available: false,
-    route: 'growth',
+    available: true,
+    route: '/main/growth-data',
   },
   {
     label: i18n('main.mall'),

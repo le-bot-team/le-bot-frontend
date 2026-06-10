@@ -38,6 +38,44 @@ const routes: RouteRecordRaw[] = [
               header: () => import('layouts/headers/MainHeader.vue'),
             },
       },
+      {
+        path: 'growth-data',
+        children: [
+          {
+            name: 'growth-data',
+            path: '',
+            meta: { title: 'components.navigations.stack.growthData' },
+            components: Platform.is.mobile
+              ? {
+                  default: () => import('pages/stack/GrowthDataPage.vue'),
+                  footer: () => import('layouts/footers/MainFooter.vue'),
+                }
+              : {
+                  default: () => import('pages/stack/GrowthDataPage.vue'),
+                  leftDrawer: () => import('layouts/drawers/LeftMainDrawer.vue'),
+                  header: () => import('layouts/headers/MainHeader.vue'),
+                },
+          },
+          {
+            name: 'growth-data-capability-detail',
+            path: 'capability/:capabilityKey',
+            meta: { title: 'components.navigations.stack.growthDataCapabilityDetail' },
+            components: {
+              default: () => import('pages/stack/growth-data/CapabilityDetailPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+          {
+            name: 'growth-data-weekly-report',
+            path: 'weekly-report',
+            meta: { title: 'components.navigations.stack.growthDataWeeklyReport' },
+            components: {
+              default: () => import('pages/stack/growth-data/ChatWeeklyReportPage.vue'),
+              header: () => import('layouts/headers/StackHeader.vue'),
+            },
+          },
+        ],
+      },
     ],
   },
   {
@@ -132,38 +170,6 @@ const routes: RouteRecordRaw[] = [
           default: () => import('pages/stack/chat/MuteSettingsPage.vue'),
           header: () => import('layouts/headers/StackHeader.vue'),
         },
-      },
-      {
-        path: 'growth-data',
-        children: [
-          {
-            name: 'growth-data',
-            path: '',
-            meta: { title: 'components.navigations.stack.growthData' },
-            components: {
-              default: () => import('pages/stack/GrowthDataPage.vue'),
-              header: () => import('layouts/headers/StackHeader.vue'),
-            },
-          },
-          {
-            name: 'growth-data-capability-detail',
-            path: 'capability/:capabilityKey',
-            meta: { title: 'components.navigations.stack.growthDataCapabilityDetail' },
-            components: {
-              default: () => import('pages/stack/growth-data/CapabilityDetailPage.vue'),
-              header: () => import('layouts/headers/StackHeader.vue'),
-            },
-          },
-          {
-            name: 'growth-data-weekly-report',
-            path: 'weekly-report',
-            meta: { title: 'components.navigations.stack.growthDataWeeklyReport' },
-            components: {
-              default: () => import('pages/stack/growth-data/ChatWeeklyReportPage.vue'),
-              header: () => import('layouts/headers/StackHeader.vue'),
-            },
-          },
-        ],
       },
       {
         path: 'profile',
