@@ -1,0 +1,1 @@
+var e=`/le-bot-frontend/assets/boy-avatar-CndA-A43.png`;export{e as t};

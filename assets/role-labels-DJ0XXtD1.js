@@ -1,0 +1,1 @@
+function e(e){return t=>t?{father:e(`role.father`),mother:e(`role.mother`),grandpa:e(`role.grandpa`),grandma:e(`role.grandma`),paternal_grandmother:e(`role.paternalGrandmother`),maternal_grandfather:e(`role.maternalGrandfather`),maternal_grandma:e(`role.maternalGrandma`),friend:e(`role.friend`),other:e(`role.other`)}[t]??t:`-`}export{e as t};

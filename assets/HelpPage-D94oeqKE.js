@@ -1,0 +1,1 @@
+import{Dn as e,Kn as t,Nn as n,On as r,tr as i}from"./index-YgRzVQcC.js";import{t as a}from"./QPage-BDg06_1B.js";var o=n({__name:`HelpPage`,setup(n){return(n,o)=>(t(),r(a,{class:`flex flex-center`},{default:i(()=>[...o[0]||=[e(`p`,{class:`text-h6 text-grey-6`},`HelpPage — Coming Soon`,-1)]]),_:1}))}});export{o as default};

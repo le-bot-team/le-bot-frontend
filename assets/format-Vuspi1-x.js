@@ -1,0 +1,1 @@
+var e=[`B`,`KB`,`MB`,`GB`,`TB`,`PB`];function t(t,n=1){let r=0;for(;parseInt(t,10)>=1024&&r<e.length-1;)t/=1024,++r;return`${t.toFixed(n)}${e[r]}`}function n(e,t,n){return n<=t?t:Math.min(n,Math.max(t,e))}export{t as n,n as t};

@@ -1,0 +1,1 @@
+import{_t as e}from"./index-YgRzVQcC.js";var t=e=>new Promise((t,n)=>{let r=new FileReader;r.onloadend=()=>{if(r.error){n(r.error);return}typeof r.result==`string`?t(r.result):n(Error(`FileReader result is not a string`))},r.readAsDataURL(e)}),n=t=>(n,r)=>r?e.t(`${t}.${n}`,r):e.t(`${t}.${n}`);export{n,t};

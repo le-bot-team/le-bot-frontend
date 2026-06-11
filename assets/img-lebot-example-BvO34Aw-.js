@@ -1,0 +1,1 @@
+var e=`/le-bot-frontend/assets/img-lebot-example-VcJjpcZQ.png`;export{e as t};
