@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // ChatHistoryPage — Chat Summary (聊天摘要) page.
 // Displays a daily chat summary with calendar navigation, frequent topics,
-// AI-generated summary, and growth signals.
+// AI-generated summary, highlights, emotions, capabilities, and growth signals.
 // Data is fetched from the backend via GET /api/v1/chat/summary.
 
 import { storeToRefs } from 'pinia';
@@ -203,6 +203,69 @@ watch([selectedDate, currentDeviceId], () => {
 function goChat() {
   void router.push('/stack/chat');
 }
+
+// ──── Emotion helpers ─────────────────────────────────────────────────────────
+const EMOTION_META: Record<string, { i18nKey: string; emoji: string; color: string; bg: string }> =
+  {
+    happy: {
+      i18nKey: 'emotionHappy',
+      emoji: '😊',
+      color: 'rgba(255, 183, 77, 1)',
+      bg: 'rgba(255, 183, 77, 0.12)',
+    },
+    curious: {
+      i18nKey: 'emotionCurious',
+      emoji: '🤔',
+      color: 'rgba(100, 181, 246, 1)',
+      bg: 'rgba(100, 181, 246, 0.12)',
+    },
+    excited: {
+      i18nKey: 'emotionExcited',
+      emoji: '🤩',
+      color: 'rgba(255, 111, 97, 1)',
+      bg: 'rgba(255, 111, 97, 0.12)',
+    },
+    calm: {
+      i18nKey: 'emotionCalm',
+      emoji: '😌',
+      color: 'rgba(102, 187, 106, 1)',
+      bg: 'rgba(102, 187, 106, 0.12)',
+    },
+    frustrated: {
+      i18nKey: 'emotionFrustrated',
+      emoji: '😤',
+      color: 'rgba(239, 83, 80, 1)',
+      bg: 'rgba(239, 83, 80, 0.12)',
+    },
+    _default: {
+      i18nKey: '',
+      emoji: '🙂',
+      color: 'rgba(147, 152, 169, 1)',
+      bg: 'rgba(147, 152, 169, 0.12)',
+    },
+  };
+
+interface EmotionDisplay {
+  label: string;
+  emoji: string;
+  color: string;
+  bg: string;
+}
+
+/** The dominant emotion (highest percentage) */
+const primaryEmotion = computed<EmotionDisplay | null>(() => {
+  if (!summary.value?.emotions) return null;
+  const entries = Object.entries(summary.value.emotions).filter(([, v]) => v > 0);
+  if (entries.length === 0) return null;
+  const [key] = entries.sort((a, b) => b[1] - a[1])[0]!;
+  const meta = EMOTION_META[key] ?? EMOTION_META['_default']!;
+  return {
+    label: meta.i18nKey ? i18n(`labels.${meta.i18nKey}`) : key,
+    emoji: meta.emoji,
+    color: meta.color,
+    bg: meta.bg,
+  };
+});
 </script>
 
 <template>
@@ -322,15 +385,16 @@ function goChat() {
 
     <!-- Summary data -->
     <template v-else-if="hasData && summary">
-      <!-- Unified card: frequent topics + chat summary -->
+      <!-- Interaction minutes header -->
+      <div class="chat-summary__minutes">
+        <span class="chat-summary__minutes-label">{{ i18n('labels.todayChat') }}</span>
+        <span class="chat-summary__minutes-value">
+          {{ i18n('labels.todayChatMin', { minutes: summary.interactionMinutes }) }}
+        </span>
+      </div>
+
+      <!-- Merged card: Chat summary + Highlights -->
       <section class="chat-summary__card">
-        <div class="chat-summary__section-title chat-summary__section-title--topics">
-          {{ i18n('labels.highFreqTopics') }}
-        </div>
-        <p class="chat-summary__text">{{ summary.topics.join('、') }}</p>
-
-        <div class="chat-summary__divider" />
-
         <div class="chat-summary__section-title chat-summary__section-title--summary">
           {{ i18n('labels.chatSummary') }}
         </div>
@@ -342,14 +406,39 @@ function goChat() {
           >
             {{ para }}
           </p>
-          <ul class="chat-summary__bullets">
-            <li v-for="(bp, idx) in summary.summaryBullets" :key="idx" class="chat-summary__bullet">
-              {{ bp }}
-            </li>
-          </ul>
         </div>
 
-        <!-- Growth signal (inside unified card) -->
+        <!-- Highlights (inline) -->
+        <template v-if="summary.summaryBullets.length">
+          <div class="chat-summary__divider" />
+          <div class="chat-summary__section-title chat-summary__section-title--highlights">
+            {{ i18n('labels.highlights') }}
+          </div>
+          <div
+            v-for="(bp, idx) in summary.summaryBullets"
+            :key="idx"
+            class="chat-summary__highlight-inline"
+          >
+            <span class="chat-summary__highlight-quote">「{{ bp.quote }}」</span>
+            <span class="chat-summary__highlight-context">— {{ bp.context }}</span>
+          </div>
+        </template>
+      </section>
+
+      <!-- Emotion (primary only) -->
+      <section v-if="primaryEmotion" class="chat-summary__card chat-summary__card--emotion">
+        <span class="chat-summary__emotion-label">{{ i18n('labels.todayEmotions') }}</span>
+        <span
+          class="chat-summary__emotion-badge"
+          :style="{ color: primaryEmotion.color, background: primaryEmotion.bg }"
+        >
+          <span class="chat-summary__emotion-emoji">{{ primaryEmotion.emoji }}</span>
+          <span class="chat-summary__emotion-text">{{ primaryEmotion.label }}</span>
+        </span>
+      </section>
+
+      <!-- Growth signal -->
+      <section class="chat-summary__card">
         <div class="chat-summary__growth">
           <img src="/lanhu-slices/icon-leaf-dairy.png" alt="" class="chat-summary__leaf-icon" />
           <p class="chat-summary__growth-text">
@@ -479,6 +568,10 @@ function goChat() {
   margin-bottom: 10px;
 }
 
+.chat-summary__section-title--highlights {
+  color: rgba(2, 188, 237, 1);
+}
+
 .chat-summary__text {
   font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 14px;
@@ -507,27 +600,85 @@ function goChat() {
   margin: 0 0 4px;
 }
 
-.chat-summary__bullets {
-  margin: 8px 0 0;
-  padding-left: 0;
-  list-style: none;
+/* ─── Interaction minutes ────────────────────────────────────────────────────── */
+.chat-summary__minutes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
 
-.chat-summary__bullet {
-  position: relative;
-  padding-left: 14px;
+.chat-summary__minutes-label {
+  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(99, 104, 104, 1);
+}
+
+.chat-summary__minutes-value {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(32, 204, 249, 1);
+}
+
+/* ─── Highlights (inline within summary card) ──────────────────────────────── */
+.chat-summary__highlight-inline {
   margin-bottom: 6px;
+  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  line-height: 24px;
 }
 
-.chat-summary__bullet::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 10px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(32, 204, 249, 1);
+.chat-summary__highlight-inline:last-child {
+  margin-bottom: 0;
+}
+
+.chat-summary__highlight-quote {
+  font-weight: 600;
+  color: rgba(21, 23, 23, 1);
+}
+
+.chat-summary__highlight-context {
+  font-weight: 400;
+  color: rgba(147, 152, 169, 1);
+  margin-left: 4px;
+}
+
+/* ─── Emotion card ──────────────────────────────────────────────────────────── */
+.chat-summary__card--emotion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.chat-summary__emotion-label {
+  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(2, 188, 237, 1);
+}
+
+.chat-summary__emotion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 20px;
+}
+
+.chat-summary__emotion-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.chat-summary__emotion-text {
+  font-family: 'AlibabaPuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* ─── Growth signal ─────────────────────────────────────────────────────────── */
@@ -535,7 +686,6 @@ function goChat() {
   background: rgba(32, 204, 249, 0.08);
   border-radius: 8px;
   padding: 12px;
-  margin-top: 14px;
   display: flex;
   gap: 8px;
   align-items: flex-start;
