@@ -51,7 +51,6 @@ export const useGrowthDataStore = defineStore('growth-data', () => {
     try {
       const response = await fetchGrowthWeeklyReport(token, deviceId, weekStart);
       const body = response.data;
-      console.log('[GrowthData] API response:', JSON.stringify(body));
 
       if (body.success && body.data) {
         report.value = body.data;

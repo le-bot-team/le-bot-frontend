@@ -1519,6 +1519,7 @@ body {
 }
 
 .home-topics-history {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1532,6 +1533,18 @@ body {
   background: transparent;
   padding: 0;
   outline: none;
+}
+
+// Red dot: unread summary indicator positioned above-right of the history label
+.home-topics-history-dot {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef5350;
+  pointer-events: none;
 }
 
 .home-topics-history-icon {

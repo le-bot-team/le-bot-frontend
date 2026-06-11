@@ -13,6 +13,7 @@ import { fetchChatSummary } from 'src/utils/api/chat-summary';
 import type { ChatSummaryData } from 'src/types/api/chat-summary';
 import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
+import { useChatSummaryRead } from 'src/composables/useChatSummaryRead';
 
 const i18n = i18nSubPath('pages.stack.chat.ChatHistoryPage');
 
@@ -21,6 +22,12 @@ const authStore = useAuthStore();
 const deviceStore = useDeviceStore();
 const { accessToken } = storeToRefs(authStore);
 const { currentDeviceId } = storeToRefs(deviceStore);
+
+// 摘要已读状态管理 — 用户进入页面查看摘要时自动标记为已读
+const { markDateAsRead } = useChatSummaryRead(
+  () => currentDeviceId.value,
+  () => accessToken.value,
+);
 
 // ──── Calendar state ─────────────────────────────────────────────────────────
 const selectedDate = ref(new Date());
@@ -179,6 +186,10 @@ async function loadSummary() {
     const body = resp.data;
     if (body.success) {
       summary.value = body.data;
+      // Mark the viewed date as read so the HomePage red dot is cleared
+      if (body.data !== null) {
+        markDateAsRead(toDateParam(selectedDate.value));
+      }
     } else {
       error.value = body.message ?? 'Unknown error';
     }
@@ -189,9 +200,13 @@ async function loadSummary() {
   }
 }
 
-// Fetch on mount
+// Fetch on mount + mark yesterday as read to clear HomePage red dot
 onMounted(() => {
   void loadSummary();
+  // User entered summary page — mark yesterday as read so the red dot clears
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  markDateAsRead(toDateParam(yesterday));
 });
 
 // Refetch when date or device changes

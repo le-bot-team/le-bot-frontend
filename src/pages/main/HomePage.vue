@@ -13,7 +13,7 @@
 // Tab-icon strategy (user decision D6-a): the bottom tab icons are Sketch
 // symbolInstence without extractable path/imageRef; mdi icons are retained.
 
-import { ref, computed, onBeforeMount } from 'vue';
+import { ref, computed, onBeforeMount, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { router } from 'src/router';
@@ -22,6 +22,7 @@ import { useAuthStore } from 'stores/auth';
 import { useDeviceStore } from 'stores/device';
 import { useMessagesStore } from 'stores/messages';
 import { useTracker } from 'src/composables/useTracker';
+import { useChatSummaryRead } from 'src/composables/useChatSummaryRead';
 import DeviceSwitchPanel from 'components/home/DeviceSwitchPanel.vue';
 
 import iconMsgHomeUrl from 'src/assets/lanhu/home/icon-msg-home.png';
@@ -37,7 +38,7 @@ const iconMascotUrl = imgLebotHomeUrl;
 const i18n = i18nSubPath('pages.main.HomePage');
 const { accessToken } = storeToRefs(useAuthStore());
 const deviceStore = useDeviceStore();
-const { currentDevice, virtualDevices } = storeToRefs(deviceStore);
+const { currentDevice, currentDeviceId, virtualDevices } = storeToRefs(deviceStore);
 const { trackClick, trackConversion } = useTracker();
 
 /** Whether the user has at least one device — controls empty-state vs normal view */
@@ -57,6 +58,20 @@ const currentDeviceName = computed(() => {
 const messagesStore = useMessagesStore();
 const { unreadCount } = storeToRefs(messagesStore);
 const hasUnreadMessages = computed(() => unreadCount.value > 0);
+
+// 聊天摘要已读状态 — 昨日摘要未读时显示红点提醒
+const { isYesterdayUnread, checkYesterdayHasData } =
+  useChatSummaryRead(
+    () => currentDeviceId.value,
+    () => accessToken.value,
+  );
+
+/** True when yesterday has summary content AND user hasn't read it yet */
+const yesterdaySummaryUnread = ref(false);
+
+const hasUnreadSummary = computed(
+  () => isYesterdayUnread.value && yesterdaySummaryUnread.value,
+);
 
 // 设备切换弹窗
 const showDeviceSwitch = ref(false);
@@ -88,6 +103,15 @@ onBeforeMount(() => {
   } else {
     // Fetch messages to keep unread badge in sync
     void messagesStore.fetchMessages();
+  }
+});
+
+onMounted(async () => {
+  if (!accessToken.value?.length) return;
+  // Check whether yesterday's summary has actual content
+  const result = await checkYesterdayHasData();
+  if (result.hasData) {
+    yesterdaySummaryUnread.value = true;
   }
 });
 
@@ -208,6 +232,8 @@ function handleAddDevice() {
             <div class="home-topics-title">{{ i18n('labels.hotTopicsTitle') }}</div>
             <button type="button" class="home-topics-history" @click="goChatHistory">
               <span>{{ i18n('labels.chatHistory') }}</span>
+              <!-- 摘要未读红点 -->
+              <span v-if="hasUnreadSummary" class="home-topics-history-dot" aria-hidden="true" />
               <span class="home-topics-history-icon">
                 <img :src="iconArrowRightUrl" alt="" class="home-icon-img" />
               </span>
