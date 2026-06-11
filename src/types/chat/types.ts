@@ -72,6 +72,35 @@ export const DEFAULT_SILENCE_CONFIG: SilenceDetectorConfig = {
   consecutiveSilentCount: 6,
 };
 
+/** Client-side audio upload mode. */
+export type ChatSessionMode = 'pushToTalk' | 'phoneCall';
+
+/** Local phone-call voice gate tuning parameters. */
+export interface PhoneCallVoiceGateConfig {
+  /** RMS threshold required to start a voice turn. */
+  voiceStartRmsThreshold: number;
+  /** RMS threshold below which an open voice turn counts as silent. */
+  voiceEndRmsThreshold: number;
+  /** Required continuous above-threshold audio before opening a voice turn. */
+  voiceStartMinMs: number;
+  /** Required continuous below-threshold audio before completing a voice turn. */
+  voiceEndSilenceMs: number;
+  /** Local audio kept before voice start so the first syllable is not clipped. */
+  preRollMs: number;
+  /** Hard client-side cap for a single uploaded voice turn. */
+  maxTurnMs: number;
+}
+
+/** Default local gate config for VoiceCallPage phone-call mode. */
+export const DEFAULT_PHONE_CALL_VOICE_GATE_CONFIG: PhoneCallVoiceGateConfig = {
+  voiceStartRmsThreshold: 0.015,
+  voiceEndRmsThreshold: 0.01,
+  voiceStartMinMs: 200,
+  voiceEndSilenceMs: 1000,
+  preRollMs: 400,
+  maxTurnMs: 25_000,
+};
+
 /** Timeouts matching Go client's hardcoded values */
 export const CHAT_TIMEOUTS = {
   /** WaitingResponse → Idle timeout in ms (Go: 30s) */

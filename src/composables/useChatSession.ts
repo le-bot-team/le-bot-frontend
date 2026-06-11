@@ -6,7 +6,13 @@ import { useChatRecorder } from 'src/composables/useChatRecorder';
 import { useSilenceDetector } from 'src/composables/useSilenceDetector';
 import { useWakeWord } from 'src/composables/useWakeWord';
 import { useWsClient } from 'src/composables/useWsClient';
-import { CHAT_TIMEOUTS, ChatState, type ChatMessage } from 'src/types/chat/types';
+import {
+  CHAT_TIMEOUTS,
+  ChatState,
+  type ChatMessage,
+  type ChatSessionMode,
+  type PhoneCallVoiceGateConfig,
+} from 'src/types/chat/types';
 import {
   WsAction,
   WsCancelOutputRequest,
@@ -29,6 +35,14 @@ import { useChatStore, type PersistedChatMessage } from 'stores/chat';
 import { getChatHistoryDB, type ChatDateEntry } from 'src/utils/chat/chatHistoryDB';
 
 import { pcmToWav } from 'src/utils/audio';
+import { PhoneCallVoiceGate } from 'src/utils/chat/phoneCallVoiceGate';
+
+export interface UseChatSessionOptions {
+  /** Audio upload behavior. ChatPage keeps push-to-talk; VoiceCallPage uses phoneCall. */
+  mode?: ChatSessionMode;
+  /** Optional phone-call gate overrides for device tuning. */
+  phoneCallVoiceGate?: Partial<PhoneCallVoiceGateConfig>;
+}
 
 export interface UseChatSessionReturn {
   /** Current chat state machine state */
@@ -84,7 +98,10 @@ export interface UseChatSessionReturn {
  * - Smart interruption (voice and manual)
  * - Session management (requestId, timeouts, cancel cooldown)
  */
-export function useChatSession(): UseChatSessionReturn {
+export function useChatSession(options: UseChatSessionOptions = {}): UseChatSessionReturn {
+  const mode = options.mode ?? 'pushToTalk';
+  const isPhoneCallMode = mode === 'phoneCall';
+
   // --- Sub-composables ---
   const wsClient = useWsClient();
   const recorder = useChatRecorder();
@@ -92,6 +109,7 @@ export function useChatSession(): UseChatSessionReturn {
   const silenceDetector = useSilenceDetector();
   const wakeWord = useWakeWord();
   const chatStore = useChatStore();
+  const phoneCallGate = new PhoneCallVoiceGate(options.phoneCallVoiceGate);
 
   // --- IndexedDB history storage ---
   const chatDB = getChatHistoryDB();
@@ -145,6 +163,8 @@ export function useChatSession(): UseChatSessionReturn {
   let currentRequestId = '';
   let waitingResponseSince = 0; // Timestamp in ms, 0 = not set
   let waitingResponseTimer: ReturnType<typeof setInterval> | undefined;
+  let analyserBuffer: Float32Array<ArrayBuffer> | undefined;
+  let phoneCallHasSentAudio = false;
 
   // --- Per-turn player instance management ---
   // Each assistant response turn gets its own player instance
@@ -325,6 +345,13 @@ export function useChatSession(): UseChatSessionReturn {
     state.value = ChatState.Active;
     waitingResponseSince = 0;
 
+    if (isPhoneCallMode) {
+      silenceDetector.stop();
+      silenceDetector.reset();
+      console.log('[useChatSession] State → Active');
+      return;
+    }
+
     // Start silence detection
     const analyserNode = recorder.getAnalyserNode();
     if (analyserNode) {
@@ -336,7 +363,7 @@ export function useChatSession(): UseChatSessionReturn {
   }
 
   function transitionToWaitingResponse() {
-    // Mirrors Go's transitionToWaitingResponse:
+    // Mirrors Go's transitionToWaitingResponse for push-to-talk mode:
     // - Does NOT send inputAudioComplete (audio keeps streaming for interrupt detection)
     // - Records waitingResponseSince
     state.value = ChatState.WaitingResponse;
@@ -350,12 +377,14 @@ export function useChatSession(): UseChatSessionReturn {
     currentTurnPlayerRef.value = currentTurnPlayer;
     setupPlayerCallbacks();
 
-    console.log('[useChatSession] State → WaitingResponse (silence detected)');
+    console.log('[useChatSession] State → WaitingResponse');
   }
 
   function transitionToIdle() {
     state.value = ChatState.Idle;
     waitingResponseSince = 0;
+    phoneCallHasSentAudio = false;
+    phoneCallGate.reset();
 
     // Stop recording
     recorder.stopRecording();
@@ -374,7 +403,7 @@ export function useChatSession(): UseChatSessionReturn {
     // If the connection dropped (half-open socket), skip restarting wake word
     // to avoid waking into a dead connection. The heartbeat will force a
     // reconnect, and the establishConnection handler will re-setup state.
-    if (isConnected.value && wsClient.isAlive()) {
+    if (isConnected.value && wsClient.isAlive() && !isPhoneCallMode) {
       wakeWord.start();
     } else {
       console.log('[useChatSession] Skipping wakeWord restart — connection not healthy');
@@ -395,6 +424,8 @@ export function useChatSession(): UseChatSessionReturn {
 
   function startSession() {
     currentRequestId = uid();
+    phoneCallGate.reset();
+    phoneCallHasSentAudio = false;
 
     // Send fresh config
     sendUpdateConfig();
@@ -404,7 +435,7 @@ export function useChatSession(): UseChatSessionReturn {
 
     // State → WaitingResponse
     state.value = ChatState.WaitingResponse;
-    waitingResponseSince = Date.now();
+    waitingResponseSince = isPhoneCallMode ? 0 : Date.now();
 
     // Start the timeout checker (runs periodically like Go's silenceCheckLoop)
     startWaitingResponseTimeoutChecker();
@@ -422,6 +453,11 @@ export function useChatSession(): UseChatSessionReturn {
     // Stop silence detection
     silenceDetector.stop();
     silenceDetector.reset();
+    if (isPhoneCallMode) {
+      completePhoneCallTurn('forced');
+    }
+    phoneCallGate.reset();
+    phoneCallHasSentAudio = false;
 
     // Send cancel to server
     wsClient.sendAction(new WsCancelOutputRequest('manual'));
@@ -445,7 +481,9 @@ export function useChatSession(): UseChatSessionReturn {
       ) {
         // 30s timeout → send inputAudioComplete → Idle
         console.log('[useChatSession] WaitingResponse timeout (30s) — ending session');
-        wsClient.sendAction(new WsInputAudioCompleteRequest(''));
+        if (!isPhoneCallMode || phoneCallHasSentAudio) {
+          wsClient.sendAction(new WsInputAudioCompleteRequest(''));
+        }
         transitionToIdle();
       }
     }, 2000);
@@ -457,6 +495,66 @@ export function useChatSession(): UseChatSessionReturn {
       // In Active state, this is just a normal response completion — keep listening.
       console.log('[useChatSession] Playback finished');
     });
+  }
+
+  // ==========================================================================
+  // Audio upload helpers
+  // ==========================================================================
+
+  function sendAudioStream(base64: string): void {
+    wsClient.sendAction(new WsInputAudioStreamRequest(base64));
+
+    // Accumulate chunks into current user message
+    const userMsg = findLastUnfinishedUserMessage();
+    if (userMsg) {
+      userMsg.audioChunks.push(base64ToBlob(base64));
+    }
+  }
+
+  function processPhoneCallChunk(base64: string): void {
+    const analyserNode = recorder.getAnalyserNode();
+    if (!analyserNode) {
+      return;
+    }
+
+    analyserBuffer ??= new Float32Array(analyserNode.fftSize);
+    analyserNode.getFloatTimeDomainData(analyserBuffer);
+
+    let sumSquares = 0;
+    for (let i = 0; i < analyserBuffer.length; i++) {
+      const sample = analyserBuffer[i] ?? 0;
+      sumSquares += sample * sample;
+    }
+
+    const rms = Math.sqrt(sumSquares / analyserBuffer.length);
+    const events = phoneCallGate.processChunk(base64, rms);
+
+    for (const event of events) {
+      if (event.type === 'speechStart') {
+        ensureOpenUserMessage();
+        phoneCallHasSentAudio = true;
+        waitingResponseSince = 0;
+      } else if (event.type === 'stream') {
+        sendAudioStream(event.buffer);
+      } else {
+        completePhoneCallTurn(event.reason);
+      }
+    }
+  }
+
+  function completePhoneCallTurn(reason: 'silence' | 'maxTurn' | 'forced'): void {
+    if (!phoneCallHasSentAudio) {
+      return;
+    }
+
+    wsClient.sendAction(new WsInputAudioCompleteRequest(''));
+    phoneCallHasSentAudio = false;
+    if (state.value === ChatState.Active) {
+      transitionToWaitingResponse();
+    } else {
+      waitingResponseSince = Date.now();
+    }
+    console.log('[useChatSession] phoneCall complete — sent inputAudioComplete, reason:', reason);
   }
 
   // ==========================================================================
@@ -507,20 +605,21 @@ export function useChatSession(): UseChatSessionReturn {
 
     // Setup recorder chunk handler — sends audio to server
     recorder.onChunk((base64: string) => {
-      if (state.value === ChatState.WaitingResponse || state.value === ChatState.Active) {
-        wsClient.sendAction(new WsInputAudioStreamRequest(base64));
-
-        // Accumulate chunks into current user message
-        const userMsg = findLastUnfinishedUserMessage();
-        if (userMsg) {
-          userMsg.audioChunks.push(base64ToBlob(base64));
-        }
+      if (state.value !== ChatState.WaitingResponse && state.value !== ChatState.Active) {
+        return;
       }
+
+      if (isPhoneCallMode) {
+        processPhoneCallChunk(base64);
+        return;
+      }
+
+      sendAudioStream(base64);
     });
 
     // Setup silence detection callback
     silenceDetector.onSilenceDetected(() => {
-      if (state.value === ChatState.Active) {
+      if (state.value === ChatState.Active && !isPhoneCallMode) {
         console.log('[useChatSession] Silence detected');
         transitionToWaitingResponse();
       }
@@ -536,13 +635,20 @@ export function useChatSession(): UseChatSessionReturn {
     setupPlayerCallbacks();
 
     // Start wake word listening
-    wakeWord.start();
+    if (!isPhoneCallMode) {
+      wakeWord.start();
+    }
   }
 
   function disconnect() {
     // Stop everything
     wakeWord.stop();
     silenceDetector.stop();
+    if (isPhoneCallMode) {
+      completePhoneCallTurn('forced');
+    }
+    phoneCallGate.reset();
+    phoneCallHasSentAudio = false;
     recorder.releaseMedia();
     currentTurnPlayer.destroy();
     wsClient.disconnect();
@@ -599,22 +705,19 @@ export function useChatSession(): UseChatSessionReturn {
     // Stop wake word listener during session
     wakeWord.stop();
 
-    // If not in Idle, interrupt current session first (like Go's OnGpioWake)
+    // If not in Idle, interrupt current session first (like Go's OnGpioWake).
+    // Phone-call mode uses speech itself for barge-in, so wake while already in
+    // a call only resumes local capture after mute and never cancels playback.
     if (state.value !== ChatState.Idle) {
+      if (isPhoneCallMode) {
+        recorder.startRecording();
+        return;
+      }
       await interruptCurrentSession();
     }
 
     // Create a new user message placeholder for this turn
-    const userMsg: ChatMessage = {
-      id: uid(),
-      role: 'user',
-      text: '',
-      audioChunks: [],
-      isFinished: false,
-      isStreaming: true,
-      timestamp: Date.now(),
-    };
-    messages.value.push(userMsg);
+    ensureOpenUserMessage();
 
     // Start the session
     startSession();
@@ -734,6 +837,25 @@ export function useChatSession(): UseChatSessionReturn {
     return messages.value.findLast((m) => m.role === 'user' && !m.isFinished);
   }
 
+  function ensureOpenUserMessage(): ChatMessage {
+    const existing = findLastUnfinishedUserMessage();
+    if (existing) {
+      return existing;
+    }
+
+    const userMsg: ChatMessage = {
+      id: uid(),
+      role: 'user',
+      text: '',
+      audioChunks: [],
+      isFinished: false,
+      isStreaming: true,
+      timestamp: Date.now(),
+    };
+    messages.value.push(userMsg);
+    return userMsg;
+  }
+
   /**
    * End the current recording turn immediately (called on button release).
    * Sends inputAudioComplete to signal the server that audio input is done.
@@ -743,6 +865,15 @@ export function useChatSession(): UseChatSessionReturn {
     if (state.value !== ChatState.WaitingResponse && state.value !== ChatState.Active) {
       return;
     }
+
+    if (isPhoneCallMode) {
+      completePhoneCallTurn('forced');
+      phoneCallGate.reset();
+      phoneCallHasSentAudio = false;
+      recorder.stopRecording();
+      return;
+    }
+
     // Stop recording
     recorder.stopRecording();
     // Send inputAudioComplete to server
@@ -788,7 +919,9 @@ function base64ToBlob(base64: string): Blob {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  const { promise, resolve } = Promise.withResolvers<void>();
+  setTimeout(resolve, ms);
+  return promise;
 }
 
 /** Strip non-serializable fields and undefined optionals for safe localStorage persistence */

@@ -382,9 +382,10 @@ WS: {LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token={accessToken}&deviceId={de
   │──── updateConfig ──────────────────>  │  (发送 conversationId, timezone, voiceId 等)
   │<─── updateConfig (conversationId) ──  │
   │                                       │
-  │     [用户按住说话，开始录音]            │
+  │     [ChatPage: 用户按住说话，开始录音]   │
+  │     [VoiceCallPage: RMS 检测到语音起点] │
   │                                       │
-  │──── inputAudioStream (base64) ─────>  │  (每 200ms 发送一个音频块)
+  │──── inputAudioStream (base64) ─────>  │  (语音分片；电话模式会先发送短预卷)
   │──── inputAudioStream (base64) ─────>  │
   │──── inputAudioStream (base64) ─────>  │
   │     ...                               │
@@ -399,10 +400,12 @@ WS: {LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token={accessToken}&deviceId={de
   │<─── outputAudioComplete ────────────  │
   │<─── chatComplete ───────────────────  │  (本轮对话结束)
   │                                       │
-  │     [静音检测触发 → 发送 inputAudioComplete]
+  │     [ChatPage 释放按钮或静音检测触发]      │
+  │     [VoiceCallPage 连续静音约 1s]       │
   │                                       │
   │──── inputAudioComplete ────────────>  │
   │                                       │
+  │     [后端兜底: 连续静音 / 无输入 / 最大话轮]
   │     [30s 无响应 → 自动超时回到 Idle]     │
 ```
 
@@ -418,9 +421,13 @@ WS: {LE_BOT_BACKEND_WS_BASE_URL}/api/v1/chat/ws?token={accessToken}&deviceId={de
 | ---------------------- | -------------- | ------------------------------------------------------- |
 | waitingResponseTimeout | 30s            | 等待响应超时，超时后发送 `inputAudioComplete` 回到 Idle |
 | cancelCooldown         | 300ms          | 发送取消后的冷却时间                                    |
-| 静音检测间隔           | 500ms          | RMS 采样间隔                                            |
-| 静音触发               | 连续 6 次 (3s) | 连续静音采样次数                                        |
-| 音频块间隔             | 200ms          | 流式音频发送间隔                                        |
+| 静音检测间隔           | 500ms          | ChatPage Active 状态 RMS 采样间隔                       |
+| 静音触发               | 连续 6 次 (3s) | ChatPage Active 状态连续静音采样次数                    |
+| 电话模式语音起点       | RMS ≥ 0.015 且约 200ms | VoiceCallPage 本地上传门控，不作为安全边界              |
+| 电话模式话轮结束       | RMS ≤ 0.010 且约 1s | 发送 `inputAudioComplete` 并停止上传后续静音分片         |
+| 后端话轮兜底           | 无输入约 1.8s / 最大约 25s | `VirtualDeviceProxy` 保证上游 `manual listen` 收尾      |
+| 后端 VPR 调用门槛       | 累积窗口 ≥ 1s 且有声 ≥ 1.2s | 短句先有界累积；识别失败后短暂冷却，避免噪声反复触发   |
+| 音频块间隔             | 200ms          | 浏览器录音分片间隔；电话模式静音分片不上传              |
 
 ### 聊天子页面
 

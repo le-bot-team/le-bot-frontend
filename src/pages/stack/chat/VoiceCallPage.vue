@@ -43,7 +43,7 @@ const {
   wake,
   endTurn,
   destroy,
-} = useChatSession();
+} = useChatSession({ mode: 'phoneCall' });
 
 type CallStatus = 'connecting' | 'connected' | 'ended' | 'failed';
 

@@ -1697,8 +1697,8 @@ ws://{host}/api/v1/chat/ws?token={accessToken}&deviceId={deviceId}
 | Action               | 说明             | Data 字段                                                                                                            |
 | -------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `updateConfig`       | 更新会话配置     | `conversationId?`, `outputText?`, `timezone?`, `voiceId?`, `speechRate?`, `sampleRate?: {input?, output?}`, `location?: {latitude, longitude}` |
-| `inputAudioStream`   | 流式发送音频数据 | `buffer`: Base64 编码 PCM 音频                                                                                       |
-| `inputAudioComplete` | 音频发送完成     | `buffer`: 最后一块音频数据                                                                                           |
+| `inputAudioStream`   | 流式发送音频数据 | `buffer`: Base64 编码 WAV/PCM 音频；电话式对话模式只在本地 RMS 门控检测到语音时上传，静音期间不持续上传 |
+| `inputAudioComplete` | 音频发送完成     | `data.buffer?`: 可选最后一块音频数据；也可仅作为话轮结束事件发送空 data/空 buffer |
 | `cancelOutput`       | 取消当前输出     | `cancelType`: "manual" \| "voice"                                                                                    |
 | `clearContext`       | 清除对话上下文   | 无                                                                                                                   |
 
@@ -1716,7 +1716,14 @@ ws://{host}/api/v1/chat/ws?token={accessToken}&deviceId={deviceId}
 | `chatComplete`(错误)  | 会话轮次失败 | 同上 + `errors: [{code, message}]`                                   |
 | `cancelOutput`        | 输出已取消   | `cancelType`: "manual" \| "voice"                                    |
 
-### 6.4 updateConfig 请求详细结构
+
+### 6.4 电话式对话话轮边界
+
+`VoiceCallPage` 使用 `phoneCall` 本地采集模式：页面保持麦克风采集和 RMS 检测，但静音期间只保留约 400ms 本地预卷缓存，不持续发送 `inputAudioStream`。检测到语音起点后，前端先发送预卷分片，再发送语音分片；检测到约 1s 连续静音或达到本地最大话轮时长后发送 `inputAudioComplete`。
+
+后端 `VirtualDeviceProxy` 继续使用小智服务器 `manual listen` 模式，但不信任前端边界：只有服务端 RMS 判定为有效语音后才向上游发送 `listen:start`，并通过前端 `inputAudioComplete`、服务端连续静音、无输入 watchdog、最大话轮时长、取消/销毁清理等路径保证最终发送 `listen:stop`。TTS 播放期间收到用户有效语音时，后端发送上游 `abort` 并向前端发送 `cancelOutput`（`cancelType: "voice"`）。VPR 在后端基于完整话轮或足够长的语音窗口异步执行；短句不会阻塞对话，会先跳过单次识别并把有声窗口在会话内有界累积，直到总音频和实际有声时长都达到阈值才调用。识别失败后会短暂冷却，避免短噪声话轮反复触发声纹识别。
+
+### 6.5 updateConfig 请求详细结构
 
 ```json
 {

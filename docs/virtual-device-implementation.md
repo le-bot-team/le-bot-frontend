@@ -1302,12 +1302,15 @@ activateAndAddVirtualDevice()
     │     │     └─ sendUpdateConfig() → voiceId, timezone...
     │     │
     │     ├─ 初始化麦克风、录音器
-    │     ├─ 启动静音检测、唤醒词监听
+    │     ├─ ChatPage: 启动静音检测、唤醒词监听
+    │     ├─ VoiceCallPage: 启动本地 RMS 语音门控，静音时只保留短预卷、不上传
     │     │
     │     └─ 音频流收发:
-    │           inputAudioStream  (前端 → 后端)
+    │           inputAudioStream  (前端 → 后端；电话模式仅语音/预卷分片)
+    │           inputAudioComplete(前端 → 后端；话轮结束事件，buffer 可为空)
     │           outputAudioStream (后端 → 前端)
     │           outputTextStream  (后端 → 前端)
+    │           cancelOutput      (后端 → 前端；语音打断时 cancelType=voice)
     │           chatComplete      (后端 → 前端)
 ```
 
